@@ -220,8 +220,18 @@ Før første kørsel skal der ligge to hemmeligheder i repoet under
 
 | Navn | Værdi |
 |---|---|
-| `FTP_contact@andreasenmedia.com` | brugernavnet fra oprettelsesmailen fra Simply.com |
-| `FTP_Andreasen18` | adgangskoden til den samme FTP-konto |
+| `FTP_USERNAME` | FTP-brugernavnet fra Simply.com — det er domænenavnet |
+| `FTP_PASSWORD` | FTP-adgangskoden til den samme konto |
+
+**Navnet er kun en etiket.** Det skal staves præcis som i tabellen, for det
+er dét, `deploy.yml` slår op i, og GitHub tillader kun bogstaver, tal og
+understreg dér — derfor kan brugernavnet ikke stå i navnefeltet. Selve
+oplysningen hører hjemme i den store **Secret**-boks nedenunder. Skriver
+man dem omvendt, fejler kørslen med `Input required and not supplied:
+username`, og intet bliver lagt op.
+
+Oplysningerne findes i Simply.coms kontrolpanel under FTP. De må **aldrig**
+skrives ind i denne fil — repoet er offentligt.
 
 Vil serveren ikke tale FTPS, så skift `protocol: ftps` til `ftp` i
 workflow-filen — men så sendes adgangskoden ukrypteret.
