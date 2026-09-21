@@ -96,7 +96,9 @@
 
       <p class="signup-privacy">Vi gemmer navn, mailadresse og mobilnummer og bruger det
         kun til denne test af Regnehelten. Vi giver det ikke videre, og vi sender ikke
-        reklamer. Du kan når som helst få det slettet ved at skrive til
+        reklamer. Mens testen kører, sender spillet også et resultat hjem — hvor mange
+        opgaver der blev løst, og hvordan det gik; <a href="/for-voksne">her står præcis
+        hvad</a>. Du kan når som helst få det hele slettet ved at skrive til
         <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
     </form>
 
@@ -336,6 +338,34 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.addEventListener('lf:tilmeldt', lukPort);
+
+  // --- resultatet, når fanen bliver lukket -------------------------------
+  //
+  // Spillet sender selv af sted, når en runde er ovre og når det er færdigt.
+  // Men lukker nogen fanen midt i en opgave, når Python ikke at gøre noget.
+  // Derfor lægger spillet hele tiden den nyeste udgave i sit eget
+  // window.lfResultat, og den her sender den med sendBeacon, som er lavet
+  // til netop dét: den overlever, at siden forsvinder.
+  var sendt = '';
+
+  function sendResultat() {
+    var data = null;
+    try { data = game.contentWindow && game.contentWindow.lfResultat; }
+    catch (e) { return; }                 // spillet er ikke i gang endnu
+    if (!data || data === sendt) return;  // ingenting nyt at fortælle
+    sendt = data;
+    try {
+      if (navigator.sendBeacon) navigator.sendBeacon('/resultat.php', data);
+      else fetch('/resultat.php', { method: 'POST', body: data, keepalive: true });
+    } catch (e) { /* så må det være */ }
+  }
+
+  // pagehide dækker at lukke fanen og at gå tilbage; visibilitychange
+  // dækker telefonen, hvor man skifter app i stedet for at lukke.
+  window.addEventListener('pagehide', sendResultat);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') sendResultat();
+  });
 
   if (KRAEV_TILMELDING && !erTilmeldt()) {
     aabnPort();

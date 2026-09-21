@@ -16,6 +16,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `om.html` | `/om` | Om Learnification |
 | `404.html` | — | Vises ved forkert adresse |
 | `tilmeld.php` | — | Tager imod tilmeldinger til spørgeskemaet |
+| `resultat.php` | — | Tager imod resultater fra testomgangene |
 | `.htaccess` | — | Serveropsætning. **Læs den, før du retter i strukturen** |
 | `spil/regnehelten/` | — | Spilpakken fra pygbag. **Overskrives ved hver bygning** |
 
@@ -85,6 +86,38 @@ Der er ikke andre steder, oplysningerne ligger.
 den voksne om, hvad det bruges til, og at spørgsmålet falder væk, når testen
 er slut. Laves opsamlingen om — en tredjepartstjeneste, flere felter, andre
 formål — skal den tekst rettes samtidig.
+
+## Resultater fra testomgangene
+
+Mens spillet er til test, sender det hjem, hvad spilleren nåede at løse.
+`resultat.php` tager imod og skriver to steder, ved siden af tilmeldingerne:
+
+| Fil | Hvad |
+|---|---|
+| `resultater.csv` | Én linje pr. omgang — navn, klassetrin, opgaver, hvor mange i første forsøg, procent, regnekraft, minutter, hvor langt de nåede, og om spillet blev spillet færdigt |
+| `resultater/<id>.json` | Hele omgangen, opgave for opgave: spørgsmål, emne, facit, antal forsøg |
+
+**Hvornår der bliver sendt.** Spillet sender selv, hver gang en runde er
+ovre, og når spillet er færdigt. Lukker nogen fanen midt i en opgave, når
+Python ikke at gøre noget — derfor lægger spillet hele tiden den nyeste
+udgave i sit `window.lfResultat`, og siden omkring spillet sender den med
+`navigator.sendBeacon`, som netop overlever, at siden forsvinder.
+
+Den samme omgang melder sig altså flere gange. Den bliver kendt på sit id
+og **opdateret** i CSV-filen, ikke lagt til igen. Der kommer kun mail, når
+en omgang er spillet helt færdig — ellers ville det blive en strøm af mails
+om den samme omgang.
+
+**Det er et barns oplysninger.** Fornavnet kommer fra det, barnet skrev i
+spillet. Filerne hører derfor til uden for `public_html` sammen med
+tilmeldingerne, og teksten på `/for-voksne` fortæller præcis, hvad der
+bliver sendt, og at det slettes, når testen er slut. Ændres der på, hvad
+spillet sender, **skal den tekst rettes samtidig** — den er et løfte.
+
+**Sådan slukkes det igen:** når testen er slut, fjernes afsendelsen ved at
+sætte `KRAEV_TILMELDING = false` i `spil/index.html` (så forsvinder porten)
+og slette `resultat.send(...)`-kaldene i spillets `main.py`. Så kører
+spillet igen uden at sende noget som helst.
 
 ## Læg siden op på Simply.com
 
