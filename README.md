@@ -220,8 +220,8 @@ Før første kørsel skal der ligge to hemmeligheder i repoet under
 
 | Navn | Værdi |
 |---|---|
-| `FTP_USERNAME` | brugernavnet fra oprettelsesmailen fra Simply.com |
-| `FTP_PASSWORD` | adgangskoden til den samme FTP-konto |
+| `FTP_contact@andreasenmedia.com` | brugernavnet fra oprettelsesmailen fra Simply.com |
+| `FTP_Andreasen18` | adgangskoden til den samme FTP-konto |
 
 Vil serveren ikke tale FTPS, så skift `protocol: ftps` til `ftp` i
 workflow-filen — men så sendes adgangskoden ukrypteret.
