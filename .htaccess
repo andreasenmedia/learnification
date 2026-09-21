@@ -103,9 +103,19 @@ ErrorDocument 404 /404.html
   ExpiresByType application/javascript  "access plus 30 days"
   ExpiresByType image/png               "access plus 30 days"
   ExpiresByType image/svg+xml           "access plus 30 days"
-  ExpiresByType application/gzip        "access plus 7 days"
-  ExpiresByType application/octet-stream "access plus 7 days"
+  # Spilpakken maa IKKE ligge en uge i browserens lager. Gjorde den det,
+  # blev en rettelse i spillet foerst set af dem, der har spillet foer, naar
+  # ugen var gaaet. En time betyder ikke, at pakken hentes igen hver time -
+  # browseren spoerger bare serveren, om den er lavet om, og faar "nej" til
+  # naeste gang.
+  ExpiresByType application/gzip        "access plus 1 hour"
+  ExpiresByType application/octet-stream "access plus 1 hour"
 </IfModule>
+
+# De 30 dage paa css og js er kun forsvarlige, fordi hver side henter dem
+# med ?v=<tal> bagpaa. Rettes et stilark eller et script, skal tallet taelles
+# op paa alle sider - ellers sidder de besoegende, der har vaeret her foer,
+# fast i den gamle udgave i en maaned.
 
 
 # ==========================================================================

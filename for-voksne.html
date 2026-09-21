@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 
@@ -51,7 +51,7 @@
   <div class="wrap narrow">
     <p class="eyebrow">For forældre og lærere</p>
     <h1>Det korte svar: der er ingen hage.</h1>
-    <p class="lead">Ingen konto, ingen mailadresse, ingen reklamer, ingen køb inde i spillet og ingen data, der forlader browseren. Nedenfor står det lange svar.</p>
+    <p class="lead">Barnet skal hverken oprette en konto eller give en mailadresse. Ingen reklamer, ingen køb inde i spillet og ingen data fra spillet, der forlader browseren. Nedenfor står det lange svar.</p>
   </div>
 </header>
 
@@ -76,6 +76,7 @@
     <h2 style="margin-top:44px;">Hvad med data og privatliv?</h2>
     <p>Spillet kører helt inde i browseren. Det navn og den alder, barnet skriver, bliver liggende i fanen og bliver sendt ingen steder hen. Der er ingen cookies fra os, ingen analyseværktøjer inde i spillet og ingen tredjeparter, der får noget at vide.</p>
     <p>Det betyder også, at fremgang ikke bliver gemt: lukker man fanen, starter man forfra. Det er en bevidst afvejning — vi vil hellere lade være med at gemme noget end at bede om en konto.</p>
+    <p>Det eneste sted, vi beder om en mailadresse, er den frivillige tilmelding til vores spørgeskema <a href="#skriv-op">nederst på siden</a>. Den er til dig som voksen, den har intet med spillet at gøre, og barnet møder den aldrig. Vi gemmer adressen, tidspunktet og hvilken side den kom fra — ikke andet — på vores eget webhotel i Danmark, og vi bruger den kun til det ene spørgeskema.</p>
 
     <h2 style="margin-top:44px;">Hvad koster det?</h2>
     <p>Ingenting, og der kommer ikke en regning bagefter. Der er ingen gratisversion med en betalt version bagved, ingen reklamer og intet at købe inde i spillet.</p>
@@ -88,9 +89,32 @@
     <details class="faq"><summary>Er der noget, der kan skræmme et barn?</summary><p>Nej. Der er ingen vold, ingen tidspres, ingen tabskærme. Det eneste ubehagelige i spillet er åbningsscenen, hvor nogen griner ad hovedpersonen i klassen — og den er der, fordi det er dét, resten af spillet handler om at komme videre fra.</p></details>
     <details class="faq"><summary>Må vi bruge det på skolen?</summary><p>Ja, meget gerne, og I behøver ikke spørge. Skriv endelig, hvis I gør — vi bliver klogere af at høre, hvordan det går i en rigtig klasse.</p></details>
 
-    <div class="card" style="margin-top:44px;">
+    <div class="card signup-card" id="skriv-op" style="margin-top:44px;">
       <h3>Har I prøvet det med børn?</h3>
-      <p>Så vil vi rigtig gerne høre om det — hvad der virkede, hvad der var for svært, og hvad der manglede. Skriv til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
+      <p>Så vil vi rigtig gerne høre om det — hvad der virkede, hvad der var for svært, og
+        hvad der manglede. Skriv dig op til vores spørgeskema, så sender vi det, når det er
+        klart. Det tager to minutter at svare på.</p>
+      <form id="signup-form" class="signup-form" method="post" action="/tilmeld.php">
+        <input type="hidden" name="side" value="/for-voksne">
+        <div class="honey" aria-hidden="true">
+          <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <div class="signup-row">
+          <label class="sr-only" for="signup-email">Din mailadresse</label>
+          <input id="signup-email" name="email" type="email" placeholder="din@mail.dk"
+                 autocomplete="email" maxlength="190" required>
+          <button class="btn btn-primary" type="submit">Skriv mig op</button>
+        </div>
+        <label class="signup-consent">
+          <input type="checkbox" name="samtykke" value="ja" required>
+          <span>Ja tak, I må skrive til mig, når spørgeskemaet er klar.</span>
+        </label>
+        <p class="signup-note" role="status" aria-live="polite"></p>
+        <p class="signup-privacy">Vi gemmer kun din mailadresse og bruger den til dette ene
+          spørgeskema om Regnehelten. Vi giver den ikke videre, og vi sender ikke reklamer.
+          Du kan når som helst få den slettet ved at skrive til
+          <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
+      </form>
     </div>
   </div>
 </section>
@@ -130,6 +154,6 @@
   </div>
 </footer>
 
-<script src="assets/script.js" defer></script>
+<script src="assets/script.js?v=2" defer></script>
 </body>
 </html>

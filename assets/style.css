@@ -340,3 +340,56 @@ footer h4 { font-family: var(--sans); font-size: .78rem; letter-spacing: .13em; 
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
+
+/* ---------- skriv-op til spoergeskemaet ---------------------------------- */
+
+.signup-card { border-color: var(--gold); border-width: 2.5px; }
+.signup-card h2 { margin-top: .15em; }
+.signup-card > p { color: var(--ink-soft); }
+
+.signup-form { margin-top: 26px; }
+
+.signup-row { display: flex; flex-wrap: wrap; gap: 12px; }
+.signup-row input[type="email"] {
+  flex: 1 1 260px; min-width: 0;
+  font-family: var(--sans); font-size: 1.02rem; color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink); border-bottom-width: 3px;
+  border-radius: var(--r-sm); padding: 14px 16px;
+}
+.signup-row input[type="email"]::placeholder { color: #9a94a2; }
+.signup-row input[type="email"]:focus-visible {
+  outline: 3px solid var(--gold); outline-offset: 2px;
+}
+.signup-row input[type="email"][aria-invalid="true"] { border-color: var(--red); }
+
+.signup-consent {
+  display: flex; gap: 11px; align-items: flex-start;
+  margin-top: 16px; font-size: .95rem; color: var(--ink-soft);
+  cursor: pointer;
+}
+.signup-consent input { margin-top: .28em; width: 19px; height: 19px; accent-color: var(--gold); flex: none; }
+
+.signup-note { margin: 16px 0 0; font-weight: 600; }
+.signup-note:empty { display: none; }
+.signup-note.ok { color: var(--green); }
+.signup-note.fejl { color: var(--red); }
+
+.signup-privacy { margin: 18px 0 0; font-size: .87rem; color: var(--ink-soft); line-height: 1.55; }
+.signup-privacy a { color: var(--gold-dark); }
+
+/* Faelden for robotter: vaek for oejet, men ikke display:none - nogle
+   robotter springer netop de felter over. */
+.honey {
+  position: absolute; left: -9999px; width: 1px; height: 1px;
+  overflow: hidden;
+}
+
+.signup-tak {
+  display: flex; gap: 14px; align-items: flex-start;
+  margin-top: 26px; padding: 20px 22px;
+  background: var(--green-soft); border: 2px solid var(--green);
+  border-radius: var(--r-sm); color: var(--ink);
+}
+.signup-tak strong { display: block; margin-bottom: 4px; }
+.signup-tak p { margin: 0; font-size: .95rem; color: var(--ink-soft); }

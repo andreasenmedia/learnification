@@ -1,0 +1,20 @@
+# Her ligger tilmeldingerne til spørgeskemaet, hvis de ikke kunne skrives
+# uden for public_html. Mappen må aldrig kunne hentes ned fra nettet.
+#
+# Begge skrivemåder står her med vilje: Apache 2.4 forstår den øverste,
+# ældre udgaver den nederste. Fjern dem ikke.
+
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>
+
+# Og skulle en af dem blive slået fra på serveren, må php-filer her
+# i hvert fald ikke kunne køres.
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>

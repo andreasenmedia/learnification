@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pygame-web.github.io">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/assets/style.css?v=2">
 <style>
 /* Startskærmen ligger oven på spillet, indtil nogen trykker. Browseren
    giver først spillet lyd og tastatur, når der har været et rigtigt klik
@@ -160,6 +160,40 @@
   </div>
 </section>
 
+
+<section id="skriv-op">
+  <div class="wrap narrow">
+    <div class="card signup-card">
+      <p class="eyebrow">Hjælp os videre</p>
+      <h2>Har I spillet det? Så vil vi gerne høre fra jer</h2>
+      <p>Regnehelten er ny, og den bliver kun bedre af at blive set efter i sømmene af dem,
+        der har den i hænderne. Skriv dig op, så sender vi ét kort spørgeskema om, hvordan
+        det gik. Det tager to minutter at svare på — og det er en voksen, der svarer, ikke barnet.</p>
+      <form id="signup-form" class="signup-form" method="post" action="/tilmeld.php">
+        <input type="hidden" name="side" value="/spil/">
+        <div class="honey" aria-hidden="true">
+          <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
+        </div>
+        <div class="signup-row">
+          <label class="sr-only" for="signup-email">Din mailadresse</label>
+          <input id="signup-email" name="email" type="email" placeholder="din@mail.dk"
+                 autocomplete="email" maxlength="190" required>
+          <button class="btn btn-primary" type="submit">Skriv mig op</button>
+        </div>
+        <label class="signup-consent">
+          <input type="checkbox" name="samtykke" value="ja" required>
+          <span>Ja tak, I må skrive til mig, når spørgeskemaet er klar.</span>
+        </label>
+        <p class="signup-note" role="status" aria-live="polite"></p>
+        <p class="signup-privacy">Vi gemmer kun din mailadresse og bruger den til dette ene
+          spørgeskema om Regnehelten. Vi giver den ikke videre, og vi sender ikke reklamer.
+          Du kan når som helst få den slettet ved at skrive til
+          <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <footer>
@@ -185,7 +219,7 @@
   </div>
 </footer>
 
-<script src="/assets/script.js" defer></script>
+<script src="/assets/script.js?v=2" defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var frame   = document.getElementById('frame');
