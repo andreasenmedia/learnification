@@ -1,0 +1,13 @@
+# Tekstfiler gemmes og hentes med LF, uanset hvilken maskine de bliver
+# rettet paa. Serveren og GitHub Actions koerer Linux.
+* text=auto eol=lf
+
+# Spilpakken og billederne er binaere. Bliver de linjeskift-oversat,
+# bliver de oedelagt - og .tar.gz'en er dén, spillet henter, saa den
+# fejl ville betyde, at spillet slet ikke starter.
+*.png   binary
+*.apk   binary
+*.gz    binary
+*.tar   binary
+*.webp  binary
+*.ico   binary

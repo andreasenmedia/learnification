@@ -1,0 +1,52 @@
+name: Læg siden op på Simply.com
+
+# Hver gang der bliver skubbet til main, bliver siden lagt op i public_html.
+# Der bliver kun sendt de filer, der rent faktisk er lavet om — resten
+# springer FTP-Deploy-Action over, fordi den husker sidste upload i en
+# lille tilstandsfil på serveren.
+#
+# Før første kørsel skal der ligge to hemmeligheder i repoet under
+# Settings -> Secrets and variables -> Actions:
+#
+#   FTP_USERNAME   brugernavnet fra oprettelsesmailen fra Simply.com
+#   FTP_PASSWORD   adgangskoden til den samme FTP-konto
+#
+# Der er kun én FTP-konto pr. webhotel hos Simply.com, så det er den
+# samme, du selv logger ind med i FileZilla.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:      # så den også kan startes i hånden fra Actions-fanen
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false      # to uploads ad gangen ville rode i hinanden
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hent repoet
+        uses: actions/checkout@v4
+
+      - name: Upload til public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftp.simply.com
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # ftps = krypteret. Vil serveren ikke, så skift til ftp — men så
+          # ryger adgangskoden ukrypteret over nettet.
+          protocol: ftps
+          port: 21
+          server-dir: public_html/
+          # .htaccess SKAL med, så den må ikke stå her.
+          # Uden den virker hverken de pæne adresser eller spillet.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/tools/**
+            README.md
+            .gitignore

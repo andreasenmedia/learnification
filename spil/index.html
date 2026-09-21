@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spil Regnehelten — Learnification</title>
+<meta name="description" content="Spil Regnehelten direkte i browseren. Gratis dansk matematikrollespil for 7-12-årige. Ingen installation, intet login.">
+<meta name="theme-color" content="#1a1720">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spil Regnehelten">
+<meta property="og:description" content="Gratis dansk matematikrollespil for 7-12-årige — spil det direkte i browseren.">
+<meta property="og:image" content="https://learnification.dk/assets/billeder/verden.png">
+<meta property="og:url" content="https://learnification.dk/spil/">
+<link rel="canonical" href="https://learnification.dk/spil/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://pygame-web.github.io">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css">
+<style>
+/* Startskærmen ligger oven på spillet, indtil nogen trykker. Browseren
+   giver først spillet lyd og tastatur, når der har været et rigtigt klik
+   på siden — så knappen her er ikke bare pynt, den er nødvendig. */
+.stage { position: relative; }
+.poster {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-items: center; text-align: center;
+  background: #262232 center/cover no-repeat;
+  padding: 24px;
+}
+.poster::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(rgba(26,23,32,.55), rgba(26,23,32,.85));
+}
+.poster > div { position: relative; z-index: 1; max-width: 460px; }
+.poster h2 { color: var(--paper); margin-bottom: .3em; }
+.poster p { color: #cfc8d6; font-size: .95rem; margin: 0 0 22px; }
+.poster .btn-primary { font-size: 1.15rem; padding: 18px 36px; }
+.poster .tiny { font-size: .85rem; color: #9d96a8; margin: 18px 0 0; }
+.poster[hidden] { display: none; }
+
+.loading { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; background: #1a1720; }
+.loading[hidden] { display: none; }
+.loading p { color: #cfc8d6; font-size: .95rem; margin: 0; }
+.dots::after {
+  content: ""; display: inline-block; width: 1.4em; text-align: left;
+  animation: dots 1.2s steps(4, end) infinite;
+}
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+@media (prefers-reduced-motion: reduce) { .dots::after { content: "..."; animation: none; } }
+
+@media (max-width: 860px) { .split { grid-template-columns: 1fr !important; gap: 34px !important; } }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+</div>
+
+<main>
+
+<div class="player-shell">
+  <div class="wrap" style="max-width:1168px;">
+    <div class="player-frame stage" id="frame">
+
+      <div class="poster" id="poster" style="background-image:url('/assets/billeder/verden.png');">
+        <div>
+          <h2>Regnehelten</h2>
+          <p>En helt almindelig skoledag — fuld af tal.</p>
+          <button class="btn btn-primary" id="start" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            Spil
+          </button>
+          <p class="tiny">Første gang henter browseren spillet ned. Det tager et øjeblik.</p>
+        </div>
+      </div>
+
+      <div class="loading" id="loading" hidden>
+        <p class="dots">Henter spillet</p>
+      </div>
+
+      <!-- Rammen indlaeses med det samme, saa hentningen er i gang, mens
+           startskaermen staar fremme. Den SKAL vaere der, foer nogen
+           klikker: browserens "brugeren har roert ved siden"-tilstand gaelder
+           kun for rammer, der allerede findes paa klikketidspunktet - en
+           ramme, der bliver lavet bagefter, faar aldrig lov at starte. -->
+      <iframe id="game"
+              title="Regnehelten"
+              allow="autoplay; fullscreen; gamepad"
+              allowfullscreen
+              src="/spil/regnehelten/"></iframe>
+    </div>
+
+    <div class="player-bar">
+      <button class="btn btn-sm btn-primary" id="fullscreen" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        Fuld skærm
+      </button>
+      <button class="btn btn-sm" id="restart" type="button">Start forfra</button>
+      <span class="spacer"></span>
+      <span>Spillet fylder ca. 1 MB og hentes kun én gang.</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:52px;align-items:start;" class="split">
+      <div>
+        <p class="eyebrow">Sådan spiller du</p>
+        <h2>På computer</h2>
+        <table class="keytable">
+          <tr><td><kbd>&#9650;</kbd> <kbd>&#9660;</kbd> <kbd>&#9664;</kbd> <kbd>&#9654;</kbd></td><td>Gå rundt</td></tr>
+          <tr><td><kbd>ENTER</kbd></td><td>Snak med den, du står over for — og svar på opgaver</td></tr>
+          <tr><td><kbd>J</kbd></td><td>Slå op i Regnebogen. Den åbner på den rigtige side</td></tr>
+          <tr><td><kbd>I</kbd></td><td>Åbn tasken med de ting, du har samlet</td></tr>
+          <tr><td><kbd>0</kbd>–<kbd>9</kbd></td><td>Skriv tal, når der skal svares</td></tr>
+          <tr><td><kbd>M</kbd></td><td>Slå lyden fra og til</td></tr>
+          <tr><td><kbd>ESC</kbd></td><td>Pause — og hjælpekortet "Sådan spiller du"</td></tr>
+        </table>
+
+        <h2 style="margin-top:44px;">På tablet og telefon</h2>
+        <p>Rør ved skærmen, så kommer knapperne frem af sig selv: et styrekors til venstre, en stor OK-knap til højre, og et taltastatur når der skal skrives tal. Man kan også bare trykke direkte på svarene.</p>
+        <p>Spillet virker bedst liggende (på tværs) på en tablet.</p>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Hvis det ikke går i gang</h3>
+          <p style="margin-bottom:14px;">Spillet kører som WebAssembly og har brug for en nogenlunde ny browser — Chrome, Edge, Firefox eller Safari fra de sidste par år.</p>
+          <p style="margin-bottom:14px;">Første gang skal der hentes ca. 1 MB plus selve motoren. På en langsom forbindelse kan der gå et halvt minut, hvor der ikke sker noget.</p>
+          <p style="margin-bottom:0;">Kommer der stadig ikke noget frem, så prøv <a href="/spil/regnehelten/">at åbne spillet i sin egen fane</a>.</p>
+        </div>
+        <div class="card" style="margin-top:22px;">
+          <h3>Lyden</h3>
+          <p style="margin-bottom:0;">Musik og lydeffekter kan slås fra hver for sig i pausemenuen under <kbd>ESC</kbd>, og <kbd>M</kbd> slår det hele fra på én gang.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Regnehelten er lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var frame   = document.getElementById('frame');
+  var game    = document.getElementById('game');
+  var poster  = document.getElementById('poster');
+  var loading = document.getElementById('loading');
+  var started = false;
+
+  function boot() {
+    if (started) return;
+    started = true;
+    poster.hidden = true;
+    loading.hidden = false;
+    watch();
+  }
+
+  // Spillet er i gang, når det har sat sit lærred op i fuld størrelse.
+  function watch() {
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      var canvas = null;
+      try { canvas = game.contentDocument && game.contentDocument.querySelector('canvas'); }
+      catch (e) { /* ikke klar endnu */ }
+      if (canvas && canvas.width > 64) {
+        clearInterval(timer);
+        loading.hidden = true;
+        canvas.focus();
+      } else if (tries > 150) {          // ~2,5 minut, så er der noget galt
+        clearInterval(timer);
+        loading.innerHTML = '<p style="max-width:420px;text-align:center;padding:0 20px;">'
+          + 'Spillet er længe om at starte. Prøv at genindlæse siden, eller '
+          + '<a href="/spil/regnehelten/" style="color:#ce8a2e;">åbn det i sin egen fane</a>.</p>';
+      }
+    }, 1000);
+  }
+
+  document.getElementById('start').addEventListener('click', boot);
+
+  document.getElementById('fullscreen').addEventListener('click', function () {
+    if (document.fullscreenElement) { document.exitFullscreen(); return; }
+    var req = frame.requestFullscreen || frame.webkitRequestFullscreen;
+    if (req) req.call(frame);
+  });
+
+  document.getElementById('restart').addEventListener('click', function () {
+    // Spillet gemmer ingenting, så en frisk indlæsning er en frisk start.
+    poster.hidden = true;
+    started = true;
+    loading.hidden = false;
+    game.src = game.src;
+    watch();
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+# ==========================================================================
+# Learnification.dk paa Simply.com (Apache-webhotel)
+#
+# Filen skal ligge oeverst i public_html. Giver serveren en fejl efter
+# upload ("500 Internal Server Error"), er det saa godt som altid en
+# enkelt linje herinde, som netop dette webhotel ikke kender - kommentér
+# den ud med # foran, i stedet for at slette hele filen.
+# ==========================================================================
+
+# --- Forside --------------------------------------------------------------
+DirectoryIndex index.html
+
+
+# ==========================================================================
+# 1. SPILLET - den vigtigste del af filen
+# ==========================================================================
+#
+# Spillet henter sig selv ned som regnehelten.tar.gz og pakker den ud i
+# browseren med Pythons tarfile ("r:gz").
+#
+# Mange Apache-servere er sat op til at sige Content-Encoding: gzip om alt
+# der ender paa .gz. Saa pakker browseren filen ud paa forhaand, spillet
+# faar en ren .tar, tarfile fejler paa den - og spillet starter aldrig.
+# Derfor SKAL kodningen fjernes her. Filen skal leveres, som den ligger.
+<IfModule mod_mime.c>
+  RemoveEncoding .gz
+  AddType application/gzip .gz .tgz
+  AddType application/x-tar .tar
+
+  # .apk'en er et zip-arkiv, ikke en Android-pakke. Uden linjen her gaetter
+  # serveren forkert, og browseren vil hellere hente den end laese den.
+  AddType application/octet-stream .apk
+
+  AddType application/wasm .wasm
+  AddType image/svg+xml .svg
+  AddType application/javascript .js .mjs
+</IfModule>
+
+# Spilmappen er bygget af pygbag og bliver skrevet over ved hver ny
+# bygning. Lad vaere med at rette i den - og hold reglerne nedenfor vaek
+# fra den.
+
+
+# ==========================================================================
+# 2. HTTPS og ét domænenavn
+# ==========================================================================
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Vent med de her to regler, til Simply.com har udstedt SSL-certifikatet
+  # (det sker af sig selv kort efter, domaenet er oprettet). Goer man det
+  # foer, faar de foerste besoegende en advarsel om et ugyldigt certifikat.
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://learnification.dk%{REQUEST_URI} [R=301,L]
+
+  # www.learnification.dk -> learnification.dk, saa der kun er én adresse
+  # (det er ogsaa den, der staar i canonical-taggene paa siderne).
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+
+# ==========================================================================
+# 3. Pæne adresser uden .html
+# ==========================================================================
+#
+# Siderne linker til /regnehelten, /for-voksne og /om. Apache finder ikke
+# selv .html-filen bag saadan en adresse, saa det skal staa her.
+#
+# /spil er en mappe med en index.html i, og den klarer serveren selv.
+
+  # Skriv .html af adressen, hvis nogen skriver den (eller et gammelt link
+  # goer det). %{THE_REQUEST} er den oprindelige forespoergsel, saa den
+  # interne omskrivning nedenfor ikke sender folk rundt i ring.
+  RewriteCond %{REQUEST_URI} !^/spil/regnehelten/
+  RewriteCond %{THE_REQUEST} \s/+([^?\s]*?)\.html[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+
+  # /regnehelten -> regnehelten.html, uden at adressen aendrer sig.
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}\.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
+</IfModule>
+
+ErrorDocument 404 /404.html
+
+
+# ==========================================================================
+# 4. Hastighed
+# ==========================================================================
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+  # .tar.gz og .apk er pakket i forvejen - de skal ikke pakkes igen.
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault                        "access plus 1 hour"
+  ExpiresByType text/html               "access plus 10 minutes"
+  ExpiresByType text/css                "access plus 30 days"
+  ExpiresByType application/javascript  "access plus 30 days"
+  ExpiresByType image/png               "access plus 30 days"
+  ExpiresByType image/svg+xml           "access plus 30 days"
+  ExpiresByType application/gzip        "access plus 7 days"
+  ExpiresByType application/octet-stream "access plus 7 days"
+</IfModule>
+
+
+# ==========================================================================
+# 5. Sikkerhed
+# ==========================================================================
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Spillet skal kunne vises i rammen paa /spil, men ikke paa andres sider.
+  <FilesMatch "\.(html|apk|tar\.gz)$">
+    Header set Content-Security-Policy "frame-ancestors 'self'"
+  </FilesMatch>
+
+  # VIGTIGT: saet ALDRIG Cross-Origin-Embedder-Policy her. Spillet henter
+  # sin Python-motor fra pygame-web.github.io, og "require-corp" ville
+  # blokere den hentning, saa spillet bliver haengende i "Loading".
+</IfModule>
+
+# Ingen mappeoversigter
+Options -Indexes
+
+# GitHub Actions lægger en lille tilstandsfil i public_html for at kunne
+# nøjes med at sende de filer, der er lavet om. Den rager ingen andre,
+# så den skal ikke kunne hentes udefra.
+RedirectMatch 404 ^/\.ftp-deploy-sync-state\.json$

@@ -1,0 +1,14 @@
+# Byggeaffald fra spillet hoerer hjemme i spillets eget projekt.
+# BEMAERK: spil/regnehelten/ ER med i repoet med vilje - det er den
+# faerdige spilpakke, og det er den, der bliver lagt op paa serveren.
+
+__pycache__/
+*.pyc
+
+# Operativsystemernes eget rod
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tilstandsfil fra FTP-uploaden, hvis den nogensinde bliver hentet ned
+.ftp-deploy-sync-state.json
