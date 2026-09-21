@@ -353,6 +353,9 @@ document.addEventListener('DOMContentLoaded', function () {
     try { data = game.contentWindow && game.contentWindow.lfResultat; }
     catch (e) { return; }                 // spillet er ikke i gang endnu
     if (!data || data === sendt) return;  // ingenting nyt at fortælle
+    try {                                 // en omgang uden opgaver er ikke en omgang
+      if (!JSON.parse(data).opgaver) return;
+    } catch (e) { return; }
     sendt = data;
     try {
       if (navigator.sendBeacon) navigator.sendBeacon('/resultat.php', data);
