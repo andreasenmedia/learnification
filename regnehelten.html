@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Regnehelten — matematikrollespil for 7-12-årige | Learnification</title>
 <meta name="description" content="Regnehelten er et dansk matematikrollespil for 7-12-årige. En almindelig skoledag med otte slags regneopgaver, en indbygget matematikbog og ingen karakterer. Spil gratis i browseren.">
-<meta name="theme-color" content="#fff7ec" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#191333" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf7f0">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Regnehelten — matematikrollespil for 7-12-årige">
 <meta property="og:description" content="En almindelig skoledag, otte slags regneopgaver og en matematikbog man kan slå op i. Ingen karakterer.">
@@ -16,9 +15,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/components.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -26,7 +23,7 @@
 <nav id="nav">
   <div class="wrap">
     <a href="/" class="nav-brand">
-      <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
       <span>Learnification</span>
     </a>
     <div class="nav-links">
@@ -34,7 +31,7 @@
       <a href="/for-voksne">For voksne</a>
       <a href="/om">Om os</a>
     </div>
-    <a href="/spil/" class="l-btn l-btn--secondary l-btn--sm nav-cta">Spil nu</a>
+    <a href="/spil/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -45,7 +42,7 @@
   <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
-  <a href="/spil/" class="l-btn l-btn--secondary" style="width:fit-content;margin-top:var(--space-2);">Spil nu</a>
+  <a href="/spil/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
 </div>
 
 <main>
@@ -58,7 +55,7 @@
       <p class="lead">Det begynder dagen før. Der blev spurgt om noget i timen, og svaret kom ikke. Nogen grinede — ikke alle, men nogen. Bagefter sagde læreren: kom forbi i morgen og vis mig, hvad du kan.</p>
       <p>Resten af spillet er den næste dag. En helt almindelig en af slagsen.</p>
       <div class="hero-cta">
-        <a href="/spil/" class="l-btn l-btn--primary l-btn--lg">Spil Regnehelten
+        <a href="/spil/" class="btn btn-primary btn-lg">Spil Regnehelten
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
         </a>
       </div>
@@ -70,29 +67,29 @@
   </div>
 </header>
 
-<section style="padding-top:var(--space-5);">
+<section style="padding-top:20px;">
   <div class="wrap">
     <p class="eyebrow">Dagen igennem</p>
-    <h2 style="margin-bottom:var(--space-6);">Seks steder, seks slags matematik</h2>
+    <h2 style="margin-bottom:34px;">Seks steder, seks slags matematik</h2>
     <div class="cards">
-      <article class="l-card l-card--wide"><h3>Hjemme</h3><p>Morgenmad med Mor og lillesøster Ida. Hvor mange skiver brød, hvor mange minutter til bussen. <strong>Husk</strong> — tallene selv.</p></article>
-      <article class="l-card l-card--wide"><h3>I butikken</h3><p>Handler ind med Far. Fire poser til 12 kroner, og hvad får vi tilbage. <strong>Forstå</strong> og <strong>anvend</strong> — regning, nogen faktisk spørger om.</p></article>
-      <article class="l-card l-card--wide"><h3>I skolegården</h3><p>Oskar vil dele hold op. <strong>Analysér</strong> — hvad er det egentlig, der bliver spurgt om her?</p></article>
-      <article class="l-card l-card--wide"><h3>I kantinen</h3><p>Emma har regnet noget ud. Passer det? <strong>Vurdér</strong> — at kunne se, om et svar er skævt, uden at regne det hele igen.</p></article>
-      <article class="l-card l-card--wide"><h3>Hos Hr. Poulsen</h3><p>Sidste time. <strong>Skab</strong> — lav selv et regnestykke, der giver det rigtige. Det er dér, man opdager, at man kan.</p></article>
-      <article class="l-card l-card--wide"><h3>Og udenom</h3><p>Kiosken, biblioteket, parken, pedellen, idrætslæreren, en hundelufter. Frivillige småopgaver, der giver ting, men ikke skubber historien.</p></article>
+      <article class="card"><h3>Hjemme</h3><p>Morgenmad med Mor og lillesøster Ida. Hvor mange skiver brød, hvor mange minutter til bussen. <strong>Husk</strong> — tallene selv.</p></article>
+      <article class="card"><h3>I butikken</h3><p>Handler ind med Far. Fire poser til 12 kroner, og hvad får vi tilbage. <strong>Forstå</strong> og <strong>anvend</strong> — regning, nogen faktisk spørger om.</p></article>
+      <article class="card"><h3>I skolegården</h3><p>Oskar vil dele hold op. <strong>Analysér</strong> — hvad er det egentlig, der bliver spurgt om her?</p></article>
+      <article class="card"><h3>I kantinen</h3><p>Emma har regnet noget ud. Passer det? <strong>Vurdér</strong> — at kunne se, om et svar er skævt, uden at regne det hele igen.</p></article>
+      <article class="card"><h3>Hos Hr. Poulsen</h3><p>Sidste time. <strong>Skab</strong> — lav selv et regnestykke, der giver det rigtige. Det er dér, man opdager, at man kan.</p></article>
+      <article class="card"><h3>Og udenom</h3><p>Kiosken, biblioteket, parken, pedellen, idrætslæreren, en hundelufter. Frivillige småopgaver, der giver ting, men ikke skubber historien.</p></article>
     </div>
-    <p class="small" style="margin-top:var(--space-6);">Rækkefølgen er ikke tilfældig: den følger Blooms taksonomi, fra at huske til selv at skabe. Barnet mærker det ikke — det bliver bare gradvist sværere at snyde sig udenom.</p>
+    <p style="margin-top:26px;color:var(--ink-soft);font-size:.95rem;">Rækkefølgen er ikke tilfældig: den følger Blooms taksonomi, fra at huske til selv at skabe. Barnet mærker det ikke — det bliver bare gradvist sværere at snyde sig udenom.</p>
   </div>
 </section>
 
-<section class="theme-night">
+<section class="dark">
   <div class="wrap">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-7);align-items:center;" class="split">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;" class="split">
       <div>
         <p class="eyebrow">Opgaverne</p>
         <h2>Otte slags, ikke ét tekstfelt</h2>
-        <ul class="checks" style="margin-top:var(--space-5);">
+        <ul class="checks" style="margin-top:22px;">
           <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Skriv svaret</strong> — det klassiske, men med tal fra noget, der sker.</span></li>
           <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Vælg</strong> og <strong>find alle</strong> — flere rigtige svar gemt mellem forkerte.</span></li>
           <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Vægten</strong> — få de to sider til at passe. Ligninger, før de hedder det.</span></li>
@@ -109,14 +106,14 @@
 
 <section>
   <div class="wrap">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-7);align-items:center;" class="split">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;" class="split">
       <div class="shot"><img src="assets/billeder/regnebogen.png" width="1024" height="640" alt="Regnebogen slået op på siden om gangetabellen." loading="lazy"></div>
       <div>
         <p class="eyebrow">Regnebogen</p>
         <h2>Hjælpen ligger i tasken</h2>
         <p>Midt i en opgave kan man trykke <kbd>J</kbd> og slå op. Bogen er ikke en hjælpetekst — det er ni rigtige sider med forklaring, et gennemregnet eksempel og en tegning, der viser hvorfor.</p>
         <p>Og den åbner på den side, opgaven handler om. Et barn, der sidder fast i gangetabellen, lander på gangetabellen. Det er hele pointen: man skal kunne komme videre selv.</p>
-        <p class="small" style="margin-bottom:0;">Sider: plus og minus · gangetabellen · division · halve og fjerdedele · penge · store tal · areal · rækkefølge · at tjekke sit eget svar.</p>
+        <p style="color:var(--ink-soft);font-size:.96rem;margin-bottom:0;">Sider: plus og minus · gangetabellen · division · halve og fjerdedele · penge · store tal · areal · rækkefølge · at tjekke sit eget svar.</p>
       </div>
     </div>
   </div>
@@ -124,7 +121,7 @@
 
 <section style="padding-top:0;">
   <div class="wrap">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-7);align-items:center;" class="split">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;" class="split">
       <div>
         <p class="eyebrow">Fremgang</p>
         <h2>Regnekraft — ikke karakterer</h2>
@@ -137,13 +134,13 @@
   </div>
 </section>
 
-<section class="theme-night">
+<section class="dark">
   <div class="wrap narrow center">
     <h2>Vil du prøve?</h2>
     <p class="lead">Det tager tredive sekunder at komme i gang, og der er ingenting at oprette.</p>
     <div class="hero-cta" style="justify-content:center;">
-      <a href="/spil/" class="l-btn l-btn--primary l-btn--lg">Spil Regnehelten</a>
-      <a href="/for-voksne" class="l-btn l-btn--ghost l-btn--lg">Til forældre og lærere</a>
+      <a href="/spil/" class="btn btn-primary btn-lg">Spil Regnehelten</a>
+      <a href="/for-voksne" class="btn btn-lg">Til forældre og lærere</a>
     </div>
   </div>
 </section>
@@ -153,8 +150,8 @@
 <footer>
   <div class="wrap cols">
     <div style="max-width:320px;">
-      <a href="/" class="nav-brand" style="margin-bottom:var(--space-3);">
-        <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
         <span>Learnification</span>
       </a>
       <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
@@ -168,11 +165,14 @@
       <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
     </div>
   </div>
-  <div class="wrap" style="margin-top:var(--space-6);">
+  <div class="wrap" style="margin-top:34px;">
     <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Regnehelten er lavet i Danmark.</p>
   </div>
 </footer>
 
+<style>
+@media (max-width: 880px) { .split { grid-template-columns: 1fr !important; gap: 34px !important; } }
+</style>
 
 <script src="assets/script.js" defer></script>
 </body>

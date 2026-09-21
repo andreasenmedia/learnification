@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Om Learnification</title>
 <meta name="description" content="Learnification laver danske læringsspil til børn. Ingen reklamer, intet login, ingen dataindsamling — bare spil, man har lyst til at spille.">
-<meta name="theme-color" content="#fff7ec" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#191333" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf7f0">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Om Learnification">
 <meta property="og:description" content="Danske læringsspil til børn. Ingen reklamer, intet login, ingen dataindsamling.">
@@ -16,9 +15,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/components.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -26,7 +23,7 @@
 <nav id="nav">
   <div class="wrap">
     <a href="/" class="nav-brand">
-      <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
       <span>Learnification</span>
     </a>
     <div class="nav-links">
@@ -34,7 +31,7 @@
       <a href="/for-voksne">For voksne</a>
       <a href="/om" aria-current="page">Om os</a>
     </div>
-    <a href="/spil/" class="l-btn l-btn--secondary l-btn--sm nav-cta">Spil nu</a>
+    <a href="/spil/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -45,12 +42,12 @@
   <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
-  <a href="/spil/" class="l-btn l-btn--secondary" style="width:fit-content;margin-top:var(--space-2);">Spil nu</a>
+  <a href="/spil/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
 </div>
 
 <main>
 
-<header class="hero" style="padding-bottom:var(--space-4);">
+<header class="hero" style="padding-bottom:16px;">
   <div class="wrap narrow">
     <p class="eyebrow">Om os</p>
     <h1>Læringsspil, hvor spillet kommer først.</h1>
@@ -58,25 +55,25 @@
   </div>
 </header>
 
-<section style="padding-top:var(--space-7);">
+<section style="padding-top:40px;">
   <div class="wrap narrow">
     <h2>Hvad vi tror på</h2>
     <p>Et barn, der ikke synes, det er godt til matematik, bliver ikke bedre af at få flere regnestykker. Det bliver bedre af at komme i en situation, hvor det gider at regne — og så opdage, at det kunne.</p>
     <p>Derfor bygger vi verdener, historier og figurer først, og lægger matematikken ind, hvor den giver mening. Æbler i en butik. Hold, der skal deles op i skolegården. En påstand fra en klassekammerat, der ikke helt kan passe.</p>
 
-    <h2 style="margin-top:var(--space-7);">Tre ting, vi ikke gør</h2>
-    <ul class="checks" style="margin-bottom:var(--space-5);">
+    <h2 style="margin-top:44px;">Tre ting, vi ikke gør</h2>
+    <ul class="checks" style="margin-bottom:26px;">
       <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Vi beder ikke om en konto.</strong> Ingen mail, ingen adgangskode, ingen forældreportal. Man trykker spil, og så spiller man.</span></li>
       <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Vi samler ingenting.</strong> Spillene kører i browseren, og der bliver ikke sendt noget videre om barnet.</span></li>
       <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Vi sælger ingenting inde i spillet.</strong> Ingen reklamer, ingen kister at åbne, ingen figurer at købe.</span></li>
     </ul>
 
-    <h2 style="margin-top:var(--space-7);">Hvem laver det?</h2>
+    <h2 style="margin-top:44px;">Hvem laver det?</h2>
     <p>Learnification er et lille dansk projekt, drevet fra Nørresundby af <a href="https://andreasenmedia.com">Andreasen Media</a>. Regnehelten er det første spil. Det er skrevet fra bunden — også grafikken og musikken, som bliver regnet ud i kode, mens spillet kører, i stedet for at blive hentet fra et bibliotek.</p>
 
-    <h2 style="margin-top:var(--space-7);">Skriv til os</h2>
+    <h2 style="margin-top:44px;">Skriv til os</h2>
     <p>Har I prøvet spillet med et barn eller en klasse, vil vi meget gerne høre hvordan det gik — også hvis det ikke gik. Og har du et forslag til, hvad det næste spil skal handle om, så sig til.</p>
-    <p><a href="mailto:kontakt@learnification.dk" class="l-btn l-btn--primary" style="margin-top:var(--space-3);">kontakt@learnification.dk</a></p>
+    <p><a href="mailto:kontakt@learnification.dk" class="btn btn-primary" style="margin-top:10px;">kontakt@learnification.dk</a></p>
   </div>
 </section>
 
@@ -85,8 +82,8 @@
 <footer>
   <div class="wrap cols">
     <div style="max-width:320px;">
-      <a href="/" class="nav-brand" style="margin-bottom:var(--space-3);">
-        <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
         <span>Learnification</span>
       </a>
       <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
@@ -100,7 +97,7 @@
       <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
     </div>
   </div>
-  <div class="wrap" style="margin-top:var(--space-6);">
+  <div class="wrap" style="margin-top:34px;">
     <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Regnehelten er lavet i Danmark.</p>
   </div>
 </footer>

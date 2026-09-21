@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Learnification — Danske læringsspil, der faktisk er spil</title>
 <meta name="description" content="Learnification laver danske læringsspil til børn. Spil Regnehelten gratis i browseren: et matematikrollespil for 7-12-årige uden karakterer, uden login og uden reklamer.">
-<meta name="theme-color" content="#fff7ec" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#191333" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf7f0">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Learnification">
 <meta property="og:title" content="Learnification — Danske læringsspil, der faktisk er spil">
@@ -19,9 +18,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/tokens.css">
-<link rel="stylesheet" href="assets/components.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <script type="application/ld+json">
 {
@@ -47,7 +44,7 @@
 <nav id="nav">
   <div class="wrap">
     <a href="/" class="nav-brand">
-      <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
       <span>Learnification</span>
     </a>
     <div class="nav-links">
@@ -55,7 +52,7 @@
       <a href="/for-voksne">For voksne</a>
       <a href="/om">Om os</a>
     </div>
-    <a href="/spil/" class="l-btn l-btn--secondary l-btn--sm nav-cta">Spil nu</a>
+    <a href="/spil/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -66,7 +63,7 @@
   <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
-  <a href="/spil/" class="l-btn l-btn--secondary" style="width:fit-content;margin-top:var(--space-2);">Spil nu</a>
+  <a href="/spil/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
 </div>
 
 <main id="main">
@@ -79,10 +76,10 @@
       <h1>Et spil, der <span class="hl">tilfældigvis</span> handler om matematik.</h1>
       <p class="lead">Regnehelten er et rollespil for 7-12-årige. Man vågner, spiser morgenmad, handler ind med sin far og går i skole — og undervejs er der tal, der skal styr på. Ligesom i virkeligheden.</p>
       <div class="hero-cta">
-        <a href="/spil/" class="l-btn l-btn--primary l-btn--lg">Spil Regnehelten
+        <a href="/spil/" class="btn btn-primary btn-lg">Spil Regnehelten
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
         </a>
-        <a href="/regnehelten" class="l-btn l-btn--ghost l-btn--lg">Læs om spillet</a>
+        <a href="/regnehelten" class="btn btn-lg">Læs om spillet</a>
       </div>
       <p class="hero-note">Gratis · ingen reklamer · intet login · kører direkte i browseren</p>
     </div>
@@ -95,24 +92,24 @@
 <!-- ============ HVORFOR ============ -->
 <section>
   <div class="wrap">
-    <div class="narrow" style="margin-bottom:var(--space-7);">
+    <div class="narrow" style="margin-bottom:44px;">
       <p class="eyebrow">Hvorfor vi laver det her</p>
       <h2>De fleste matematikspil er et regneark med lyd på.</h2>
       <p class="lead">Barnet får et stykke, taster et svar og får en stjerne. Det er ikke et spil — det er lektier med animation. Vi bygger det omvendt: først en verden, man har lyst til at være i, og så matematikken ind i den, der hvor den hører hjemme.</p>
     </div>
     <div class="cards">
-      <article class="l-card l-card--wide">
+      <article class="card">
         <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div>
         <h3>Ingen karakterer</h3>
         <p>Danske børn får ikke karakterer før 8. klasse, og så skal et spil til en 9-årig heller ikke give dem. Fremgang vises som Regnekraft, og til sidst som en liste over det, man kan nu.</p>
       </article>
-      <article class="l-card l-card--wide">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M14.5 4h-5L4 9.5v5L9.5 20h5l5.5-5.5v-5z"/><path d="M12 8v4M12 16h.01"/></svg></div>
+      <article class="card">
+        <div class="ic g"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M14.5 4h-5L4 9.5v5L9.5 20h5l5.5-5.5v-5z"/><path d="M12 8v4M12 16h.01"/></svg></div>
         <h3>Opgaver, man spiller</h3>
         <p>Otte forskellige slags opgaver: skriv svaret, find alle, få vægten i balance, byg et regnestykke, betal med de rigtige mønter. Det er ikke det samme tekstfelt igen og igen.</p>
       </article>
-      <article class="l-card l-card--wide">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg></div>
+      <article class="card">
+        <div class="ic b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5z"/></svg></div>
         <h3>Hjælpen er inde i spillet</h3>
         <p>Sidder man fast, slår man op i Regnebogen — en rigtig lille matematikbog med forklaring, eksempel og tegning. Den åbner på den side, opgaven handler om. Man skal ikke råbe på en voksen.</p>
       </article>
@@ -123,21 +120,18 @@
 <!-- ============ SPILKORT ============ -->
 <section style="padding-top:0;">
   <div class="wrap">
-    <div class="game-card l-card l-card--frame">
+    <div class="game-card">
       <div class="pic"><img src="assets/billeder/opgave.png" width="1024" height="640" alt="Skærmbillede: Far spørger hvad fire poser æbler til 12 kr koster, og der er et felt til at skrive svaret i." loading="lazy"></div>
       <div class="body">
         <p class="eyebrow">Vores første spil</p>
         <h2>Regnehelten</h2>
         <ul class="tags">
-          <li class="l-badge l-badge--outline">7-12 år</li>
-          <li class="l-badge l-badge--outline">Dansk tale og tekst</li>
-          <li class="l-badge l-badge--outline">45-60 min</li>
-          <li class="l-badge l-badge--outline">Gratis</li>
+          <li>7-12 år</li><li>Dansk tale og tekst</li><li>Ca. 45-60 min</li><li>Gratis</li>
         </ul>
         <p>En helt almindelig skoledag, fra sengekanten til sidste time. Seks steder, seks slags matematik, en sidehistorie om at turde svare igen. Undervejs er der sidemissioner, ting man kan samle, og to pausespil, man kan låse op.</p>
-        <div class="hero-cta" style="margin-top:var(--space-5);">
-          <a href="/spil/" class="l-btn l-btn--primary">Spil nu</a>
-          <a href="/regnehelten" class="l-btn l-btn--ghost">Hvad lærer man?</a>
+        <div class="hero-cta" style="margin-top:22px;">
+          <a href="/spil/" class="btn btn-primary">Spil nu</a>
+          <a href="/regnehelten" class="btn">Hvad lærer man?</a>
         </div>
       </div>
     </div>
@@ -145,17 +139,17 @@
 </section>
 
 <!-- ============ SÅDAN ============ -->
-<section class="theme-night">
+<section class="dark">
   <div class="wrap">
     <p class="eyebrow">Sådan kommer I i gang</p>
-    <h2 style="margin-bottom:var(--space-7);">Tre klik, ingen konto.</h2>
+    <h2 style="margin-bottom:40px;">Tre klik, ingen konto.</h2>
     <ol class="steps">
       <li><span class="n">1</span><h3>Tryk spil</h3><p>Spillet henter sig selv ned i browseren. Det tager et øjeblik første gang og går hurtigt bagefter.</p></li>
       <li><span class="n">2</span><h3>Lav din figur</h3><p>Navn, alder og udseende. Alderen bestemmer, hvor svære tallene bliver — resten er pynt.</p></li>
       <li><span class="n">3</span><h3>Spil</h3><p>Piletaster og ENTER på computer, eller fingrene på en tablet. Der er ingenting at installere og ingenting at betale.</p></li>
     </ol>
-    <div class="hero-cta" style="margin-top:var(--space-7);">
-      <a href="/spil/" class="l-btn l-btn--primary l-btn--lg">Start spillet</a>
+    <div class="hero-cta" style="margin-top:42px;">
+      <a href="/spil/" class="btn btn-primary btn-lg">Start spillet</a>
     </div>
   </div>
 </section>
@@ -164,7 +158,7 @@
 <section>
   <div class="wrap">
     <p class="eyebrow">Kig med</p>
-    <h2 style="margin-bottom:var(--space-6);">Sådan ser det ud</h2>
+    <h2 style="margin-bottom:34px;">Sådan ser det ud</h2>
     <div class="shots">
       <figure class="shot-fig">
         <span class="shot"><img src="assets/billeder/hjem.png" width="1024" height="640" alt="Skærmbillede: barnets værelse og køkkenet hjemme, set oppefra." loading="lazy"></span>
@@ -193,7 +187,7 @@
     <h2>Vi samler ingenting om jeres barn</h2>
     <p class="lead">Spillet kører i browseren og sender ingenting videre. Der er ingen konto, ingen mailadresse, ingen reklamer og ingen køb inde i spillet. Når fanen lukkes, er der ikke efterladt noget.</p>
     <div class="hero-cta" style="justify-content:center;">
-      <a href="/for-voksne" class="l-btn l-btn--ghost">Læs mere for voksne</a>
+      <a href="/for-voksne" class="btn">Læs mere for voksne</a>
     </div>
   </div>
 </section>
@@ -203,8 +197,8 @@
 <footer>
   <div class="wrap cols">
     <div style="max-width:320px;">
-      <a href="/" class="nav-brand" style="margin-bottom:var(--space-3);">
-        <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
         <span>Learnification</span>
       </a>
       <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
@@ -225,7 +219,7 @@
       </nav>
     </div>
   </div>
-  <div class="wrap" style="margin-top:var(--space-6);">
+  <div class="wrap" style="margin-top:34px;">
     <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Regnehelten er lavet i Danmark.</p>
   </div>
 </footer>
