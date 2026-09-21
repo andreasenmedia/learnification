@@ -1,6 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/>
-  <rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/>
-  <rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/>
-  <rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Learnification">
+  <!-- Selve maerket maa ikke vises under 32x35px og maa ikke beskaeres ind i
+       et kvadrat, saa det kan ikke bruges som favicon. Her staar i stedet
+       maerkets egen guldgnist paa en brandviolet flade. Begge farver er
+       tokens (brand, gold). Kommer der et rigtigt favicon fra Andreasen
+       Media, skal det her skiftes ud. -->
+  <rect width="32" height="32" rx="8" fill="#6c3ce9"/>
+  <path d="M16 6 L19.1 12.9 L26 16 L19.1 19.1 L16 26 L12.9 19.1 L6 16 L12.9 12.9 Z" fill="#ffb800"/>
 </svg>

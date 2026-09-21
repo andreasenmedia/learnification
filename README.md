@@ -21,6 +21,87 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 `assets/billeder/*.png` er rigtige skærmbilleder fra spillet, lavet af
 `tools/screenshots.py` i spillets eget projekt.
 
+## Designsystemet
+
+Siden er bygget på designsystemet **Learnification**, som ligger her:
+
+<https://claude.ai/artifact/QZJgnbnsdavAoTLRKmer3y>
+
+Systemet ejer farver, skrift, afstand, hjørner, skygger og de tre
+komponenter (knap, badge, kort). Hjemmesiden ejer sit eget layout — og
+ikke andet. Stilarkene er lagt i tre lag, og de skal indlæses i den
+rækkefølge:
+
+| Fil | Hvem ejer den | Hvad står der |
+|---|---|---|
+| `assets/tokens.css` | designsystemet | Alle tokens, begge temaer, skriftstilene. **Skrevet af `project/tokens.json`** |
+| `assets/components.css` | delt | Øverst designsystemets `project/components/bundle.css` ord for ord. Nederst sidens egne tilføjelser, tydeligt adskilt |
+| `assets/style.css` | hjemmesiden | Layout, navigation, hero, footer. Bruger kun tokens — ikke én farve eller afstand skrevet i hånden |
+
+**Skal en farve eller en afstand laves om, sker det i designsystemet.**
+Derefter skrives `tokens.css` af igen. Retter man den her, driver siden og
+systemet fra hinanden, og næste gang nogen henter systemet ned, bliver
+rettelsen kørt over.
+
+### Sådan bruges systemet på siden
+
+- **Knapper.** `l-btn` plus `l-btn--primary`, `--secondary` eller
+  `--ghost`. Primary er den ene, der bærer `shadow-glow-brand`, så der er
+  højst én af dem synlig ad gangen: forsiden har tre, men de står en hel
+  skærm fra hinanden. Den faste "Spil nu" i navigationen er `--secondary`,
+  fordi den altid står sammen med en primary — præcis det par, brand book
+  beskriver. Størrelserne `--lg` og `--sm` er sidens egne: rammen vokser,
+  mens teksten bliver stående i `label`.
+- **Badges.** `l-badge l-badge--outline` til neutral metadata (aldersgruppe,
+  spilletid). `--gold` er forbeholdt noget, spilleren har optjent, og
+  bruges derfor ikke på hjemmesiden.
+- **Kort.** `l-card` plus `l-card--wide` i et gitter og `l-card--frame`,
+  når kortet kun rammer et billede ind. Systemets kort er questkort til et
+  dashboard og har en fast maksimalbredde; de to varianter er sidens.
+- **Mørke sektioner.** `class="theme-night"` sætter Night Quest-værdierne
+  lokalt. Er hele siden i forvejen mørk, rykker sektionen op på
+  `surface-200` og får to hårstreger, så den stadig kan ses.
+- **Temaet følger brugerens system** via `prefers-color-scheme`.
+  `data-theme="light"` eller `"dark"` på `<html>` tvinger det ene.
+
+### Det, vi har gjort anderledes end brand book — og hvorfor
+
+Fire steder følger siden ikke systemet til punkt og prikke. Alle fire står
+som kommentarer i koden det sted, de gælder:
+
+1. **Fokusringen er `brand`, ikke `outline`.** `outline` rammer 2,0:1 mod
+   `surface-100` i det lyse tema og er dermed under de 3:1, en fokusring
+   skal have. `brand` rammer 5,7:1. Samme sted: kanten på ghost-knappen og
+   det neutrale badge er `ink-muted`.
+2. **Knaptekst er ikke sat i versaler.** `label` skal ifølge brand book
+   sættes i versaler eller næsten-versaler. Vægten og sporingen er med,
+   men ikke versalerne: knapperne her læses af 7-12-årige og af forældre,
+   og dansk i 14px versaler er hårdt for dem. Badges og eyebrows **er** i
+   versaler.
+3. **Faviconet er ikke mærket.** Mærket må ikke vises under 32×35px og må
+   ikke beskæres ind i et kvadrat, så det kan ikke bruges som favicon.
+   `assets/favicon.svg` er i stedet mærkets egen guldgnist på en
+   brandviolet flade — begge dele tokens. **Kommer der et rigtigt favicon
+   fra Andreasen Media, skal det skiftes ud.**
+4. **Ikonerne er stadig en markeret stedfortræder.** Brand book siger selv,
+   at der ikke er leveret et ikonsæt endnu. Sidens ikoner er
+   stregikoner i én vægt og én familie, farvet `brand` på `surface-300`,
+   indtil der kommer et rigtigt sæt.
+
+**Teksten på siden er ikke skrevet om.** Brand book beskriver også en
+stemme — quest, mission, XP, "Make Learning Great Again" — som er tænkt til
+produktets egne skærme og til et engelsksproget publikum. Hjemmesidens
+danske tekst er rettet mod børn, forældre og lærere og er ladt urørt. Skal
+den også lægges om, er det et stykke arbejde for sig.
+
+### Kontrasten er målt, ikke gættet
+
+Alle farvepar, siden faktisk bruger, er regnet igennem i begge temaer og
+består WCAG AA (4,5:1 for tekst, 3:1 for ikoner, kanter og fokusringe).
+Det laveste, der står tilbage, er fluebenene i `success` på den lyse flade
+med 3,2:1 — og de bærer aldrig betydningen alene, der står altid tekst i
+`ink` ved siden af.
+
 ## Læg siden op på Simply.com
 
 Webroden hedder `public_html`. Indholdet af **denne mappe** skal ligge
@@ -107,7 +188,9 @@ den hentning.
 
 ## Afhængigheder udefra
 
-- **Google Fonts** (Fraunces + Inter) til hjemmesiden.
+- **Google Fonts** (Baloo 2 + Nunito Sans) til hjemmesiden. De to
+  skriftsnit er designsystemets, og linket skal se ud, som det gør i
+  `<head>` — begge vægtsæt skal med.
 - **pygame-web.github.io** leverer Python-motoren til spillet (ca. 20-30 MB,
   som browseren gemmer efter første besøg). Går den ned, kan spillet ikke
   starte. Skal det undgås, kan motoren lægges på eget webhotel og pygbag

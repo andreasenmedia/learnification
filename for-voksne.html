@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For forældre og lærere — Learnification</title>
 <meta name="description" content="Hvad Regnehelten øver, hvordan det passer til Fælles Mål, hvad der bliver samlet om barnet (ingenting) og hvordan spillet kan bruges i en klasse.">
-<meta name="theme-color" content="#faf7f0">
+<meta name="theme-color" content="#fff7ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191333" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="article">
 <meta property="og:title" content="For forældre og lærere — Learnification">
 <meta property="og:description" content="Hvad Regnehelten øver, hvordan det bruges i en klasse, og hvorfor vi ikke samler noget om barnet.">
@@ -15,7 +16,9 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Nunito+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -23,7 +26,7 @@
 <nav id="nav">
   <div class="wrap">
     <a href="/" class="nav-brand">
-      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
       <span>Learnification</span>
     </a>
     <div class="nav-links">
@@ -31,7 +34,7 @@
       <a href="/for-voksne" aria-current="page">For voksne</a>
       <a href="/om">Om os</a>
     </div>
-    <a href="/spil/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
+    <a href="/spil/" class="l-btn l-btn--secondary l-btn--sm nav-cta">Spil nu</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -42,12 +45,12 @@
   <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
-  <a href="/spil/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
+  <a href="/spil/" class="l-btn l-btn--secondary" style="width:fit-content;margin-top:var(--space-2);">Spil nu</a>
 </div>
 
 <main>
 
-<header class="hero" style="padding-bottom:20px;">
+<header class="hero" style="padding-bottom:var(--space-5);">
   <div class="wrap narrow">
     <p class="eyebrow">For forældre og lærere</p>
     <h1>Det korte svar: der er ingen hage.</h1>
@@ -55,32 +58,32 @@
   </div>
 </header>
 
-<section style="padding-top:44px;">
+<section style="padding-top:var(--space-7);">
   <div class="wrap narrow">
     <h2>Hvad øver barnet?</h2>
     <p>Regnehelten dækker det, en dansk elev arbejder med i indskolingen og på mellemtrinnet: de fire regningsarter, tabeller, penge og tilbagebetaling, brøkdele som halve og fjerdedele, tal- og størrelsesforståelse, enkle ligninger som vægtopgaver, areal, regnerækkefølge — og at kunne vurdere, om et svar overhovedet kan passe.</p>
     <p>Sværhedsgraden bliver sat ud fra den alder, barnet skriver ved start. Der er tre niveauer, og de flytter på talstørrelser og antal trin, ikke på hvilke opgavetyper man møder.</p>
 
-    <h2 style="margin-top:44px;">Hvorfor ingen karakterer?</h2>
+    <h2 style="margin-top:var(--space-7);">Hvorfor ingen karakterer?</h2>
     <p>Fordi danske elever ikke får karakterer før 8. klasse, og fordi et tal på en skærm er en dårlig ting at give et barn, der i forvejen synes, matematik er noget, andre er bedre til.</p>
     <p>I stedet er der en måler, der hedder Regnekraft, og til sidst en liste i elevplansprog: <em>jeg kan gange med 4</em>, <em>jeg kan regne penge ud i hovedet</em>, med stjerner ved hver og et par ord fra læreren i spillet. Den liste er værd at kigge på sammen bagefter — det er der, samtalen ligger.</p>
 
-    <h2 style="margin-top:44px;">Hvad sker der, når barnet svarer forkert?</h2>
+    <h2 style="margin-top:var(--space-7);">Hvad sker der, når barnet svarer forkert?</h2>
     <p>Ingenting dramatisk. Der er ikke liv, der ryger, og ingen lyd, der siger, at man dummede sig. Man får lov at prøve igen, og hvis det stadig ikke lykkes, foreslår spillet Regnebogen — som åbner på præcis den side, opgaven handler om.</p>
     <p>Belønninger gives for at ramme rigtigt i <em>første</em> forsøg, men de er ting og pausespil, ikke adgang til at komme videre. Man kan spille hele spillet igennem uden at få en eneste ting.</p>
 
-    <h2 style="margin-top:44px;">Kan det bruges i en klasse?</h2>
+    <h2 style="margin-top:var(--space-7);">Kan det bruges i en klasse?</h2>
     <p>Ja. Et gennemspil tager 45-60 minutter, altså en lektion eller to. Der er ikke noget lærerpanel og ingen klasseoversigt — spillet ved ikke, hvem der spiller, og det er med vilje.</p>
     <p>Det, der virker, er at lade eleverne spille og så bruge slutlisten som udgangspunkt: hvad står der på din liste, og hvad vil du gerne have til at stå der næste gang? Sidemissionerne kan bruges som differentiering — de er frivillige og skubber ikke historien fremad, så de hurtige elever har noget at tage fat på uden at løbe fra resten.</p>
 
-    <h2 style="margin-top:44px;">Hvad med data og privatliv?</h2>
+    <h2 style="margin-top:var(--space-7);">Hvad med data og privatliv?</h2>
     <p>Spillet kører helt inde i browseren. Det navn og den alder, barnet skriver, bliver liggende i fanen og bliver sendt ingen steder hen. Der er ingen cookies fra os, ingen analyseværktøjer inde i spillet og ingen tredjeparter, der får noget at vide.</p>
     <p>Det betyder også, at fremgang ikke bliver gemt: lukker man fanen, starter man forfra. Det er en bevidst afvejning — vi vil hellere lade være med at gemme noget end at bede om en konto.</p>
 
-    <h2 style="margin-top:44px;">Hvad koster det?</h2>
+    <h2 style="margin-top:var(--space-7);">Hvad koster det?</h2>
     <p>Ingenting, og der kommer ikke en regning bagefter. Der er ingen gratisversion med en betalt version bagved, ingen reklamer og intet at købe inde i spillet.</p>
 
-    <h2 style="margin-top:44px;">Spørgsmål</h2>
+    <h2 style="margin-top:var(--space-7);">Spørgsmål</h2>
     <details class="faq"><summary>Hvilken alder passer det til?</summary><p>7-12 år. De yngste får bedst ud af det sammen med en voksen, der læser med — der er en del tekst, og den er skrevet til at blive læst, ikke sprunget over. Fra omkring 9 år klarer de fleste det selv.</p></details>
     <details class="faq"><summary>Virker det på iPad?</summary><p>Ja. Rør ved skærmen, så kommer styrekors, OK-knap og taltastatur frem. Hold den på tværs — spillet er bredt.</p></details>
     <details class="faq"><summary>Kan man slå musikken fra?</summary><p>Ja. <kbd>M</kbd> slår al lyd fra, og i pausemenuen under <kbd>ESC</kbd> kan musik og lydeffekter slås fra hver for sig.</p></details>
@@ -88,19 +91,19 @@
     <details class="faq"><summary>Er der noget, der kan skræmme et barn?</summary><p>Nej. Der er ingen vold, ingen tidspres, ingen tabskærme. Det eneste ubehagelige i spillet er åbningsscenen, hvor nogen griner ad hovedpersonen i klassen — og den er der, fordi det er dét, resten af spillet handler om at komme videre fra.</p></details>
     <details class="faq"><summary>Må vi bruge det på skolen?</summary><p>Ja, meget gerne, og I behøver ikke spørge. Skriv endelig, hvis I gør — vi bliver klogere af at høre, hvordan det går i en rigtig klasse.</p></details>
 
-    <div class="card" style="margin-top:44px;">
+    <div class="l-card l-card--wide" style="margin-top:var(--space-7);">
       <h3>Har I prøvet det med børn?</h3>
       <p>Så vil vi rigtig gerne høre om det — hvad der virkede, hvad der var for svært, og hvad der manglede. Skriv til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
     </div>
   </div>
 </section>
 
-<section class="dark">
+<section class="theme-night">
   <div class="wrap narrow center">
     <h2>Prøv det selv først</h2>
     <p class="lead">Det tager ti minutter at få en fornemmelse af, om det er noget for jeres barn.</p>
     <div class="hero-cta" style="justify-content:center;">
-      <a href="/spil/" class="btn btn-primary btn-lg">Spil Regnehelten</a>
+      <a href="/spil/" class="l-btn l-btn--primary l-btn--lg">Spil Regnehelten</a>
     </div>
   </div>
 </section>
@@ -110,8 +113,8 @@
 <footer>
   <div class="wrap cols">
     <div style="max-width:320px;">
-      <a href="/" class="nav-brand" style="margin-bottom:12px;">
-        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <a href="/" class="nav-brand" style="margin-bottom:var(--space-3);">
+        <img src="assets/learnification-mark.svg" width="33" height="36" alt="" aria-hidden="true">
         <span>Learnification</span>
       </a>
       <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
@@ -125,7 +128,7 @@
       <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
     </div>
   </div>
-  <div class="wrap" style="margin-top:34px;">
+  <div class="wrap" style="margin-top:var(--space-6);">
     <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Regnehelten er lavet i Danmark.</p>
   </div>
 </footer>

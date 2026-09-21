@@ -1,0 +1,157 @@
+/* ==========================================================================
+   Learnification — komponentlaget
+
+   Foerste halvdel er designsystemets egen project/components/bundle.css,
+   skrevet af ord for ord: https://claude.ai/artifact/QZJgnbnsdavAoTLRKmer3y
+   Ret den ikke her. Ret den i systemet og skriv den af igen.
+
+   Anden halvdel er hjemmesidens tilfoejelser til den — stoerrelser,
+   fokusring og et par varianter, systemet ikke har, fordi det ikke er
+   bygget til en forside. De staar for sig, saa man kan se forskel.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Fra designsystemet (bundle.css, uaendret)
+   -------------------------------------------------------------------------- */
+
+.l-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  padding: var(--space-3) var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+.l-btn:hover { transform: translateY(-1px); }
+.l-btn:active { transform: translateY(0); }
+.l-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.l-btn--primary { background: var(--brand); color: var(--on-brand); box-shadow: var(--shadow-glow-brand); }
+.l-btn--primary:hover { background: var(--brand-hover); }
+
+.l-btn--secondary { background: var(--accent); color: var(--on-accent); }
+
+.l-btn--ghost { background: transparent; color: var(--ink); box-shadow: none; border: 2px solid var(--outline); }
+.l-btn--ghost:hover { background: var(--surface-300); }
+
+.l-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-3);
+  white-space: nowrap;
+}
+
+.l-badge--gold { background: var(--gold); color: var(--on-gold); }
+.l-badge--brand { background: var(--brand); color: var(--on-brand); }
+.l-badge--accent { background: var(--accent); color: var(--on-accent); }
+.l-badge--outline { background: transparent; color: var(--ink); border: 2px solid var(--outline); }
+
+.l-card {
+  background: var(--surface-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 340px;
+}
+
+.l-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.l-card__progress {
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-300);
+  overflow: hidden;
+}
+
+.l-card__progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--brand);
+}
+
+/* --------------------------------------------------------------------------
+   2. Hjemmesidens tilfoejelser
+
+   Alt herunder bygger kun paa tokens — ingen nye farver, ingen nye
+   afstande. Skulle systemet en dag faa sine egne stoerrelser eller sin
+   egen fokusring, ryger blokken her ud igen.
+   -------------------------------------------------------------------------- */
+
+/* Knaptekst er sat i label, som systemets Button-side kraever. Den staar i
+   normal sats og ikke i versaler: knapperne her skal laeses af 7-12-aarige
+   og af foraeldre, og 14px versaler paa dansk er for haardt et krav til
+   dem. Vaegten og sporingen fra label er beholdt. */
+.l-btn {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  text-align: center;
+}
+
+/* Systemet har ingen knapstoerrelser. Rammen vokser og skrumper, teksten
+   bliver staaende i label — saa skalaen bliver ikke opfundet forfra. */
+.l-btn--lg { padding: var(--space-4) var(--space-6); }
+.l-btn--sm { padding: var(--space-2) var(--space-4); }
+
+/* Fokusringen er sat i brand og ikke i outline, som brand book'en ellers
+   siger. Grunden er maalbar: outline (#c9ae7e) rammer 2,0:1 mod den lyse
+   surface-100 og er dermed under de 3:1, en fokusring skal have. brand
+   rammer 5,7:1. Se README'ens afsnit om designsystemet. */
+.l-btn:focus-visible,
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--brand);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .l-btn:hover { transform: none; }
+}
+
+/* Badges er metadata-chips paa denne side. De er sat i label i versaler,
+   som brand book'en beskriver, og holder sig til to-tre ord. */
+.l-badge {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Kortene i systemet er questkort til et dashboard og har derfor en fast
+   maksimalbredde. I et sidelayout skal de fylde deres spalte ud. */
+.l-card--wide { max-width: none; }
+
+/* Et kort, der kun rammer et billede ind — polstringen ville skubbe
+   billedet vaek fra kanten. */
+.l-card--frame { padding: 0; overflow: hidden; gap: 0; max-width: none; }
+
+/* Kanten paa ghost-knappen og paa det neutrale badge er de eneste steder,
+   hvor en kant skal baere graensen helt alene. outline rammer 2,0:1 mod den
+   lyse surface-100 og er dermed under de 3:1, en betydende kant skal have;
+   i Night Quest rammer den 3,1:1 og klarer det lige netop. De to faar derfor
+   ink-muted i begge temaer (8,5:1 lyst, 8,3:1 moerkt) — det ville se
+   underligt ud, hvis kanten skiftede karakter med temaet. Alle andre steder
+   staar outline, som systemet foreskriver. */
+.l-btn--ghost,
+.l-badge--outline { border-color: var(--ink-muted); }
