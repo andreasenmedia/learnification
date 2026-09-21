@@ -37,15 +37,32 @@ og `components.css` i et mørkt tema. Det blev rullet tilbage igen, fordi det
 lyse udtryk klæder spillet bedre. Vil man se på det, ligger det i historikken
 under `Laeg designsystemet Learnification ned over hele siden`.
 
-## Tilmelding til spørgeskemaet
+## Porten foran spillet, og listen over testere
 
-Nederst på `/spil/` og på `/for-voksne` kan forældre lægge deres mailadresse,
-så de kan få tilsendt ét spørgeskema, når de har prøvet spillet.
+Mens Regnehelten er til test, skal en voksen skrive **navn, mailadresse og
+eventuelt mobilnummer**, før spillet kan gå i gang. Porten er en dialog, der
+lægger sig over `/spil/`, og den er stilet til den voksne — ikke til barnet,
+der sidder ved skærmen. Den samme formular ligger også som en almindelig
+tilmelding nederst på `/for-voksne`.
 
-`tilmeld.php` tager imod. Den gemmer **kun** tidspunkt, mailadresse og hvilken
-side tilmeldingen kom fra — ingen IP-adresser, ingen cookies, ingen
-tredjeparter. Der ryger også en mail til adressen øverst i filen, så listen
-findes to steder.
+**Sådan slukkes porten, når testen er slut:** i `spil/index.html` står
+
+```js
+var KRAEV_TILMELDING = true;
+```
+
+Sæt den til `false`. Så er porten væk, og spillet starter som før. Resten —
+formularen på `/for-voksne`, `tilmeld.php`, listen — bliver ved med at virke.
+
+Porten spørger kun én gang pr. browser: efter en tilmelding står der
+`lf-tester` i `localStorage`, og så kommer den ikke igen. Den er lavet i
+JavaScript og er ikke en lås — den, der vil, kan komme uden om den. Den er
+til at samle testere, ikke til at beskytte noget.
+
+`tilmeld.php` tager imod og gemmer **kun** tidspunkt, navn, mailadresse,
+mobilnummer og hvilken side tilmeldingen kom fra. Ingen IP-adresser, ingen
+cookies, ingen tredjeparter. Der ryger også en mail til adressen øverst i
+filen, så listen findes to steder.
 
 **Hvor listen ligger.** Helst i `learnification-data/tilmeldinger.csv` én
 mappe **over** `public_html`, hvor den ikke kan hentes ned fra nettet. Kan
@@ -53,17 +70,21 @@ PHP ikke skrive der, ryger den i `public_html/data/` i stedet, og den mappe
 er spærret af sin egen `.htaccess`. Hvilken af de to der blev brugt, står i
 beskeden, du får på mail.
 
+**Kolonnerne står i `KOLONNER` øverst i `tilmeld.php`.** Laves de om, bliver
+den gamle fil automatisk lagt til side som `tilmeldinger-tidligere-<dato>.csv`,
+og der bliver startet en ny. Så bliver to formater aldrig blandet sammen, og
+ingenting går tabt.
+
 **Sådan får du fat i listen:** File Manager i Simply.coms kontrolpanel, eller
-FTP. Filen er almindelig CSV med `tidspunkt,email,side` og kan åbnes i Excel
-eller Numbers.
+FTP. Filen er almindelig CSV og kan åbnes i Excel eller Numbers.
 
 **Sletning.** Beder nogen om at blive slettet, fjerner du linjen i CSV-filen.
-Der er ikke andre steder, adressen ligger.
+Der er ikke andre steder, oplysningerne ligger.
 
-**Teksten om privatliv på `/for-voksne` skal passe.** Der står, at spillet
-ikke sender noget, og at det eneste sted, vi beder om en mailadresse, er den
-frivillige tilmelding. Laves opsamlingen om — en tredjepartstjeneste, flere
-felter, andre formål — skal den tekst rettes samtidig.
+**Teksten om privatliv på `/for-voksne` skal passe.** Der står, hvad vi beder
+den voksne om, hvad det bruges til, og at spørgsmålet falder væk, når testen
+er slut. Laves opsamlingen om — en tredjepartstjeneste, flere felter, andre
+formål — skal den tekst rettes samtidig.
 
 ## Læg siden op på Simply.com
 

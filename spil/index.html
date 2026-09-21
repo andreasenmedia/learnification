@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://pygame-web.github.io">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/style.css?v=2">
+<link rel="stylesheet" href="/assets/style.css?v=3">
 <style>
 /* Startskærmen ligger oven på spillet, indtil nogen trykker. Browseren
    giver først spillet lyd og tastatur, når der har været et rigtigt klik
@@ -54,6 +54,55 @@
 </style>
 </head>
 <body>
+
+<div class="modal-slor" id="port" hidden>
+  <div class="modal" role="dialog" aria-modal="true"
+       aria-labelledby="port-titel" aria-describedby="port-tekst">
+    <p class="eyebrow">Til dig, der sidder med</p>
+    <h2 id="port-titel">Regnehelten er til test</h2>
+    <p id="port-tekst">Spillet er ikke udgivet endnu, og det er jer, der prøver det af.
+      Skriv dig op som voksen, så går spillet i gang med det samme — og bagefter sender
+      vi ét kort spørgeskema om, hvordan det gik. Det tager to minutter at svare på.</p>
+
+    <form class="signup-form" data-modal="ja" method="post" action="/tilmeld.php">
+      <input type="hidden" name="side" value="/spil/">
+      <div class="honey" aria-hidden="true">
+        <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
+      </div>
+
+      <div class="signup-felt">
+        <label for="port-navn">Dit navn</label>
+        <input id="port-navn" name="navn" type="text" autocomplete="name"
+               maxlength="80" placeholder="Mette Jensen" required>
+      </div>
+      <div class="signup-felt">
+        <label for="port-email">Din mailadresse</label>
+        <input id="port-email" name="email" type="email" autocomplete="email"
+               maxlength="190" placeholder="din@mail.dk" required>
+      </div>
+      <div class="signup-felt">
+        <label for="port-mobil">Mobilnummer <span>— valgfrit</span></label>
+        <input id="port-mobil" name="mobil" type="tel" autocomplete="tel"
+               maxlength="25" placeholder="12 34 56 78">
+      </div>
+
+      <label class="signup-consent">
+        <input type="checkbox" name="samtykke" value="ja" required>
+        <span>Ja tak, I må kontakte mig om testen af Regnehelten.</span>
+      </label>
+      <p class="signup-note" role="status" aria-live="polite"></p>
+
+      <button class="btn btn-primary btn-lg" type="submit">Start spillet</button>
+
+      <p class="signup-privacy">Vi gemmer navn, mailadresse og mobilnummer og bruger det
+        kun til denne test af Regnehelten. Vi giver det ikke videre, og vi sender ikke
+        reklamer. Du kan når som helst få det slettet ved at skrive til
+        <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
+    </form>
+
+    <p class="modal-ud"><a href="/regnehelten">Jeg vil hellere læse om spillet først</a></p>
+  </div>
+</div>
 
 <nav id="nav">
   <div class="wrap">
@@ -161,39 +210,6 @@
 </section>
 
 
-<section id="skriv-op">
-  <div class="wrap narrow">
-    <div class="card signup-card">
-      <p class="eyebrow">Hjælp os videre</p>
-      <h2>Har I spillet det? Så vil vi gerne høre fra jer</h2>
-      <p>Regnehelten er ny, og den bliver kun bedre af at blive set efter i sømmene af dem,
-        der har den i hænderne. Skriv dig op, så sender vi ét kort spørgeskema om, hvordan
-        det gik. Det tager to minutter at svare på — og det er en voksen, der svarer, ikke barnet.</p>
-      <form id="signup-form" class="signup-form" method="post" action="/tilmeld.php">
-        <input type="hidden" name="side" value="/spil/">
-        <div class="honey" aria-hidden="true">
-          <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
-        </div>
-        <div class="signup-row">
-          <label class="sr-only" for="signup-email">Din mailadresse</label>
-          <input id="signup-email" name="email" type="email" placeholder="din@mail.dk"
-                 autocomplete="email" maxlength="190" required>
-          <button class="btn btn-primary" type="submit">Skriv mig op</button>
-        </div>
-        <label class="signup-consent">
-          <input type="checkbox" name="samtykke" value="ja" required>
-          <span>Ja tak, I må skrive til mig, når spørgeskemaet er klar.</span>
-        </label>
-        <p class="signup-note" role="status" aria-live="polite"></p>
-        <p class="signup-privacy">Vi gemmer kun din mailadresse og bruger den til dette ene
-          spørgeskema om Regnehelten. Vi giver den ikke videre, og vi sender ikke reklamer.
-          Du kan når som helst få den slettet ved at skrive til
-          <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
-      </form>
-    </div>
-  </div>
-</section>
-
 </main>
 
 <footer>
@@ -219,8 +235,15 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=2" defer></script>
+<script src="/assets/script.js?v=3" defer></script>
 <script>
+/* Porten foran spillet.
+
+   Spillet er til test, og vi vil vide, hvem der tester det. Derfor skal en
+   voksen skrive sig op, foer der kan spilles. Naar testperioden er slut,
+   saettes den her til false - saa er porten vaek, og resten virker som foer. */
+var KRAEV_TILMELDING = true;
+
 document.addEventListener('DOMContentLoaded', function () {
   var frame   = document.getElementById('frame');
   var game    = document.getElementById('game');
@@ -257,7 +280,66 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 1000);
   }
 
-  document.getElementById('start').addEventListener('click', boot);
+  var start = document.getElementById('start');
+  start.addEventListener('click', boot);
+
+  // --- porten ------------------------------------------------------------
+  var port = document.getElementById('port');
+
+  function aabnPort() {
+    port.hidden = false;
+    document.body.classList.add('laast');
+    start.disabled = true;
+    // Spillet henter sig selv i baggrunden, mens der bliver skrevet - og
+    // pygbag saetter fokus i sin egen ramme, naar den er klar. Den skal
+    // holde fingrene fra tastaturet, saa laenge porten staar aaben.
+    game.inert = true;
+    game.setAttribute('tabindex', '-1');
+    saetFokus();
+    [250, 900, 2000, 4000].forEach(function (ms) { setTimeout(saetFokus, ms); });
+  }
+
+  // Foerste tomme felt - saa lander man ikke i navnefeltet igen, hvis man
+  // allerede er i gang laengere nede.
+  function saetFokus() {
+    if (port.hidden) return;
+    if (port.contains(document.activeElement)) return;
+    var felter = port.querySelectorAll('input:not([tabindex="-1"]):not([type="checkbox"])');
+    for (var i = 0; i < felter.length; i++) {
+      if (!felter[i].value) { felter[i].focus(); return; }
+    }
+    if (felter.length) felter[0].focus();
+  }
+
+  function lukPort() {
+    port.hidden = true;
+    document.body.classList.remove('laast');
+    start.disabled = false;
+    game.inert = false;
+    game.removeAttribute('tabindex');
+    // saa er der ét tryk tilbage, og det er paa den store knap
+    start.focus();
+  }
+
+  // Tabulator skal blive inde i porten, saa laenge den staar aaben
+  port.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var kan = port.querySelectorAll('a[href], button:not([disabled]), input:not([tabindex="-1"])');
+    if (!kan.length) return;
+    var f = kan[0], s = kan[kan.length - 1];
+    if (e.shiftKey && document.activeElement === f) { e.preventDefault(); s.focus(); }
+    else if (!e.shiftKey && document.activeElement === s) { e.preventDefault(); f.focus(); }
+  });
+
+  port.addEventListener('mousedown', function (e) {
+    if (e.target === port) saetFokus();       // klik ved siden af kortet
+  });
+
+  document.addEventListener('lf:tilmeldt', lukPort);
+
+  if (KRAEV_TILMELDING && !erTilmeldt()) {
+    aabnPort();
+  }
 
   document.getElementById('fullscreen').addEventListener('click', function () {
     if (document.fullscreenElement) { document.exitFullscreen(); return; }

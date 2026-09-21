@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=2">
+<link rel="stylesheet" href="assets/style.css?v=3">
 </head>
 <body>
 
@@ -76,7 +76,7 @@
     <h2 style="margin-top:44px;">Hvad med data og privatliv?</h2>
     <p>Spillet kører helt inde i browseren. Det navn og den alder, barnet skriver, bliver liggende i fanen og bliver sendt ingen steder hen. Der er ingen cookies fra os, ingen analyseværktøjer inde i spillet og ingen tredjeparter, der får noget at vide.</p>
     <p>Det betyder også, at fremgang ikke bliver gemt: lukker man fanen, starter man forfra. Det er en bevidst afvejning — vi vil hellere lade være med at gemme noget end at bede om en konto.</p>
-    <p>Det eneste sted, vi beder om en mailadresse, er den frivillige tilmelding til vores spørgeskema <a href="#skriv-op">nederst på siden</a>. Den er til dig som voksen, den har intet med spillet at gøre, og barnet møder den aldrig. Vi gemmer adressen, tidspunktet og hvilken side den kom fra — ikke andet — på vores eget webhotel i Danmark, og vi bruger den kun til det ene spørgeskema.</p>
+    <p>Mens Regnehelten er til test, beder vi til gengæld den voksne om navn, mailadresse og eventuelt et mobilnummer, før spillet går i gang. Det er dig som voksen, der skriver det — ikke barnet — og det bliver liggende på vores eget webhotel i Danmark. Vi bruger det kun til at sende ét spørgeskema om, hvordan testen gik, vi giver det ikke videre, og du kan når som helst få det slettet ved at skrive til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>. Når testperioden er slut, falder spørgsmålet væk igen.</p>
 
     <h2 style="margin-top:44px;">Hvad koster det?</h2>
     <p>Ingenting, og der kommer ikke en regning bagefter. Der er ingen gratisversion med en betalt version bagved, ingen reklamer og intet at købe inde i spillet.</p>
@@ -99,20 +99,32 @@
         <div class="honey" aria-hidden="true">
           <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
         </div>
+        <div class="signup-felt">
+          <label for="vok-navn">Dit navn</label>
+          <input id="vok-navn" name="navn" type="text" autocomplete="name"
+                 maxlength="80" placeholder="Mette Jensen" required>
+        </div>
+        <div class="signup-felt">
+          <label for="vok-email">Din mailadresse</label>
+          <input id="vok-email" name="email" type="email" autocomplete="email"
+                 maxlength="190" placeholder="din@mail.dk" required>
+        </div>
+        <div class="signup-felt">
+          <label for="vok-mobil">Mobilnummer <span>— valgfrit</span></label>
+          <input id="vok-mobil" name="mobil" type="tel" autocomplete="tel"
+                 maxlength="25" placeholder="12 34 56 78">
+        </div>
         <div class="signup-row">
-          <label class="sr-only" for="signup-email">Din mailadresse</label>
-          <input id="signup-email" name="email" type="email" placeholder="din@mail.dk"
-                 autocomplete="email" maxlength="190" required>
           <button class="btn btn-primary" type="submit">Skriv mig op</button>
         </div>
         <label class="signup-consent">
           <input type="checkbox" name="samtykke" value="ja" required>
-          <span>Ja tak, I må skrive til mig, når spørgeskemaet er klar.</span>
+          <span>Ja tak, I må kontakte mig om testen af Regnehelten.</span>
         </label>
         <p class="signup-note" role="status" aria-live="polite"></p>
-        <p class="signup-privacy">Vi gemmer kun din mailadresse og bruger den til dette ene
-          spørgeskema om Regnehelten. Vi giver den ikke videre, og vi sender ikke reklamer.
-          Du kan når som helst få den slettet ved at skrive til
+        <p class="signup-privacy">Vi gemmer navn, mailadresse og mobilnummer og bruger det
+          kun til denne test af Regnehelten. Vi giver det ikke videre, og vi sender ikke
+          reklamer. Du kan når som helst få det slettet ved at skrive til
           <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
       </form>
     </div>
@@ -154,6 +166,6 @@
   </div>
 </footer>
 
-<script src="assets/script.js?v=2" defer></script>
+<script src="assets/script.js?v=3" defer></script>
 </body>
 </html>

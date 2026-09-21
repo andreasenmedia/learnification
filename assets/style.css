@@ -393,3 +393,68 @@ footer h4 { font-family: var(--sans); font-size: .78rem; letter-spacing: .13em; 
 }
 .signup-tak strong { display: block; margin-bottom: 4px; }
 .signup-tak p { margin: 0; font-size: .95rem; color: var(--ink-soft); }
+
+/* ---------- felter i tilmeldingen --------------------------------------- */
+
+.signup-felt { margin-bottom: 14px; }
+.signup-felt label {
+  display: block; font-size: .92rem; font-weight: 600;
+  margin-bottom: 6px; color: var(--ink);
+}
+.signup-felt label span { font-weight: 400; color: var(--ink-soft); }
+.signup-felt input {
+  width: 100%;
+  font-family: var(--sans); font-size: 1.02rem; color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink); border-bottom-width: 3px;
+  border-radius: var(--r-sm); padding: 13px 15px;
+}
+.signup-felt input::placeholder { color: #9a94a2; }
+.signup-felt input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.signup-felt input[aria-invalid="true"] { border-color: var(--red); }
+
+/* ---------- porten foran spillet ---------------------------------------- */
+
+.modal-slor {
+  position: fixed; inset: 0; z-index: 90;
+  display: grid; place-items: center;
+  padding: 20px;
+  background: rgba(26, 23, 32, .78);
+  overflow-y: auto;
+}
+.modal-slor[hidden] { display: none; }
+
+.modal {
+  position: relative;
+  width: 100%; max-width: 520px;
+  margin: auto;
+  background: var(--paper);
+  border: 2.5px solid var(--gold);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 34px 32px 28px;
+}
+.modal h2 { margin: .1em 0 .5em; font-size: 1.6rem; }
+.modal > p { color: var(--ink-soft); }
+.modal .signup-form { margin-top: 24px; }
+.modal .btn { width: 100%; justify-content: center; margin-top: 4px; }
+
+.modal-ud { margin: 18px 0 0; text-align: center; font-size: .9rem; }
+.modal-ud a { color: var(--ink-soft); }
+
+@media (max-width: 560px) {
+  .modal { padding: 26px 20px 22px; border-radius: var(--r); }
+  .modal h2 { font-size: 1.35rem; }
+}
+
+/* Lav skærm (en telefon på tværs, eller et lille vindue): porten skal rulle
+   i stedet for at blive klippet. Både toppen og bunden skal kunne nås, og
+   derfor SKAL margin:auto væk her — ellers midterstiller den kortet igen,
+   uanset hvad place-items siger, og så er overskriften ikke til at rulle
+   op til. */
+@media (max-height: 700px) {
+  .modal-slor { place-items: start center; }
+  .modal { margin: 0 auto; }
+}
+
+body.laast { overflow: hidden; }
