@@ -172,8 +172,17 @@ python tools/build_web.py
 cp build/web/* ~/Claude/Projects/learnification/spil/regnehelten/
 ```
 
-Upload derefter de fire filer i `spil/regnehelten/` igen. Nye
-skærmbilleder til hjemmesiden:
+Upload derefter de fire filer i `spil/regnehelten/` igen.
+
+**Spilleren behøver ikke gøre noget for at få den nye udgave.** Alt under
+`/spil/` bliver leveret med `Cache-Control: no-cache` (afsnit 6 i
+`.htaccess`), så browseren spørger serveren hver gang, om pakken er lavet
+om. Er den ikke det, svarer serveren `304` uden at sende noget, så det
+koster ikke noget at spørge. Før den regel lå spilpakken en time i Chromes
+lager, uden at browseren spurgte, og en ny bygning blev først set bagefter
+— eller efter en hård genindlæsning.
+
+Nye skærmbilleder til hjemmesiden:
 
 ```bash
 cd ~/Claude/Projects/matematik-eventyr

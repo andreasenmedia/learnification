@@ -103,13 +103,10 @@ ErrorDocument 404 /404.html
   ExpiresByType application/javascript  "access plus 30 days"
   ExpiresByType image/png               "access plus 30 days"
   ExpiresByType image/svg+xml           "access plus 30 days"
-  # Spilpakken maa IKKE ligge en uge i browserens lager. Gjorde den det,
-  # blev en rettelse i spillet foerst set af dem, der har spillet foer, naar
-  # ugen var gaaet. En time betyder ikke, at pakken hentes igen hver time -
-  # browseren spoerger bare serveren, om den er lavet om, og faar "nej" til
-  # naeste gang.
-  ExpiresByType application/gzip        "access plus 1 hour"
-  ExpiresByType application/octet-stream "access plus 1 hour"
+  # Spilpakken staar for sig selv i afsnit 6 nedenfor: den skal tjekkes
+  # hver gang, ikke ligge og blive gammel i en time.
+  ExpiresByType application/gzip        "access plus 0 seconds"
+  ExpiresByType application/octet-stream "access plus 0 seconds"
 </IfModule>
 
 # De 30 dage paa css og js er kun forsvarlige, fordi hver side henter dem
@@ -134,6 +131,41 @@ ErrorDocument 404 /404.html
   # sin Python-motor fra pygame-web.github.io, og "require-corp" ville
   # blokere den hentning, saa spillet bliver haengende i "Loading".
 </IfModule>
+
+# ==========================================================================
+# 6. Spillet maa aldrig komme i en gammel udgave
+# ==========================================================================
+#
+# "access plus 1 hour" gjorde, at Chrome slet ikke spurgte serveren i en
+# time: en ny bygning blev foerst set, naar timen var gaaet, og en hard
+# reload var den eneste vej udenom. Det er ikke til at forklare et barn,
+# der spiller videre i den gamle udgave.
+#
+# Alt under /spil/ bliver derfor leveret med "no-cache". Det betyder IKKE
+# "hent det hele igen hver gang": browseren maa gerne gemme filen, men skal
+# spoerge serveren, om den er lavet om. Er den ikke det, svarer serveren
+# 304 Not Modified uden at sende en eneste byte af den megabyte, pakken
+# fylder - og spilleren faar den fra sit eget lager som foer.
+#
+# Spilmappen bliver skrevet over ved hver bygning, saa reglen staar her og
+# ikke i en .htaccess derinde - den ville forsvinde ved naeste bygning.
+<IfModule mod_setenvif.c>
+  SetEnvIf Request_URI ^/spil/ spilfil
+</IfModule>
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-cache, must-revalidate" env=spilfil
+  # Expires og Cache-Control maa ikke sige hver sit - saa vinder den
+  # gamle dato i nogle browsere.
+  Header unset Expires env=spilfil
+
+  # Samme regel efter filendelse. Den fanger pakken, ogsaa hvis serveren
+  # en dag ikke har mod_setenvif, for det er dén fil, der maa vaere gammel.
+  <FilesMatch "\.(apk|tar\.gz)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header unset Expires
+  </FilesMatch>
+</IfModule>
+
 
 # Ingen mappeoversigter
 Options -Indexes
