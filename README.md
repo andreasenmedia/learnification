@@ -169,18 +169,32 @@ Spillet ligger i `Claude/Projects/matematik-eventyr`:
 ```bash
 cd ~/Claude/Projects/matematik-eventyr
 python tools/build_web.py
-cp build/web/* ~/Claude/Projects/learnification/spil/regnehelten/
+cd ~/Claude/Projects/learnification
+git rm spil/regnehelten/regnehelten.*.apk spil/regnehelten/regnehelten.*.tar.gz
+cp ~/Claude/Projects/matematik-eventyr/build/web/* spil/regnehelten/
 ```
 
-Upload derefter de fire filer i `spil/regnehelten/` igen.
+**Bemærk `git rm`-linjen.** Spilpakken hedder `regnehelten.<stempel>.tar.gz`,
+hvor stemplet følger indholdet, så den hedder noget nyt, hver gang den er
+lavet om. Den gamle bliver derfor ikke skrevet over af `cp` — den skal
+fjernes, ellers ligger der to pakker og fylder. Bliver den fjernet i repoet,
+sletter FTP-uploaden den også på serveren.
 
-**Spilleren behøver ikke gøre noget for at få den nye udgave.** Alt under
-`/spil/` bliver leveret med `Cache-Control: no-cache` (afsnit 6 i
-`.htaccess`), så browseren spørger serveren hver gang, om pakken er lavet
-om. Er den ikke det, svarer serveren `304` uden at sende noget, så det
-koster ikke noget at spørge. Før den regel lå spilpakken en time i Chromes
-lager, uden at browseren spurgte, og en ny bygning blev først set bagefter
-— eller efter en hård genindlæsning.
+**Spilleren behøver ikke gøre noget for at få den nye udgave** — heller
+ikke en hård genindlæsning. Der er to lag om det:
+
+1. **Pakken skifter navn, når den skifter indhold.** En adresse, browseren
+   aldrig har set før, kan ikke ligge gammel i dens lager. Det er `tools/build_web.py`
+   i spillets projekt, der sætter stemplet på og skriver de to linjer om i
+   `index.html`, hvor indlæseren henter pakken.
+2. **Alt under `/spil/` bliver leveret med `Cache-Control: no-cache`**
+   (afsnit 6 i `.htaccess`), så browseren spørger serveren hver gang, om
+   `index.html` er lavet om — og det er dén fil, der peger på pakkens nye
+   navn. Er der ikke noget nyt, svarer serveren `304` uden at sende noget.
+
+Det første lag er dét, der virker; det andet er dét, der sørger for, at
+det første bliver opdaget. Før begge dele lå spilpakken en time i Chromes
+lager, uden at browseren overhovedet spurgte.
 
 Nye skærmbilleder til hjemmesiden:
 
