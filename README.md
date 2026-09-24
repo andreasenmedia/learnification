@@ -45,6 +45,7 @@ over OECD-gennemsnittet. Kilderne står nederst i PISA-afsnittet på
 | `js/game.js` | Motoren: bevægelse, samtaler, døre, gemning, lys og stemning, joystick |
 | `js/ui.js` | Dialog, opgavetyper, dagbogen, menu, skærmtastatur, grafer |
 | `js/audio.js` | Lyd og musik, lavet med WebAudio i browseren |
+| `js/voice.js` | Oplæsning af replikker: indtalte filer i `lyd/`, ellers browserens danske stemme |
 
 **Missionerne bygger på hinanden.** Hver mission giver en evne og spor i
 dagbogen, og senere missioner bruger dem — fx er de spor, man fremlægger for
@@ -59,6 +60,25 @@ teksten om privatliv på `/runeborg` rettes samtidig.
 **Berøringsskærme:** joystick, E-knap og skærmtastatur (QWERTY med æøå til
 navnet, taltastatur til regneopgaver) dukker op ved første berøring og
 gemmer sig efter 5 sekunders stilhed.
+
+**Oplæsning:** alle replikker (og opgavernes spørgsmål) er læst ind på
+forhånd med Piper — lokal, open source talesyntese med den danske stemme
+`da_DK-talesyntese-medium` — og ligger som `spil/runeborg/lyd/<nøgle>.mp3`
+med listen `lyd/stemmer.json`. Hver person har sin egen klang (tonehøjde og
+tempo i `PROFIL` øverst i værktøjet). **Retter man en replik, skal lyden
+laves igen**, ellers er den replik tavs (eller læses af browserens egen
+danske stemme, hvis den har en):
+
+```bash
+python tools/runeborg-stemmer.py
+```
+
+Kun nye og ændrede replikker bliver indtalt, og overflødige filer slettes.
+Spillerens navn kan ikke indtales på forhånd og læses derfor som "lærling".
+Kræver `pip install piper-tts`, stemmen (`python -m piper.download_voices
+da_DK-talesyntese-medium`, lægges i `%LOCALAPPDATA%/piper-voices`) og
+ffmpeg. Nøglen er en hash af person + renset tekst, så `clean()` og `fnv()`
+i værktøjet skal svare præcis til dem i `js/voice.js`.
 
 **Test fra konsollen:** `RB.debug.tp('by', 24, 20)` teleporterer,
 `RB.debug.S` er hele tilstanden.

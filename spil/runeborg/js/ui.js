@@ -30,7 +30,7 @@
     isOpen: function () { return open > 0; },
 
     // ---------------------------------------------------------------- dialog
-    say: function (who, text) {
+    say: function (who, text, speakText) {
       return new Promise(function (resolve) {
         var d = el('div', 'dialog px' + (who ? '' : ' narrator'));
         d.setAttribute('role', 'dialog');
@@ -42,7 +42,12 @@
         var sayEl = el('div', 'say'); box.appendChild(sayEl);
         d.appendChild(box);
         var nx = el('div', 'next', '&#9660; <span class="key">E</span>'); d.appendChild(nx);
+        var again = el('button', 'say-again', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12"/></svg>'); again.type = 'button'; again.title = 'Læs op igen'; again.setAttribute('aria-label', 'Læs op igen');
+        if (RB.voice.on) d.appendChild(again);
         push(d);
+        var voiceText = speakText || text, voiceWho = who ? who.id : null;
+        RB.voice.speak(voiceText, voiceWho);
+        again.addEventListener('click', function (e) { e.stopPropagation(); RB.voice.speak(voiceText, voiceWho); });
         text = text.replace(/\{navn\}/g, esc(RB.state.name || 'lærling'));
         // hurtig skrivemaskine — kan springes over med et tryk
         var full = text, i = 0, done = false;
@@ -55,7 +60,7 @@
         function finish() { clearInterval(timer); done = true; sayEl.innerHTML = full; }
         function adv() {
           if (!done) { finish(); return; }
-          advanceFn = null; RB.audio.sfx('blip'); pop(d); resolve();
+          advanceFn = null; RB.voice.stop(); RB.audio.sfx('blip'); pop(d); resolve();
         }
         advanceFn = adv;
         d.addEventListener('click', adv);
@@ -72,10 +77,11 @@
         var ch = el('div', 'choices');
         choices.forEach(function (c, i) {
           var b = el('button', 'btn', esc(c)); b.type = 'button';
-          b.addEventListener('click', function () { pop(d); resolve(i); });
+          b.addEventListener('click', function () { RB.voice.stop(); pop(d); resolve(i); });
           ch.appendChild(b);
         });
         box.appendChild(ch); d.appendChild(box); push(d);
+        RB.voice.speak(text, who ? who.id : null);
         setTimeout(function () { var f = ch.querySelector('button'); if (f) f.focus(); }, 30);
       });
     },
@@ -131,7 +137,12 @@
         });
         if (T.chart) [].concat(T.chart).forEach(function (ch) { side.appendChild(chart(ch)); });
 
-        main.appendChild(el('p', 'task-q', T.q));
+        var qEl = el('p', 'task-q', T.q); main.appendChild(qEl);
+        if (RB.voice.on) {
+          var rd = el('button', 'btn small read-q', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12"/></svg> Læs spørgsmålet op'); rd.type = 'button';
+          rd.addEventListener('click', function () { RB.voice.speak(T.q, 'fortaeller'); });
+          main.insertBefore(rd, qEl);
+        }
         if (T.help) main.appendChild(el('p', 'task-help', T.help));
 
         var state = { sel: [], pick: null, sort: {}, order: null };
@@ -213,9 +224,9 @@
         push(bg);
 
         var tries = 0, solved = false;
-        later.addEventListener('click', function () { pop(bg); resolve(null); });
+        later.addEventListener('click', function () { RB.voice.stop(); pop(bg); resolve(null); });
         ok.addEventListener('click', function () { if (solved) finish(); else check(); });
-        bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); pop(bg); resolve(null); } });
+        bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); RB.voice.stop(); pop(bg); resolve(null); } });
 
         function check() {
           var r = evaluate();
@@ -235,7 +246,7 @@
           }
         }
         function show(kind, html) { fb.className = 'feedback show ' + kind; fb.innerHTML = html; }
-        function finish() { pop(bg); resolve({ first: tries === 1, tries: tries }); }
+        function finish() { RB.voice.stop(); pop(bg); resolve({ first: tries === 1, tries: tries }); }
 
         function evaluate() {
           if (T.type === 'choice') {
@@ -381,6 +392,7 @@
         var first = el('button', 'btn', 'Fortsæt'); first.type = 'button'; m.appendChild(first);
         toggle('Musik', function () { return RB.audio.musicOn; }, function (v) { RB.audio.setMusic(v); });
         toggle('Lydeffekter', function () { return RB.audio.sfxOn; }, function (v) { RB.audio.setSfx(v); });
+        toggle('Oplæsning af dialog', function () { return RB.voice.on; }, function (v) { RB.voice.on = v; });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
         if (RB.canFullscreen) toggle('Fuld skærm', function () { return RB.isFullscreen(); }, function () { RB.toggleFullscreen(); });
         var restart = el('button', 'btn', 'Start forfra'); restart.type = 'button'; m.appendChild(restart);

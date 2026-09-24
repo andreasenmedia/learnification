@@ -88,6 +88,8 @@
       nextTime = ctx.currentTime + 0.3;
       if (!timer) timer = setInterval(tick, 90);
     },
+    // Musikken dæmpes, mens en replik bliver læst op
+    duck: function (down) { if (musicBus && musicOn) musicBus.gain.setTargetAtTime(down ? 0.16 : 0.55, ctx.currentTime, 0.15); },
     setMusic: function (on) { musicOn = on; if (musicBus) musicBus.gain.setTargetAtTime(on ? 0.55 : 0, ctx.currentTime, 0.2); },
     setSfx: function (on) { sfxOn = on; if (sfxBus) sfxBus.gain.setTargetAtTime(on ? 0.8 : 0, ctx.currentTime, 0.05); },
     get musicOn() { return musicOn; }, get sfxOn() { return sfxOn; },

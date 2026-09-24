@@ -124,6 +124,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .dialog.narrator { grid-template-columns: 1fr; }
 .dialog.narrator .say { font-style: normal; color: var(--txt-soft); }
 @keyframes bob { 50% { transform: translateY(3px); } }
+.dialog .say-again { position: absolute; right: 12px; top: 10px; background: var(--panel-2); border: 2px solid var(--edge-2); width: 34px; height: 30px; display: grid; place-items: center; padding: 0; color: var(--txt-soft); }
+.dialog .say-again:hover, .dialog .say-again:focus-visible { border-color: var(--gold); color: var(--gold); outline: none; }
+.dialog .say { padding-right: 36px; }
+.read-q { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px; box-shadow: none; }
 .dialog .choices { display: grid; gap: 8px; margin-top: 10px; }
 
 /* ---------- Opgaver ---------- */

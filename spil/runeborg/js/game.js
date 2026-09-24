@@ -39,12 +39,12 @@
   function save() { if (!S || FOTO || !started) return; try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) { /* privat vindue */ } }
   function load() { try { var s = JSON.parse(localStorage.getItem(SAVE)); return s && s.v === 1 ? s : null; } catch (e) { return null; } }
   RB.saveSettings = function () {
-    try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, big: document.body.classList.contains('big') })); } catch (e) { }
+    try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, voice: RB.voice.on, big: document.body.classList.contains('big') })); } catch (e) { }
   };
   function loadSettings() {
     try {
       var s = JSON.parse(localStorage.getItem(SETTINGS)); if (!s) return;
-      RB.audio.setMusic(s.music !== false); RB.audio.setSfx(s.sfx !== false); document.body.classList.toggle('big', !!s.big);
+      RB.audio.setMusic(s.music !== false); RB.audio.setSfx(s.sfx !== false); RB.voice.on = s.voice !== false; document.body.classList.toggle('big', !!s.big);
     } catch (e) { }
   }
   RB.resetGame = function () { try { localStorage.removeItem(SAVE); } catch (e) { } location.reload(); };
@@ -75,8 +75,8 @@
   }
   function who(id) {
     if (!id) return null;
-    if (id === 'player') return { name: S.name, sheet: sheets.player };
-    var n = K.npcs[id]; return { name: n.name, sheet: sheetFor(id) };
+    if (id === 'player') return { id: 'player', name: S.name, sheet: sheets.player };
+    var n = K.npcs[id]; return { id: id, name: n.name, sheet: sheetFor(id) };
   }
 
   // Alt, der står på kortet lige nu: personer, ting, runestykker, katten.
@@ -113,7 +113,7 @@
   var g = {
     get S() { return S; },
     get world() { return world; },
-    say: function (id, text) { return UI.say(who(id), text); },
+    say: function (id, text, speakText) { return UI.say(who(id), text, speakText); },
     ask: function (id, text, choices) { return UI.ask(who(id), text, choices); },
     task: function (key, T0) {
       if (S.solved[key]) return Promise.resolve(true);
@@ -170,7 +170,7 @@
   async function findRune(id) {
     var r = K.runes.filter(function (x) { return x.id === id; })[0];
     S.runes.push(id); RB.audio.sfx('pick'); save(); hud();
-    await g.say(null, '<b>Runestykke: ' + RB.esc(r.title) + '</b><br>' + RB.esc(r.t));
+    await g.say(null, '<b>Runestykke: ' + RB.esc(r.title) + '</b><br>' + RB.esc(r.t), 'Runestykke: ' + r.title + '. ' + r.t);
     UI.toast('<b>Runestykker: ' + S.runes.length + ' af ' + K.runes.length + '</b>');
   }
 
