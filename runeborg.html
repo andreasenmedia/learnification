@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runeborg — 8-bit fantasyspil om læsning, beviser og data | Learnification</title>
+<meta name="description" content="Runeborg er et gratis dansk 8-bit fantasyspil for 11-15-årige. Opklar mysteriet om den grønne brønd med læsning, kildekritik, fair forsøg, data og forhold. Bygget ud fra de områder, hvor danske elever klarede sig dårligst i PISA 2025.">
+<meta name="theme-color" content="#faf7f0">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Runeborg — et 8-bit eventyr om beviser i stedet for rygter">
+<meta property="og:description" content="En hyggelig fantasyby, en grøn brønd og et hav af rygter. Opklar mysteriet med læsning, kildekritik, data og regning. Gratis i browseren.">
+<meta property="og:image" content="https://learnification.dk/assets/billeder/runeborg-by.png">
+<meta property="og:url" content="https://learnification.dk/runeborg">
+<link rel="canonical" href="https://learnification.dk/runeborg">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=3">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Runeborg",
+  "inLanguage": "da",
+  "description": "Et dansk 8-bit fantasyspil for 11-15-årige om læsning, kildekritik, naturvidenskabelige undersøgelser, data og forhold.",
+  "url": "https://learnification.dk/runeborg",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "gamePlatform": "Webbrowser",
+  "typicalAgeRange": "11-15",
+  "publisher": { "@type": "Organization", "name": "Learnification" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "DKK" }
+}
+</script>
+<style>
+.pisa { width: 100%; border-collapse: collapse; font-size: .96rem; }
+.pisa th, .pisa td { text-align: left; padding: 12px 14px; border-bottom: 2px solid var(--paper-edge); vertical-align: top; }
+.pisa th { font-family: var(--display); font-size: 1.02rem; }
+.pisa td:first-child { font-weight: 600; }
+.pisa-wrap { overflow-x: auto; background: #fff; border: 2px solid var(--paper-edge); border-radius: var(--r); box-shadow: var(--shadow); }
+.stat-row { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin: 30px 0 10px; }
+.stat { background: #fff; border: 2px solid var(--paper-edge); border-radius: var(--r); padding: 18px 20px; }
+.stat b { display: block; font-family: var(--display); font-size: 2rem; line-height: 1.1; color: var(--ink); }
+.stat span { color: var(--ink-soft); font-size: .92rem; }
+.acts { counter-reset: act; }
+.sources { font-size: .85rem; color: var(--ink-soft); }
+.sources a { color: var(--ink-soft); }
+@media (max-width: 880px) { .split { grid-template-columns: 1fr !important; gap: 34px !important; } }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/runeborg" aria-current="page">Runeborg</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+    </div>
+    <a href="/spil/runeborg/" class="btn btn-primary btn-sm nav-cta">Spil Runeborg</a>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/runeborg">Runeborg</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/spil/runeborg/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil Runeborg</a>
+</div>
+
+<main>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Spil · 5.-9. klasse · gratis</p>
+      <h1>Runeborg</h1>
+      <p class="lead">Det er høst i Runeborg. Bladene falder, røgen fra skorstenene dufter af æbler — og vandet i byens brønd er blevet grønt. Borgmesteren har allerede fundet en syndebuk: den gamle heks Hilde, som nu står i gabestokken på torvet.</p>
+      <p>Du er den nyeste lærling i Eventyrerlauget. Dit våben er ikke et sværd. Det er spørgsmål, målinger og beviser.</p>
+      <div class="hero-cta">
+        <a href="/spil/runeborg/" class="btn btn-primary btn-lg">Spil Runeborg
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        </a>
+        <a href="#pisa" class="btn btn-lg">Hvad øver man?</a>
+      </div>
+      <p class="hero-note">Ca. 60-90 minutter · dansk tekst · starter med det samme · gemmer kun i din egen browser</p>
+    </div>
+    <div class="shot">
+      <img src="assets/billeder/runeborg-by.png" width="1280" height="800" alt="Skærmbillede fra Runeborg: torvet i en hyggelig 8-bit fantasyby med brønd, opslagstavle, markedsboder og byens folk." loading="eager">
+    </div>
+  </div>
+</header>
+
+<section id="pisa" style="padding-top:20px;">
+  <div class="wrap">
+    <div class="narrow">
+      <p class="eyebrow">Hvorfor lige de her færdigheder?</p>
+      <h2>Bygget ud fra PISA 2025</h2>
+      <p class="lead">I september 2026 kom resultaterne fra PISA 2025. Danske 15-årige scorede det laveste nogensinde i alle tre fag. Runeborg er bygget direkte ud fra de områder, hvor det gik dårligst — og pakket ind i et eventyr, man har lyst til at være i.</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><b>−29 point</b><span>i læsning siden 2022. Det største fald af de tre fag.</span></div>
+      <div class="stat"><b>Ca. hver 3.</b><span>15-årig er nu en svag læser — dobbelt så mange som i 2018.</span></div>
+      <div class="stat"><b>470 point</b><span>i at fortolke data og evidens — den svageste del af naturfag.</span></div>
+      <div class="stat"><b>5-10 %-point</b><span>færre elever beskriver sig som nysgerrige på at lære.</span></div>
+    </div>
+    <div class="pisa-wrap" style="margin-top:26px;">
+      <table class="pisa">
+        <thead><tr><th>Svagt punkt i PISA 2025</th><th>Sådan øves det i Runeborg</th></tr></thead>
+        <tbody>
+          <tr><td>Læsning: finde information i en tekst</td><td>Laugets regler og borgmesterens opslag. Man klikker på præcis den sætning, der svarer — og lærer at skelne det tal, der svarer på spørgsmålet, fra de andre tal i teksten.</td></tr>
+          <tr><td>Læsning: fakta eller holdning</td><td>Rygterne på kroen skal sorteres: hvad kan tjekkes, og hvad er bare en mening? Og en pointe mange overser: et fakta-udsagn er ikke automatisk sandt — det kan bare undersøges.</td></tr>
+          <tr><td>Læsning: vurdere kilder, der siger hinanden imod</td><td>Baronens reklamepjece mod færgemandens logbog med datoer. Hvem har skrevet det, hvad har de at vinde, og hvordan ved de det?</td></tr>
+          <tr><td>Naturfag: planlægge en undersøgelse</td><td>Alkymisten Zaras fire glas: vælg de to, der giver en fair test, og find ud af, hvad der skal holdes ens.</td></tr>
+          <tr><td>Naturfag: fortolke data og evidens <em>(det svageste område)</em></td><td>Egne vandprøver fra tre steder bliver til søjle- og kurvediagrammer. Hvilke konklusioner bærer data — og hvilke er for store påstande?</td></tr>
+          <tr><td>Matematik i hverdagen: forhold og skalering</td><td>Hildes opskrift skal skaleres op til hele brønden. Undervejs møder man den klassiske fælde: at lægge til, hvor man skal gange.</td></tr>
+          <tr><td>Matematik i hverdagen: pris pr. stk. og procent</td><td>Tre købmænd, tre poser månesalt og en rabat på 25 %. Den største pose er ikke den dyreste.</td></tr>
+          <tr><td>Matematik i hverdagen: målestok</td><td>Laugsmesterens kort viser vejen til farveriet. Centimeter bliver til meter, og meter bliver til minutter.</td></tr>
+          <tr><td>Nysgerrighed og vedholdenhed</td><td>Ingen straf for at svare forkert, kun en forklaring og et nyt forsøg. Spillet fejrer, når man bliver ved. Og der er gemt runestykker i hele byen til dem, der går på opdagelse.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sources" style="margin-top:14px;">Kilder: <a href="https://uvm.dk/aktuelt/nyheder/2026/september/260908-pisa-undersoegelse-danske-elevers-faglige-niveau-er-lavere-end-nogensinde-maalt-foer/">Børne- og Undervisningsministeriet, 8. september 2026</a> · <a href="https://www.vive.dk/da/udgivelser/pisa-2025-bxq12bbz/">VIVE: PISA 2025 — Hovedrapport</a> · <a href="https://www.folkeskolen.dk/historisk-fald-i-pisa-aldrig-har-dansk-skole-klaret-sig-daarligere/">Folkeskolen.dk</a>. Danske elever lå over OECD-gennemsnittet i computationel problemløsning (506 point), så det har vi ikke taget med.</p>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap">
+    <p class="eyebrow">Missioner, der bygger på hinanden</p>
+    <h2 style="margin-bottom:34px;">Det, du lærer i dag, bruger du i morgen</h2>
+    <div class="cards">
+      <article class="card"><h3>Akt 1 · Rygter</h3><p>Læs opslagene, sortér rygterne på Den Gyldne Drage, og sammenlign to kilder på biblioteket. Hvert trin giver en evne og et spor i din dagbog.</p></article>
+      <article class="card"><h3>Akt 2 · Beviserne</h3><p>Planlæg et fair forsøg, tag vandprøver ud i byen, og fortolk dine egne målinger. Så står du på torvet og skal redde Hilde — med de spor, du selv har samlet. Rygter virker ikke.</p></article>
+      <article class="card"><h3>Akt 3 · Eliksiren</h3><p>Hilde har en opskrift. Resultatet af dine beregninger bestemmer, hvor meget månesalt du skal købe, og markedet belønner dem, der regner prisen pr. skefuld ud.</p></article>
+      <article class="card"><h3>Akt 4 · Farveriet</h3><p>Forbi en vagt med et hjemmelavet certifikat, ind til rørene, og til sidst ansigt til ansigt med baronen. Alt det, du har lært, kommer i spil på én gang.</p></article>
+    </div>
+    <p style="margin-top:26px;">Ved siden af hovedhistorien er der tre ekstramissioner: en forsvundet kat, en bard der kun vil synge om det, der er sandt, og en smed med et blandingsforhold, der ikke går op.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;" class="split">
+      <div class="shot"><img src="assets/billeder/runeborg-opgave.png" width="1280" height="800" alt="Skærmbillede: en opgave med et søjlediagram over grønhed i tre vandprøver og spørgsmålet 'Hvor var vandet mest grønt?'" loading="lazy"></div>
+      <div>
+        <p class="eyebrow">Opgaverne</p>
+        <h2>Man svarer ikke i et tekstfelt</h2>
+        <p>Man klikker på den sætning i teksten, der svarer. Man sorterer udsagn i kasser, sætter trin i rækkefølge, vælger to glas ud af fire og aflæser grafer. Og nogle gange skal der regnes.</p>
+        <p>Svarer man forkert, forklarer spillet, <em>hvorfor</em> netop det svar ikke holder. Har man fx trukket rabatten fra i stedet for at beregne den, siger spillet præcis det.</p>
+        <p style="margin-bottom:0;">Teksten er sat med Atkinson Hyperlegible, en skrift designet til at være let at læse. Og i menuen kan teksten gøres større.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;" class="split">
+      <div>
+        <p class="eyebrow">Hyggeligt, ikke stressende</p>
+        <h2>En by, man har lyst til at gå rundt i</h2>
+        <p>Runeborg er en lille fantasyby i efterårsfarver: en kro med bard og kamin, en dragehvalp, der sover ved ilden i lauget, lanterner, der tændes, når det bliver aften, og ildfluer over engen. Dagen går, mens historien skrider frem — og det hele ender med høstfest på torvet.</p>
+        <p>Der er ingen karakterer og ingen tid, der løber ud. Til sidst får man en liste i elevplan-sprog: <em>jeg kan skelne fakta fra holdninger</em>, <em>jeg kan aflæse grafer</em> — med stjerner for, hvor tit det sad i første forsøg, og et særligt skulderklap for hver gang, man prøvede igen.</p>
+      </div>
+      <div class="shot"><img src="assets/billeder/runeborg-fest.png" width="1280" height="800" alt="Skærmbillede: høstfest om aftenen på torvet med lyskæder, lanterner, ildfluer og byens folk samlet." loading="lazy"></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="shots">
+      <figure class="shot-fig">
+        <span class="shot"><img src="assets/billeder/runeborg-kro.png" width="1280" height="800" alt="Skærmbillede: inde på kroen Den Gyldne Drage med kroværten bag disken, en bard og gæster ved bordene." loading="lazy"></span>
+        <figcaption>Den Gyldne Drage — varm suppe og kolde historier.</figcaption>
+      </figure>
+      <figure class="shot-fig">
+        <span class="shot"><img src="assets/billeder/runeborg-dialog.png" width="1280" height="800" alt="Skærmbillede: laugsmester Brynja byder lærlingen velkommen i Eventyrerlauget." loading="lazy"></span>
+        <figcaption>Laugsmester Brynja og dragen Glød.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="dark">
+  <div class="wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start;" class="split">
+      <div>
+        <p class="eyebrow">Sådan spiller man</p>
+        <h2>Tastatur eller fingre</h2>
+        <ul class="checks">
+          <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>Piletaster eller WASD</strong> for at gå, <strong>E</strong> for at tale og undersøge, <strong>B</strong> for dagbogen og <strong>Esc</strong> for menuen.</span></li>
+          <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>På telefon og tablet</strong> dukker et joystick og en E-knap op, så snart man rører skærmen. Skal der skrives, kommer et skærmtastatur med æ, ø og å. Rører man ikke skærmen i fem sekunder, gemmer det hele sig igen.</span></li>
+          <li><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg><span><strong>En blå pil</strong> i kanten af skærmen viser altid vej til næste mission.</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Til forældre og lærere</h3>
+          <p style="margin-bottom:14px;">Runeborg sender ingenting nogen steder hen. Der er ingen tilmelding, ingen konto og ingen reklamer. Spillet gemmer, hvor langt man er nået, i browserens egen hukommelse på den enhed, man spiller på — det er alt.</p>
+          <p style="margin-bottom:0;">Spillet er lavet til 5.-9. klasse og passer ind i dansk, natur/teknologi, fysik/kemi og matematik. Det virker godt som fælles oplæg: spil en akt, og tal bagefter om, hvorfor borgmesteren ikke kunne bruge Agnetes rygte som bevis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap narrow center">
+    <h2>Klar til at blive lærling?</h2>
+    <p class="lead">Spillet starter med det samme. Der er intet at hente ned og intet at oprette.</p>
+    <div class="hero-cta" style="justify-content:center;">
+      <a href="/spil/runeborg/" class="btn btn-primary btn-lg">Spil Runeborg</a>
+      <a href="/regnehelten" class="btn btn-lg">Se også Regnehelten</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="assets/script.js?v=3" defer></script>
+</body>
+</html>

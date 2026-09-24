@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spil Runeborg — Learnification</title>
+<meta name="description" content="Runeborg er et gratis dansk 8-bit fantasyspil for 11-15-årige. Opklar mysteriet om den grønne brønd med læsning, kildekritik, undersøgelser, data og proportioner.">
+<meta name="theme-color" content="#140f1c">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spil Runeborg">
+<meta property="og:description" content="Et 8-bit fantasyspil, hvor du opklarer mysteriet om den grønne brønd med beviser i stedet for rygter.">
+<meta property="og:url" content="https://learnification.dk/spil/runeborg/">
+<link rel="canonical" href="https://learnification.dk/spil/runeborg/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Pixelify+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="runeborg.css?v=1">
+</head>
+<body>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="screen" width="320" height="180" aria-label="Runeborg — spilverdenen"></canvas>
+
+    <!-- HUD: kvest øverst til venstre, ting øverst til højre -->
+    <div id="hud" hidden>
+      <div id="hud-quest"><span class="hud-label">Mission</span><span id="hud-quest-title"></span><span id="hud-quest-goal"></span></div>
+      <div id="hud-right">
+        <span class="hud-chip" title="Guld"><i class="ico ico-gold"></i><b id="hud-gold">0</b></span>
+        <span class="hud-chip" title="Runestykker fundet"><i class="ico ico-rune"></i><b id="hud-runes">0/8</b></span>
+        <button class="hud-btn" id="btn-book" type="button" title="Dagbogen (B)">Bog</button>
+        <button class="hud-btn" id="btn-menu" type="button" title="Menu (Esc)">Menu</button>
+      </div>
+    </div>
+
+    <div id="prompt" hidden></div>
+    <div id="toasts" aria-live="polite"></div>
+    <div id="fade"></div>
+
+    <!-- Alle vinduer (dialog, opgaver, bog, menu) lægger sig her -->
+    <div id="layer"></div>
+
+    <!-- Berøringsknapper — vises først, når nogen rører skærmen, og gemmer
+         sig igen efter 5 sekunder uden berøring -->
+    <div id="touch" hidden>
+      <div id="stick-zone" aria-hidden="true">
+        <div id="stick-base"><div id="stick-knob"></div></div>
+      </div>
+      <div id="tbtns">
+        <button id="t-act" type="button">E</button>
+        <button id="t-book" type="button">Bog</button>
+      </div>
+    </div>
+    <div id="vkbd" hidden aria-hidden="true"></div>
+  </div>
+</div>
+
+<noscript><p style="color:#fff;padding:24px;font-family:sans-serif">Runeborg kræver JavaScript.</p></noscript>
+
+<script src="js/art.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/world.js?v=1"></script>
+<script src="js/ui.js?v=1"></script>
+<script src="js/content.js?v=1"></script>
+<script src="js/game.js?v=1"></script>
+</body>
+</html>

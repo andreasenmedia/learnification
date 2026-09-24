@@ -12,3 +12,4 @@ desktop.ini
 
 # Tilstandsfil fra FTP-uploaden, hvis den nogensinde bliver hentet ned
 .ftp-deploy-sync-state.json
+.chrome-foto/

@@ -19,6 +19,54 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `resultat.php` | — | Tager imod resultater fra testomgangene |
 | `.htaccess` | — | Serveropsætning. **Læs den, før du retter i strukturen** |
 | `spil/regnehelten/` | — | Spilpakken fra pygbag. **Overskrives ved hver bygning** |
+| `runeborg.html` | `/runeborg` | Om Runeborg: historien, PISA-grundlaget, missionerne |
+| `spil/runeborg/` | `/spil/runeborg/` | Selve Runeborg — skrevet direkte her, ingen bygning |
+
+## Runeborg
+
+8-bit fantasyspil for 5.-9. klasse, skrevet i ren JavaScript uden
+biblioteker og uden bygning: filerne i `spil/runeborg/` **er** spillet.
+Retter man i dem, er det bare at uploade. Tæl `?v=` op i
+`spil/runeborg/index.html`, når en `.js`- eller `.css`-fil er lavet om.
+
+Indholdet er valgt ud fra de områder, hvor danske elever klarede sig
+dårligst i PISA 2025 (offentliggjort 8. september 2026): læsning (finde
+information, fakta/holdning, kildekritik), naturfag (planlægge undersøgelser
+og især fortolke data og evidens) og hverdagsmatematik (forhold, procent,
+målestok). Computationel problemløsning er udeladt — der lå danske elever
+over OECD-gennemsnittet. Kilderne står nederst i PISA-afsnittet på
+`/runeborg`.
+
+| Fil | Hvad |
+|---|---|
+| `js/content.js` | **Alt indhold**: personer, missioner, opgaver, spor, evner, runestykker. Her retter man tekster og opgaver |
+| `js/world.js` | Kortene, bygget med små hjælpefunktioner (hus, gade, å) |
+| `js/art.js` | Al grafik, tegnet i kode — ingen billedfiler |
+| `js/game.js` | Motoren: bevægelse, samtaler, døre, gemning, lys og stemning, joystick |
+| `js/ui.js` | Dialog, opgavetyper, dagbogen, menu, skærmtastatur, grafer |
+| `js/audio.js` | Lyd og musik, lavet med WebAudio i browseren |
+
+**Missionerne bygger på hinanden.** Hver mission giver en evne og spor i
+dagbogen, og senere missioner bruger dem — fx er de spor, man fremlægger for
+borgmesteren, præcis dem, der står i spillerens dagbog. Tilføjer man en
+mission, skal den have `requires` og gerne `uses` (vises i dagbogen).
+
+**Spillet sender ingenting.** Det gemmer kun i browserens `localStorage`
+(`runeborg-v1` og `runeborg-indstillinger`). Der er ingen tilmeldingsport
+som på Regnehelten, og intet `resultat.php`-kald. Skal det ændres, skal
+teksten om privatliv på `/runeborg` rettes samtidig.
+
+**Berøringsskærme:** joystick, E-knap og skærmtastatur (QWERTY med æøå til
+navnet, taltastatur til regneopgaver) dukker op ved første berøring og
+gemmer sig efter 5 sekunders stilhed.
+
+**Test fra konsollen:** `RB.debug.tp('by', 24, 20)` teleporterer,
+`RB.debug.S` er hele tilstanden.
+
+**Nye skærmbilleder til siden:** `python tools/runeborg-billeder.py`
+starter den lokale server, åbner spillet i en usynlig Chrome med
+`#foto=<scene>` og gemmer `assets/billeder/runeborg-*.png`. Fototilstanden
+gemmer intet.
 
 `assets/billeder/*.png` er rigtige skærmbilleder fra spillet, lavet af
 `tools/screenshots.py` i spillets eget projekt.
