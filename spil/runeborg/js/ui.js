@@ -382,9 +382,10 @@
         toggle('Musik', function () { return RB.audio.musicOn; }, function (v) { RB.audio.setMusic(v); });
         toggle('Lydeffekter', function () { return RB.audio.sfxOn; }, function (v) { RB.audio.setSfx(v); });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
+        if (RB.canFullscreen) toggle('Fuld skærm', function () { return RB.isFullscreen(); }, function () { RB.toggleFullscreen(); });
         var restart = el('button', 'btn', 'Start forfra'); restart.type = 'button'; m.appendChild(restart);
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/runeborg'; home.style.textDecoration = 'none'; m.appendChild(home);
-        m.appendChild(el('div', 'keys', '<span class="key">&#8592;&#8593;&#8594;&#8595;</span><span>Gå (eller WASD)</span><span class="key">E</span><span>Tal, undersøg, gå videre</span><span class="key">B</span><span>Dagbogen</span><span class="key">M</span><span>Musik til/fra</span><span class="key">Esc</span><span>Denne menu</span>'));
+        m.appendChild(el('div', 'keys', '<span class="key">&#8592;&#8593;&#8594;&#8595;</span><span>Gå (eller WASD)</span><span class="key">E</span><span>Tal, undersøg, gå videre</span><span class="key">B</span><span>Dagbogen</span><span class="key">F</span><span>Fuld skærm</span><span class="key">M</span><span>Musik til/fra</span><span class="key">Esc</span><span>Denne menu</span>'));
         function done() { pop(bg); resolve(); }
         first.addEventListener('click', done);
         restart.addEventListener('click', function () {

@@ -34,7 +34,9 @@
     return { v: 1, name: name, cls: cls, map: 'laug', x: 6, y: 5, dir: 'up', q: { q0: 'active' }, flags: {}, clues: [], skills: [], runes: [], gold: 0, solved: {}, stats: {}, persist: 0, seen: {}, talks: 0 };
   }
   var FOTO = (location.hash.match(/foto=(\w+)/) || [])[1];   // tools/runeborg-billeder.py tager skærmbilleder sådan
-  function save() { if (!S || FOTO) return; try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) { /* privat vindue */ } }
+  // Gem først, når et rigtigt spil er i gang — titelskærmens baggrundsby må
+  // aldrig overskrive det, man har gemt.
+  function save() { if (!S || FOTO || !started) return; try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) { /* privat vindue */ } }
   function load() { try { var s = JSON.parse(localStorage.getItem(SAVE)); return s && s.v === 1 ? s : null; } catch (e) { return null; } }
   RB.saveSettings = function () {
     try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, big: document.body.classList.contains('big') })); } catch (e) { }
@@ -148,11 +150,13 @@
     if (busy) return;
     busy = true;
     try { await fn(); } catch (e) { console.error(e); }
-    busy = false; hud(); save();
+    busy = false; lastClose = performance.now(); hud(); save();
   }
 
+  var lastClose = 0;
   function interact() {
     if (busy || UI.isOpen() || player.moving) return;
+    if (performance.now() - lastClose < 300) return;   // lige kommet ud af en samtale
     var f = facing(); if (!f) return;
     if (f.ent) {
       var e = f.ent;
@@ -464,10 +468,14 @@
     var tag = document.activeElement && document.activeElement.tagName;
     if (tag === 'INPUT') return;
     if (KEYS[e.key]) { if (!UI.isOpen()) { e.preventDefault(); press(KEYS[e.key]); } return; }
-    if (UI.isOpen() || busy) return;
+    // Et tryk, der lige har lukket en dialog, må ikke også starte en ny samtale.
+    // (Dialogen lukker, historien bliver færdig, og så når den samme tast
+    // hertil — uden det her tjek starter samtalen forfra i det uendelige.)
+    if (e.defaultPrevented || e.repeat || UI.isOpen() || busy) return;
     if (e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); interact(); }
     else if (e.key === 'b' || e.key === 'B' || e.key === 'Tab') { e.preventDefault(); openBook(); }
     else if (e.key === 'Escape') { e.preventDefault(); openMenu(); }
+    else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); RB.toggleFullscreen(); }
     else if (e.key === 'm' || e.key === 'M') { RB.audio.setMusic(!RB.audio.musicOn); RB.saveSettings(); UI.toast('Musik ' + (RB.audio.musicOn ? 'til' : 'fra')); }
   });
   document.addEventListener('keyup', function (e) { if (KEYS[e.key]) release(KEYS[e.key]); });
@@ -475,6 +483,23 @@
   document.addEventListener('visibilitychange', function () { heldOrder = []; });
   function openBook() { if (busy || UI.isOpen()) return; heldOrder = []; run(function () { return UI.book(); }); }
   function openMenu() { if (busy || UI.isOpen()) return; heldOrder = []; run(function () { return UI.menu(); }); }
+  // Fuld skærm. Knappen skjules, hvor browseren ikke kan (fx iPhone-Safari).
+  var root = document.documentElement;
+  var canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+  function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  RB.toggleFullscreen = function () {
+    if (!canFull) return;
+    if (isFull()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    var p = (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+    if (p && p.catch) p.catch(function () { });
+  };
+  RB.isFullscreen = isFull; RB.canFullscreen = canFull;
+  var fullBtn = document.getElementById('btn-full');
+  if (!canFull) fullBtn.hidden = true;
+  fullBtn.addEventListener('click', function () { RB.toggleFullscreen(); fullBtn.blur(); });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+    document.addEventListener(ev, function () { fullBtn.title = isFull() ? 'Forlad fuld skærm (F)' : 'Fuld skærm (F)'; setTimeout(resize, 50); });
+  });
   document.getElementById('btn-book').addEventListener('click', openBook);
   document.getElementById('btn-menu').addEventListener('click', openMenu);
 
