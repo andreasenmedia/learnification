@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log ind — Learnification</title>
+<meta name="description" content="Log ind på Learnification som elev med klassekoden, eller som lærer eller forælder.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#faf7f0">
+<link rel="canonical" href="https://learnification.dk/login">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=1">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/runeborg">Runeborg</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login" aria-current="page">Log ind</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/runeborg">Runeborg</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+    <div class="smal">
+
+      <!-- Allerede logget ind -->
+      <div class="panel guld" id="inde" hidden>
+        <div class="hej"><span class="ikon" id="inde-ikon" aria-hidden="true"></span><h2 id="inde-titel"></h2></div>
+        <div id="inde-elev" hidden>
+          <p>Hvad vil du spille?</p>
+          <div class="spilvalg">
+            <a href="/spil/"><img src="/assets/billeder/verden.png" alt=""><span>Regnehelten</span></a>
+            <a href="/spil/runeborg/"><img src="/assets/billeder/runeborg-by.png" alt=""><span>Runeborg</span></a>
+          </div>
+        </div>
+        <div id="inde-voksen" hidden>
+          <p class="knapper"><a class="btn btn-primary" id="inde-konto" href="/konto">Gå til min konto</a></p>
+        </div>
+        <p class="lille" style="margin:18px 0 0;">Er det ikke dig? <button type="button" class="link-knap" id="log-ud">Log ud</button></p>
+      </div>
+
+      <div id="ude" hidden>
+        <p class="eyebrow midt">Learnification er til test</p>
+        <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Log ind</h1>
+
+        <div class="faner" role="tablist" aria-label="Hvem logger ind?">
+          <button type="button" role="tab" id="fane-elev" aria-controls="elev" aria-selected="true">Jeg er elev</button>
+          <button type="button" role="tab" id="fane-voksen" aria-controls="voksen" aria-selected="false">Jeg er voksen</button>
+        </div>
+
+        <!-- Eleven: kode, og så sit navn -->
+        <div class="panel" id="elev" role="tabpanel" aria-labelledby="fane-elev">
+          <form id="kode-form" novalidate>
+            <p class="besked" id="kode-besked"></p>
+            <div class="felt kode-felt">
+              <label for="kode">Skriv jeres kode</label>
+              <input id="kode" name="kode" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                     maxlength="20" placeholder="UGLE-472" required>
+              <p class="hj">Koden står på det kort, du har fået af din lærer eller en voksen.</p>
+            </div>
+            <button class="btn btn-primary btn-lg btn-fuld" type="submit">Videre</button>
+          </form>
+
+          <div id="navne-trin" hidden>
+            <p class="besked" id="navne-besked"></p>
+            <h2 id="gruppe-navn" style="margin-bottom:.2em;"></h2>
+            <p>Tryk på dit navn.</p>
+            <div class="navne" id="navne"></div>
+            <button type="button" class="link-knap" id="anden-kode">Det er ikke min klasse</button>
+          </div>
+        </div>
+
+        <!-- Den voksne: mail og kodeord -->
+        <div class="panel" id="voksen" role="tabpanel" aria-labelledby="fane-voksen" hidden>
+          <form id="login-form" novalidate>
+            <p class="besked" id="login-besked"></p>
+            <div class="felt">
+              <label for="email">Mailadresse</label>
+              <input id="email" name="email" type="email" autocomplete="username" required>
+            </div>
+            <div class="felt">
+              <label for="kodeord">Kodeord</label>
+              <input id="kodeord" name="kodeord" type="password" autocomplete="current-password" required>
+            </div>
+            <button class="btn btn-primary btn-fuld" type="submit">Log ind</button>
+            <p class="lille" style="margin:16px 0 0;"><button type="button" class="link-knap" id="vis-glemt">Glemt kodeord?</button></p>
+          </form>
+
+          <form id="glemt-form" novalidate hidden>
+            <h2>Glemt kodeord</h2>
+            <p>Skriv den mailadresse, kontoen er oprettet med, så sender vi et link, hvor du kan vælge et nyt.</p>
+            <p class="besked" id="glemt-besked"></p>
+            <div class="felt">
+              <label for="glemt-email">Mailadresse</label>
+              <input id="glemt-email" type="email" autocomplete="email" required>
+            </div>
+            <div class="knapper">
+              <button class="btn btn-primary" type="submit">Send link</button>
+              <button type="button" class="link-knap" id="skjul-glemt">Tilbage</button>
+            </div>
+          </form>
+
+          <form id="nulstil-form" novalidate hidden>
+            <h2>Vælg et nyt kodeord</h2>
+            <p class="besked" id="nulstil-besked"></p>
+            <div class="felt">
+              <label for="nyt-kodeord">Nyt kodeord <span>— mindst 8 tegn</span></label>
+              <input id="nyt-kodeord" type="password" autocomplete="new-password" minlength="8" required>
+            </div>
+            <button class="btn btn-primary btn-fuld" type="submit">Gem kodeord</button>
+          </form>
+
+          <hr style="border:0;border-top:2px solid var(--paper-edge);margin:24px 0 18px;">
+          <p style="margin:0;"><strong>Har I ikke en konto?</strong> Skoler og forældre kan oprette en testkonto gratis.</p>
+          <p style="margin:12px 0 0;"><a class="btn btn-sm" href="/opret">Opret testkonto</a></p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="/assets/konto.js?v=1"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var til = LF.til('');
+
+  function visFane(hvilken) {
+    var elev = hvilken === 'elev';
+    $('fane-elev').setAttribute('aria-selected', elev);
+    $('fane-voksen').setAttribute('aria-selected', !elev);
+    $('elev').hidden = !elev;
+    $('voksen').hidden = elev;
+    (elev ? $('kode') : $('email')).focus();
+  }
+  $('fane-elev').addEventListener('click', function () { visFane('elev'); });
+  $('fane-voksen').addEventListener('click', function () { visFane('voksen'); });
+
+  function visInde(d) {
+    $('ude').hidden = true;
+    $('inde').hidden = false;
+    if (d.hvem === 'elev') {
+      $('inde-ikon').textContent = d.elev.ikon;
+      $('inde-titel').textContent = 'Hej ' + d.elev.kaldenavn + '!';
+      $('inde-elev').hidden = false;
+    } else {
+      $('inde-ikon').textContent = '👋';
+      $('inde-titel').textContent = 'Du er logget ind som ' + (d.konto.kontakt || d.konto.navn);
+      $('inde-voksen').hidden = false;
+      if (d.konto.type === 'admin') { $('inde-konto').href = '/admin'; $('inde-konto').textContent = 'Gå til overblikket'; }
+    }
+  }
+
+  function videre(standard) {
+    if (til) { location.replace(til); return true; }
+    if (standard) { location.replace(standard); return true; }
+    return false;
+  }
+
+  // --- eleven ---------------------------------------------------------------
+  var kode = '';
+
+  $('kode-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button');
+    var v = $('kode').value.trim();
+    if (!v) { LF.besked($('kode-besked'), 'Skriv koden først.', 'fejl'); return; }
+    LF.travl(knap, true);
+    LF.send('elev', 'kode', { kode: v }).then(function (d) {
+      kode = d.kode;
+      LF.besked($('kode-besked'), '');
+      $('gruppe-navn').textContent = d.gruppe;
+      var html = '';
+      d.elever.forEach(function (el) {
+        html += '<button type="button" class="navn-knap" data-id="' + el.id + '"><span class="ikon" aria-hidden="true">'
+          + LF.esc(el.ikon) + '</span>' + LF.esc(el.kaldenavn) + '</button>';
+      });
+      $('navne').innerHTML = html;
+      $('kode-form').hidden = true;
+      $('navne-trin').hidden = false;
+      var f = $('navne').querySelector('button'); if (f) f.focus();
+    }).catch(function (err) {
+      LF.besked($('kode-besked'), err.message, 'fejl');
+    }).then(function () { LF.travl(knap, false); });
+  });
+
+  $('navne').addEventListener('click', function (e) {
+    var b = e.target.closest('.navn-knap');
+    if (!b) return;
+    b.disabled = true;
+    LF.send('elev', 'login', { kode: kode, elev_id: +b.dataset.id }).then(function () {
+      if (!videre('')) return LF.hent('konto', 'mig').then(visInde);
+    }).catch(function (err) {
+      b.disabled = false;
+      LF.besked($('navne-besked'), err.message, 'fejl');
+    });
+  });
+
+  $('anden-kode').addEventListener('click', function () {
+    $('navne-trin').hidden = true;
+    $('kode-form').hidden = false;
+    $('kode').select();
+  });
+
+  // --- den voksne -----------------------------------------------------------
+  $('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button[type=submit]');
+    LF.travl(knap, true);
+    LF.send('konto', 'login', { email: $('email').value.trim(), kodeord: $('kodeord').value })
+      .then(function (d) { videre(d.type === 'admin' ? '/admin' : '/konto'); })
+      .catch(function (err) { LF.besked($('login-besked'), err.message, 'fejl'); LF.travl(knap, false); });
+  });
+
+  $('vis-glemt').addEventListener('click', function () {
+    $('login-form').hidden = true; $('glemt-form').hidden = false;
+    $('glemt-email').value = $('email').value; $('glemt-email').focus();
+  });
+  $('skjul-glemt').addEventListener('click', function () {
+    $('glemt-form').hidden = true; $('login-form').hidden = false; $('email').focus();
+  });
+  $('glemt-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button[type=submit]');
+    LF.travl(knap, true);
+    LF.send('konto', 'glemt', { email: $('glemt-email').value.trim() })
+      .then(function (d) { LF.besked($('glemt-besked'), d.besked, 'ok'); })
+      .catch(function (err) { LF.besked($('glemt-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
+  });
+
+  var token = (location.hash.match(/nulstil=([0-9a-f]+)/) || [])[1];
+  $('nulstil-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button[type=submit]');
+    LF.travl(knap, true);
+    LF.send('konto', 'nulstil', { token: token, kodeord: $('nyt-kodeord').value })
+      .then(function () { history.replaceState(null, '', location.pathname); location.replace('/konto'); })
+      .catch(function (err) { LF.besked($('nulstil-besked'), err.message, 'fejl'); LF.travl(knap, false); });
+  });
+
+  $('log-ud').addEventListener('click', function () {
+    LF.send('konto', 'logud').then(function () { location.reload(); });
+  });
+
+  // --- start ----------------------------------------------------------------
+  if (token) {
+    $('ude').hidden = false;
+    $('login-form').hidden = true;
+    $('nulstil-form').hidden = false;
+    visFane('voksen');
+    $('nyt-kodeord').focus();
+    return;
+  }
+
+  LF.hent('konto', 'mig').then(function (d) {
+    // Kom man hertil fra et spil og er logget ind, går det direkte tilbage
+    if (d.logget_ind && videre('')) return;
+    if (d.logget_ind) { visInde(d); return; }
+    $('ude').hidden = false;
+    visFane(/voksen/.test(location.hash) || /voksen/.test(location.search) ? 'voksen' : 'elev');
+  }).catch(function () {
+    $('ude').hidden = false;
+    visFane('elev');
+  });
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+</body>
+</html>

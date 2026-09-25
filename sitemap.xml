@@ -7,4 +7,6 @@
   <url><loc>https://learnification.dk/spil/runeborg/</loc><priority>0.9</priority></url>
   <url><loc>https://learnification.dk/for-voksne</loc><priority>0.7</priority></url>
   <url><loc>https://learnification.dk/om</loc><priority>0.5</priority></url>
+  <url><loc>https://learnification.dk/login</loc><priority>0.6</priority></url>
+  <url><loc>https://learnification.dk/opret</loc><priority>0.6</priority></url>
 </urlset>

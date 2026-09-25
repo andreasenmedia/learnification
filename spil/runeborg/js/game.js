@@ -4,7 +4,11 @@
 (function () {
   'use strict';
   var RB = window.RB, K, UI, T = 16, VW = 320, VH = 180, SCALE = 4;
-  var SAVE = 'runeborg-v1', SETTINGS = 'runeborg-indstillinger';
+  // Er man logget ind, har hvert barn sit eget eventyr — ellers ville en
+  // klasse, der deler computere, spille videre i hinandens. Id'et står i
+  // cookien lf_in (fx "elev.12"), som sættes sammen med login.
+  var SPILLER = (document.cookie.match(/(?:^|;\s*)lf_in=((?:elev|voksen)\.\d+)/) || [])[1];
+  var SAVE = 'runeborg-v1' + (SPILLER ? '-' + SPILLER : ''), SETTINGS = 'runeborg-indstillinger';
 
   var canvas = document.getElementById('screen');
   var ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false;

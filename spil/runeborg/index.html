@@ -59,12 +59,20 @@
 
 <noscript><p style="color:#fff;padding:24px;font-family:sans-serif">Runeborg kræver JavaScript.</p></noscript>
 
+<!-- Login foran spillet og måling af spilletid. KRAEV_LOGIN = false
+     lader alle spille igen, når testen er slut (se også /spil/). -->
+<script src="/assets/spilletid.js?v=1"></script>
+<script>
+var KRAEV_LOGIN = true;
+LFSpil.start({ spil: 'runeborg', kraevLogin: KRAEV_LOGIN,
+               bruger: function (d) { window.LF_SPILLER = d; } });
+</script>
 <script src="js/art.js?v=1"></script>
 <script src="js/audio.js?v=2"></script>
 <script src="js/world.js?v=1"></script>
 <script src="js/voice.js?v=1"></script>
-<script src="js/ui.js?v=3"></script>
+<script src="js/ui.js?v=4"></script>
 <script src="js/content.js?v=1"></script>
-<script src="js/game.js?v=3"></script>
+<script src="js/game.js?v=4"></script>
 </body>
 </html>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spil Regnehelten — Learnification</title>
-<meta name="description" content="Spil Regnehelten direkte i browseren. Gratis dansk matematikrollespil for 7-12-årige. Ingen installation, intet login.">
+<meta name="description" content="Spil Regnehelten direkte i browseren. Gratis dansk matematikrollespil for 7-12-årige. Ingen installation — log ind med jeres klassekode.">
 <meta name="theme-color" content="#1a1720">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Spil Regnehelten">
@@ -50,61 +50,12 @@
 @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
 @media (prefers-reduced-motion: reduce) { .dots::after { content: "..."; animation: none; } }
 
+.link-ud { background: none; border: 0; padding: 0; color: var(--gold); font: inherit; text-decoration: underline; cursor: pointer; }
+
 @media (max-width: 860px) { .split { grid-template-columns: 1fr !important; gap: 34px !important; } }
 </style>
 </head>
 <body>
-
-<div class="modal-slor" id="port" hidden>
-  <div class="modal" role="dialog" aria-modal="true"
-       aria-labelledby="port-titel" aria-describedby="port-tekst">
-    <p class="eyebrow">Til dig, der sidder med</p>
-    <h2 id="port-titel">Regnehelten er til test</h2>
-    <p id="port-tekst">Spillet er ikke udgivet endnu, og det er jer, der prøver det af.
-      Skriv dig op som voksen, så går spillet i gang med det samme — og bagefter sender
-      vi ét kort spørgeskema om, hvordan det gik. Det tager to minutter at svare på.</p>
-
-    <form class="signup-form" data-modal="ja" method="post" action="/tilmeld.php">
-      <input type="hidden" name="side" value="/spil/">
-      <div class="honey" aria-hidden="true">
-        <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
-      </div>
-
-      <div class="signup-felt">
-        <label for="port-navn">Dit navn</label>
-        <input id="port-navn" name="navn" type="text" autocomplete="name"
-               maxlength="80" placeholder="Mette Jensen" required>
-      </div>
-      <div class="signup-felt">
-        <label for="port-email">Din mailadresse</label>
-        <input id="port-email" name="email" type="email" autocomplete="email"
-               maxlength="190" placeholder="din@mail.dk" required>
-      </div>
-      <div class="signup-felt">
-        <label for="port-mobil">Mobilnummer <span>— valgfrit</span></label>
-        <input id="port-mobil" name="mobil" type="tel" autocomplete="tel"
-               maxlength="25" placeholder="12 34 56 78">
-      </div>
-
-      <label class="signup-consent">
-        <input type="checkbox" name="samtykke" value="ja" required>
-        <span>Ja tak, I må kontakte mig om testen af Regnehelten.</span>
-      </label>
-      <p class="signup-note" role="status" aria-live="polite"></p>
-
-      <button class="btn btn-primary btn-lg" type="submit">Start spillet</button>
-
-      <p class="signup-privacy">Vi gemmer navn, mailadresse og mobilnummer og bruger det
-        kun til denne test af Regnehelten. Vi giver det ikke videre, og vi sender ikke
-        reklamer. Mens testen kører, sender spillet også et resultat hjem — hvor mange
-        opgaver der blev løst, og hvordan det gik; <a href="/for-voksne">her står præcis
-        hvad</a>. Du kan når som helst få det hele slettet ved at skrive til
-        <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
-    </form>
-
-    <p class="modal-ud"><a href="/regnehelten">Jeg vil hellere læse om spillet først</a></p>
-  </div>
-</div>
 
 <nav id="nav">
   <div class="wrap">
@@ -117,6 +68,7 @@
       <a href="/runeborg">Runeborg</a>
       <a href="/for-voksne">For voksne</a>
       <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
     </div>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -129,6 +81,7 @@
   <a href="/runeborg">Runeborg</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
 </div>
 
 <main>
@@ -172,7 +125,7 @@
       </button>
       <button class="btn btn-sm" id="restart" type="button">Start forfra</button>
       <span class="spacer"></span>
-      <span>Spillet fylder ca. 1 MB og hentes kun én gang.</span>
+      <span id="spiller" hidden></span>
     </div>
   </div>
 </div>
@@ -231,7 +184,7 @@
     </div>
     <div>
       <h4>Learnification</h4>
-      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
     </div>
   </div>
   <div class="wrap" style="margin-top:34px;">
@@ -239,14 +192,33 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=3" defer></script>
+<script src="/assets/script.js?v=4" defer></script>
+<script src="/assets/spilletid.js?v=1"></script>
 <script>
-/* Porten foran spillet.
+/* Login foran spillet.
 
-   Spillet er til test, og vi vil vide, hvem der tester det. Derfor skal en
-   voksen skrive sig op, foer der kan spilles. Naar testperioden er slut,
-   saettes den her til false - saa er porten vaek, og resten virker som foer. */
-var KRAEV_TILMELDING = true;
+   Mens spillene er til test, skal man være logget ind for at spille —
+   eleven med sin klassekode, eller en voksen med sin konto. Er ingen
+   logget ind, bliver man sendt til /login og kommer tilbage hertil bagefter.
+   Når testperioden er slut, sættes den her til false: så kan alle spille,
+   og spilletiden bliver stadig talt for dem, der er logget ind. */
+var KRAEV_LOGIN = true;
+
+LFSpil.start({
+  spil: 'regnehelten',
+  kraevLogin: KRAEV_LOGIN,
+  aktiv: false,                        // tiden tæller først, når der er trykket Spil
+  bruger: function (d) {
+    var el = document.getElementById('spiller');
+    var navn = d.hvem === 'elev' ? d.elev.ikon + ' ' + d.elev.kaldenavn : (d.konto.kontakt || d.konto.navn);
+    el.textContent = 'Du spiller som ' + navn + ' · ';
+    var ud = document.createElement('button');
+    ud.type = 'button'; ud.className = 'link-ud'; ud.textContent = 'Log ud';
+    ud.addEventListener('click', function () { LFSpil.logUd('/login'); });
+    el.appendChild(ud);
+    el.hidden = false;
+  }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
   var frame   = document.getElementById('frame');
@@ -255,11 +227,17 @@ document.addEventListener('DOMContentLoaded', function () {
   var loading = document.getElementById('loading');
   var started = false;
 
+  // Tastatur og klik havner inde i spillets ramme, ikke på siden her —
+  // så rammen skal også lyttes på, hver gang den bliver (gen)indlæst.
+  LFSpil.lyt(game.contentWindow);
+  game.addEventListener('load', function () { LFSpil.lyt(game.contentWindow); });
+
   function boot() {
     if (started) return;
     started = true;
     poster.hidden = true;
     loading.hidden = false;
+    LFSpil.aktiv(true);
     watch();
   }
 
@@ -286,60 +264,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var start = document.getElementById('start');
   start.addEventListener('click', boot);
-
-  // --- porten ------------------------------------------------------------
-  var port = document.getElementById('port');
-
-  function aabnPort() {
-    port.hidden = false;
-    document.body.classList.add('laast');
-    start.disabled = true;
-    // Spillet henter sig selv i baggrunden, mens der bliver skrevet - og
-    // pygbag saetter fokus i sin egen ramme, naar den er klar. Den skal
-    // holde fingrene fra tastaturet, saa laenge porten staar aaben.
-    game.inert = true;
-    game.setAttribute('tabindex', '-1');
-    saetFokus();
-    [250, 900, 2000, 4000].forEach(function (ms) { setTimeout(saetFokus, ms); });
-  }
-
-  // Foerste tomme felt - saa lander man ikke i navnefeltet igen, hvis man
-  // allerede er i gang laengere nede.
-  function saetFokus() {
-    if (port.hidden) return;
-    if (port.contains(document.activeElement)) return;
-    var felter = port.querySelectorAll('input:not([tabindex="-1"]):not([type="checkbox"])');
-    for (var i = 0; i < felter.length; i++) {
-      if (!felter[i].value) { felter[i].focus(); return; }
-    }
-    if (felter.length) felter[0].focus();
-  }
-
-  function lukPort() {
-    port.hidden = true;
-    document.body.classList.remove('laast');
-    start.disabled = false;
-    game.inert = false;
-    game.removeAttribute('tabindex');
-    // saa er der ét tryk tilbage, og det er paa den store knap
-    start.focus();
-  }
-
-  // Tabulator skal blive inde i porten, saa laenge den staar aaben
-  port.addEventListener('keydown', function (e) {
-    if (e.key !== 'Tab') return;
-    var kan = port.querySelectorAll('a[href], button:not([disabled]), input:not([tabindex="-1"])');
-    if (!kan.length) return;
-    var f = kan[0], s = kan[kan.length - 1];
-    if (e.shiftKey && document.activeElement === f) { e.preventDefault(); s.focus(); }
-    else if (!e.shiftKey && document.activeElement === s) { e.preventDefault(); f.focus(); }
-  });
-
-  port.addEventListener('mousedown', function (e) {
-    if (e.target === port) saetFokus();       // klik ved siden af kortet
-  });
-
-  document.addEventListener('lf:tilmeldt', lukPort);
 
   // --- resultatet, når fanen bliver lukket -------------------------------
   //
@@ -372,10 +296,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (document.visibilityState === 'hidden') sendResultat();
   });
 
-  if (KRAEV_TILMELDING && !erTilmeldt()) {
-    aabnPort();
-  }
-
   document.getElementById('fullscreen').addEventListener('click', function () {
     if (document.fullscreenElement) { document.exitFullscreen(); return; }
     var req = frame.requestFullscreen || frame.webkitRequestFullscreen;
@@ -387,6 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
     poster.hidden = true;
     started = true;
     loading.hidden = false;
+    LFSpil.aktiv(true);
     game.src = game.src;
     watch();
   });

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opret testkonto — Learnification</title>
+<meta name="description" content="Opret en gratis testkonto til din skole eller familie, og sæt dine elever eller børn på.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#faf7f0">
+<link rel="canonical" href="https://learnification.dk/opret">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=1">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/runeborg">Runeborg</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login" aria-current="page">Log ind</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/runeborg">Runeborg</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+    <div class="smal">
+      <p class="eyebrow midt">Gratis, mens spillene er til test</p>
+      <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Opret en testkonto</h1>
+      <p class="lead midt" style="font-size:1.05rem;">Kontoen er til dig som voksen. Bagefter sætter du dine elever eller børn på med et kaldenavn — de skal hverken have mail eller kodeord.</p>
+
+      <form class="panel" id="opret-form" novalidate style="margin-top:26px;">
+        <p class="besked" id="besked"></p>
+
+        <div class="valg" role="radiogroup" aria-label="Hvem er I?">
+          <label><input type="radio" name="type" value="skole" checked>
+            <span><strong>Skole</strong><small>Lærere, der vil bruge spillene i en eller flere klasser</small></span></label>
+          <label><input type="radio" name="type" value="foraelder">
+            <span><strong>Familie</strong><small>Forældre, der vil lade deres egne børn spille</small></span></label>
+        </div>
+
+        <div class="honey" aria-hidden="true">
+          <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="felt">
+          <label for="navn" id="navn-label">Skolens navn</label>
+          <input id="navn" name="navn" maxlength="120" autocomplete="organization" required>
+        </div>
+        <div class="felt-raekke">
+          <div class="felt" id="kontakt-felt">
+            <label for="kontakt">Dit navn</label>
+            <input id="kontakt" name="kontakt" maxlength="120" autocomplete="name">
+          </div>
+          <div class="felt">
+            <label for="bynavn">By <span>— valgfrit</span></label>
+            <input id="bynavn" name="bynavn" maxlength="80" autocomplete="address-level2">
+          </div>
+        </div>
+        <div class="felt">
+          <label for="email">Mailadresse</label>
+          <input id="email" name="email" type="email" maxlength="190" autocomplete="email" required>
+          <p class="hj" id="email-hj">Brug gerne din arbejdsmail.</p>
+        </div>
+        <div class="felt">
+          <label for="kodeord">Vælg et kodeord <span>— mindst 8 tegn</span></label>
+          <input id="kodeord" name="kodeord" type="password" minlength="8" autocomplete="new-password" required>
+        </div>
+
+        <label class="samtykke">
+          <input type="checkbox" name="samtykke" id="samtykke" required>
+          <span>Jeg har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig og børnene, og at vi må skrive til mig om testen.</span>
+        </label>
+
+        <button class="btn btn-primary btn-lg btn-fuld" type="submit">Opret konto</button>
+        <p class="lille midt" style="margin:16px 0 0;">Har du allerede en konto? <a href="/login#voksen">Log ind</a></p>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/konto.js?v=1"></script>
+<script>
+(function () {
+  var f = document.getElementById('opret-form');
+  function type() { return f.querySelector('input[name=type]:checked').value; }
+  function tilpas() {
+    var skole = type() === 'skole';
+    document.getElementById('navn-label').textContent = skole ? 'Skolens navn' : 'Dit navn';
+    document.getElementById('navn').autocomplete = skole ? 'organization' : 'name';
+    document.getElementById('kontakt-felt').hidden = !skole;
+    document.getElementById('email-hj').textContent = skole ? 'Brug gerne din arbejdsmail.' : 'Vi skriver kun om testen.';
+  }
+  f.querySelectorAll('input[name=type]').forEach(function (r) { r.addEventListener('change', tilpas); });
+  var q = new URLSearchParams(location.search).get('type');
+  if (q === 'familie') { f.querySelector('input[value=foraelder]').checked = true; }
+  tilpas();
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = f.querySelector('button[type=submit]');
+    var besked = document.getElementById('besked');
+    var d = {
+      type: type(),
+      navn: f.navn.value.trim(), kontakt: f.kontakt.value.trim(), bynavn: f.bynavn.value.trim(),
+      email: f.email.value.trim(), kodeord: f.kodeord.value,
+      samtykke: f.samtykke.checked, hjemmeside: f.hjemmeside.value
+    };
+    LF.travl(knap, true);
+    LF.send('konto', 'opret', d).then(function () {
+      location.replace('/konto?ny=1');
+    }).catch(function (err) {
+      LF.besked(besked, err.message, 'fejl');
+      besked.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      LF.travl(knap, false);
+    });
+  });
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+</body>
+</html>

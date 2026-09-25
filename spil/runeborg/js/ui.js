@@ -397,6 +397,12 @@
         if (RB.canFullscreen) toggle('Fuld skærm', function () { return RB.isFullscreen(); }, function () { RB.toggleFullscreen(); });
         var restart = el('button', 'btn', 'Start forfra'); restart.type = 'button'; m.appendChild(restart);
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/runeborg'; home.style.textDecoration = 'none'; m.appendChild(home);
+        // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
+        if (window.LF_SPILLER && window.LFSpil) {
+          var hvem = LF_SPILLER.hvem === 'elev' ? LF_SPILLER.elev.kaldenavn : 'voksen';
+          var ud = el('button', 'btn', 'Log ud (' + hvem.replace(/[<>&]/g, '') + ')'); ud.type = 'button'; m.appendChild(ud);
+          ud.addEventListener('click', function () { LFSpil.logUd('/login'); });   // pagehide gemmer eventyret
+        }
         m.appendChild(el('div', 'keys', '<span class="key">&#8592;&#8593;&#8594;&#8595;</span><span>Gå (eller WASD)</span><span class="key">E</span><span>Tal, undersøg, gå videre</span><span class="key">B</span><span>Dagbogen</span><span class="key">F</span><span>Fuld skærm</span><span class="key">M</span><span>Musik til/fra</span><span class="key">Esc</span><span>Denne menu</span>'));
         function done() { pop(bg); resolve(); }
         first.addEventListener('click', done);
@@ -422,7 +428,7 @@
           RB.audio.unlock(); pop(s); resolve('new');
         });
         c.appendChild(row);
-        c.appendChild(el('p', 'tiny', 'Spillet gemmer kun i din egen browser. Intet bliver sendt nogen steder hen. <a href="/runeborg">Om spillet</a>'));
+        c.appendChild(el('p', 'tiny', 'Eventyret gemmes i din egen browser. Mens spillet er til test, sendes kun, hvor længe du har spillet. <a href="/for-voksne#data">Hvad gemmes?</a>'));
         push(s); (row.querySelector('.primary') || nw).focus();
       });
     },

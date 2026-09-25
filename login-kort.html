@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login-kort — Learnification</title>
+<meta name="description" content="Login-kort til udskrift.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf7f0">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=1">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/runeborg">Runeborg</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/runeborg">Runeborg</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+    <div class="ingen-print" style="margin-bottom:24px;">
+      <a href="/konto" class="tilbage">&larr; Tilbage til kontoen</a>
+      <h1 style="font-size:clamp(1.8rem,4vw,2.4rem);" id="titel">Login-kort</h1>
+      <p>Ét kort til hvert barn. Klip dem ud, eller skriv bare koden på tavlen — navnet trykker de selv på.</p>
+      <p class="knapper"><button type="button" class="btn btn-primary" onclick="window.print()">Udskriv</button></p>
+    </div>
+    <p class="lille" id="besked"></p>
+    <div class="kort-ark" id="kort"></div>
+  </div>
+</main>
+
+<script src="/assets/konto.js?v=1"></script>
+<script>
+(function () {
+  var gid = +(new URLSearchParams(location.search).get('g') || 0);
+  LF.hent('klasse', 'oversigt').then(function (d) {
+    var g = d.grupper.filter(function (x) { return x.id === gid; })[0];
+    if (!g) { document.getElementById('besked').textContent = 'Den gruppe findes ikke på din konto.'; return; }
+    var navn = g.navn === 'Familien' && d.konto.type === 'foraelder' ? 'Børnene' : g.navn;
+    document.getElementById('titel').textContent = 'Login-kort · ' + navn;
+    if (!g.elever.length) { document.getElementById('besked').textContent = 'Der er ingen elever i gruppen endnu.'; return; }
+    document.getElementById('kort').innerHTML = g.elever.map(function (e) {
+      return '<div class="login-kort"><div class="top"><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>'
+        + '<span class="navn">' + LF.esc(e.kaldenavn) + '</span></div>'
+        + '<p class="trin">1. Gå ind på <strong>learnification.dk/login</strong></p>'
+        + '<p class="trin">2. Skriv koden: <span class="kode">' + LF.esc(g.kode) + '</span></p>'
+        + '<p class="trin" style="margin:0;">3. Tryk på dit navn og dit dyr</p></div>';
+    }).join('');
+  }).catch(function (err) {
+    if (err.status === 401) location.replace('/login?til=' + encodeURIComponent(location.pathname + location.search) + '#voksen');
+    else document.getElementById('besked').textContent = err.message;
+  });
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+</body>
+</html>

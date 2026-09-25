@@ -1,0 +1,17 @@
+# Filer, der starter med _, er fælles kode og skal ikke kunne kaldes udefra.
+# Begge skrivemåder står her med vilje: Apache 2.4 forstår den øverste,
+# ældre udgaver den nederste.
+<FilesMatch "^_">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Svarene her handler om, hvem der er logget ind — de må aldrig gemmes
+<IfModule mod_headers.c>
+  Header set Cache-Control "no-store"
+</IfModule>

@@ -21,6 +21,12 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `spil/regnehelten/` | — | Spilpakken fra pygbag. **Overskrives ved hver bygning** |
 | `runeborg.html` | `/runeborg` | Om Runeborg: historien, PISA-grundlaget, missionerne |
 | `spil/runeborg/` | `/spil/runeborg/` | Selve Runeborg — skrevet direkte her, ingen bygning |
+| `login.html` | `/login` | Log ind: elev med klassekode, voksen med mail og kodeord, glemt kodeord |
+| `opret.html` | `/opret` | Opret testkonto som skole eller familie |
+| `konto.html` | `/konto` | Den voksnes side: klasser, elever, koder og spilletid |
+| `login-kort.html` | `/login-kort?g=<id>` | Login-kort til udskrift, ét pr. elev |
+| `admin.html` | `/admin` | Overblikket over alle testbrugere (kun administrator) |
+| `api/` | — | PHP bag login-systemet. Se "Login og testkonti" |
 
 ## Runeborg
 
@@ -52,10 +58,10 @@ dagbogen, og senere missioner bruger dem — fx er de spor, man fremlægger for
 borgmesteren, præcis dem, der står i spillerens dagbog. Tilføjer man en
 mission, skal den have `requires` og gerne `uses` (vises i dagbogen).
 
-**Spillet sender ingenting.** Det gemmer kun i browserens `localStorage`
-(`runeborg-v1` og `runeborg-indstillinger`). Der er ingen tilmeldingsport
-som på Regnehelten, og intet `resultat.php`-kald. Skal det ændres, skal
-teksten om privatliv på `/runeborg` rettes samtidig.
+**Spillet sender kun spilletid** (se "Login og testkonti"). Eventyret
+gemmes i browserens `localStorage` (`runeborg-v1[-elev.<id>]` og
+`runeborg-indstillinger`), og der er intet `resultat.php`-kald. Skal det
+ændres, skal teksten om privatliv på `/runeborg` rettes samtidig.
 
 **Berøringsskærme:** joystick, E-knap og skærmtastatur (QWERTY med æøå til
 navnet, taltastatur til regneopgaver) dukker op ved første berøring og
@@ -106,7 +112,13 @@ og `components.css` i et mørkt tema. Det blev rullet tilbage igen, fordi det
 lyse udtryk klæder spillet bedre. Vil man se på det, ligger det i historikken
 under `Laeg designsystemet Learnification ned over hele siden`.
 
-## Porten foran spillet, og listen over testere
+## Den gamle tilmeldingsport (afløst af login)
+
+**Porten er fjernet fra `/spil/` og afløst af login-systemet nedenfor.**
+`tilmeld.php` og de gamle tilmeldinger i `tilmeldinger.csv` ligger der
+stadig, men ingen side sender til den længere. Resten af afsnittet
+beskriver, hvordan den virkede.
+
 
 Mens Regnehelten er til test, skal en voksen skrive **navn, mailadresse og
 eventuelt mobilnummer**, før spillet kan gå i gang. Porten er en dialog, der
@@ -154,6 +166,113 @@ Der er ikke andre steder, oplysningerne ligger.
 den voksne om, hvad det bruges til, og at spørgsmålet falder væk, når testen
 er slut. Laves opsamlingen om — en tredjepartstjeneste, flere felter, andre
 formål — skal den tekst rettes samtidig.
+
+## Login og testkonti
+
+Mens spillene er til test, skal man være logget ind for at spille. Det
+giver et overblik over, hvem der tester, og hvor meget de spiller.
+
+**Hvem logger ind hvordan**
+
+- **Den voksne** (lærer eller forælder) opretter en konto på `/opret` med
+  mail og kodeord og logger ind på `/login` under "Jeg er voksen".
+- **En skole** laver klasser (fx 4.B) og skriver elevernes fornavne. **En
+  familie** får én gruppe, "Familien", med det samme.
+- Hver klasse/familie får en **kode** som `UGLE-472`. **Barnet** går ind på
+  `/login`, skriver koden og trykker på sit navn og sit dyr. Ingen mail og
+  intet kodeord til børn. Små bogstaver, mellemrum og manglende bindestreg
+  er ligegyldige.
+- Nye konti kan bruges med det samme, står som **Ny** i overblikket og kan
+  godkendes eller spærres derfra. En spærret konto og alle dens elever bliver
+  logget ud med det samme.
+
+**Spilletid** bliver målt af `assets/spilletid.js` på begge spillersider. Et
+sekund tæller, når spillet er fremme på skærmen, spillet er i gang (på
+Regnehelten: efter der er trykket Spil), og nogen har rørt tastatur, mus
+eller skærm inden for to minutter. Tiden sendes til `api/spilletid.php` hvert
+halve minut og med `sendBeacon`, når fanen lukkes. Serveren lægger aldrig
+mere tid til, end der faktisk er gået siden sidste puls (højst 90 sek. ad
+gangen), og en pause på over en halv time starter en ny "omgang".
+
+**Sådan slukkes login-kravet**, når testen er slut: sæt
+`var KRAEV_LOGIN = true;` til `false` i både `spil/index.html` og
+`spil/runeborg/index.html`. Så kan alle spille, og tiden bliver stadig talt
+for dem, der er logget ind. Login-kravet er lavet i JavaScript og er ikke en
+lås — spilfilerne kan hentes direkte. Skal spillene en dag bag betaling, skal
+de leveres gennem PHP i stedet.
+
+**Runeborg gemmer hvert barns eventyr for sig.** Nøglen i `localStorage` er
+`runeborg-v1-elev.<id>`, når et barn er logget ind (id'et læses fra cookien
+`lf_in`), ellers `runeborg-v1` som før. Så spiller en klasse, der deler
+computere, ikke videre i hinandens eventyr. Menuen i Runeborg har "Log ud".
+
+### Første gang på Simply.com: opret administratoren
+
+1. Læg siden op som altid (push til `main`).
+2. Åbn `learnification.dk/admin`. Siden skriver en nøgle i
+   `opsaetningsnoegle.txt` i datamappen — `learnification-data/` ved siden af
+   `public_html`, eller `public_html/data/`, hvis PHP ikke må skrive der.
+   Siden fortæller hvilken.
+3. Hent nøglen med File Manager i kontrolpanelet, skriv den på siden sammen
+   med navn, mail og kodeord (mindst 10 tegn). Filen slettes, og opsætningen
+   lukker. Der kan kun oprettes én administrator på den måde.
+
+Administratorens egen spilletid tæller ikke med i overblikket.
+
+### Hvor data ligger
+
+Alt ligger i SQLite-filen `learnification.sqlite` i datamappen (samme mappe
+som `tilmeldinger.csv`). Den opretter sig selv. Ved siden af ligger
+`hemmelighed.txt` (bruges til at hashe IP-adresser i gætte-bremsen) —
+**slet ikke de to filer**, og tag gerne en kopi af databasen med File Manager
+en gang imellem.
+
+Har webhotellet ikke SQLite slået til (så siger `/admin` det), kan MySQL fra
+kontrolpanelet bruges i stedet: læg en `database.php` i datamappen — se
+kommentaren øverst i `api/_kerne.php`. Den fil må aldrig i repoet.
+
+Tabellerne står i `opret_tabeller()` i `api/_kerne.php`. Skal de ændres,
+tilføjes et nyt trin nederst i `$trin`, så eksisterende databaser bliver
+løftet op af sig selv.
+
+**Hvad der gemmes** (og står på `/for-voksne#data` — ret teksten der, hvis
+det ændres): den voksnes navn, skolens navn, by, mail og kodeordet som hash;
+børnenes kaldenavn, gruppe og spilletid pr. spil og dag. IP-adresser kun som
+HMAC-hash i højst en time til gætte-bremsen. Én login-cookie `lf_session`
+(tilfældig nøgle, kun dens SHA-256 står i databasen) og en harmløs
+`lf_in=elev.<id>`, som siderne bruger til at vide, at nogen er logget ind.
+
+**Sletning:** den voksne kan selv slette børn og hele kontoen under
+`/konto`. Slettes et barn, bliver dets spilletid stående på kontoen uden navn,
+så tallene i overblikket ikke hopper. Slettes kontoen, forsvinder alt.
+
+**Sikkerhed, kort:** kodeord med `password_hash`; alt, der ændrer noget,
+kræver headeren `X-LF: 1` (en fremmed side kan ikke sætte den); `api/_*.php`
+og `data/` er spærret; gæt på klassekoder bremses til 30 pr. kvarter pr.
+adresse, login til 8 pr. kvarter pr. mail. Glemt kodeord sender et link med
+`mail()` til den voksne, gyldigt i en time.
+
+### API
+
+| Fil | Handlinger |
+|---|---|
+| `api/konto.php` | `mig`, `opret`, `login`, `logud`, `glemt`, `nulstil`, `skift_kodeord`, `ret`, `slet_konto` |
+| `api/klasse.php` | `oversigt`, `ny_gruppe`, `ret_gruppe`, `slet_gruppe`, `ny_kode`, `nye_elever`, `ret_elev`, `slet_elev` |
+| `api/elev.php` | `kode`, `login` |
+| `api/spilletid.php` | `puls` |
+| `api/admin.php` | `status`, `opsaet`, `overblik`, `konto`, `saet_status`, `eksport` (CSV til Excel) |
+
+### Test lokalt med PHP
+
+Der er ingen PHP installeret på maskinen som standard. Med en portabel PHP
+(zip fra windows.php.net, `extension=pdo_sqlite` slået til i `php.ini`):
+
+```bash
+php -S 127.0.0.1:8792 tools/lokal-router.php
+```
+
+fra projektets rodmappe. Routeren opfører sig som `.htaccess` og lægger
+databasen i systemets midlertidige mappe, så testdata aldrig havner i repoet.
 
 ## Resultater fra testomgangene
 

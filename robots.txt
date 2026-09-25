@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /konto
+Disallow: /admin
+Disallow: /login-kort
 
 Sitemap: https://learnification.dk/sitemap.xml

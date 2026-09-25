@@ -22,7 +22,37 @@ document.addEventListener('DOMContentLoaded', function () {
   if (year) year.textContent = new Date().getFullYear();
 
   skrivOp();
+  loginIMenuen();
 });
+
+
+/* Er nogen logget ind, bliver "Log ind" i menuen til deres egen side.
+
+   Serveren bliver kun spurgt, hvis cookien lf_in er sat — den bliver sat
+   ved siden af selve login-cookien og siger bare "der er nogen". Så koster
+   det ingenting for alle dem, der ikke er logget ind. */
+function loginIMenuen() {
+  if (!/(?:^|;\s*)lf_in=(elev|voksen)/.test(document.cookie)) return;
+  fetch('/api/konto.php?handling=mig', { credentials: 'same-origin', cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.logget_ind) return;
+      var links = document.querySelectorAll('a.nav-login');
+      for (var i = 0; i < links.length; i++) {
+        if (d.hvem === 'elev') {
+          links[i].textContent = d.elev.ikon + ' ' + d.elev.kaldenavn;
+          links[i].href = '/login';
+        } else if (d.konto.type === 'admin') {
+          links[i].textContent = 'Overblik';
+          links[i].href = '/admin';
+        } else {
+          links[i].textContent = 'Min konto';
+          links[i].href = '/konto';
+        }
+      }
+    })
+    .catch(function () { /* så står der bare "Log ind" */ });
+}
 
 
 /* Tilmelding til testen.

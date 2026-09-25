@@ -13,3 +13,9 @@ desktop.ini
 # Tilstandsfil fra FTP-uploaden, hvis den nogensinde bliver hentet ned
 .ftp-deploy-sync-state.json
 .chrome-foto/
+
+# Login-databasen og dens hemmeligheder, hvis de nogensinde havner i
+# data/ lokalt. De hører kun hjemme på serveren.
+data/*.sqlite*
+data/*.txt
+data/database.php

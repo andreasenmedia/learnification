@@ -31,6 +31,7 @@
       <a href="/runeborg">Runeborg</a>
       <a href="/for-voksne" aria-current="page">For voksne</a>
       <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
     </div>
     <a href="/spil/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
@@ -44,6 +45,7 @@
   <a href="/runeborg">Runeborg</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
   <a href="/spil/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
 </div>
 
@@ -53,7 +55,7 @@
   <div class="wrap narrow">
     <p class="eyebrow">For forældre og lærere</p>
     <h1>Det korte svar: der er ingen hage.</h1>
-    <p class="lead">Barnet skal hverken oprette en konto eller give en mailadresse. Ingen reklamer, ingen køb inde i spillet og ingen tredjeparter. Mens spillet er til test, sender det til gengæld et resultat hjem til os — det står der præcis, hvad er, længere nede. Nedenfor står det lange svar.</p>
+    <p class="lead">Barnet skal hverken have mailadresse eller kodeord. Mens spillene er til test, opretter en voksen en gratis testkonto og sætter børnene på med et kaldenavn — så logger de ind med en klassekode. Ingen reklamer, ingen køb inde i spillet og ingen tredjeparter. Nedenfor står det lange svar, også om præcis hvad vi gemmer.</p>
   </div>
 </header>
 
@@ -73,17 +75,22 @@
     <p>Belønninger gives for at ramme rigtigt i <em>første</em> forsøg, men de er ting og pausespil, ikke adgang til at komme videre. Man kan spille hele spillet igennem uden at få en eneste ting.</p>
 
     <h2 style="margin-top:44px;">Kan det bruges i en klasse?</h2>
-    <p>Ja. Et gennemspil tager 45-60 minutter, altså en lektion eller to. Der er ikke noget lærerpanel og ingen klasseoversigt — spillet ved ikke, hvem der spiller, og det er med vilje.</p>
+    <p>Ja. Et gennemspil tager 45-60 minutter, altså en lektion eller to. <a href="/opret">Opret en skolekonto</a>, lav en klasse, og skriv elevernes fornavne. Klassen får en kode som UGLE-472, og eleverne logger ind på <a href="/login">learnification.dk/login</a> med koden og et tryk på deres eget navn. Der er login-kort til udskrift.</p>
+    <p>På kontoen kan du se, hvor længe hver elev har spillet hvert spil — i alt og den sidste uge. Mere end det viser den ikke: der er ingen karakterer og ingen rangliste.</p>
     <p>Det, der virker, er at lade eleverne spille og så bruge slutlisten som udgangspunkt: hvad står der på din liste, og hvad vil du gerne have til at stå der næste gang? Sidemissionerne kan bruges som differentiering — de er frivillige og skubber ikke historien fremad, så de hurtige elever har noget at tage fat på uden at løbe fra resten.</p>
 
-    <h2 style="margin-top:44px;">Hvad med data og privatliv?</h2>
-    <p>Spillet kører inde i browseren, og der er ingen cookies fra os, ingen analyseværktøjer og ingen tredjeparter, der får noget at vide.</p>
+    <h2 style="margin-top:44px;" id="data">Hvad med data og privatliv?</h2>
+    <p>Spillene kører inde i browseren. Der er ingen analyseværktøjer, ingen reklamer og ingen tredjeparter, der får noget at vide. Den eneste cookie er den, der husker, at man er logget ind.</p>
 
-    <p><strong>Mens spillet er til test, sender det ét resultat hjem til os.</strong> Det sker, når en runde er løst, og når spillet er færdigt — og hvis I lukker fanen undervejs, sendes det, der nåede at blive løst. Vi får: det fornavn, barnet skrev i spillet, klassetrinnet, hvor mange opgaver der blev løst, hvor mange der lykkedes i første forsøg, hvilke emner de handlede om, hvor lang tid der gik, og hvor langt i historien I nåede. Ikke hvad barnet svarede forkert på i øvrigt, ikke IP-adresser, ikke noget om jeres udstyr. Det er dét, der gør testen brugbar for os: vi kan se, om opgaverne rammer klassetrinnet.</p>
+    <p><strong>Om den voksne, der opretter en testkonto,</strong> gemmer vi: skolens navn eller dit navn, kontaktpersonens navn, by (hvis du skriver den), mailadresse og kodeordet — kun som en uigenkendelig hash, så heller ikke vi kan se det.</p>
+    <p><strong>Om hvert barn</strong> gemmer vi det kaldenavn, den voksne har skrevet, hvilken klasse eller familie barnet hører til, og hvor længe barnet har spillet hvert spil hvilke dage. Tiden tæller kun, mens spillet er fremme på skærmen, og nogen har rørt tastatur, mus eller skærm inden for to minutter. Brug fornavne eller kaldenavne — aldrig efternavne eller andet, der kan pege på et bestemt barn.</p>
+    <p>For at stoppe nogen, der prøver at gætte koder og kodeord, gemmer vi IP-adressen som en uigenkendelig kode i højst en time. Ellers gemmer vi ingen IP-adresser.</p>
+
+    <p><strong>Regnehelten sender desuden ét resultat hjem til os, mens det er til test.</strong> Det sker, når en runde er løst, og når spillet er færdigt — og hvis I lukker fanen undervejs, sendes det, der nåede at blive løst. Vi får: det fornavn, barnet skrev i spillet, klassetrinnet, hvor mange opgaver der blev løst, hvor mange der lykkedes i første forsøg, hvilke emner de handlede om, hvor lang tid der gik, og hvor langt i historien I nåede. Ikke hvad barnet svarede forkert på i øvrigt, ikke IP-adresser, ikke noget om jeres udstyr. Det er dét, der gør testen brugbar for os: vi kan se, om opgaverne rammer klassetrinnet.</p>
 
     <p>Det ligger på vores eget webhotel i Danmark sammen med tilmeldingerne, det bliver ikke givet videre, og det bliver slettet, når testen er slut. Vil I have jeres slettet før det, så skriv til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a> — så er det væk samme dag. Og vil I hellere prøve spillet uden at sende noget, så sig til, så får I en udgave, der ikke gør det.</p>
-    <p>Det betyder også, at fremgang ikke bliver gemt: lukker man fanen, starter man forfra. Det er en bevidst afvejning — vi vil hellere lade være med at gemme noget end at bede om en konto.</p>
-    <p>Mens Regnehelten er til test, beder vi til gengæld den voksne om navn, mailadresse og eventuelt et mobilnummer, før spillet går i gang. Det er dig som voksen, der skriver det — ikke barnet — og det bliver liggende på vores eget webhotel i Danmark. Vi bruger det kun til at sende ét spørgeskema om, hvordan testen gik, vi giver det ikke videre, og du kan når som helst få det slettet ved at skrive til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>. Når testperioden er slut, falder spørgsmålet væk igen.</p>
+    <p>Regnehelten gemmer ikke, hvor langt man er nået: lukker man fanen, starter man forfra. Runeborg gemmer eventyret i browseren på den enhed, man spiller på — hvert barn for sig, når de er logget ind.</p>
+    <p>Det hele ligger på vores eget webhotel i Danmark og bliver ikke givet videre. Du kan selv slette et barn eller hele kontoen under <a href="/konto">Min konto</a> — så er det væk med det samme. Er I en skole og har brug for en databehandleraftale, så skriv til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>. Når testperioden er slut, sletter vi testdata.</p>
 
     <h2 style="margin-top:44px;">Hvad koster det?</h2>
     <p>Ingenting, og der kommer ikke en regning bagefter. Der er ingen gratisversion med en betalt version bagved, ingen reklamer og intet at købe inde i spillet.</p>
@@ -94,46 +101,17 @@
     <details class="faq"><summary>Kan man slå musikken fra?</summary><p>Ja. <kbd>M</kbd> slår al lyd fra, og i pausemenuen under <kbd>ESC</kbd> kan musik og lydeffekter slås fra hver for sig.</p></details>
     <details class="faq"><summary>Kan man gemme og fortsætte senere?</summary><p>Ikke i denne version. Et gennemspil er lagt til at kunne klares i én omgang på under en time.</p></details>
     <details class="faq"><summary>Er der noget, der kan skræmme et barn?</summary><p>Nej. Der er ingen vold, ingen tidspres, ingen tabskærme. Det eneste ubehagelige i spillet er åbningsscenen, hvor nogen griner ad hovedpersonen i klassen — og den er der, fordi det er dét, resten af spillet handler om at komme videre fra.</p></details>
-    <details class="faq"><summary>Må vi bruge det på skolen?</summary><p>Ja, meget gerne, og I behøver ikke spørge. Skriv endelig, hvis I gør — vi bliver klogere af at høre, hvordan det går i en rigtig klasse.</p></details>
+    <details class="faq"><summary>Må vi bruge det på skolen?</summary><p>Ja, meget gerne. <a href="/opret">Opret en gratis skolekonto</a>, så har I klassekoder og kan se elevernes spilletid. Skriv endelig, hvordan det går — vi bliver klogere af at høre om en rigtig klasse.</p></details>
 
     <div class="card signup-card" id="skriv-op" style="margin-top:44px;">
-      <h3>Har I prøvet det med børn?</h3>
-      <p>Så vil vi rigtig gerne høre om det — hvad der virkede, hvad der var for svært, og
-        hvad der manglede. Skriv dig op til vores spørgeskema, så sender vi det, når det er
-        klart. Det tager to minutter at svare på.</p>
-      <form id="signup-form" class="signup-form" method="post" action="/tilmeld.php">
-        <input type="hidden" name="side" value="/for-voksne">
-        <div class="honey" aria-hidden="true">
-          <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
-        </div>
-        <div class="signup-felt">
-          <label for="vok-navn">Dit navn</label>
-          <input id="vok-navn" name="navn" type="text" autocomplete="name"
-                 maxlength="80" placeholder="Mette Jensen" required>
-        </div>
-        <div class="signup-felt">
-          <label for="vok-email">Din mailadresse</label>
-          <input id="vok-email" name="email" type="email" autocomplete="email"
-                 maxlength="190" placeholder="din@mail.dk" required>
-        </div>
-        <div class="signup-felt">
-          <label for="vok-mobil">Mobilnummer <span>— valgfrit</span></label>
-          <input id="vok-mobil" name="mobil" type="tel" autocomplete="tel"
-                 maxlength="25" placeholder="12 34 56 78">
-        </div>
-        <div class="signup-row">
-          <button class="btn btn-primary" type="submit">Skriv mig op</button>
-        </div>
-        <label class="signup-consent">
-          <input type="checkbox" name="samtykke" value="ja" required>
-          <span>Ja tak, I må kontakte mig om testen af Regnehelten.</span>
-        </label>
-        <p class="signup-note" role="status" aria-live="polite"></p>
-        <p class="signup-privacy">Vi gemmer navn, mailadresse og mobilnummer og bruger det
-          kun til denne test af Regnehelten. Vi giver det ikke videre, og vi sender ikke
-          reklamer. Du kan når som helst få det slettet ved at skrive til
-          <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>.</p>
-      </form>
+      <h3>Vil I være med i testen?</h3>
+      <p>Opret en gratis testkonto som skole eller familie. Så får I klassekoder til
+        børnene, kan se hvor meget de har spillet, og vi skriver til jer med et kort
+        spørgeskema om, hvordan det gik.</p>
+      <p class="hero-cta" style="margin-top:20px;">
+        <a class="btn btn-primary" href="/opret">Opret testkonto</a>
+        <a class="btn" href="/login#voksen">Log ind</a>
+      </p>
     </div>
   </div>
 </section>
@@ -165,7 +143,7 @@
     </div>
     <div>
       <h4>Learnification</h4>
-      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
     </div>
   </div>
   <div class="wrap" style="margin-top:34px;">
@@ -173,6 +151,6 @@
   </div>
 </footer>
 
-<script src="assets/script.js?v=3" defer></script>
+<script src="assets/script.js?v=4" defer></script>
 </body>
 </html>

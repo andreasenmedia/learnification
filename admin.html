@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overblik — Learnification</title>
+<meta name="description" content="Overblik over testbrugere.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf7f0">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/style.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=1">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/runeborg">Runeborg</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login" aria-current="page">Log ind</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/runeborg">Runeborg</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+    <p class="midt lille" id="indlaeser">Henter overblikket …</p>
+
+    <!-- Første gang: opret administratoren -->
+    <form class="panel smal" id="opsaet" hidden novalidate>
+      <p class="eyebrow">Første gang</p>
+      <h2>Opret administratoren</h2>
+      <p>Serveren har lige lagt en nøgle i filen <strong>opsaetningsnoegle.txt</strong> i mappen <strong id="mappe"></strong>.
+        Åbn den med File Manager i Simply.coms kontrolpanel (eller FTP), og skriv nøglen herunder. Så er det kun den, der har adgang til webhotellet, der kan blive administrator.</p>
+      <p class="besked" id="opsaet-besked"></p>
+      <div class="felt"><label for="noegle">Nøglen fra filen</label><input id="noegle" autocomplete="off" spellcheck="false"></div>
+      <div class="felt"><label for="a-navn">Dit navn</label><input id="a-navn" autocomplete="name"></div>
+      <div class="felt"><label for="a-email">Mailadresse <span>— den logger du ind med</span></label><input id="a-email" type="email" autocomplete="username"></div>
+      <div class="felt"><label for="a-kode">Kodeord <span>— mindst 10 tegn</span></label><input id="a-kode" type="password" autocomplete="new-password"></div>
+      <button class="btn btn-primary btn-fuld" type="submit">Opret administrator</button>
+    </form>
+
+    <div class="panel smal" id="ikke-admin" hidden>
+      <h2>Kun for Learnification</h2>
+      <p>Den her side er overblikket over alle testkonti. Du er logget ind med en almindelig konto.</p>
+      <p><a class="btn btn-primary" href="/konto">Gå til din konto</a></p>
+    </div>
+
+    <!-- Overblikket -->
+    <div id="overblik" hidden>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Administrator</p><h1>Testbrugere</h1></div>
+        <div class="knapper">
+          <a class="btn btn-sm" href="/api/admin.php?handling=eksport">Hent som Excel (CSV)</a>
+          <a class="btn btn-sm" href="/konto">Min egen konto</a>
+          <button type="button" class="btn btn-sm" data-logud>Log ud</button>
+        </div>
+      </div>
+      <div class="tal-raekke" id="tal"></div>
+      <div class="tal-raekke" id="tal-spil"></div>
+      <div class="panel">
+        <h2>Spilletid pr. dag, de sidste 30 dage</h2>
+        <div id="dage"></div>
+      </div>
+      <div class="panel">
+        <h2>Konti</h2>
+        <div class="filter">
+          <input id="soeg" type="search" placeholder="Søg på navn, mail eller by" aria-label="Søg">
+          <select id="f-type" aria-label="Type"><option value="">Alle typer</option><option value="skole">Skoler</option><option value="foraelder">Familier</option></select>
+          <select id="f-status" aria-label="Status"><option value="">Alle</option><option value="ny">Nye</option><option value="godkendt">Godkendte</option><option value="spaerret">Spærrede</option></select>
+        </div>
+        <div class="tabel-rul"><table class="liste" id="konti"></table></div>
+      </div>
+    </div>
+
+    <!-- Én konto -->
+    <div id="detalje" hidden>
+      <a href="#" class="tilbage" id="tilbage">&larr; Alle konti</a>
+      <div class="topbar">
+        <div><p class="eyebrow" id="d-type" style="margin-bottom:6px;"></p><h1 id="d-navn"></h1><p id="d-info"></p></div>
+        <div class="knapper" id="d-knapper"></div>
+      </div>
+      <div class="tal-raekke" id="d-tal"></div>
+      <div class="panel"><h2>Spilletid pr. dag, de sidste 30 dage</h2><div id="d-dage"></div></div>
+      <div id="d-grupper"></div>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/konto.js?v=1"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var STATUS = { ny: 'Ny', godkendt: 'Godkendt', spaerret: 'Spærret' };
+  var TYPE = { skole: 'Skole', foraelder: 'Familie' };
+  var alle = [], spilnavne = {};
+
+  function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje'].forEach(function (x) { $(x).hidden = x !== id; }); }
+
+  document.querySelectorAll('[data-logud]').forEach(function (b) {
+    b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
+  });
+
+  // --- start: opsætning, login eller overblik -------------------------------
+  function start() {
+    LF.hent('admin', 'status').then(function (s) {
+      if (!s.har_admin) { $('mappe').textContent = s.mappe; vis('opsaet'); $('noegle').focus(); return; }
+      return LF.hent('konto', 'mig').then(function (m) {
+        if (!m.logget_ind || m.hvem !== 'voksen') { location.replace('/login?til=/admin#voksen'); return; }
+        if (m.konto.type !== 'admin') { vis('ikke-admin'); return; }
+        rute();
+      });
+    }).catch(function (err) { $('indlaeser').textContent = err.message; });
+  }
+
+  $('opsaet').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button');
+    LF.travl(knap, true);
+    LF.send('admin', 'opsaet', { noegle: $('noegle').value, navn: $('a-navn').value.trim(), email: $('a-email').value.trim(), kodeord: $('a-kode').value })
+      .then(function () { location.reload(); })
+      .catch(function (err) { LF.besked($('opsaet-besked'), err.message, 'fejl'); LF.travl(knap, false); });
+  });
+
+  function rute() {
+    var m = location.hash.match(/konto=(\d+)/);
+    if (m) visKonto(+m[1]); else visOverblik();
+  }
+  window.addEventListener('hashchange', rute);
+  $('tilbage').addEventListener('click', function (e) { e.preventDefault(); location.hash = ''; });
+
+  // --- overblikket ----------------------------------------------------------
+  function visOverblik() {
+    LF.hent('admin', 'overblik').then(function (d) {
+      alle = d.konti; spilnavne = d.spil;
+      vis('overblik');
+      var t = d.tal;
+      $('tal').innerHTML = [
+        [t.skoler, 'Skoler'], [t.familier, 'Familier'],
+        [t.elever_spillet + ' af ' + t.elever, 'Elever, der har spillet'],
+        [t.aktive_uge, 'Aktive spillere, 7 dage'],
+        [t.nye, 'Nye konti at kigge på']
+      ].map(kort).join('');
+      var spk = [[LF.tid(d.tid.i_alt), 'Spilletid i alt'], [LF.tid(d.tid.uge), 'Spilletid, 7 dage']];
+      Object.keys(d.spil).forEach(function (s) {
+        var x = d.tid.spil[s] || { i_alt: 0, gange: 0 };
+        spk.push([LF.tid(x.i_alt), d.spil[s] + ' · ' + x.gange + ' gange']);
+      });
+      $('tal-spil').innerHTML = spk.map(kort).join('');
+      LF.soejler($('dage'), d.dage);
+      tabel();
+    }).catch(function (err) { vis('indlaeser'); $('indlaeser').textContent = err.message; });
+  }
+
+  function kort(t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + LF.esc(t[1]) + '</div></div>'; }
+
+  function tabel() {
+    var q = $('soeg').value.trim().toLowerCase(), ft = $('f-type').value, fs = $('f-status').value;
+    var r = alle.filter(function (k) {
+      return (!ft || k.type === ft) && (!fs || k.status === fs)
+        && (!q || (k.navn + ' ' + k.kontakt + ' ' + k.email + ' ' + k.bynavn).toLowerCase().indexOf(q) >= 0);
+    });
+    var html = '<thead><tr><th>Konto</th><th>Type</th><th>Status</th><th class="t">Oprettet</th><th class="t">Elever</th>'
+      + '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
+    r.forEach(function (k) {
+      html += '<tr class="klik" data-id="' + k.id + '" tabindex="0"><td><strong>' + LF.esc(k.navn) + '</strong><br><span class="lille">'
+        + LF.esc([k.type === 'skole' ? k.kontakt : '', k.email, k.bynavn].filter(Boolean).join(' · ')) + '</span></td>'
+        + '<td>' + TYPE[k.type] + '</td><td>' + maerke(k.status) + '</td>'
+        + '<td class="t">' + LF.dato(k.oprettet) + '</td>'
+        + '<td class="t">' + k.elever_spillet + ' / ' + k.elever + '</td>'
+        + '<td class="t">' + LF.tid(k.uge) + '</td><td class="t"><strong>' + LF.tid(k.i_alt) + '</strong></td>'
+        + '<td class="t">' + LF.dato(k.sidst_spillet) + '</td></tr>';
+    });
+    if (!r.length) html += '<tr><td colspan="8" class="tom">' + (alle.length ? 'Ingen konti passer til søgningen.' : 'Ingen testkonti endnu.') + '</td></tr>';
+    $('konti').innerHTML = html + '</tbody>';
+  }
+  ['soeg', 'f-type', 'f-status'].forEach(function (id) { $(id).addEventListener('input', tabel); });
+  $('konti').addEventListener('click', function (e) {
+    var tr = e.target.closest('tr[data-id]'); if (tr) location.hash = 'konto=' + tr.dataset.id;
+  });
+  $('konti').addEventListener('keydown', function (e) {
+    var tr = e.target.closest('tr[data-id]'); if (tr && e.key === 'Enter') location.hash = 'konto=' + tr.dataset.id;
+  });
+
+  // --- én konto -------------------------------------------------------------
+  function visKonto(id) {
+    LF.hent('admin', 'konto', { id: id }).then(function (d) {
+      var k = d.konto, skole = k.type === 'skole';
+      vis('detalje');
+      window.scrollTo(0, 0);
+      $('d-type').innerHTML = (TYPE[k.type] || 'Administrator') + ' ' + maerke(k.status);
+      $('d-navn').textContent = k.navn;
+      $('d-info').innerHTML = LF.esc([skole ? k.kontakt : '', k.bynavn].filter(Boolean).join(' · '))
+        + (skole || k.bynavn ? ' · ' : '') + '<a href="mailto:' + LF.esc(k.email) + '">' + LF.esc(k.email) + '</a>'
+        + '<br><span class="lille">Oprettet ' + LF.dato(k.oprettet) + ' · sidst logget ind ' + LF.dato(k.sidst_inde) + '</span>';
+      var knapper = '';
+      if (k.type !== 'admin') {
+        if (k.status !== 'godkendt') knapper += '<button type="button" class="btn btn-sm btn-primary" data-status="godkendt">' + (k.status === 'spaerret' ? 'Åbn igen' : 'Godkend') + '</button>';
+        if (k.status !== 'spaerret') knapper += '<button type="button" class="btn btn-sm" data-status="spaerret">Spær</button>';
+      }
+      $('d-knapper').innerHTML = knapper;
+      $('d-knapper').dataset.id = k.id;
+
+      var elever = 0, spillet = 0;
+      d.grupper.forEach(function (g) { g.elever.forEach(function (e) { elever++; if (e.tid.i_alt) spillet++; }); });
+      var tal = [[LF.tid(d.tid.i_alt), 'Spilletid i alt'], [LF.tid(d.tid.uge), 'De sidste 7 dage'],
+                 [spillet + ' af ' + elever, 'Elever, der har spillet'], [d.tid.gange, 'Gange spillet'], [LF.dato(d.tid.sidst), 'Sidst spillet']];
+      $('d-tal').innerHTML = tal.map(kort).join('');
+      LF.soejler($('d-dage'), d.dage);
+
+      var spil = Object.keys(d.spil), html = '';
+      d.grupper.forEach(function (g) {
+        html += '<section class="panel"><div class="gruppe-hoved"><h3>' + LF.esc(g.navn)
+          + (g.klassetrin !== null ? ' <span class="lille">(' + LF.klassetrin(g.klassetrin) + ')</span>' : '') + '</h3>'
+          + '<span class="kode"><small>Kode</small>' + LF.esc(g.kode) + '</span></div>';
+        if (!g.elever.length) { html += '<p class="tom">Ingen elever.</p></section>'; return; }
+        html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>Elev</th>';
+        spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });
+        html += '<th class="t">Gange</th><th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
+        g.elever.forEach(function (e) {
+          html += '<tr><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>';
+          spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + '</td>'; });
+          html += '<td class="t">' + e.tid.gange + '</td><td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>'
+            + LF.tid(e.tid.i_alt) + '</strong></td><td class="t">' + LF.dato(e.tid.sidst) + '</td></tr>';
+        });
+        html += '</tbody></table></div></section>';
+      });
+      var ekstra = [];
+      if (d.voksen_tid.i_alt) ekstra.push('Den voksne har selv spillet i ' + LF.tid(d.voksen_tid.i_alt) + '.');
+      if (d.slettede_tid.i_alt) ekstra.push('Elever, der er slettet igen, har spillet i ' + LF.tid(d.slettede_tid.i_alt) + '.');
+      if (ekstra.length) html += '<div class="panel"><p style="margin:0;">' + ekstra.join(' ') + '</p></div>';
+      if (!d.grupper.length) html += '<div class="panel"><p class="tom" style="margin:0;">Kontoen har ingen klasser endnu.</p></div>';
+      $('d-grupper').innerHTML = html;
+    }).catch(function (err) { alert(err.message); location.hash = ''; });
+  }
+
+  $('d-knapper').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-status]'); if (!b) return;
+    var s = b.dataset.status;
+    if (s === 'spaerret' && !confirm('Spær kontoen? Den voksne og alle børnene bliver logget ud og kan ikke logge ind igen, før du åbner den.')) return;
+    LF.send('admin', 'saet_status', { id: +this.dataset.id, status: s }).then(rute, function (err) { alert(err.message); });
+  });
+
+  start();
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+</body>
+</html>
