@@ -3,12 +3,12 @@
  * Den voksnes side af sagen: klasser (eller familien) og elever.
  *
  *   GET  ?handling=oversigt     alt på kontoen: grupper, elever, spilletid
- *   POST ny_gruppe, ret_gruppe, slet_gruppe, ny_kode
+ *   POST ny_gruppe, ret_gruppe, slet_gruppe
  *   POST nye_elever             ét kaldenavn pr. linje
- *   POST ret_elev, slet_elev
+ *   POST ret_elev, slet_elev, ny_elevkode
  *
- * En skole har klasser, en familie har én gruppe, "Familien". Hver gruppe
- * har sin kode, og barnet logger ind med koden og trykker på sit navn.
+ * En skole har klasser, en familie har én gruppe, "Familien". Hvert barn
+ * har sin egen kode (fx RAVN-4827) og logger ind med den alene.
  */
 
 declare(strict_types=1);
@@ -61,11 +61,11 @@ if ($h === 'oversigt') {
         $elever = [];
         foreach (alle('SELECT * FROM elever WHERE gruppe_id = ? ORDER BY kaldenavn', [$g['id']]) as $e) {
             $elever[] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
-                         'tid' => spilletid('elev_id = ?', [$e['id']])];
+                         'kode' => $e['kode'], 'tid' => spilletid('elev_id = ?', [$e['id']])];
         }
         $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'],
                       'klassetrin' => $g['klassetrin'] !== null ? (int) $g['klassetrin'] : null,
-                      'kode' => $g['kode'], 'elever' => $elever];
+                      'elever' => $elever];
     }
     svar(['ok' => true,
           'konto' => ['id' => $kid, 'type' => $k['type'], 'navn' => $k['navn'], 'kontakt' => $k['kontakt'],
@@ -108,14 +108,6 @@ case 'slet_gruppe':
     kør('DELETE FROM grupper WHERE id = ?', [$g['id']]);
     svar(['ok' => true]);
 
-case 'ny_kode':
-    // Er koden sluppet ud, får gruppen en ny, og alle elever bliver logget ud
-    $g = min_gruppe($kid, tal('id'));
-    $kode = ny_kode();
-    kør('UPDATE grupper SET kode = ? WHERE id = ?', [$kode, $g['id']]);
-    kør('DELETE FROM logins WHERE elev_id IN (SELECT id FROM elever WHERE gruppe_id = ?)', [$g['id']]);
-    svar(['ok' => true, 'kode' => $kode]);
-
 case 'nye_elever':
     $g = min_gruppe($kid, tal('id'));
     $raa = (string) (input()['navne'] ?? '');
@@ -142,8 +134,8 @@ case 'nye_elever':
     }
     db()->beginTransaction();
     foreach ($navne as $n) {
-        kør('INSERT INTO elever (gruppe_id, kaldenavn, ikon, oprettet) VALUES (?, ?, ?, ?)',
-            [$g['id'], $n, nyt_ikon((int) $g['id']), time()]);
+        kør('INSERT INTO elever (gruppe_id, kaldenavn, ikon, kode, oprettet) VALUES (?, ?, ?, ?, ?)',
+            [$g['id'], $n, nyt_ikon((int) $g['id']), ny_elevkode(db()), time()]);
     }
     db()->commit();
     svar(['ok' => true, 'antal' => count($navne)]);
@@ -164,6 +156,14 @@ case 'ret_elev':
     }
     kør('UPDATE elever SET kaldenavn = ?, ikon = ? WHERE id = ?', [$navn, $ikon, $e['id']]);
     svar(['ok' => true]);
+
+case 'ny_elevkode':
+    // Er barnets kode sluppet ud, får det en ny, og det bliver logget ud
+    $e = min_elev($kid, tal('id'));
+    $kode = ny_elevkode(db());
+    kør('UPDATE elever SET kode = ? WHERE id = ?', [$kode, $e['id']]);
+    kør('DELETE FROM logins WHERE elev_id = ?', [$e['id']]);
+    svar(['ok' => true, 'kode' => $kode]);
 
 case 'slet_elev':
     $e = min_elev($kid, tal('id'));

@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=4">
-<link rel="stylesheet" href="/assets/konto.css?v=1">
+<link rel="stylesheet" href="/assets/konto.css?v=2">
 </head>
 <body>
 
@@ -233,8 +233,7 @@
       var spil = Object.keys(d.spil), html = '';
       d.grupper.forEach(function (g) {
         html += '<section class="panel"><div class="gruppe-hoved"><h3>' + LF.esc(g.navn)
-          + (g.klassetrin !== null ? ' <span class="lille">(' + LF.klassetrin(g.klassetrin) + ')</span>' : '') + '</h3>'
-          + '<span class="kode"><small>Kode</small>' + LF.esc(g.kode) + '</span></div>';
+          + (g.klassetrin !== null ? ' <span class="lille">(' + LF.klassetrin(g.klassetrin) + ')</span>' : '') + '</h3></div>';
         if (!g.elever.length) { html += '<p class="tom">Ingen elever.</p></section>'; return; }
         html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>Elev</th>';
         spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });

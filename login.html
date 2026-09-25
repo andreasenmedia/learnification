@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Log ind — Learnification</title>
-<meta name="description" content="Log ind på Learnification som elev med klassekoden, eller som lærer eller forælder.">
+<meta name="description" content="Log ind på Learnification som elev med din egen kode, eller som lærer eller forælder.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#faf7f0">
 <link rel="canonical" href="https://learnification.dk/login">
@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=4">
-<link rel="stylesheet" href="/assets/konto.css?v=1">
+<link rel="stylesheet" href="/assets/konto.css?v=2">
 </head>
 <body>
 
@@ -73,26 +73,18 @@
           <button type="button" role="tab" id="fane-voksen" aria-controls="voksen" aria-selected="false">Jeg er voksen</button>
         </div>
 
-        <!-- Eleven: kode, og så sit navn -->
+        <!-- Eleven: sin egen kode -->
         <div class="panel" id="elev" role="tabpanel" aria-labelledby="fane-elev">
           <form id="kode-form" novalidate>
             <p class="besked" id="kode-besked"></p>
             <div class="felt kode-felt">
-              <label for="kode">Skriv jeres kode</label>
+              <label for="kode">Skriv din kode</label>
               <input id="kode" name="kode" autocomplete="off" autocapitalize="characters" spellcheck="false"
-                     maxlength="20" placeholder="UGLE-472" required>
-              <p class="hj">Koden står på det kort, du har fået af din lærer eller en voksen.</p>
+                     maxlength="20" placeholder="RAVN-4827" required>
+              <p class="hj">Koden står på dit eget login-kort, som du har fået af din lærer eller en voksen.</p>
             </div>
-            <button class="btn btn-primary btn-lg btn-fuld" type="submit">Videre</button>
+            <button class="btn btn-primary btn-lg btn-fuld" type="submit">Log ind</button>
           </form>
-
-          <div id="navne-trin" hidden>
-            <p class="besked" id="navne-besked"></p>
-            <h2 id="gruppe-navn" style="margin-bottom:.2em;"></h2>
-            <p>Tryk på dit navn.</p>
-            <div class="navne" id="navne"></div>
-            <button type="button" class="link-knap" id="anden-kode">Det er ikke min klasse</button>
-          </div>
         </div>
 
         <!-- Den voksne: mail og kodeord -->
@@ -184,48 +176,19 @@
   }
 
   // --- eleven ---------------------------------------------------------------
-  var kode = '';
-
   $('kode-form').addEventListener('submit', function (e) {
     e.preventDefault();
     var knap = this.querySelector('button');
     var v = $('kode').value.trim();
-    if (!v) { LF.besked($('kode-besked'), 'Skriv koden først.', 'fejl'); return; }
+    if (!v) { LF.besked($('kode-besked'), 'Skriv din kode først.', 'fejl'); return; }
     LF.travl(knap, true);
-    LF.send('elev', 'kode', { kode: v }).then(function (d) {
-      kode = d.kode;
+    LF.send('elev', 'login', { kode: v }).then(function () {
       LF.besked($('kode-besked'), '');
-      $('gruppe-navn').textContent = d.gruppe;
-      var html = '';
-      d.elever.forEach(function (el) {
-        html += '<button type="button" class="navn-knap" data-id="' + el.id + '"><span class="ikon" aria-hidden="true">'
-          + LF.esc(el.ikon) + '</span>' + LF.esc(el.kaldenavn) + '</button>';
-      });
-      $('navne').innerHTML = html;
-      $('kode-form').hidden = true;
-      $('navne-trin').hidden = false;
-      var f = $('navne').querySelector('button'); if (f) f.focus();
-    }).catch(function (err) {
-      LF.besked($('kode-besked'), err.message, 'fejl');
-    }).then(function () { LF.travl(knap, false); });
-  });
-
-  $('navne').addEventListener('click', function (e) {
-    var b = e.target.closest('.navn-knap');
-    if (!b) return;
-    b.disabled = true;
-    LF.send('elev', 'login', { kode: kode, elev_id: +b.dataset.id }).then(function () {
       if (!videre('')) return LF.hent('konto', 'mig').then(visInde);
     }).catch(function (err) {
-      b.disabled = false;
-      LF.besked($('navne-besked'), err.message, 'fejl');
-    });
-  });
-
-  $('anden-kode').addEventListener('click', function () {
-    $('navne-trin').hidden = true;
-    $('kode-form').hidden = false;
-    $('kode').select();
+      LF.besked($('kode-besked'), err.message, 'fejl');
+      $('kode').select();
+    }).then(function () { LF.travl(knap, false); });
   });
 
   // --- den voksne -----------------------------------------------------------

@@ -161,7 +161,7 @@ case 'konto':
                          'sidst_inde' => $e['sidst_inde'] !== null ? (int) $e['sidst_inde'] : null,
                          'tid' => spilletid('elev_id = ?', [$e['id']])];
         }
-        $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'], 'kode' => $g['kode'],
+        $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'],
                       'klassetrin' => $g['klassetrin'] !== null ? (int) $g['klassetrin'] : null,
                       'elever' => $elever];
     }

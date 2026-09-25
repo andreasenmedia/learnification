@@ -45,8 +45,9 @@ const IKONER = ['🦊', '🐻', '🐼', '🐸', '🦉', '🐢', '🦄', '🐝', 
                 '🐰', '🐹', '🐧', '🐙', '🦋', '🐞', '🦔', '🐳', '🦒', '🐘', '🦜', '🐿️',
                 '🦓', '🐴', '🐷', '🐮', '🐶', '🐱', '🦝', '🦦'];
 
-// Klassekoderne er et dyr + tre cifre, fx UGLE-472. Ingen æ, ø og å, så
-// de kan skrives på ethvert tastatur, og ingen ord, der ligner hinanden.
+// Koderne er et dyr + cifre: klassen har tre (UGLE-472), hvert barn har
+// sit eget med fire (RAVN-4827). Ingen æ, ø og å, så de kan skrives på
+// ethvert tastatur, og ingen ord, der ligner hinanden.
 const KODEORD = ['UGLE', 'RAVN', 'ULV', 'HEST', 'KAT', 'HUND', 'LOS', 'ODDER', 'GRIS',
                  'GED', 'MUS', 'HARE', 'ELG', 'SPURV', 'KRAGE', 'TORSK', 'SILD', 'LAKS',
                  'HVAL', 'PANDA', 'TIGER', 'ZEBRA', 'KAMEL', 'KOALA', 'PINGVIN', 'DELFIN',
@@ -287,6 +288,18 @@ function opret_tabeller(PDO $pdo): void
             "CREATE TABLE forsoeg (noegle $tekst NOT NULL, tid INTEGER NOT NULL)$slut",
             'CREATE INDEX forsoeg_noegle ON forsoeg(noegle)',
         ],
+        // Hvert barn får sin egen kode, så man ikke kan trykke sig ind på
+        // en klassekammerats navn. Børn, der fandtes i forvejen, får en her.
+        2 => [
+            "ALTER TABLE elever ADD COLUMN kode $tekst",
+            'CREATE UNIQUE INDEX elever_kode ON elever(kode)',
+            function (PDO $pdo): void {
+                $ret = $pdo->prepare('UPDATE elever SET kode = ? WHERE id = ?');
+                foreach ($pdo->query('SELECT id FROM elever WHERE kode IS NULL')->fetchAll(PDO::FETCH_COLUMN) as $id) {
+                    $ret->execute([ny_elevkode($pdo), $id]);
+                }
+            },
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
@@ -296,7 +309,7 @@ function opret_tabeller(PDO $pdo): void
         $pdo->beginTransaction();
         try {
             foreach ($saetninger as $sql) {
-                $pdo->exec($sql);
+                is_callable($sql) ? $sql($pdo) : $pdo->exec($sql);
             }
             $pdo->prepare('INSERT INTO version (nr) VALUES (?)')->execute([$version]);
             $pdo->commit();
@@ -346,19 +359,31 @@ function vaerdi(string $sql, array $p = [])
  * gemt som den er — kun som en hash med serverens hemmelighed, og den
  * bliver slettet igen efter en time.
  */
-function bremse(string $slags, string $hvem, int $max, int $sekunder): void
+function bremse(string $slags, string $hvem, int $max, int $sekunder, bool $noter = true): void
 {
     $nu = time();
     if (random_int(1, 20) === 1) {
         kør('DELETE FROM forsoeg WHERE tid < ?', [$nu - 3600]);
     }
-    $noegle = $slags . ':' . hash_hmac('sha256', $hvem, hemmelighed());
     $antal = (int) vaerdi('SELECT COUNT(*) FROM forsoeg WHERE noegle = ? AND tid > ?',
-                          [$noegle, $nu - $sekunder]);
+                          [forsoegsnoegle($slags, $hvem), $nu - $sekunder]);
     if ($antal >= $max) {
         fejl('Det var mange forsøg på kort tid. Vent et par minutter, og prøv igen.', 429);
     }
-    kør('INSERT INTO forsoeg (noegle, tid) VALUES (?, ?)', [$noegle, $nu]);
+    if ($noter) {
+        noter_forsoeg($slags, $hvem);
+    }
+}
+
+/** Til bremser, der kun skal tælle de forkerte forsøg (se api/elev.php). */
+function noter_forsoeg(string $slags, string $hvem): void
+{
+    kør('INSERT INTO forsoeg (noegle, tid) VALUES (?, ?)', [forsoegsnoegle($slags, $hvem), time()]);
+}
+
+function forsoegsnoegle(string $slags, string $hvem): string
+{
+    return $slags . ':' . hash_hmac('sha256', $hvem, hemmelighed());
 }
 
 function ip(): string
@@ -468,12 +493,32 @@ function kraev_admin(): array
     return $k;
 }
 
-/** En ledig klassekode, fx UGLE-472. */
+/**
+ * En ledig klassekode, fx UGLE-472. Børnene logger ikke ind med den længere
+ * (de har hver deres, se ny_elevkode), men grupper-tabellen kræver en.
+ */
 function ny_kode(): string
 {
     for ($i = 0; $i < 50; $i++) {
         $kode = KODEORD[random_int(0, count(KODEORD) - 1)] . '-' . random_int(100, 999);
         if (!vaerdi('SELECT 1 FROM grupper WHERE kode = ?', [$kode])) {
+            return $kode;
+        }
+    }
+    fejl('Kunne ikke finde en ledig kode. Prøv igen.', 500);
+}
+
+/**
+ * En ledig kode til ét barn, fx RAVN-4827. Tager databasen som argument,
+ * fordi den også bruges, mens tabellerne bliver løftet op (inden db() er klar).
+ */
+function ny_elevkode(PDO $pdo): string
+{
+    $findes = $pdo->prepare('SELECT 1 FROM elever WHERE kode = ?');
+    for ($i = 0; $i < 50; $i++) {
+        $kode = KODEORD[random_int(0, count(KODEORD) - 1)] . '-' . random_int(1000, 9999);
+        $findes->execute([$kode]);
+        if (!$findes->fetchColumn()) {
             return $kode;
         }
     }

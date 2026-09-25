@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css?v=4">
-<link rel="stylesheet" href="/assets/konto.css?v=1">
+<link rel="stylesheet" href="/assets/konto.css?v=2">
 </head>
 <body>
 
@@ -71,8 +71,8 @@
         <h2>Velkommen — kontoen er klar</h2>
         <ol class="steps" style="margin-top:18px;">
           <li><span class="n">1</span><h3 id="trin1-titel">Opret en klasse</h3><p id="trin1-tekst">Giv den et navn, fx 4.B, og skriv elevernes fornavne eller kaldenavne — ét pr. linje.</p></li>
-          <li><span class="n">2</span><h3>Del koden</h3><p>Hver <span data-gruppeord>klasse</span> får en kode som UGLE-472. Udskriv login-kortene, eller skriv koden på tavlen.</p></li>
-          <li><span class="n">3</span><h3>Log ind og spil</h3><p>Børnene går ind på <strong>learnification.dk/login</strong>, skriver koden og trykker på deres navn.</p></li>
+          <li><span class="n">2</span><h3>Del koderne</h3><p>Hvert barn får sin egen kode som RAVN-4827, så ingen kan komme ind som en anden. Udskriv login-kortene — ét til hvert barn.</p></li>
+          <li><span class="n">3</span><h3>Log ind og spil</h3><p>Børnene går ind på <strong>learnification.dk/login</strong> og skriver deres egen kode.</p></li>
         </ol>
       </div>
 
@@ -211,24 +211,24 @@
     d.grupper.forEach(function (g) {
       var titel = skole || admin ? LF.esc(g.navn) + (g.klassetrin !== null ? ' <span class="lille">(' + LF.klassetrin(g.klassetrin) + ')</span>' : '') : 'Børn';
       html += '<section class="panel" data-gruppe="' + g.id + '" style="padding-top:24px;">'
-        + '<div class="gruppe-hoved"><h3>' + titel + '</h3>'
-        + '<span class="kode"><small>Kode</small>' + LF.esc(g.kode) + '</span></div>'
+        + '<div class="gruppe-hoved"><h3>' + titel + '</h3></div>'
         + '<p class="knapper lille ingen-print" style="margin:-4px 0 16px;gap:6px 18px;">'
         + '<a href="/login-kort?g=' + g.id + '">Udskriv login-kort</a>'
-        + '<button type="button" class="link-knap" data-ny-kode>Lav en ny kode</button>'
         + (skole || admin ? '<button type="button" class="link-knap" data-ret-gruppe>Omdøb</button>'
           + '<button type="button" class="link-knap fare" data-slet-gruppe>Slet klassen</button>' : '')
         + '</p>';
       if (g.elever.length) {
-        html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>' + (skole ? 'Elev' : 'Barn') + '</th>';
+        html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>' + (skole ? 'Elev' : 'Barn') + '</th><th>Kode</th>';
         spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });
         html += '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th><th class="ingen-print"></th></tr></thead><tbody>';
         g.elever.forEach(function (e) {
-          html += '<tr data-elev="' + e.id + '"><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>';
+          html += '<tr data-elev="' + e.id + '"><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>'
+            + '<td class="elevkode">' + LF.esc(e.kode) + '</td>';
           spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + '</td>'; });
           html += '<td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>' + LF.tid(e.tid.i_alt) + '</strong></td>'
             + '<td class="t">' + LF.dato(e.tid.sidst) + '</td>'
             + '<td class="handling ingen-print"><button type="button" class="link-knap" data-ret-elev>Omdøb</button>'
+            + '<button type="button" class="link-knap" data-ny-elevkode>Ny kode</button>'
             + '<button type="button" class="link-knap fare" data-slet-elev>Slet</button></td></tr>';
         });
         html += '</tbody></table></div>';
@@ -269,9 +269,9 @@
     var elev = raekke ? g.elever.filter(function (x) { return x.id === eid; })[0] : null;
     var fejl = function (err) { alert(err.message); };
 
-    if (e.target.matches('[data-ny-kode]')) {
-      if (confirm('Lav en ny kode til ' + (g.navn === 'Familien' ? 'jer' : g.navn) + '?\n\nDen gamle holder op med at virke, og alle, der er logget ind med den, bliver logget ud.'))
-        LF.send('klasse', 'ny_kode', { id: gid }).then(hent, fejl);
+    if (e.target.matches('[data-ny-elevkode]')) {
+      if (confirm('Lav en ny kode til ' + elev.kaldenavn + '?\n\nDen gamle holder op med at virke, og ' + elev.kaldenavn + ' bliver logget ud. Husk at udskrive et nyt login-kort.'))
+        LF.send('klasse', 'ny_elevkode', { id: eid }).then(hent, fejl);
     } else if (e.target.matches('[data-ret-gruppe]')) {
       var navn = prompt('Nyt navn til klassen:', g.navn);
       if (navn && navn.trim()) LF.send('klasse', 'ret_gruppe', { id: gid, navn: navn.trim(), klassetrin: g.klassetrin }).then(hent, fejl);

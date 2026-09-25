@@ -21,7 +21,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `spil/regnehelten/` | — | Spilpakken fra pygbag. **Overskrives ved hver bygning** |
 | `runeborg.html` | `/runeborg` | Om Runeborg: historien, PISA-grundlaget, missionerne |
 | `spil/runeborg/` | `/spil/runeborg/` | Selve Runeborg — skrevet direkte her, ingen bygning |
-| `login.html` | `/login` | Log ind: elev med klassekode, voksen med mail og kodeord, glemt kodeord |
+| `login.html` | `/login` | Log ind: elev med sin egen kode, voksen med mail og kodeord, glemt kodeord |
 | `opret.html` | `/opret` | Opret testkonto som skole eller familie |
 | `konto.html` | `/konto` | Den voksnes side: klasser, elever, koder og spilletid |
 | `login-kort.html` | `/login-kort?g=<id>` | Login-kort til udskrift, ét pr. elev |
@@ -178,10 +178,15 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   mail og kodeord og logger ind på `/login` under "Jeg er voksen".
 - **En skole** laver klasser (fx 4.B) og skriver elevernes fornavne. **En
   familie** får én gruppe, "Familien", med det samme.
-- Hver klasse/familie får en **kode** som `UGLE-472`. **Barnet** går ind på
-  `/login`, skriver koden og trykker på sit navn og sit dyr. Ingen mail og
-  intet kodeord til børn. Små bogstaver, mellemrum og manglende bindestreg
-  er ligegyldige.
+- **Hvert barn** får sin egen **kode** som `RAVN-4827` (dyr + fire cifre),
+  går ind på `/login` og skriver den — så er det inde. Der er ingen navne at
+  trykke på, så et barn kan ikke komme ind som en klassekammerat. Ingen mail
+  og intet kodeord til børn. Små bogstaver, mellemrum og manglende bindestreg
+  er ligegyldige. Koden står i tabellen under `/konto` og på login-kortene;
+  "Ny kode" ud for barnet laver en ny og logger barnet ud.
+- Grupperne har stadig en klassekode (`UGLE-472`) i databasen, men den
+  bruges ikke til login længere. Skriver et barn en gammel klassekode, får
+  det besked om at spørge efter sit nye login-kort.
 - Nye konti kan bruges med det samme, står som **Ny** i overblikket og kan
   godkendes eller spærres derfra. En spærret konto og alle dens elever bliver
   logget ud med det samme.
@@ -237,7 +242,7 @@ løftet op af sig selv.
 
 **Hvad der gemmes** (og står på `/for-voksne#data` — ret teksten der, hvis
 det ændres): den voksnes navn, skolens navn, by, mail og kodeordet som hash;
-børnenes kaldenavn, gruppe og spilletid pr. spil og dag. IP-adresser kun som
+børnenes kaldenavn, login-kode, gruppe og spilletid pr. spil og dag. IP-adresser kun som
 HMAC-hash i højst en time til gætte-bremsen. Én login-cookie `lf_session`
 (tilfældig nøgle, kun dens SHA-256 står i databasen) og en harmløs
 `lf_in=elev.<id>`, som siderne bruger til at vide, at nogen er logget ind.
@@ -248,8 +253,8 @@ så tallene i overblikket ikke hopper. Slettes kontoen, forsvinder alt.
 
 **Sikkerhed, kort:** kodeord med `password_hash`; alt, der ændrer noget,
 kræver headeren `X-LF: 1` (en fremmed side kan ikke sætte den); `api/_*.php`
-og `data/` er spærret; gæt på klassekoder bremses til 30 pr. kvarter pr.
-adresse, login til 8 pr. kvarter pr. mail. Glemt kodeord sender et link med
+og `data/` er spærret; forkerte elevkoder bremses til 30 pr. kvarter pr.
+adresse (rigtige tæller ikke, så en hel klasse bag én IP kan logge ind), login til 8 pr. kvarter pr. mail. Glemt kodeord sender et link med
 `mail()` til den voksne, gyldigt i en time.
 
 ### API
@@ -257,8 +262,8 @@ adresse, login til 8 pr. kvarter pr. mail. Glemt kodeord sender et link med
 | Fil | Handlinger |
 |---|---|
 | `api/konto.php` | `mig`, `opret`, `login`, `logud`, `glemt`, `nulstil`, `skift_kodeord`, `ret`, `slet_konto` |
-| `api/klasse.php` | `oversigt`, `ny_gruppe`, `ret_gruppe`, `slet_gruppe`, `ny_kode`, `nye_elever`, `ret_elev`, `slet_elev` |
-| `api/elev.php` | `kode`, `login` |
+| `api/klasse.php` | `oversigt`, `ny_gruppe`, `ret_gruppe`, `slet_gruppe`, `nye_elever`, `ret_elev`, `ny_elevkode`, `slet_elev` |
+| `api/elev.php` | `login` |
 | `api/spilletid.php` | `puls` |
 | `api/admin.php` | `status`, `opsaet`, `overblik`, `konto`, `saet_status`, `eksport` (CSV til Excel) |
 
