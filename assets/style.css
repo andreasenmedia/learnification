@@ -272,6 +272,7 @@ figure.shot-fig figcaption {
 }
 .steps h3 { font-size: 1.1rem; margin-bottom: .3em; }
 .steps p { margin: 0; color: var(--ink-soft); font-size: .96rem; }
+.dark .steps p { color: #c9c3d0; }
 
 /* ---------- spiller ------------------------------------------------------ */
 

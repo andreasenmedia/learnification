@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Learnification — Danske læringsspil, der faktisk er spil</title>
-<meta name="description" content="Learnification laver danske læringsspil til børn. Spil Regnehelten gratis i browseren: et matematikrollespil for 7-12-årige uden karakterer, uden login og uden reklamer.">
+<meta name="description" content="Learnification laver danske læringsspil til børn. Spil Runeborg gratis i browseren: et 8-bit fantasyeventyr om læsning, kildekritik og data for 5.-9. klasse. Og Regnehelten, et matematikrollespil for 1.-6. klasse.">
 <meta name="theme-color" content="#faf7f0">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Learnification">
 <meta property="og:title" content="Learnification — Danske læringsspil, der faktisk er spil">
-<meta property="og:description" content="Spil Regnehelten gratis i browseren: et dansk matematikrollespil for 7-12-årige. Ingen karakterer, intet login, ingen reklamer.">
-<meta property="og:image" content="https://learnification.dk/assets/billeder/verden.png">
+<meta property="og:description" content="Spil Runeborg gratis i browseren: et dansk 8-bit fantasyeventyr, hvor man opklarer mysteriet om den grønne brønd med beviser i stedet for rygter.">
+<meta property="og:image" content="https://learnification.dk/assets/billeder/runeborg-by.png">
 <meta property="og:url" content="https://learnification.dk/">
 <meta property="og:locale" content="da_DK">
 <meta name="twitter:card" content="summary_large_image">
@@ -19,8 +19,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=3">
+<link rel="stylesheet" href="assets/style.css?v=4">
 <script type="application/ld+json">
+[
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Runeborg",
+  "inLanguage": "da",
+  "description": "Et dansk 8-bit fantasyspil for 11-15-årige om læsning, kildekritik, naturvidenskabelige undersøgelser, data og forhold.",
+  "url": "https://learnification.dk/runeborg",
+  "playMode": "SinglePlayer",
+  "applicationCategory": "Game",
+  "gamePlatform": "Webbrowser",
+  "typicalAgeRange": "11-15",
+  "publisher": { "@type": "Organization", "name": "Learnification" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "DKK" }
+},
 {
   "@context": "https://schema.org",
   "@type": "VideoGame",
@@ -35,6 +50,7 @@
   "publisher": { "@type": "Organization", "name": "Learnification" },
   "offers": { "@type": "Offer", "price": "0", "priceCurrency": "DKK" }
 }
+]
 </script>
 </head>
 <body>
@@ -48,13 +64,13 @@
       <span>Learnification</span>
     </a>
     <div class="nav-links">
-      <a href="/regnehelten">Regnehelten</a>
       <a href="/runeborg">Runeborg</a>
+      <a href="/regnehelten">Regnehelten</a>
       <a href="/for-voksne">For voksne</a>
       <a href="/om">Om os</a>
       <a href="/login" class="nav-login">Log ind</a>
     </div>
-    <a href="/spil/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
+    <a href="/spil/runeborg/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -62,12 +78,12 @@
 </nav>
 
 <div id="mobile-menu">
-  <a href="/regnehelten">Regnehelten</a>
   <a href="/runeborg">Runeborg</a>
+  <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/om">Om os</a>
   <a href="/login" class="nav-login">Log ind</a>
-  <a href="/spil/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
+  <a href="/spil/runeborg/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
 </div>
 
 <main id="main">
@@ -76,19 +92,19 @@
 <header class="hero">
   <div class="wrap hero-grid">
     <div>
-      <p class="eyebrow">Danske læringsspil</p>
-      <h1>Et spil, der <span class="hl">tilfældigvis</span> handler om matematik.</h1>
-      <p class="lead">Regnehelten er et rollespil for 7-12-årige. Man vågner, spiser morgenmad, handler ind med sin far og går i skole — og undervejs er der tal, der skal styr på. Ligesom i virkeligheden.</p>
+      <p class="eyebrow">Nyt spil · 5.-9. klasse</p>
+      <h1>Runeborg: et eventyr, hvor <span class="hl">beviser</span> slår rygter.</h1>
+      <p class="lead">Vandet i byens brønd er blevet grønt, og borgmesteren giver heksen skylden. Som lærling i Eventyrerlauget opklarer man sagen med læsning, kildekritik, fair forsøg, data og regning — i en hyggelig 8-bit fantasyby.</p>
       <div class="hero-cta">
-        <a href="/spil/" class="btn btn-primary btn-lg">Spil Regnehelten
+        <a href="/spil/runeborg/" class="btn btn-primary btn-lg">Spil Runeborg
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
         </a>
-        <a href="/regnehelten" class="btn btn-lg">Læs om spillet</a>
+        <a href="/runeborg" class="btn btn-lg">Læs om spillet</a>
       </div>
-      <p class="hero-note">Gratis · ingen reklamer · intet login · kører direkte i browseren</p>
+      <p class="hero-note">Gratis · ingen reklamer · kører direkte i browseren · til de yngste: <a href="/regnehelten">Regnehelten</a></p>
     </div>
     <div class="shot">
-      <img src="assets/billeder/verden.png" width="1024" height="640" alt="Skærmbillede fra Regnehelten: spilleren står i en skolegård med fodboldmål, bænk og cykelstativ. Øverst vises opgaven og en Regnekraft-måler." loading="eager" fetchpriority="high">
+      <img src="assets/billeder/runeborg-by.png" width="1280" height="800" alt="Skærmbillede fra Runeborg: torvet i en hyggelig 8-bit fantasyby med brønd, opslagstavle og markedsboder." loading="eager" fetchpriority="high">
     </div>
   </div>
 </header>
@@ -121,7 +137,28 @@
   </div>
 </section>
 
-<!-- ============ SPILKORT ============ -->
+<!-- ============ SPILKORT: RUNEBORG ============ -->
+<section style="padding-top:0;">
+  <div class="wrap">
+    <div class="game-card">
+      <div class="pic"><img src="assets/billeder/runeborg-opgave.png" width="1280" height="800" alt="Skærmbillede: en opgave med et søjlediagram over grønhed i tre vandprøver og spørgsmålet 'Hvor var vandet mest grønt?'" loading="lazy"></div>
+      <div class="body">
+        <p class="eyebrow">Læsning, naturfag og matematik for 5.-9. klasse</p>
+        <h2>Runeborg</h2>
+        <ul class="tags">
+          <li>5.-9. klasse</li><li>8-bit fantasy</li><li>Ca. 60-90 min</li><li>Gratis</li>
+        </ul>
+        <p>Byen summer af rygter, og det er lærlingens job at finde ud af, hvad der faktisk passer. Man læser opslag, skiller fakta fra holdninger, tager vandprøver og tolker data. Indholdet bygger på de områder, hvor danske elever klarede sig dårligst i PISA 2025.</p>
+        <div class="hero-cta" style="margin-top:22px;">
+          <a href="/spil/runeborg/" class="btn btn-primary">Spil Runeborg</a>
+          <a href="/runeborg" class="btn">Hvad øver man?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPILKORT: REGNEHELTEN ============ -->
 <section style="padding-top:0;">
   <div class="wrap">
     <div class="game-card">
@@ -134,29 +171,8 @@
         </ul>
         <p>En helt almindelig skoledag, fra sengekanten til sidste time. Seks steder, seks slags matematik, en sidehistorie om at turde svare igen. Undervejs er der sidemissioner, ting man kan samle, og to pausespil, man kan låse op.</p>
         <div class="hero-cta" style="margin-top:22px;">
-          <a href="/spil/" class="btn btn-primary">Spil nu</a>
+          <a href="/spil/" class="btn btn-primary">Spil Regnehelten</a>
           <a href="/regnehelten" class="btn">Hvad lærer man?</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SPILKORT: RUNEBORG ============ -->
-<section style="padding-top:0;">
-  <div class="wrap">
-    <div class="game-card">
-      <div class="pic"><img src="assets/billeder/runeborg-by.png" width="1280" height="800" alt="Skærmbillede fra Runeborg: torvet i en hyggelig 8-bit fantasyby med brønd, opslagstavle og markedsboder." loading="lazy"></div>
-      <div class="body">
-        <p class="eyebrow">Nyt spil</p>
-        <h2>Runeborg</h2>
-        <ul class="tags">
-          <li>5.-9. klasse</li><li>8-bit fantasy</li><li>Ca. 60-90 min</li><li>Gratis</li>
-        </ul>
-        <p>Vandet i byens brønd er blevet grønt, og borgmesteren giver heksen skylden. Som lærling i Eventyrerlauget opklarer man sagen med læsning, kildekritik, fair forsøg, data og regning — bygget ud fra de områder, hvor danske elever klarede sig dårligst i PISA 2025.</p>
-        <div class="hero-cta" style="margin-top:22px;">
-          <a href="/spil/runeborg/" class="btn btn-primary">Spil Runeborg</a>
-          <a href="/runeborg" class="btn">Hvad øver man?</a>
         </div>
       </div>
     </div>
@@ -167,14 +183,15 @@
 <section class="dark">
   <div class="wrap">
     <p class="eyebrow">Sådan kommer I i gang</p>
-    <h2 style="margin-bottom:40px;">Tre klik, ingen konto.</h2>
+    <h2 style="margin-bottom:40px;">En voksen opretter. Barnet spiller.</h2>
     <ol class="steps">
-      <li><span class="n">1</span><h3>Tryk spil</h3><p>Spillet henter sig selv ned i browseren. Det tager et øjeblik første gang og går hurtigt bagefter.</p></li>
-      <li><span class="n">2</span><h3>Lav din figur</h3><p>Navn, alder og udseende. Alderen bestemmer, hvor svære tallene bliver — resten er pynt.</p></li>
-      <li><span class="n">3</span><h3>Spil</h3><p>Piletaster og ENTER på computer, eller fingrene på en tablet. Der er ingenting at installere og ingenting at betale.</p></li>
+      <li><span class="n">1</span><h3>Opret en testkonto</h3><p>Mens spillene er til test, opretter en voksen en gratis konto som skole eller familie. Det tager et par minutter.</p></li>
+      <li><span class="n">2</span><h3>Log ind med klassekoden</h3><p>Børnene sættes på med et kaldenavn og logger ind med en kode som <span style="white-space:nowrap;">UGLE-472</span> og et tryk på deres eget navn. Ingen mail, intet kodeord.</p></li>
+      <li><span class="n">3</span><h3>Vælg et spil</h3><p>Runeborg til 5.-9. klasse, Regnehelten til 1.-6. Begge kører direkte i browseren på computer og tablet. Der er ingenting at installere og ingenting at betale.</p></li>
     </ol>
     <div class="hero-cta" style="margin-top:42px;">
-      <a href="/spil/" class="btn btn-primary btn-lg">Start spillet</a>
+      <a href="/opret" class="btn btn-primary btn-lg">Opret testkonto</a>
+      <a href="/login" class="btn btn-lg">Log ind</a>
     </div>
   </div>
 </section>
@@ -186,20 +203,28 @@
     <h2 style="margin-bottom:34px;">Sådan ser det ud</h2>
     <div class="shots">
       <figure class="shot-fig">
-        <span class="shot"><img src="assets/billeder/hjem.png" width="1024" height="640" alt="Skærmbillede: barnets værelse og køkkenet hjemme, set oppefra." loading="lazy"></span>
-        <figcaption>Morgenen hjemme — dagen starter et helt almindeligt sted.</figcaption>
+        <span class="shot"><img src="assets/billeder/runeborg-fest.png" width="1280" height="800" alt="Skærmbillede fra Runeborg: høstfest om aftenen på torvet med lyskæder, lanterner, ildfluer og byens folk samlet." loading="lazy"></span>
+        <figcaption>Runeborg: høstfest på torvet om aftenen.</figcaption>
       </figure>
       <figure class="shot-fig">
-        <span class="shot"><img src="assets/billeder/regnebogen.png" width="1024" height="640" alt="Skærmbillede: Regnebogen er slået op på siden om gangetabellen, med forklaring, eksempel og en tegning af tre rækker med fire prikker." loading="lazy"></span>
-        <figcaption>Regnebogen kan slås op midt i en opgave.</figcaption>
+        <span class="shot"><img src="assets/billeder/runeborg-dialog.png" width="1280" height="800" alt="Skærmbillede fra Runeborg: laugsmester Brynja byder lærlingen velkommen i Eventyrerlauget." loading="lazy"></span>
+        <figcaption>Runeborg: velkommen i Eventyrerlauget.</figcaption>
       </figure>
       <figure class="shot-fig">
-        <span class="shot"><img src="assets/billeder/klasse.png" width="1024" height="640" alt="Skærmbillede fra åbningsscenen: klasselokalet dagen før, fuldt af elever." loading="lazy"></span>
-        <figcaption>Åbningsscenen: dagen før, da det gik galt.</figcaption>
+        <span class="shot"><img src="assets/billeder/runeborg-kro.png" width="1280" height="800" alt="Skærmbillede fra Runeborg: inde på kroen Den Gyldne Drage med kroværten bag disken, en bard og gæster ved bordene." loading="lazy"></span>
+        <figcaption>Runeborg: kroen Den Gyldne Drage.</figcaption>
       </figure>
       <figure class="shot-fig">
-        <span class="shot"><img src="assets/billeder/titel.png" width="1024" height="640" alt="Titelskærmen til Regnehelten." loading="lazy"></span>
-        <figcaption>Ingen menuer at finde rundt i. Tryk ENTER.</figcaption>
+        <span class="shot"><img src="assets/billeder/verden.png" width="1024" height="640" alt="Skærmbillede fra Regnehelten: spilleren står i en skolegård med fodboldmål, bænk og cykelstativ. Øverst vises opgaven og en Regnekraft-måler." loading="lazy"></span>
+        <figcaption>Regnehelten: skolegården med opgave og Regnekraft.</figcaption>
+      </figure>
+      <figure class="shot-fig">
+        <span class="shot"><img src="assets/billeder/regnebogen.png" width="1024" height="640" alt="Skærmbillede fra Regnehelten: Regnebogen er slået op på siden om gangetabellen, med forklaring, eksempel og en tegning af tre rækker med fire prikker." loading="lazy"></span>
+        <figcaption>Regnehelten: Regnebogen kan slås op midt i en opgave.</figcaption>
+      </figure>
+      <figure class="shot-fig">
+        <span class="shot"><img src="assets/billeder/hjem.png" width="1024" height="640" alt="Skærmbillede fra Regnehelten: barnets værelse og køkkenet hjemme, set oppefra." loading="lazy"></span>
+        <figcaption>Regnehelten: dagen starter et helt almindeligt sted.</figcaption>
       </figure>
     </div>
   </div>
@@ -231,10 +256,10 @@
     <div>
       <h4>Spil</h4>
       <nav>
+        <a href="/runeborg">Om Runeborg</a>
+        <a href="/spil/runeborg/">Spil Runeborg</a>
         <a href="/regnehelten">Om Regnehelten</a>
         <a href="/spil/">Spil Regnehelten</a>
-      <a href="/runeborg">Om Runeborg</a>
-      <a href="/spil/runeborg/">Spil Runeborg</a>
       </nav>
     </div>
     <div>
