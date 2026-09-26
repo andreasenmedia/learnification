@@ -5,7 +5,7 @@
    altid finder den samme fil. Spillerens navn læses som "lærling", fordi
    det ikke kan indtales på forhånd.
 
-   Mangler en fil, bruges browserens egen danske stemme, hvis den har en.
+   Mangler en fil, bruges enhedens egen danske stemme, hvis den har en.
    Har den ingen, er der stille — hellere det end en engelsk stemme, der
    læser dansk. clean() og hash() SKAL svare til dem i runeborg-stemmer.py. */
 (function () {
@@ -37,7 +37,9 @@
   function pickVoice() {
     if (!synth) return;
     var vs = synth.getVoices();
-    daVoice = vs.filter(function (v) { return /^da([-_]|$)/i.test(v.lang); })[0] || null;
+    // Kun stemmer, der kører på selve enheden. Chromes "Google Dansk" sender
+    // teksten til Googles servere, og så får en tredjepart barnets IP-adresse.
+    daVoice = vs.filter(function (v) { return /^da([-_]|$)/i.test(v.lang) && v.localService !== false; })[0] || null;
   }
   if (synth) { pickVoice(); if (synth.addEventListener) synth.addEventListener('voiceschanged', pickVoice); else synth.onvoiceschanged = pickVoice; }
 

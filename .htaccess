@@ -34,6 +34,7 @@ DirectoryIndex index.html
   AddType application/wasm .wasm
   AddType image/svg+xml .svg
   AddType application/javascript .js .mjs
+  AddType font/woff2 .woff2
 </IfModule>
 
 # Spilmappen er bygget af pygbag og bliver skrevet over ved hver ny
@@ -103,6 +104,8 @@ ErrorDocument 404 /404.html
   ExpiresByType application/javascript  "access plus 30 days"
   ExpiresByType image/png               "access plus 30 days"
   ExpiresByType image/svg+xml           "access plus 30 days"
+  # Skrifterne i assets/skrifter bliver aldrig rettet, kun skiftet ud
+  ExpiresByType font/woff2              "access plus 1 year"
   # Spilpakken staar for sig selv i afsnit 6 nedenfor: den skal tjekkes
   # hver gang, ikke ligge og blive gammel i en time.
   ExpiresByType application/gzip        "access plus 0 seconds"

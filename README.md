@@ -14,6 +14,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `spil/index.html` | `/spil/` | Selve spilleren — spillet i en ramme med tastaturhjælp |
 | `for-voksne.html` | `/for-voksne` | Forældre og lærere: hvad barnet øver, data, FAQ |
 | `om.html` | `/om` | Om Learnification |
+| `privatliv.html` | `/privatliv` | Privatlivs- og cookiepolitik. **Ret den, når noget nyt gemmes** |
 | `404.html` | — | Vises ved forkert adresse |
 | `tilmeld.php` | — | Tager imod tilmeldinger til spørgeskemaet |
 | `resultat.php` | — | Tager imod resultater fra testomgangene |
@@ -103,9 +104,13 @@ Siden har ét stilark, `assets/style.css`, skrevet i hånden. Farverne er
 papir og blæk med en varm orange til knapper og links — de samme toner som
 i spillet, så rammen om Regnehelten ligner det, der kører indeni.
 
-Skriften er **Fraunces** til overskrifter og **Inter** til brødtekst, begge
-fra Google Fonts. Linket i `<head>` skal se ud, som det gør nu, på alle
-sider, ellers skifter overskrifterne udseende midt i et klik.
+Skriften er **Fraunces** til overskrifter og **Inter** til brødtekst.
+De ligger på vores eget webhotel i `assets/skrifter/` (Runeborgs Atkinson
+Hyperlegible og Pixelify Sans ligger samme sted) og bliver linket med
+`/assets/skrifter/site.css` eller `runeborg.css`. **Link aldrig direkte til
+fonts.googleapis.com igen**: så sender hver besøgendes browser sin IP til
+Google uden samtykke, og det er set som et GDPR-brud. Skal der flere vægte
+med, så ret `tools/hent-skrifter.py` og kør den.
 
 Der lå på et tidspunkt et større designsystem henover siden med `tokens.css`
 og `components.css` i et mørkt tema. Det blev rullet tilbage igen, fordi det
@@ -425,12 +430,23 @@ den hentning.
 
 ## Afhængigheder udefra
 
-- **Google Fonts** (Fraunces + Inter) til hjemmesiden. Linket skal se ud,
-  som det gør i `<head>` — begge vægtsæt skal med.
 - **pygame-web.github.io** leverer Python-motoren til spillet (ca. 20-30 MB,
   som browseren gemmer efter første besøg). Går den ned, kan spillet ikke
   starte. Skal det undgås, kan motoren lægges på eget webhotel og pygbag
-  køres med `--cdn https://learnification.dk/motor/`.
+  køres med `--cdn https://learnification.dk/motor/`. Det ville også gøre
+  GitHub til en tredjepart mindre — i dag står den på `/privatliv`.
+
+## Cookies og privatliv
+
+Der er **ingen cookie-banner, og det er med vilje**: sitet sætter kun
+`lf_session` og `lf_in` ved login og gemmer spil og indstillinger i
+`localStorage`. Alt det er "strengt nødvendigt for en tjeneste, brugeren selv
+har bedt om", og kræver derfor ikke samtykke (ePrivacy art. 5, stk. 3).
+Det holder kun, så længe der ikke kommer statistik, pixels, indlejrede
+videoer, Google Fonts-links eller lignende på. Kommer der noget af det, skal
+der samtykke til, *før* det indlæses — og `/privatliv` skal rettes. Runeborgs
+oplæsning bruger kun stemmer, der kører på enheden (`localService`), fordi
+Chromes "Google Dansk" sender teksten til Google.
 
 ## Test lokalt som på Simply.com
 

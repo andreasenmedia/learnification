@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privatliv og cookies · Learnification</title>
+<meta name="description" content="Hvilke cookies learnification.dk bruger, hvad der gemmes i browseren, og hvordan vi behandler oplysninger om børn og voksne. Kun nødvendige cookies — ingen sporing.">
+<meta name="theme-color" content="#faf7f0">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Privatliv og cookies · Learnification">
+<meta property="og:description" content="Kun nødvendige cookies, ingen sporing og ingen reklamer. Her står præcis, hvad vi gemmer.">
+<meta property="og:image" content="https://learnification.dk/assets/billeder/titel.png">
+<meta property="og:url" content="https://learnification.dk/privatliv">
+<link rel="canonical" href="https://learnification.dk/privatliv">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
+<link rel="stylesheet" href="/assets/style.css?v=4">
+<style>
+/* Tabellerne på privatlivssiden. De ruller for sig selv på en smal skærm,
+   så siden aldrig bliver bredere end telefonen. */
+.priv .tabel { overflow-x: auto; margin: 0 0 1.4em; border: 2px solid var(--paper-edge); border-radius: 14px; background: var(--paper); }
+.priv table { width: 100%; border-collapse: collapse; font-size: .95rem; min-width: 520px; }
+.priv th, .priv td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--paper-edge); }
+.priv th { background: var(--paper-2); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.priv tr:last-child td { border-bottom: 0; }
+.priv td:first-child { width: 30%; }
+.priv code { font-size: .88em; background: var(--paper-2); padding: 1px 5px; border-radius: 5px; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/runeborg">Runeborg</a>
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
+    </div>
+    <a href="/spil/runeborg/" class="btn btn-primary btn-sm nav-cta">Spil nu</a>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/runeborg">Runeborg</a>
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+  <a href="/spil/runeborg/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
+</div>
+
+<main>
+
+<header class="hero" style="padding-bottom:16px;">
+  <div class="wrap narrow">
+    <p class="eyebrow">Privatliv og cookies</p>
+    <h1>Ingen sporing, ingen reklamer, ingen cookie-banner.</h1>
+    <p class="lead">Vi bruger kun det, der skal til for, at man kan logge ind og gemme sit spil. Derfor spørger vi ikke om lov til cookies — loven kræver det ikke, når der ikke er andet. Her står præcis, hvad der ligger i din browser, og hvad vi gemmer om dig og dit barn.</p>
+    <p class="small">Senest opdateret 26. september 2026.</p>
+  </div>
+</header>
+
+<section style="padding-top:40px;">
+  <div class="wrap narrow priv">
+
+    <h2 id="cookies">Cookies</h2>
+    <p>Der bliver kun sat cookies, når nogen logger ind. Besøger du bare siden eller spiller uden login, bliver der ikke sat nogen.</p>
+    <div class="tabel"><table>
+      <thead><tr><th>Navn</th><th>Hvad den gør</th><th>Holder</th></tr></thead>
+      <tbody>
+        <tr><td><code>lf_session</code></td><td>Husker, at du eller dit barn er logget ind. Den indeholder en tilfældig nøgle, som kun virker her — ikke navn, kode eller andet.</td><td>30 dage (elever fra en skole: 10 timer), eller til man logger ud</td></tr>
+        <tr><td><code>lf_in</code></td><td>Fortæller siderne, <em>at</em> nogen er logget ind, og hvilket nummer kontoen har, så menuen kan vise dit navn, og Runeborg kan gemme hvert barns eventyr for sig på en delt computer. Den giver ikke adgang til noget.</td><td>Samme som <code>lf_session</code></td></tr>
+      </tbody>
+    </table></div>
+    <p>Begge er førstepartscookies fra learnification.dk. Vi bruger ingen cookies til statistik, analyse, reklamer eller sociale medier, og ingen andre sætter cookies gennem vores sider.</p>
+
+    <h2 id="browser" style="margin-top:44px;">Det, der gemmes i browseren</h2>
+    <p>Spillene gemmer lidt i browserens lokale lager (<code>localStorage</code>). Det bliver på din enhed og bliver ikke sendt til os.</p>
+    <div class="tabel"><table>
+      <thead><tr><th>Navn</th><th>Hvad det gør</th><th>Holder</th></tr></thead>
+      <tbody>
+        <tr><td><code>runeborg-v1</code><br><code>runeborg-v1-elev.&lt;nr&gt;</code></td><td>Hvor langt man er nået i Runeborg — ét for hvert barn, der er logget ind.</td><td>Til man starter forfra eller rydder browseren</td></tr>
+        <tr><td><code>runeborg-indstillinger</code></td><td>Om musik, lydeffekter og oplæsning er slået til, og om teksten skal være stor.</td><td>Til man rydder browseren</td></tr>
+        <tr><td><code>lf-tester</code></td><td>At denne browser har meldt sig til testen, så vi ikke spørger igen.</td><td>Til man rydder browseren</td></tr>
+      </tbody>
+    </table></div>
+    <p>Regnehelten gemmer ikke noget om spilleren i browseren — lukker man fanen, starter man forfra.</p>
+
+    <h2 id="samtykke" style="margin-top:44px;">Hvorfor der ikke er et cookie-banner</h2>
+    <p>Reglerne om cookies (ePrivacy-direktivets artikel 5, stk. 3, og den danske cookiebekendtgørelse) kræver samtykke til alt, der gemmes på brugerens udstyr — <strong>undtagen</strong> det, der er strengt nødvendigt for at levere en tjeneste, brugeren selv har bedt om. Et login, man selv har valgt, og et spil, man selv har startet, er præcis det. Alt ovenfor hører under undtagelsen, så der er ikke noget at sige ja eller nej til.</p>
+    <p>Kommer der en dag noget til, som ikke er strengt nødvendigt — fx statistik — spørger vi først, og det bliver skrevet her.</p>
+
+    <h2 id="andre" style="margin-top:44px;">Hvem der ellers er involveret</h2>
+    <p>Siden, skrifttyperne og al data ligger hos vores webhotel, <strong>Simply.com</strong> i Danmark, som er vores databehandler. Mails fra os bliver også sendt derfra.</p>
+    <p><strong>Én undtagelse:</strong> Regnehelten er skrevet i Python, og den motor, der kører Python i browseren, bliver hentet fra <code>pygame-web.github.io</code>, som drives af GitHub (ejet af Microsoft) i USA. Når spillet starter, ser GitHub derfor din IP-adresse og hvilken browser, du bruger — ligesom enhver side, man henter noget fra. GitHub får ikke navne, koder eller noget om, hvordan barnet spiller. GitHub er omfattet af EU-US Data Privacy Framework, som EU-Kommissionen har godkendt til overførsler til USA. Runeborg og resten af sitet henter intet fra andre.</p>
+
+    <h2 id="gemmer" style="margin-top:44px;">Hvad vi gemmer, og hvorfor</h2>
+    <p>Den fulde liste, skrevet i almindeligt sprog, står på <a href="/for-voksne#data">For forældre og lærere</a>. Kort fortalt:</p>
+    <div class="tabel"><table>
+      <thead><tr><th>Oplysninger</th><th>Hvorfor</th><th>Retsgrundlag</th></tr></thead>
+      <tbody>
+        <tr><td>Den voksnes konto: navn, skole, by, mail og kodeord som hash</td><td>For at du kan logge ind og styre børnenes adgang</td><td>Aftale (GDPR art. 6, stk. 1, litra b)</td></tr>
+        <tr><td>Børn: kaldenavn, login-kode, klasse eller familie, spilletid pr. spil og dag</td><td>For at barnet kan logge ind, og den voksne kan se spilletiden</td><td>Aftale med den voksne (litra b) — for skoler se nedenfor</td></tr>
+        <tr><td>Regnehelten, mens den er til test: fornavn i spillet, klassetrin, antal løste opgaver og emner</td><td>For at se, om opgaverne passer til klassetrinnet</td><td>Legitim interesse i at gøre spillet bedre (litra f)</td></tr>
+        <tr><td>Tilmelding til testen: navn, mail, mobilnummer</td><td>For at kunne skrive til jer om testen</td><td>Aftale (litra b)</td></tr>
+        <tr><td>IP-adresse som uigenkendelig kode</td><td>For at stoppe nogen, der prøver at gætte koder</td><td>Legitim interesse i sikkerhed (litra f)</td></tr>
+      </tbody>
+    </table></div>
+    <p><strong>Hvor længe:</strong> kontoen og børnenes oplysninger til I sletter dem under <a href="/konto">Min konto</a> — det sker med det samme. IP-koden i højst en time. Testresultater og tilmeldinger slettes, når testperioden er slut. Vi giver intet videre og sælger intet.</p>
+    <p><strong>Skoler:</strong> bruger en skole Learnification i undervisningen, er skolen (kommunen) dataansvarlig for elevernes oplysninger, og vi behandler dem på skolens vegne. Skriv til os, så får I en databehandleraftale.</p>
+
+    <h2 id="rettigheder" style="margin-top:44px;">Dine rettigheder</h2>
+    <p>Du har ret til at få at vide, hvad vi har gemt om dig eller dit barn, få det rettet eller slettet, få det udleveret, begrænse brugen af det og gøre indsigelse mod den. Skriv til <a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a>, så svarer vi hurtigst muligt og senest inden for en måned.</p>
+    <p>Er du utilfreds med, hvordan vi behandler oplysningerne, kan du klage til <a href="https://www.datatilsynet.dk">Datatilsynet</a>, Carl Jacobsens Vej 35, 2500 Valby.</p>
+
+    <h2 id="slet" style="margin-top:44px;">Sådan sletter du det hele fra browseren</h2>
+    <p>Log ud, og slet derefter data for learnification.dk i browserens indstillinger — i Chrome og Edge under <em>Indstillinger → Privatliv → Cookies og andre webstedsdata</em>, i Safari under <em>Indstillinger → Avanceret → Webstedsdata</em>. Bemærk, at Runeborg så starter forfra.</p>
+
+    <h2 id="ansvarlig" style="margin-top:44px;">Dataansvarlig</h2>
+    <p>Andreasen Media<br>Lindegaarden 12, 1.<br>9400 Nørresundby<br>CVR 40908757<br><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="/privatliv">Privatliv og cookies</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+</body>
+</html>
