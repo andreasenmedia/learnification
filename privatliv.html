@@ -64,7 +64,7 @@
   <div class="wrap narrow">
     <p class="eyebrow">Privatliv og cookies</p>
     <h1>Ingen sporing, ingen reklamer, ingen cookie-banner.</h1>
-    <p class="lead">Vi bruger kun det, der skal til for, at man kan logge ind og gemme sit spil. Derfor spørger vi ikke om lov til cookies — loven kræver det ikke, når der ikke er andet. Her står præcis, hvad der ligger i din browser, og hvad vi gemmer om dig og dit barn.</p>
+    <p class="lead">Cookies bruger vi kun til at huske, at man er logget ind, og spillene gemmer kun i browseren, hvor langt man er nået. Vores besøgstal laver vi selv — uden cookies og uden at kunne genkende nogen. Derfor spørger vi ikke om lov til cookies: loven kræver det ikke, når der ikke er andet. Her står præcis, hvad der ligger i din browser, og hvad vi gemmer om dig og dit barn.</p>
     <p class="small">Senest opdateret 26. september 2026.</p>
   </div>
 </header>
@@ -95,9 +95,15 @@
     </table></div>
     <p>Regnehelten gemmer ikke noget om spilleren i browseren — lukker man fanen, starter man forfra.</p>
 
+    <h2 id="statistik" style="margin-top:44px;">Besøgsstatistik</h2>
+    <p>Vi vil gerne vide, hvordan folk finder siden, og hvilke sider de kigger på, så vi kan gøre den bedre. Det måler vi selv på vores eget webhotel — der er ingen Google Analytics eller lignende, og ingen andre får tallene.</p>
+    <p>Når en side bliver vist, får serveren at vide: <strong>hvilken side</strong>, hvilken af vores egne sider man kom fra, <strong>navnet på det site</strong>, der linkede hertil (fx "google.com" — ikke hvad man søgte på), og om det er en mobil. Serveren laver din IP-adresse og browserens navn om til en tilfældig kode, der kun gælder <strong>i dag</strong>. Selve IP-adressen bliver aldrig gemt, og koden laves med en nøgle, der skiftes hver nat og ikke gemmes. Så kan vi se, at et besøg gik fra forsiden til Runeborg — men ikke hvem det var, og ikke om det var den samme, der kom igen i morgen.</p>
+    <p>Statistikken sætter ingen cookies og gemmer intet på din enhed. Har du slået <em>Do Not Track</em> eller <em>Global Privacy Control</em> til i din browser, bliver du slet ikke talt. Linjerne bliver slettet efter 13 måneder.</p>
+
     <h2 id="samtykke" style="margin-top:44px;">Hvorfor der ikke er et cookie-banner</h2>
     <p>Reglerne om cookies (ePrivacy-direktivets artikel 5, stk. 3, og den danske cookiebekendtgørelse) kræver samtykke til alt, der gemmes på brugerens udstyr — <strong>undtagen</strong> det, der er strengt nødvendigt for at levere en tjeneste, brugeren selv har bedt om. Et login, man selv har valgt, og et spil, man selv har startet, er præcis det. Alt ovenfor hører under undtagelsen, så der er ikke noget at sige ja eller nej til.</p>
-    <p>Kommer der en dag noget til, som ikke er strengt nødvendigt — fx statistik — spørger vi først, og det bliver skrevet her.</p>
+    <p>Besøgsstatistikken gemmer ikke noget i browseren og læser ikke noget, der er gemt der — kun hvilken side der bliver vist, og hvor man kom fra. Den er lavet efter de betingelser, som fx det franske datatilsyn (CNIL) stiller til besøgsstatistik uden samtykke: kun til vores egen brug, kun samlede tal, ingen genkendelse fra dag til dag, ingen deling med andre, og en nem måde at sige fra på.</p>
+    <p>Kommer der en dag noget til, som kræver samtykke — fx reklamer, indlejrede videoer eller statistik fra andre — spørger vi først, og det bliver skrevet her.</p>
 
     <h2 id="andre" style="margin-top:44px;">Hvem der ellers er involveret</h2>
     <p>Siden, skrifttyperne og al data ligger hos vores webhotel, <strong>Simply.com</strong> i Danmark, som er vores databehandler. Mails fra os bliver også sendt derfra.</p>
@@ -113,9 +119,10 @@
         <tr><td>Regnehelten, mens den er til test: fornavn i spillet, klassetrin, antal løste opgaver og emner</td><td>For at se, om opgaverne passer til klassetrinnet</td><td>Legitim interesse i at gøre spillet bedre (litra f)</td></tr>
         <tr><td>Tilmelding til testen: navn, mail, mobilnummer</td><td>For at kunne skrive til jer om testen</td><td>Aftale (litra b)</td></tr>
         <tr><td>IP-adresse som uigenkendelig kode</td><td>For at stoppe nogen, der prøver at gætte koder</td><td>Legitim interesse i sikkerhed (litra f)</td></tr>
+        <tr><td>Besøgsstatistik: side, forrige side, henvisende site, mobil ja/nej og en kode, der kun gælder én dag</td><td>For at se, hvordan siden bliver fundet og brugt, og gøre den bedre</td><td>Legitim interesse (litra f)</td></tr>
       </tbody>
     </table></div>
-    <p><strong>Hvor længe:</strong> kontoen og børnenes oplysninger til I sletter dem under <a href="/konto">Min konto</a> — det sker med det samme. IP-koden i højst en time. Testresultater og tilmeldinger slettes, når testperioden er slut. Vi giver intet videre og sælger intet.</p>
+    <p><strong>Hvor længe:</strong> kontoen og børnenes oplysninger til I sletter dem under <a href="/konto">Min konto</a> — det sker med det samme. IP-koden i højst en time. Besøgsstatistikken i 13 måneder. Testresultater og tilmeldinger slettes, når testperioden er slut. Vi giver intet videre og sælger intet.</p>
     <p><strong>Skoler:</strong> bruger en skole Learnification i undervisningen, er skolen (kommunen) dataansvarlig for elevernes oplysninger, og vi behandler dem på skolens vegne. Skriv til os, så får I en databehandleraftale.</p>
 
     <h2 id="rettigheder" style="margin-top:44px;">Dine rettigheder</h2>
@@ -156,5 +163,6 @@
 </footer>
 
 <script src="/assets/script.js?v=4" defer></script>
+<script src="/assets/besoeg.js?v=1" defer></script>
 </body>
 </html>

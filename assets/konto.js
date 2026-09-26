@@ -91,20 +91,22 @@ window.LF = LF;
     else { knap.disabled = false; }
   };
 
-  /** Søjlediagram over spilletid pr. dag: {'2026-09-25': sek, ...} */
-  LF.soejler = function (el, dage) {
+  /** Søjlediagram pr. dag: {'2026-09-25': sek, ...}. Uden fmt er tallene
+      spilletid i sekunder; statistikken giver sin egen, fx antal besøg. */
+  LF.soejler = function (el, dage, fmt, navn) {
+    fmt = fmt || LF.tid;
     var noegler = Object.keys(dage);
-    var max = Math.max.apply(null, noegler.map(function (k) { return dage[k]; }).concat([60]));
-    var html = '<div class="soejler" role="img" aria-label="Spilletid pr. dag">';
+    var max = Math.max.apply(null, noegler.map(function (k) { return dage[k]; }).concat([fmt === LF.tid ? 60 : 1]));
+    var html = '<div class="soejler" role="img" aria-label="' + LF.esc(navn || 'Spilletid pr. dag') + '">';
     noegler.forEach(function (k) {
       var v = dage[k], h = v ? Math.max(2, Math.round(v / max * 100)) : 0;
       var d = new Date(k + 'T12:00:00');
-      var navn = d.toLocaleDateString('da-DK', { weekday: 'short', day: 'numeric', month: 'short' });
-      html += '<div class="s"><i style="height:' + h + '%"></i><span class="tip">' + LF.esc(navn) + ': ' + LF.tid(v) + '</span></div>';
+      var dagnavn = d.toLocaleDateString('da-DK', { weekday: 'short', day: 'numeric', month: 'short' });
+      html += '<div class="s"><i style="height:' + h + '%"></i><span class="tip">' + LF.esc(dagnavn) + ': ' + LF.esc(fmt(v)) + '</span></div>';
     });
-    html += '</div><div class="soejler-akse"><span>' + fmt(noegler[0]) + '</span><span>i dag</span></div>';
+    html += '</div><div class="soejler-akse"><span>' + kort(noegler[0]) + '</span><span>i dag</span></div>';
     el.innerHTML = html;
-    function fmt(k) { return new Date(k + 'T12:00:00').toLocaleDateString('da-DK', { day: 'numeric', month: 'short' }); }
+    function kort(k) { return new Date(k + 'T12:00:00').toLocaleDateString('da-DK', { day: 'numeric', month: 'short' }); }
   };
 
   /** Hvor må man sendes hen efter login? Kun sider på vores eget domæne. */

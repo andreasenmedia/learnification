@@ -27,6 +27,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `konto.html` | `/konto` | Den voksnes side: klasser, elever, koder og spilletid |
 | `login-kort.html` | `/login-kort?g=<id>` | Login-kort til udskrift, ét pr. elev |
 | `admin.html` | `/admin` | Overblikket over alle testbrugere (kun administrator) |
+| `statistik.html` | `/statistik` | Besøgsstatistik: kilder, landingssider, vejen rundt (kun administrator) |
 | `api/` | — | PHP bag login-systemet. Se "Login og testkonti" |
 
 ## Runeborg
@@ -447,6 +448,25 @@ videoer, Google Fonts-links eller lignende på. Kommer der noget af det, skal
 der samtykke til, *før* det indlæses — og `/privatliv` skal rettes. Runeborgs
 oplæsning bruger kun stemmer, der kører på enheden (`localService`), fordi
 Chromes "Google Dansk" sender teksten til Google.
+
+**Besøgsstatistikken er vores egen** (`assets/besoeg.js` → `api/besoeg.php`
+→ tabellen `besoeg`, vist på `/statistik`). Den er bygget til at kunne køre
+uden samtykke, og det holder kun, så længe disse ting er sande:
+
+- ingen cookies og intet i `localStorage` — heller ikke "bare et id";
+- IP-adressen gemmes aldrig; besøgskoden er en HMAC af IP + browser med et
+  salt i `besoegssalt.txt`, der skiftes ved datoskift og skrives over, så
+  ingen kan følges fra dag til dag;
+- kun sti, forrige egen side, henvisende værtsnavn (ikke hele adressen) og
+  mobil ja/nej; aldrig forespørgsler (`?token=`, `?g=`) — `besoeg.js` sender
+  kun `pathname`;
+- DNT og GPC respekteres (i både JS og PHP);
+- tallene deles ikke med nogen og bruges kun samlet; linjer slettes efter
+  400 dage.
+
+Tilføj en `?ref=navn` på links i opslag, nyhedsbreve og visitkort, så dukker
+de op under "Hvor kommer de fra?". Ændres noget af ovenstående, skal
+`/privatliv#statistik` rettes — og måske skal der så samtykke til.
 
 ## Test lokalt som på Simply.com
 

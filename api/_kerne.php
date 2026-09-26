@@ -300,6 +300,22 @@ function opret_tabeller(PDO $pdo): void
                 }
             },
         ],
+        // Besøgsstatistik (api/besoeg.php). Én linje pr. sidevisning.
+        // "besoeger" er en kode, der kun gælder den ene dag — se besoeg.php.
+        3 => [
+            "CREATE TABLE besoeg (
+                id $id,
+                tid INTEGER NOT NULL,
+                dag $tekst NOT NULL,
+                besoeger $tekst NOT NULL,
+                side $tekst NOT NULL,
+                fra $tekst NOT NULL DEFAULT '',
+                kilde $tekst NOT NULL DEFAULT '',
+                mobil INTEGER NOT NULL DEFAULT 0
+            )$slut",
+            'CREATE INDEX besoeg_tid ON besoeg(tid)',
+            'CREATE INDEX besoeg_dag ON besoeg(dag, besoeger)',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

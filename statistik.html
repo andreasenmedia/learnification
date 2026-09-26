@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Besøg — Learnification</title>
+<meta name="description" content="Besøgsstatistik for learnification.dk.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf7f0">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
+<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/konto.css?v=2">
+<style>
+/* Kun statistiksiden. Resten kommer fra konto.css. */
+.periode { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.periode button { border: 2px solid var(--paper-edge); background: var(--paper); color: var(--ink-soft);
+  font: 600 .92rem var(--sans); padding: 7px 13px; border-radius: 999px; cursor: pointer; }
+.periode button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.periode button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.to-kol { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin: 22px 0; }
+.to-kol .panel + .panel { margin-top: 0; }
+@media (max-width: 820px) { .to-kol { grid-template-columns: 1fr; } }
+.to-kol .panel .lille { margin-top: 0; }
+table.liste td.navn { width: 100%; }
+table.liste td.navn .sti { color: var(--ink-soft); font-size: .84rem; margin-left: 6px; }
+.bjaelke { height: 6px; border-radius: 3px; background: var(--gold); margin-top: 5px; }
+.forklaring { font-size: .9rem; color: var(--ink-soft); margin-top: 26px; }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/runeborg">Runeborg</a>
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/runeborg">Runeborg</a>
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+    <p class="midt lille" id="indlaeser">Henter statistikken …</p>
+
+    <div class="panel smal" id="ikke-admin" hidden>
+      <h2>Kun for Learnification</h2>
+      <p>Den her side er besøgsstatistikken for hele sitet. Du er logget ind med en almindelig konto.</p>
+      <p><a class="btn btn-primary" href="/konto">Gå til din konto</a></p>
+    </div>
+
+    <div id="statistik" hidden>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Administrator</p><h1>Besøg på siden</h1></div>
+        <div class="knapper">
+          <a class="btn btn-sm" href="/admin">Testbrugere</a>
+          <button type="button" class="btn btn-sm" data-logud>Log ud</button>
+        </div>
+      </div>
+      <div class="periode" id="periode" role="group" aria-label="Periode">
+        <button type="button" data-dage="1">I dag</button>
+        <button type="button" data-dage="7">7 dage</button>
+        <button type="button" data-dage="30">30 dage</button>
+        <button type="button" data-dage="90">90 dage</button>
+        <button type="button" data-dage="365">Et år</button>
+      </div>
+      <div class="tal-raekke" id="tal"></div>
+      <div class="panel" id="dage-panel">
+        <h2>Besøg pr. dag</h2>
+        <div id="dage"></div>
+      </div>
+      <div class="to-kol">
+        <div class="panel"><h2>Hvor kommer de fra?</h2><div class="tabel-rul"><table class="liste" id="kilder"></table></div></div>
+        <div class="panel"><h2>Hvor lander de?</h2><div class="tabel-rul"><table class="liste" id="ind"></table></div></div>
+      </div>
+      <div class="panel">
+        <h2>Mest sete sider</h2>
+        <div class="tabel-rul"><table class="liste" id="sider"></table></div>
+      </div>
+      <div class="to-kol">
+        <div class="panel"><h2>Vejen rundt</h2><p class="lille">De hyppigste skridt fra én side til den næste.</p><div class="tabel-rul"><table class="liste" id="veje"></table></div></div>
+        <div class="panel"><h2>Hvor går de fra siden?</h2><p class="lille">Den sidste side, et besøg så.</p><div class="tabel-rul"><table class="liste" id="ud"></table></div></div>
+      </div>
+      <p class="forklaring">Et besøg er én person på én dag. Tallene kommer fra vores egen server uden cookies: ingen kan genkendes fra den ene dag til den næste, så den samme person, der kommer igen i morgen, tæller som et nyt besøg. En hel skoleklasse på samme netværk og med ens computere kan tælle som ganske få besøg. Browsere, der har bedt om ikke at blive fulgt, bliver slet ikke talt, og det gør administratorsiderne heller ikke. Se <a href="/privatliv#statistik">privatlivssiden</a>.</p>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/konto.js?v=2"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var NAVNE = {
+    '/': 'Forside', '/runeborg': 'Om Runeborg', '/spil/runeborg/': 'Spil Runeborg',
+    '/regnehelten': 'Om Regnehelten', '/spil/': 'Spil Regnehelten', '/for-voksne': 'For voksne',
+    '/om': 'Om os', '/login': 'Log ind', '/opret': 'Opret konto', '/konto': 'Min konto',
+    '/login-kort': 'Login-kort', '/privatliv': 'Privatliv og cookies', '/404 (findes ikke)': 'Siden findes ikke'
+  };
+  var dage = 30;
+
+  function side(s) {
+    return NAVNE[s] ? LF.esc(NAVNE[s]) + '<span class="sti">' + LF.esc(s) + '</span>' : LF.esc(s);
+  }
+  function tal(n) { return Number(n).toLocaleString('da-DK'); }
+  function kort(t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + LF.esc(t[1]) + '</div></div>'; }
+
+  /** Liste med en lille bjælke under hvert navn. vis(navn) giver HTML. */
+  function liste(el, raekker, kolonne, vis, i_alt) {
+    var max = raekker.length ? raekker[0][1] : 1;
+    var html = '<thead><tr><th></th><th class="t">' + LF.esc(kolonne) + '</th>' + (i_alt ? '<th class="t">Andel</th>' : '') + '</tr></thead><tbody>';
+    raekker.forEach(function (r) {
+      html += '<tr><td class="navn">' + vis(r[0]) + '<div class="bjaelke" style="width:' + Math.max(2, Math.round(r[1] / max * 100)) + '%"></div></td>'
+        + '<td class="t">' + tal(r[1]) + '</td>' + (i_alt ? '<td class="t">' + Math.round(r[1] / i_alt * 100) + ' %</td>' : '') + '</tr>';
+    });
+    if (!raekker.length) html += '<tr><td colspan="3" class="tom">Ingen besøg i perioden endnu.</td></tr>';
+    el.innerHTML = html + '</tbody>';
+  }
+
+  function vej(v) {
+    var d = v.split(' → ');
+    return side(d[0]) + ' <strong aria-label="til">→</strong> ' + side(d[1]);
+  }
+
+  function hent() {
+    document.querySelectorAll('#periode button').forEach(function (b) {
+      b.setAttribute('aria-pressed', +b.dataset.dage === dage ? 'true' : 'false');
+    });
+    LF.hent('admin', 'besoeg', { dage: dage }).then(function (d) {
+      $('indlaeser').hidden = true;
+      $('statistik').hidden = false;
+      var t = d.tal;
+      $('tal').innerHTML = [
+        [tal(t.besoeg), 'Besøg'], [tal(t.visninger), 'Sidevisninger'],
+        [String(t.sider_pr_besoeg).replace('.', ','), 'Sider pr. besøg'],
+        [t.spil + ' %', 'Nåede til et spil'], [t.en_side + ' %', 'Så kun én side'], [t.mobil + ' %', 'På mobil']
+      ].map(kort).join('');
+      $('dage-panel').hidden = d.dage === 1;
+      if (d.dage > 1) LF.soejler($('dage'), d.pr_dag, function (v) { return v === 1 ? '1 besøg' : tal(v) + ' besøg'; }, 'Besøg pr. dag');
+      liste($('kilder'), d.kilder, 'Besøg', LF.esc, t.besoeg);
+      liste($('ind'), d.ind, 'Besøg', side, t.besoeg);
+      liste($('ud'), d.ud, 'Besøg', side, t.besoeg);
+      liste($('veje'), d.veje, 'Gange', vej);
+      var html = '<thead><tr><th>Side</th><th class="t">Visninger</th><th class="t">Besøg</th></tr></thead><tbody>';
+      d.sider.forEach(function (s) {
+        html += '<tr><td class="navn">' + side(s[0]) + '</td><td class="t">' + tal(s[1]) + '</td><td class="t">' + tal(s[2]) + '</td></tr>';
+      });
+      if (!d.sider.length) html += '<tr><td colspan="3" class="tom">Ingen besøg i perioden endnu.</td></tr>';
+      $('sider').innerHTML = html + '</tbody>';
+    }).catch(function (err) { $('indlaeser').hidden = false; $('indlaeser').textContent = err.message; });
+  }
+
+  $('periode').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-dage]'); if (!b) return;
+    dage = +b.dataset.dage;
+    hent();
+  });
+  document.querySelectorAll('[data-logud]').forEach(function (b) {
+    b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
+  });
+
+  LF.hent('konto', 'mig').then(function (m) {
+    if (!m.logget_ind || m.hvem !== 'voksen') { location.replace('/login?til=/statistik#voksen'); return; }
+    if (m.konto.type !== 'admin') { $('indlaeser').hidden = true; $('ikke-admin').hidden = false; return; }
+    hent();
+  }).catch(function (err) { $('indlaeser').textContent = err.message; });
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="/privatliv">Privatliv og cookies</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+</body>
+</html>

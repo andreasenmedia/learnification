@@ -8,6 +8,7 @@
  *   GET  ?handling=konto&id=    én konto med klasser og elever
  *   POST saet_status            godkend / spær / åbn igen
  *   GET  ?handling=eksport      alle konti som CSV til Excel
+ *   GET  ?handling=besoeg&dage= besøgsstatistikken til /statistik
  *
  * DEN FØRSTE ADMINISTRATOR. Første gang /admin bliver åbnet, skriver
  * serveren en tilfældig nøgle i opsaetningsnoegle.txt i datamappen
@@ -125,7 +126,114 @@ function konti_med_tal(): array
     return $ud;
 }
 
+/** Et værtsnavn eller en ?ref=-kode som et navn, man kan læse. */
+function kildenavn(string $k): string
+{
+    if ($k === '') {
+        return 'Direkte eller ukendt';
+    }
+    $kendte = [
+        'google' => 'Google', 'bing' => 'Bing', 'duckduckgo' => 'DuckDuckGo', 'ecosia' => 'Ecosia',
+        'yahoo' => 'Yahoo', 'facebook' => 'Facebook', 'fb' => 'Facebook', 'instagram' => 'Instagram',
+        'linkedin' => 'LinkedIn', 'lnkd' => 'LinkedIn', 't.co' => 'X / Twitter', 'twitter' => 'X / Twitter',
+        'x.com' => 'X / Twitter', 'youtube' => 'YouTube', 'tiktok' => 'TikTok', 'reddit' => 'Reddit',
+        'chatgpt' => 'ChatGPT', 'openai' => 'ChatGPT', 'perplexity' => 'Perplexity', 'claude.ai' => 'Claude',
+        'gemini' => 'Gemini', 'copilot' => 'Copilot', 'aula' => 'Aula', 'mail.' => 'Webmail',
+        'outlook' => 'Outlook', 'andreasenmedia' => 'Andreasen Media',
+    ];
+    foreach ($kendte as $noegle => $navn) {
+        if (strpos($k, $noegle) !== false) {
+            return $navn;
+        }
+    }
+    return $k;
+}
+
+/** [[navn, antal], ...] sorteret, højst $n. */
+function top(array $taelling, int $n = 12): array
+{
+    arsort($taelling);
+    $ud = [];
+    foreach (array_slice($taelling, 0, $n, true) as $k => $v) {
+        $ud[] = [(string) $k, (int) $v];
+    }
+    return $ud;
+}
+
 switch ($h) {
+
+case 'besoeg':
+    $dage = in_array(tal('dage'), [1, 7, 30, 90, 365], true) ? tal('dage') : 30;
+    $fra = strtotime('today') - ($dage - 1) * 86400;
+
+    // Alle sidevisninger i perioden, sorteret, så de kan lægges i besøg.
+    // Et besøg er én besøgskode på én dag — koden skifter hver nat.
+    $besoeg = [];
+    $sider = $sidebesoeg = $kilder = $ind = $ud = $veje = [];
+    $pr_dag = [];
+    for ($i = 0; $i < $dage; $i++) {
+        $pr_dag[date('Y-m-d', $fra + $i * 86400 + 7200)] = ['b' => [], 'v' => 0];
+    }
+    $visninger = 0;
+    $s = db()->prepare('SELECT dag, besoeger, side, fra, kilde, mobil FROM besoeg WHERE tid >= ? ORDER BY id');
+    $s->execute([$fra]);
+    while ($r = $s->fetch()) {
+        $noegle = $r['dag'] . $r['besoeger'];
+        $visninger++;
+        if (!isset($besoeg[$noegle])) {
+            $besoeg[$noegle] = ['ind' => $r['side'], 'kilde' => $r['kilde'], 'mobil' => (int) $r['mobil'],
+                                'sider' => 0, 'sidst' => '', 'spil' => false];
+        }
+        $b = &$besoeg[$noegle];
+        $b['sider']++;
+        // Kom de ind direkte og senere via et link, er det linket, der tæller
+        if ($b['kilde'] === '' && $r['kilde'] !== '') {
+            $b['kilde'] = $r['kilde'];
+        }
+        if ($b['sidst'] !== '' && $b['sidst'] !== $r['side']) {
+            $vej = $b['sidst'] . ' → ' . $r['side'];
+            $veje[$vej] = ($veje[$vej] ?? 0) + 1;
+        }
+        $b['sidst'] = $r['side'];
+        if (strpos($r['side'], '/spil/') === 0) {
+            $b['spil'] = true;
+        }
+        unset($b);
+        $sider[$r['side']] = ($sider[$r['side']] ?? 0) + 1;
+        $sidebesoeg[$r['side']][$noegle] = true;
+        if (isset($pr_dag[$r['dag']])) {
+            $pr_dag[$r['dag']]['b'][$r['besoeger']] = true;
+            $pr_dag[$r['dag']]['v']++;
+        }
+    }
+
+    $mobil = $spil = $en_side = 0;
+    foreach ($besoeg as $b) {
+        $k = kildenavn($b['kilde']);
+        $kilder[$k] = ($kilder[$k] ?? 0) + 1;
+        $ind[$b['ind']] = ($ind[$b['ind']] ?? 0) + 1;
+        $ud[$b['sidst']] = ($ud[$b['sidst']] ?? 0) + 1;
+        $mobil += $b['mobil'];
+        $spil += $b['spil'] ? 1 : 0;
+        $en_side += $b['sider'] === 1 ? 1 : 0;
+    }
+    $antal = count($besoeg);
+    $side_liste = [];
+    foreach (top($sider, 40) as [$side, $v]) {
+        $side_liste[] = [$side, $v, count($sidebesoeg[$side])];
+    }
+
+    svar(['ok' => true, 'dage' => $dage,
+          'tal' => ['besoeg' => $antal, 'visninger' => $visninger,
+                    'sider_pr_besoeg' => $antal ? round($visninger / $antal, 1) : 0,
+                    'mobil' => $antal ? round($mobil / $antal * 100) : 0,
+                    'spil' => $antal ? round($spil / $antal * 100) : 0,
+                    'en_side' => $antal ? round($en_side / $antal * 100) : 0],
+          'pr_dag' => array_map(fn($x) => count($x['b']), $pr_dag),
+          'visninger_pr_dag' => array_map(fn($x) => $x['v'], $pr_dag),
+          'kilder' => top($kilder), 'ind' => top($ind), 'ud' => top($ud),
+          'sider' => $side_liste, 'veje' => top($veje, 20)]);
+
 
 case 'overblik':
     $konti = konti_med_tal();
