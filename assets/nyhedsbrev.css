@@ -1,0 +1,41 @@
+/* Tilmeldingsboksen til nyhedsbrevet (forsiden, /for-voksne, /nyhedsbrev).
+   Bygger på style.css — samme papir, blæk og guld. */
+
+.nb-boks {
+  max-width: 640px; margin: 0 auto; text-align: left;
+  background: var(--paper); border: 2px solid var(--paper-edge);
+  border-radius: var(--r); box-shadow: var(--shadow); padding: 28px 26px;
+}
+.nb-boks h2 { margin-bottom: .3em; }
+.nb-boks > p { color: var(--ink-soft); }
+@media (max-width: 560px) { .nb-boks { padding: 22px 16px; } }
+
+.nb-raekke { display: grid; grid-template-columns: 1.4fr 1fr; gap: 12px; margin-bottom: 14px; }
+@media (max-width: 560px) { .nb-raekke { grid-template-columns: 1fr; } }
+.nb-raekke label { display: block; font-size: .92rem; font-weight: 600; margin-bottom: 6px; }
+.nb-raekke label span { font-weight: 400; color: var(--ink-soft); }
+.nb-raekke input {
+  width: 100%; font: 1.02rem var(--sans); color: var(--ink); background: var(--paper);
+  border: 2px solid var(--ink); border-bottom-width: 3px; border-radius: var(--r-sm); padding: 12px 14px;
+}
+.nb-raekke input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.nb-roller { border: 0; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.nb-roller legend { font-size: .92rem; font-weight: 600; margin-bottom: 6px; padding: 0; }
+.nb-roller legend span { font-weight: 400; color: var(--ink-soft); }
+.nb-roller label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-size: .96rem; }
+.nb-roller input { accent-color: var(--gold); width: 17px; height: 17px; }
+
+.nb-samtykke {
+  display: flex; gap: 11px; align-items: flex-start; margin: 4px 0 18px;
+  font-size: .94rem; color: var(--ink-soft); cursor: pointer;
+}
+.nb-samtykke input { margin-top: .28em; width: 19px; height: 19px; accent-color: var(--gold); flex: none; }
+
+.nb-faelde { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.nb-besked { margin: 16px 0 0; padding: 12px 15px; border-radius: var(--r-sm); font-weight: 600; font-size: .95rem; }
+.nb-besked:empty { display: none; }
+.nb-besked.fejl { background: #fbe6e3; color: #8f2a23; border: 2px solid #e3a59f; }
+.nb-besked.ok { background: var(--green-soft); color: #1f5a36; border: 2px solid #9fcfb0; }
+.nb-lille { font-size: .86rem; color: var(--ink-soft); margin: 14px 0 0; }

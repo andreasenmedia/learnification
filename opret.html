@@ -92,6 +92,11 @@
           <span>Jeg har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig og børnene, og at vi må skrive til mig om testen.</span>
         </label>
 
+        <label class="samtykke">
+          <input type="checkbox" name="nyhedsbrev" id="nyhedsbrev">
+          <span><strong>Frivilligt:</strong> Send mig også nyt fra Learnification på mail — nye spil, opdateringer og tilbud. Højst et par gange om måneden, og jeg kan altid afmelde igen. <a href="/privatliv#nyhedsbrev" target="_blank">Læs mere</a></span>
+        </label>
+
         <button class="btn btn-primary btn-lg btn-fuld" type="submit">Opret konto</button>
         <p class="lille midt" style="margin:16px 0 0;">Har du allerede en konto? <a href="/login#voksen">Log ind</a></p>
       </form>
@@ -124,10 +129,11 @@
       type: type(),
       navn: f.navn.value.trim(), kontakt: f.kontakt.value.trim(), bynavn: f.bynavn.value.trim(),
       email: f.email.value.trim(), kodeord: f.kodeord.value,
-      samtykke: f.samtykke.checked, hjemmeside: f.hjemmeside.value
+      samtykke: f.samtykke.checked, nyhedsbrev: f.nyhedsbrev.checked, hjemmeside: f.hjemmeside.value
     };
     LF.travl(knap, true);
     LF.send('konto', 'opret', d).then(function () {
+      if (window.LFMaal) LFMaal('opret_konto');
       location.replace('/konto?ny=1');
     }).catch(function (err) {
       LF.besked(besked, err.message, 'fejl');
@@ -162,6 +168,7 @@
 </footer>
 
 <script src="/assets/script.js?v=4" defer></script>
-<script src="/assets/besoeg.js?v=1" defer></script>
+<script src="/assets/samtykke.js?v=1" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>

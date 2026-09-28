@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyhedsbrev — Learnification</title>
+<meta name="description" content="Få nyt fra Learnification på mail: nye danske læringsspil, opdateringer og tilbud til skoler og familier.">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#faf7f0">
+<link rel="canonical" href="https://learnification.dk/nyhedsbrev">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
+<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/konto.css?v=2">
+<link rel="stylesheet" href="/assets/nyhedsbrev.css?v=1">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/runeborg">Runeborg</a>
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/runeborg">Runeborg</a>
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+
+    <!-- Fra linket i bekræftelsesmailen -->
+    <div class="panel smal midt" id="bekraeft" hidden>
+      <h2 id="bekraeft-titel">Bekræfter …</h2>
+      <p id="bekraeft-tekst"></p>
+      <p><a class="btn" href="/">Til forsiden</a></p>
+    </div>
+
+    <!-- Fra afmeldingslinket i hver mail. Der skal trykkes: nogle
+         mailprogrammer åbner links af sig selv for at tjekke dem, og så
+         ville folk blive afmeldt uden at have gjort noget. -->
+    <div class="panel smal midt" id="afmeld" hidden>
+      <h2>Afmeld nyhedsbrevet</h2>
+      <p id="afmeld-tekst">Tryk på knappen, så får du ikke flere mails fra os.</p>
+      <p class="besked" id="afmeld-besked"></p>
+      <p><button class="btn btn-primary" type="button" id="afmeld-knap">Afmeld mig</button></p>
+    </div>
+
+    <div id="tilmeld">
+    <form class="nb-boks" data-nyhedsbrev novalidate>
+      <p class="eyebrow">Nyhedsbrev</p>
+      <h2>Få nyt fra Learnification</h2>
+      <p>Nye spil, opdateringer og tilbud til skoler og familier. Højst et par mails om måneden — og du kan afmelde dig med ét klik.</p>
+      <div class="nb-raekke">
+        <div><label for="nb-email-side">Mailadresse</label><input id="nb-email-side" name="email" type="email" autocomplete="email" required></div>
+        <div><label for="nb-navn-side">Fornavn <span>— frivilligt</span></label><input id="nb-navn-side" name="navn" autocomplete="given-name" maxlength="80"></div>
+      </div>
+      <fieldset class="nb-roller">
+        <legend>Jeg er <span>— frivilligt</span></legend>
+        <label><input type="radio" name="rolle" value="foraelder"> Forælder</label>
+        <label><input type="radio" name="rolle" value="laerer"> Lærer / skole</label>
+        <label><input type="radio" name="rolle" value="andet"> Andet</label>
+      </fieldset>
+      <div class="nb-faelde" aria-hidden="true"><label>Lad være tom <input name="hjemmeside" tabindex="-1" autocomplete="off"></label></div>
+      <label class="nb-samtykke">
+        <input type="checkbox" name="samtykke" required>
+        <span>Ja tak, send mig nyt fra Learnification på mail — nye spil, opdateringer og tilbud til skoler og familier. Højst et par gange om måneden. Jeg kan altid afmelde igen med et klik. <a href="/privatliv#nyhedsbrev">Sådan behandler vi din mail</a></span>
+      </label>
+      <button class="btn btn-primary" type="submit">Skriv mig op</button>
+      <p class="nb-besked" role="status" aria-live="polite"></p>
+      <p class="nb-lille">Du får først en mail, hvor du skal bekræfte, at det er dig. Kun for voksne.</p>
+    </form>
+    </div>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var q = new URLSearchParams(location.search);
+
+  function send(handling, noegle) {
+    return fetch('/api/nyhedsbrev.php', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-LF': '1' },
+      body: JSON.stringify({ handling: handling, noegle: noegle })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) throw new Error(d.besked || 'Noget gik galt.');
+      return d;
+    });
+  }
+
+  // Nøglen skal ikke blive stående i adressefeltet og historikken
+  function rydAdresse() { history.replaceState(null, '', location.pathname); }
+
+  if (q.get('bekraeft')) {
+    $('tilmeld').hidden = true;
+    $('bekraeft').hidden = false;
+    send('bekraeft', q.get('bekraeft')).then(function (d) {
+      $('bekraeft-titel').textContent = 'Tak — du er skrevet op!';
+      $('bekraeft-tekst').textContent = d.email + ' får nu nyt fra Learnification. Der er et afmeldingslink i hver mail.';
+    }).catch(function (err) {
+      $('bekraeft-titel').textContent = 'Det gik ikke';
+      $('bekraeft-tekst').textContent = err.message === 'Failed to fetch' ? 'Kunne ikke komme i kontakt med serveren. Prøv linket igen om lidt.' : err.message;
+    });
+    rydAdresse();
+  } else if (q.get('afmeld')) {
+    var noegle = q.get('afmeld');
+    $('tilmeld').hidden = true;
+    $('afmeld').hidden = false;
+    rydAdresse();
+    $('afmeld-knap').addEventListener('click', function () {
+      var knap = this;
+      knap.disabled = true;
+      send('afmeld', noegle).then(function (d) {
+        $('afmeld-tekst').textContent = d.email + ' er afmeldt. Du får ikke flere nyhedsbreve fra os.';
+        knap.remove();
+      }).catch(function (err) {
+        var b = $('afmeld-besked');
+        b.textContent = err.message === 'Failed to fetch' ? 'Kunne ikke komme i kontakt med serveren. Prøv igen om lidt.' : err.message;
+        b.className = 'besked fejl';
+        knap.disabled = false;
+      });
+    });
+  }
+})();
+</script>
+<script src="/assets/nyhedsbrev.js?v=2" defer></script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="/privatliv">Privatliv og cookies</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+<script src="/assets/samtykke.js?v=1" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
+</body>
+</html>

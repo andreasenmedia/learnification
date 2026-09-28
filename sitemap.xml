@@ -8,6 +8,7 @@
   <url><loc>https://learnification.dk/for-voksne</loc><priority>0.7</priority></url>
   <url><loc>https://learnification.dk/om</loc><priority>0.5</priority></url>
   <url><loc>https://learnification.dk/login</loc><priority>0.6</priority></url>
+  <url><loc>https://learnification.dk/nyhedsbrev</loc><priority>0.5</priority></url>
   <url><loc>https://learnification.dk/opret</loc><priority>0.6</priority></url>
   <url><loc>https://learnification.dk/privatliv</loc><priority>0.3</priority></url>
 </urlset>

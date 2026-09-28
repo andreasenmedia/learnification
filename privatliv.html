@@ -63,9 +63,9 @@
 <header class="hero" style="padding-bottom:16px;">
   <div class="wrap narrow">
     <p class="eyebrow">Privatliv og cookies</p>
-    <h1>Ingen sporing, ingen reklamer, ingen cookie-banner.</h1>
-    <p class="lead">Cookies bruger vi kun til at huske, at man er logget ind, og spillene gemmer kun i browseren, hvor langt man er nået. Vores besøgstal laver vi selv — uden cookies og uden at kunne genkende nogen. Derfor spørger vi ikke om lov til cookies: loven kræver det ikke, når der ikke er andet. Her står præcis, hvad der ligger i din browser, og hvad vi gemmer om dig og dit barn.</p>
-    <p class="small">Senest opdateret 26. september 2026.</p>
+    <h1>Så lidt som muligt — og kun med lov.</h1>
+    <p class="lead">Uden at spørge bruger vi kun de cookies, der skal til for at logge ind, og vores grundlæggende besøgstal laver vi selv uden cookies. Alt andet — en statistik-cookie og eventuelle annonce-cookies — kommer først, hvis en voksen siger ja i cookie-banneret, og kan altid slås fra igen. Børnenes sider får aldrig andet end det nødvendige. Her står præcis, hvad der ligger i din browser, og hvad vi gemmer om dig og dit barn.</p>
+    <p class="small">Senest opdateret 28. september 2026. <button type="button" data-cookie-indstillinger style="background:none;border:0;padding:0;font:inherit;color:var(--gold-dark);text-decoration:underline;cursor:pointer;">Ret dine cookie-valg</button></p>
   </div>
 </header>
 
@@ -73,15 +73,26 @@
   <div class="wrap narrow priv">
 
     <h2 id="cookies">Cookies</h2>
-    <p>Der bliver kun sat cookies, når nogen logger ind. Besøger du bare siden eller spiller uden login, bliver der ikke sat nogen.</p>
+    <p>Uden dit samtykke bliver der kun sat de <strong>nødvendige</strong> cookies: dem, der holder dig logget ind, og den, der husker dit svar i cookie-banneret. De andre bliver først sat, hvis du siger ja — og bliver slettet igen, hvis du siger nej eller trækker dit ja tilbage under <em>Cookie-indstillinger</em> nederst på hver side.</p>
+    <h3 style="margin-top:22px;">Nødvendige — kræver ikke samtykke</h3>
     <div class="tabel"><table>
       <thead><tr><th>Navn</th><th>Hvad den gør</th><th>Holder</th></tr></thead>
       <tbody>
         <tr><td><code>lf_session</code></td><td>Husker, at du eller dit barn er logget ind. Den indeholder en tilfældig nøgle, som kun virker her — ikke navn, kode eller andet.</td><td>30 dage (elever fra en skole: 10 timer), eller til man logger ud</td></tr>
-        <tr><td><code>lf_in</code></td><td>Fortæller siderne, <em>at</em> nogen er logget ind, og hvilket nummer kontoen har, så menuen kan vise dit navn, og Runeborg kan gemme hvert barns eventyr for sig på en delt computer. Den giver ikke adgang til noget.</td><td>Samme som <code>lf_session</code></td></tr>
+        <tr><td><code>lf_in</code></td><td>Fortæller siderne, <em>at</em> nogen er logget ind, og hvilket nummer kontoen har, så menuen kan vise dit navn, og spillene kan gemme hvert barns fremskridt for sig på en delt computer. Den giver ikke adgang til noget.</td><td>Samme som <code>lf_session</code></td></tr>
+        <tr><td><code>lf_samtykke</code></td><td>Husker, hvad du svarede i cookie-banneret, så vi ikke spørger hver gang. Indeholder dit valg, et tilfældigt nummer og tidspunktet.</td><td>12 måneder — så spørger vi igen</td></tr>
       </tbody>
     </table></div>
-    <p>Begge er førstepartscookies fra learnification.dk. Vi bruger ingen cookies til statistik, analyse, reklamer eller sociale medier, og ingen andre sætter cookies gennem vores sider.</p>
+    <h3 style="margin-top:22px;">Statistik — kun med dit samtykke</h3>
+    <div class="tabel"><table>
+      <thead><tr><th>Navn</th><th>Hvad den gør</th><th>Holder</th></tr></thead>
+      <tbody>
+        <tr><td><code>lf_bes</code></td><td>Et tilfældigt nummer til vores egen besøgsstatistik, så vi kan se, om du kommer igen, og hvilken vej du første gang fandt os (fx en annonce eller et nyhedsbrev), når du senere melder dig til noget. Kun hos os — ingen andre får tallene.</td><td>12 måneder</td></tr>
+      </tbody>
+    </table></div>
+    <h3 style="margin-top:22px;">Markedsføring — kun med dit samtykke</h3>
+    <p>Vi bruger ingen annonce-cookies lige nu, og derfor spørger banneret heller ikke om det. Tager vi en dag fx Metas, Googles eller LinkedIns annoncemåling i brug, kommer den på listen her, banneret begynder at spørge, og intet bliver hentet fra dem, før du har sagt ja.</p>
+    <p>Alle cookies ovenfor er førstepartscookies fra learnification.dk. <strong>Spillene, elev-login og alt, mens et barn er logget ind, får aldrig andet end de nødvendige</strong> — heller ikke hvis en voksen har sagt ja på samme computer. Børn under 13 kan ikke selv give samtykke.</p>
 
     <h2 id="browser" style="margin-top:44px;">Det, der gemmes i browseren</h2>
     <p>Spillene gemmer lidt i browserens lokale lager (<code>localStorage</code>). Det bliver på din enhed og bliver ikke sendt til os.</p>
@@ -91,19 +102,27 @@
         <tr><td><code>runeborg-v1</code><br><code>runeborg-v1-elev.&lt;nr&gt;</code></td><td>Hvor langt man er nået i Runeborg — ét for hvert barn, der er logget ind.</td><td>Til man starter forfra eller rydder browseren</td></tr>
         <tr><td><code>runeborg-indstillinger</code></td><td>Om musik, lydeffekter og oplæsning er slået til, og om teksten skal være stor.</td><td>Til man rydder browseren</td></tr>
         <tr><td><code>lf-tester</code></td><td>At denne browser har meldt sig til testen, så vi ikke spørger igen.</td><td>Til man rydder browseren</td></tr>
+        <tr><td><code>regnehelten-gem:&lt;nr&gt;</code></td><td>En kopi af det gemte Regnehelten-spil (se "Gemte spil" nedenfor), så intet går tabt, hvis nettet forsvinder et øjeblik.</td><td>Til man starter forfra eller rydder browseren</td></tr>
       </tbody>
     </table></div>
-    <p>Regnehelten gemmer ikke noget om spilleren i browseren — lukker man fanen, starter man forfra.</p>
+
+    <h2 id="gemte-spil" style="margin-top:44px;">Gemte spil</h2>
+    <p>Regnehelten gemmer af sig selv, hvor langt man er nået, så man kan spille videre — også på en anden computer eller tablet. Er man logget ind, ligger det gemte spil på vores server under barnets login (eller den voksnes konto): fornavnet og udseendet fra spillet, klassetrin, hvor langt i historien man er, Regnekraft, hvad der er i tasken, hvor i verden man står, og de opgaver, der er løst i omgangen. Det bliver slettet sammen med barnet eller kontoen under <a href="/konto">Min konto</a>.</p>
 
     <h2 id="statistik" style="margin-top:44px;">Besøgsstatistik</h2>
     <p>Vi vil gerne vide, hvordan folk finder siden, og hvilke sider de kigger på, så vi kan gøre den bedre. Det måler vi selv på vores eget webhotel — der er ingen Google Analytics eller lignende, og ingen andre får tallene.</p>
     <p>Når en side bliver vist, får serveren at vide: <strong>hvilken side</strong>, hvilken af vores egne sider man kom fra, <strong>navnet på det site</strong>, der linkede hertil (fx "google.com" — ikke hvad man søgte på), og om det er en mobil. Serveren laver din IP-adresse og browserens navn om til en tilfældig kode, der kun gælder <strong>i dag</strong>. Selve IP-adressen bliver aldrig gemt, og koden laves med en nøgle, der skiftes hver nat og ikke gemmes. Så kan vi se, at et besøg gik fra forsiden til Runeborg — men ikke hvem det var, og ikke om det var den samme, der kom igen i morgen.</p>
-    <p>Statistikken sætter ingen cookies og gemmer intet på din enhed. Har du slået <em>Do Not Track</em> eller <em>Global Privacy Control</em> til i din browser, bliver du slet ikke talt. Linjerne bliver slettet efter 13 måneder.</p>
+    <p>Den grundlæggende statistik sætter ingen cookies og gemmer intet på din enhed. Den tæller også, når nogen melder sig til nyhedsbrevet, opretter en konto eller starter et spil — som et samlet tal, knyttet til den kode, der kun gælder i dag. Har du slået <em>Do Not Track</em> eller <em>Global Privacy Control</em> til i din browser, bliver du slet ikke talt, og cookie-banneret bliver ikke vist. Linjerne bliver slettet efter 13 måneder.</p>
+    <p><strong>Siger du ja til statistik</strong> i cookie-banneret, kommer nummeret fra cookien <code>lf_bes</code> med på dine sidevisninger. Det er det eneste, der ændrer sig: så kan vi se, at det er den samme, der kommer igen, og hvilken kilde der oprindeligt førte dig hertil. Nummeret er tilfældigt og bliver aldrig koblet sammen med din konto, dit navn eller din mail.</p>
 
-    <h2 id="samtykke" style="margin-top:44px;">Hvorfor der ikke er et cookie-banner</h2>
-    <p>Reglerne om cookies (ePrivacy-direktivets artikel 5, stk. 3, og den danske cookiebekendtgørelse) kræver samtykke til alt, der gemmes på brugerens udstyr — <strong>undtagen</strong> det, der er strengt nødvendigt for at levere en tjeneste, brugeren selv har bedt om. Et login, man selv har valgt, og et spil, man selv har startet, er præcis det. Alt ovenfor hører under undtagelsen, så der er ikke noget at sige ja eller nej til.</p>
-    <p>Besøgsstatistikken gemmer ikke noget i browseren og læser ikke noget, der er gemt der — kun hvilken side der bliver vist, og hvor man kom fra. Den er lavet efter de betingelser, som fx det franske datatilsyn (CNIL) stiller til besøgsstatistik uden samtykke: kun til vores egen brug, kun samlede tal, ingen genkendelse fra dag til dag, ingen deling med andre, og en nem måde at sige fra på.</p>
-    <p>Kommer der en dag noget til, som kræver samtykke — fx reklamer, indlejrede videoer eller statistik fra andre — spørger vi først, og det bliver skrevet her.</p>
+    <h2 id="samtykke" style="margin-top:44px;">Cookie-banneret og dit samtykke</h2>
+    <p>Reglerne om cookies (ePrivacy-direktivets artikel 5, stk. 3, og den danske cookiebekendtgørelse) kræver samtykke til alt, der gemmes på brugerens udstyr — <strong>undtagen</strong> det, der er strengt nødvendigt for at levere en tjeneste, brugeren selv har bedt om, som et login. Derfor spørger vi kun om det, der ikke er nødvendigt.</p>
+    <p>Banneret er lavet efter Datatilsynets vejledning: "Afvis alle" er lige så stor og nem som "Tillad alle", intet er slået til på forhånd, siden kan bruges uden at svare, og intet bliver sat, før du har sagt ja. Du kan altid ændre eller trække dit samtykke tilbage under <em>Cookie-indstillinger</em> nederst på siden — et nej sletter de cookies, der allerede er sat.</p>
+    <p>For at kunne dokumentere, at du har sagt ja eller nej, gemmer vi dit valg sammen med det tilfældige nummer fra <code>lf_samtykke</code>, tidspunktet, siden og versionen af teksten — ingen IP-adresse eller andet, der peger på dig. Det bliver slettet efter 3 år.</p>
+
+    <h2 id="nyhedsbrev" style="margin-top:44px;">Nyhedsbrevet</h2>
+    <p>Du kan melde dig til nyt fra Learnification på mail — nye spil, opdateringer og tilbud til skoler og familier, højst et par gange om måneden. Kun for voksne. Vi gemmer din mailadresse, dit fornavn og om du er forælder eller lærer (hvis du skriver det), hvilken side du meldte dig til fra, den tekst, du sagde ja til, og hvornår du sagde ja og bekræftede.</p>
+    <p>Du kommer først på listen, når du har klikket på linket i den bekræftelsesmail, vi sender — så ingen kan melde andre til. Ubekræftede tilmeldinger bliver slettet efter 30 dage. Der er et afmeldingslink i hver mail, og afmelder du dig, får du ikke flere. Vil du slettes helt, så skriv til os.</p>
 
     <h2 id="andre" style="margin-top:44px;">Hvem der ellers er involveret</h2>
     <p>Siden, skrifttyperne og al data ligger hos vores webhotel, <strong>Simply.com</strong> i Danmark, som er vores databehandler. Mails fra os bliver også sendt derfra.</p>
@@ -119,10 +138,14 @@
         <tr><td>Regnehelten, mens den er til test: fornavn i spillet, klassetrin, antal løste opgaver og emner</td><td>For at se, om opgaverne passer til klassetrinnet</td><td>Legitim interesse i at gøre spillet bedre (litra f)</td></tr>
         <tr><td>Tilmelding til testen: navn, mail, mobilnummer</td><td>For at kunne skrive til jer om testen</td><td>Aftale (litra b)</td></tr>
         <tr><td>IP-adresse som uigenkendelig kode</td><td>For at stoppe nogen, der prøver at gætte koder</td><td>Legitim interesse i sikkerhed (litra f)</td></tr>
-        <tr><td>Besøgsstatistik: side, forrige side, henvisende site, mobil ja/nej og en kode, der kun gælder én dag</td><td>For at se, hvordan siden bliver fundet og brugt, og gøre den bedre</td><td>Legitim interesse (litra f)</td></tr>
+        <tr><td>Besøgsstatistik: side, forrige side, henvisende site, kampagne, mobil ja/nej, tilmeldinger og en kode, der kun gælder én dag</td><td>For at se, hvordan siden bliver fundet og brugt, og gøre den bedre</td><td>Legitim interesse (litra f)</td></tr>
+        <tr><td>Statistik-cookiens tilfældige nummer (<code>lf_bes</code>)</td><td>For at se, om folk kommer igen, og hvad der fik dem til at melde sig til</td><td>Samtykke (litra a)</td></tr>
+        <tr><td>Dit svar i cookie-banneret med tidspunkt og et tilfældigt nummer</td><td>For at kunne bevise, at vi har dit samtykke</td><td>Retlig forpligtelse (litra c, jf. art. 7, stk. 1)</td></tr>
+        <tr><td>Nyhedsbrevet: mail, fornavn, rolle, tilmeldingsside, samtykketekst og tidspunkter</td><td>For at sende dig nyt fra os</td><td>Samtykke (litra a) og markedsføringslovens § 10</td></tr>
+        <tr><td>Gemte spil i Regnehelten</td><td>For at man kan spille videre, også på en anden enhed</td><td>Aftale (litra b)</td></tr>
       </tbody>
     </table></div>
-    <p><strong>Hvor længe:</strong> kontoen og børnenes oplysninger til I sletter dem under <a href="/konto">Min konto</a> — det sker med det samme. IP-koden i højst en time. Besøgsstatistikken i 13 måneder. Testresultater og tilmeldinger slettes, når testperioden er slut. Vi giver intet videre og sælger intet.</p>
+    <p><strong>Hvor længe:</strong> kontoen og børnenes oplysninger til I sletter dem under <a href="/konto">Min konto</a> — det sker med det samme. IP-koden i højst en time. Besøgsstatistikken i 13 måneder. Samtykkebeviser i 3 år. Nyhedsbrevet, til du afmelder dig. Testresultater og tilmeldinger slettes, når testperioden er slut. Vi giver intet videre og sælger intet.</p>
     <p><strong>Skoler:</strong> bruger en skole Learnification i undervisningen, er skolen (kommunen) dataansvarlig for elevernes oplysninger, og vi behandler dem på skolens vegne. Skriv til os, så får I en databehandleraftale.</p>
 
     <h2 id="rettigheder" style="margin-top:44px;">Dine rettigheder</h2>
@@ -163,6 +186,7 @@
 </footer>
 
 <script src="/assets/script.js?v=4" defer></script>
-<script src="/assets/besoeg.js?v=1" defer></script>
+<script src="/assets/samtykke.js?v=1" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>

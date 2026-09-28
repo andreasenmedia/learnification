@@ -72,6 +72,18 @@ LFSpil.start({ spil: 'runeborg', kraevLogin: KRAEV_LOGIN,
 <script src="js/ui.js?v=4"></script>
 <script src="js/content.js?v=1"></script>
 <script src="js/game.js?v=4"></script>
-<script src="/assets/besoeg.js?v=1" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
+<script>
+// Første tryk eller tast i spillet tæller som "startet Runeborg" i statistikken
+(function () {
+  function start() {
+    removeEventListener('pointerdown', start, true);
+    removeEventListener('keydown', start, true);
+    if (window.LFMaal) LFMaal('spil_runeborg');
+  }
+  addEventListener('pointerdown', start, true);
+  addEventListener('keydown', start, true);
+})();
+</script>
 </body>
 </html>

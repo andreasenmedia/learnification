@@ -316,6 +316,70 @@ function opret_tabeller(PDO $pdo): void
             'CREATE INDEX besoeg_tid ON besoeg(tid)',
             'CREATE INDEX besoeg_dag ON besoeg(dag, besoeger)',
         ],
+        // Gemte spil (api/gem.php): ét pr. spiller pr. spil, så et barn kan
+        // spille videre på en anden computer. "hvem" er 'elev.<id>' eller
+        // 'voksen.<id>' — samme form som cookien lf_in.
+        // Nyhedsbrevet (api/nyhedsbrev.php): kun voksne, kun med samtykke,
+        // og først på listen, når mailadressen er bekræftet.
+        4 => [
+            "CREATE TABLE gemte_spil (
+                id $id,
+                konto_id INTEGER NOT NULL,
+                elev_id INTEGER,
+                hvem $tekst NOT NULL,
+                spil $tekst NOT NULL,
+                data TEXT NOT NULL,
+                udgave INTEGER NOT NULL DEFAULT 1,
+                enhed $tekst NOT NULL DEFAULT '',
+                opdateret INTEGER NOT NULL,
+                FOREIGN KEY (konto_id) REFERENCES konti(id) ON DELETE CASCADE,
+                FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE UNIQUE INDEX gemte_spil_hvem ON gemte_spil(hvem, spil)',
+            "CREATE TABLE nyhedsbrev (
+                id $id,
+                email $tekst NOT NULL UNIQUE,
+                navn $tekst NOT NULL DEFAULT '',
+                rolle $tekst NOT NULL DEFAULT '',
+                kilde $tekst NOT NULL DEFAULT '',
+                samtykke TEXT NOT NULL,
+                noegle $tekst NOT NULL UNIQUE,
+                oprettet INTEGER NOT NULL,
+                bekraeftet INTEGER,
+                afmeldt INTEGER
+            )$slut",
+        ],
+        // Cookies med samtykke (assets/samtykke.js). "bid" er statistik-
+        // cookiens tilfældige id og står KUN på linjen, når den besøgende har
+        // sagt ja til statistik. "maal" er konverteringer: tilmeldt
+        // nyhedsbrev, oprettet konto, startet et spil. "samtykker" er beviset
+        // for, hvad folk har sagt ja og nej til — uden IP-adresse.
+        5 => [
+            "ALTER TABLE besoeg ADD COLUMN bid $tekst NOT NULL DEFAULT ''",
+            "ALTER TABLE besoeg ADD COLUMN kampagne $tekst NOT NULL DEFAULT ''",
+            'CREATE INDEX besoeg_bid ON besoeg(bid)',
+            "CREATE TABLE maal (
+                id $id,
+                tid INTEGER NOT NULL,
+                dag $tekst NOT NULL,
+                besoeger $tekst NOT NULL,
+                bid $tekst NOT NULL DEFAULT '',
+                navn $tekst NOT NULL,
+                side $tekst NOT NULL DEFAULT ''
+            )$slut",
+            'CREATE INDEX maal_tid ON maal(tid)',
+            "CREATE TABLE samtykker (
+                id $id,
+                samtykke_id $tekst NOT NULL,
+                tid INTEGER NOT NULL,
+                valg $tekst NOT NULL,
+                statistik INTEGER NOT NULL,
+                markedsfoering INTEGER NOT NULL,
+                version INTEGER NOT NULL,
+                side $tekst NOT NULL DEFAULT ''
+            )$slut",
+            'CREATE INDEX samtykker_tid ON samtykker(tid)',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

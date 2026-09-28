@@ -17,7 +17,8 @@
 <link rel="canonical" href="https://learnification.dk/">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
-<link rel="stylesheet" href="assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/nyhedsbrev.css?v=1">
 <script type="application/ld+json">
 [
 {
@@ -233,11 +234,40 @@
   <div class="wrap narrow center">
     <p class="eyebrow">Til forældre og lærere</p>
     <h2>Så lidt om jeres barn som muligt</h2>
-    <p class="lead">Barnet har hverken mailadresse eller kodeord. Om barnet gemmer vi kun det kaldenavn, en voksen har skrevet, og hvor længe der er spillet. Den voksne, der opretter testkontoen, oplyser navn og mail. Der er ingen reklamer, ingen sporing og ingen køb inde i spillene.</p>
+    <p class="lead">Barnet har hverken mailadresse eller kodeord. Om barnet gemmer vi kun det kaldenavn, en voksen har skrevet, og hvor længe der er spillet. Den voksne, der opretter testkontoen, oplyser navn og mail. Der er ingen reklamer, ingen sporing af børnene og ingen køb inde i spillene.</p>
     <p>Mens Regnehelten er til test, sender spillet desuden et kort resultat hjem, så vi kan se, om opgaverne passer til klassetrinnet.</p>
     <div class="hero-cta" style="justify-content:center;">
       <a href="/for-voksne#data" class="btn">Se præcis hvad vi gemmer</a>
     </div>
+  </div>
+</section>
+
+<!-- ============ NYHEDSBREV ============ -->
+<section style="padding-top:0;">
+  <div class="wrap">
+    <form class="nb-boks" data-nyhedsbrev novalidate>
+      <p class="eyebrow">Nyhedsbrev</p>
+      <h2>Hør først om nye spil</h2>
+      <p>Nye spil, opdateringer og tilbud til skoler og familier. Højst et par mails om måneden — og du kan afmelde dig med ét klik.</p>
+      <div class="nb-raekke">
+        <div><label for="nb-email-forside">Mailadresse</label><input id="nb-email-forside" name="email" type="email" autocomplete="email" required></div>
+        <div><label for="nb-navn-forside">Fornavn <span>— frivilligt</span></label><input id="nb-navn-forside" name="navn" autocomplete="given-name" maxlength="80"></div>
+      </div>
+      <fieldset class="nb-roller">
+        <legend>Jeg er <span>— frivilligt</span></legend>
+        <label><input type="radio" name="rolle" value="foraelder"> Forælder</label>
+        <label><input type="radio" name="rolle" value="laerer"> Lærer / skole</label>
+        <label><input type="radio" name="rolle" value="andet"> Andet</label>
+      </fieldset>
+      <div class="nb-faelde" aria-hidden="true"><label>Lad være tom <input name="hjemmeside" tabindex="-1" autocomplete="off"></label></div>
+      <label class="nb-samtykke">
+        <input type="checkbox" name="samtykke" required>
+        <span>Ja tak, send mig nyt fra Learnification på mail — nye spil, opdateringer og tilbud til skoler og familier. Højst et par gange om måneden. Jeg kan altid afmelde igen med et klik. <a href="/privatliv#nyhedsbrev">Sådan behandler vi din mail</a></span>
+      </label>
+      <button class="btn btn-primary" type="submit">Skriv mig op</button>
+      <p class="nb-besked" role="status" aria-live="polite"></p>
+      <p class="nb-lille">Du får først en mail, hvor du skal bekræfte, at det er dig. Kun for voksne.</p>
+    </form>
   </div>
 </section>
 
@@ -278,6 +308,8 @@
 </footer>
 
 <script src="assets/script.js?v=4" defer></script>
-<script src="/assets/besoeg.js?v=1" defer></script>
+<script src="/assets/nyhedsbrev.js?v=2" defer></script>
+<script src="/assets/samtykke.js?v=1" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>

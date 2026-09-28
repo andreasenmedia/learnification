@@ -122,6 +122,13 @@ case 'opret':
         . 'Tidspunkt: ' . date('d-m-Y H:i') . "\n\n"
         . "Godkend eller spær den i overblikket:\n" . adresse() . "/admin\n");
 
+    // Nyhedsbrevet er sit eget flueben — aldrig en del af at oprette kontoen
+    if (!empty(input()['nyhedsbrev'])) {
+        require __DIR__ . '/_nyhedsbrev.php';
+        nyhedsbrev_tilmeld($email, $type === 'skole' ? $kontakt : $navn,
+                           $type === 'skole' ? 'laerer' : 'foraelder', '/opret');
+    }
+
     svar(['ok' => true, 'besked' => 'Kontoen er oprettet.']);
 
 case 'login':

@@ -2,9 +2,15 @@
 /**
  * Besøgsstatistik: tager imod én sidevisning fra assets/besoeg.js.
  *
- *   POST {side, fra, kilde}     ->  204, uanset hvad
+ *   POST {side, fra, kilde, kampagne, bid}   ->  204, uanset hvad
+ *   POST {maal, side, bid}                   ->  204   (en konvertering)
  *
- * Den er lavet, så der IKKE skal et cookie-banner til:
+ * "bid" kommer KUN med, når den besøgende har sagt ja til statistik i
+ * cookie-banneret (assets/samtykke.js): det er id'et fra cookien lf_bes,
+ * som lader os se, at det er den samme, der kommer igen en anden dag.
+ * Alt det følgende gælder for alle andre:
+ *
+ * Grundstatistikken er lavet, så den IKKE kræver samtykke:
  *
  *  - Der bliver ikke sat cookies og ikke gemt noget i browseren.
  *  - IP-adressen bliver aldrig gemt. Sammen med browserens navn bliver den
@@ -25,6 +31,9 @@ require __DIR__ . '/_kerne.php';
 
 const BEHOLD_DAGE = 400;          // ca. 13 måneder
 const MAKS_PR_BESOEGER = 300;     // pr. dag — mere end det er ikke et menneske
+
+// Konverteringer, der kan tælles. Kaldes med LFMaal('navn') fra siderne.
+const MAAL = ['nyhedsbrev', 'opret_konto', 'spil_regnehelten', 'spil_runeborg'];
 
 function faerdig(): void
 {
@@ -85,6 +94,13 @@ $kilde = kilde($d['kilde'] ?? '');
 if ($kilde === 'learnification.dk') {
     $kilde = '';
 }
+$kampagne = kilde($d['kampagne'] ?? '');
+$bid = is_string($d['bid'] ?? null) && preg_match('/^[0-9a-f]{16}$/', $d['bid']) ? $d['bid'] : '';
+// Børnenes sider får aldrig et id med, heller ikke hvis nogen prøver
+if (strpos($side, '/spil/') === 0 || strpos($side, '/login') === 0) {
+    $bid = '';
+}
+$maal = is_string($d['maal'] ?? null) && in_array($d['maal'], MAAL, true) ? $d['maal'] : '';
 
 /**
  * Dagens salt. Det skiftes, når datoen skifter, og det gamle bliver skrevet
@@ -126,12 +142,21 @@ try {
     if ((int) vaerdi('SELECT COUNT(*) FROM besoeg WHERE dag = ? AND besoeger = ?', [$dag, $besoeger]) >= MAKS_PR_BESOEGER) {
         faerdig();
     }
+    if ($maal !== '') {
+        // Én gang pr. mål pr. besøgende pr. dag — et dobbeltklik er ikke to
+        if (!vaerdi('SELECT 1 FROM maal WHERE dag = ? AND besoeger = ? AND navn = ?', [$dag, $besoeger, $maal])) {
+            kør('INSERT INTO maal (tid, dag, besoeger, bid, navn, side) VALUES (?, ?, ?, ?, ?, ?)',
+                [$nu, $dag, $besoeger, $bid, $maal, $side]);
+        }
+        faerdig();
+    }
     $mobil = preg_match('/Mobi|Android|iPhone|iPad/i', $ua) ? 1 : 0;
-    kør('INSERT INTO besoeg (tid, dag, besoeger, side, fra, kilde, mobil) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [$nu, $dag, $besoeger, $side, $fra, $kilde, $mobil]);
+    kør('INSERT INTO besoeg (tid, dag, besoeger, side, fra, kilde, mobil, bid, kampagne) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [$nu, $dag, $besoeger, $side, $fra, $kilde, $mobil, $bid, $kampagne]);
 
     if (random_int(1, 200) === 1) {
         kør('DELETE FROM besoeg WHERE tid < ?', [$nu - BEHOLD_DAGE * 86400]);
+        kør('DELETE FROM maal WHERE tid < ?', [$nu - BEHOLD_DAGE * 86400]);
     }
 } catch (Throwable $e) {
     error_log('learnification besoeg: ' . $e->getMessage());

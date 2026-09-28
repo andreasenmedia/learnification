@@ -121,7 +121,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
         Fuld skærm
       </button>
-      <button class="btn btn-sm" id="restart" type="button">Start forfra</button>
+      <button class="btn btn-sm" id="restart" type="button">Genstart</button>
       <span class="spacer"></span>
       <span id="spiller" hidden></span>
     </div>
@@ -154,6 +154,10 @@
           <p style="margin-bottom:14px;">Spillet kører som WebAssembly og har brug for en nogenlunde ny browser — Chrome, Edge, Firefox eller Safari fra de sidste par år.</p>
           <p style="margin-bottom:14px;">Første gang skal der hentes ca. 1 MB plus selve motoren. På en langsom forbindelse kan der gå et halvt minut, hvor der ikke sker noget.</p>
           <p style="margin-bottom:0;">Kommer der stadig ikke noget frem, så prøv <a href="/spil/regnehelten/">at åbne spillet i sin egen fane</a>.</p>
+        </div>
+        <div class="card" style="margin-top:22px;">
+          <h3>Spillet gemmer selv</h3>
+          <p style="margin-bottom:0;">Regnehelten gemmer, hver gang en runde er ovre, og når man går gennem en dør. Log ind med den samme kode på en anden computer eller tablet, så kan man trykke <strong>Fortsæt</strong> og spille videre lige dér, hvor man slap.</p>
         </div>
         <div class="card" style="margin-top:22px;">
           <h3>Lyden</h3>
@@ -236,6 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
     poster.hidden = true;
     loading.hidden = false;
     LFSpil.aktiv(true);
+    if (window.LFMaal) LFMaal('spil_regnehelten');
     watch();
   }
 
@@ -301,7 +306,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('restart').addEventListener('click', function () {
-    // Spillet gemmer ingenting, så en frisk indlæsning er en frisk start.
+    // Spillet gemmer selv (se gemning.py i spillet), så en frisk indlæsning
+    // lander på titelskærmen, hvor man kan fortsætte eller starte forfra.
     poster.hidden = true;
     started = true;
     loading.hidden = false;
@@ -311,6 +317,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 </script>
-<script src="/assets/besoeg.js?v=1" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>

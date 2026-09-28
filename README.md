@@ -439,34 +439,95 @@ den hentning.
 
 ## Cookies og privatliv
 
-Der er **ingen cookie-banner, og det er med vilje**: sitet sætter kun
-`lf_session` og `lf_in` ved login og gemmer spil og indstillinger i
-`localStorage`. Alt det er "strengt nødvendigt for en tjeneste, brugeren selv
-har bedt om", og kræver derfor ikke samtykke (ePrivacy art. 5, stk. 3).
-Det holder kun, så længe der ikke kommer statistik, pixels, indlejrede
-videoer, Google Fonts-links eller lignende på. Kommer der noget af det, skal
-der samtykke til, *før* det indlæses — og `/privatliv` skal rettes. Runeborgs
-oplæsning bruger kun stemmer, der kører på enheden (`localService`), fordi
-Chromes "Google Dansk" sender teksten til Google.
+**Cookie-banneret** (`assets/samtykke.js`, siden 2026-09-28) spørger kun om
+det, der ikke er nødvendigt. Tre kategorier:
+
+- **Nødvendige** — `lf_session`, `lf_in` (login) og `lf_samtykke` (selve
+  valget, 12 måneder). Altid tændt; undtaget fra samtykkekravet (ePrivacy
+  art. 5, stk. 3).
+- **Statistik** — `lf_bes`, et tilfældigt id i 12 måneder, som `besoeg.js`
+  sender med, så `/statistik` kan se tilbagevendende besøgende og give en
+  konvertering til den FØRSTE kilde/kampagne, vi så for id'et.
+- **Markedsføring** — Meta Pixel, Google (gtag) og LinkedIn Insight. Slås til
+  ved at skrive et id i `PIXELS` øverst i `samtykke.js`. Står der intet id,
+  bliver kategorien slet ikke vist (man må ikke spørge om noget, der ikke
+  bruges). Husk at tælle `VERSION` op, når der kommer en pixel til — så
+  bliver alle spurgt igen — og at skrive den på `/privatliv#cookies`.
+
+Reglerne, banneret er bygget efter (Datatilsynets cookievejledning): intet
+før ja; "Afvis alle" lige så stor som "Tillad alle"; intet slået til på
+forhånd; siden virker uden svar; "Cookie-indstillinger" i sidefoden på hver
+side (sættes ind af scriptet), og et nej sletter de cookies, der er sat;
+hvert valg logges som bevis i tabellen `samtykker` via `api/samtykke.php`
+(uden IP, slettes efter 3 år); nyt spørgsmål efter 12 måneder. DNT/GPC
+tæller som nej, og så vises banneret ikke.
+
+**Børn får aldrig andet end det nødvendige.** `samtykke.js` er ikke med på
+`/spil/*`, `/login` og `/login-kort`, og den svarer altid nej, når et barn
+er logget ind (`lf_in = elev.*`). `api/besoeg.php` smider også `bid` væk på
+de sider. Hold det sådan — børn under 13 kan ikke selv give samtykke.
+
+Runeborgs oplæsning bruger kun stemmer, der kører på enheden
+(`localService`), fordi Chromes "Google Dansk" sender teksten til Google.
 
 **Besøgsstatistikken er vores egen** (`assets/besoeg.js` → `api/besoeg.php`
-→ tabellen `besoeg`, vist på `/statistik`). Den er bygget til at kunne køre
-uden samtykke, og det holder kun, så længe disse ting er sande:
+→ tabellerne `besoeg` og `maal`, vist på `/statistik`). Grundtallene kører
+uden samtykke, og det holder kun, så længe disse ting er sande for dem, der
+IKKE har sagt ja:
 
 - ingen cookies og intet i `localStorage` — heller ikke "bare et id";
 - IP-adressen gemmes aldrig; besøgskoden er en HMAC af IP + browser med et
   salt i `besoegssalt.txt`, der skiftes ved datoskift og skrives over, så
   ingen kan følges fra dag til dag;
-- kun sti, forrige egen side, henvisende værtsnavn (ikke hele adressen) og
-  mobil ja/nej; aldrig forespørgsler (`?token=`, `?g=`) — `besoeg.js` sender
-  kun `pathname`;
+- kun sti, forrige egen side, henvisende værtsnavn (ikke hele adressen),
+  `utm_campaign`, mobil ja/nej og mål; aldrig forespørgsler (`?token=`,
+  `?g=`) — `besoeg.js` sender kun `pathname`;
 - DNT og GPC respekteres (i både JS og PHP);
 - tallene deles ikke med nogen og bruges kun samlet; linjer slettes efter
   400 dage.
 
-Tilføj en `?ref=navn` på links i opslag, nyhedsbreve og visitkort, så dukker
-de op under "Hvor kommer de fra?". Ændres noget af ovenstående, skal
-`/privatliv#statistik` rettes — og måske skal der så samtykke til.
+**Mål (konverteringer)** tælles med `LFMaal('navn')` fra siderne:
+`nyhedsbrev` (nyhedsbrev.js), `opret_konto` (opret.html),
+`spil_regnehelten` (spil/index.html, Spil-knappen) og `spil_runeborg`
+(første tryk i Runeborg). Nye navne skal også i `MAAL` i `api/besoeg.php`
+og `MAALRAEKKE` i `statistik.html`. Har den besøgende sagt ja til
+markedsføring, sendes målet også videre til pixels (`konvertering()` i
+`samtykke.js`).
+
+Tilføj `?ref=navn` eller `?utm_source=navn&utm_campaign=kampagne` på links i
+opslag, annoncer, nyhedsbreve og visitkort, så dukker de op under "Kilder" og
+"Kampagner". Ændres noget af ovenstående, skal `/privatliv` rettes.
+
+## Nyhedsbrevet
+
+Tilmelding på `/nyhedsbrev`, forsiden og `/for-voksne` (boksen er
+`form[data-nyhedsbrev]` + `assets/nyhedsbrev.js/.css`) og som frivilligt
+flueben på `/opret`. **Dobbelt tilmelding**: man får en mail med et link
+(`/nyhedsbrev?bekraeft=<nøgle>`) og står først som aktiv, når man har
+klikket. Ubekræftede slettes efter 30 dage. Samtykketeksten gemmes ved hver
+tilmelding (`NYHEDSBREV_SAMTYKKE` i `api/_nyhedsbrev.php` — ændres den, så
+ret datoen i teksten).
+
+Listen ses under **/admin → Nyhedsbrev**; "Hent aktive som CSV" giver kun
+dem, der må få mails, med et personligt afmeldingslink
+(`/nyhedsbrev?afmeld=<nøgle>`), som SKAL med i hver mail (flet det ind fra
+CSV'en i jeres mailprogram). Afmelding kræver et klik på en knap, så
+mailprogrammer, der åbner links af sig selv, ikke afmelder folk.
+
+Bekræftelsesmailen sendes med PHP's `mail()` fra `no-reply@learnification.dk`
+ligesom de andre mails. Kommer den ikke frem, så tjek SPF/DKIM for domænet
+hos Simply.com.
+
+## Gemte spil
+
+Regnehelten gemmer selv (`gemning.py` i spillets repo): efter hver runde,
+ved dørskift, efter pausespil og hvert 20. sekund, hvis spilleren har flyttet
+sig. I browseren sender spillet det gemte til `api/gem.php` (tabellen
+`gemte_spil`, én pr. spiller pr. spil) og lægger en kopi i `localStorage`.
+Siden sender altid den udgave med, den byggede videre på; har en anden skærm
+gemt noget nyere imens, svarer serveren 409, og spillet beder barnet hente
+det nyeste. Test lokalt på `127.0.0.1`, ikke `localhost` — på `localhost`
+henter pygbag sine pakker fra `localhost:8000`, og spillet starter aldrig.
 
 ## Test lokalt som på Simply.com
 

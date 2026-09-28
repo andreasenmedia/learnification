@@ -87,6 +87,16 @@ table.liste td.navn .sti { color: var(--ink-soft); font-size: .84rem; margin-lef
         <h2>Besøg pr. dag</h2>
         <div id="dage"></div>
       </div>
+      <div class="panel">
+        <h2>Konverteringer</h2>
+        <p class="lille">Tilmeldinger til nyhedsbrevet, oprettede konti og spil, der blev startet — og hvilken kilde der førte dertil. Har den besøgende sagt ja til statistik, tæller den første kilde, vi så for dem, også selv om de kom tilbage direkte dage senere.</p>
+        <div class="tal-raekke" id="maal"></div>
+        <div class="tabel-rul"><table class="liste" id="maal-kilder"></table></div>
+      </div>
+      <div class="to-kol">
+        <div class="panel"><h2>Kampagner</h2><p class="lille">Fra links med <code>?utm_campaign=</code> — fx <code>/?utm_source=facebook&amp;utm_campaign=efteraar</code>.</p><div class="tabel-rul"><table class="liste" id="kampagner"></table></div></div>
+        <div class="panel"><h2>Cookie-samtykke</h2><p class="lille">Hvad folk har svaret i banneret i perioden, og hvor mange af dem, der sagde ja til statistik, vi har set igen en anden dag.</p><div class="tal-raekke" id="samtykke"></div></div>
+      </div>
       <div class="to-kol">
         <div class="panel"><h2>Hvor kommer de fra?</h2><div class="tabel-rul"><table class="liste" id="kilder"></table></div></div>
         <div class="panel"><h2>Hvor lander de?</h2><div class="tabel-rul"><table class="liste" id="ind"></table></div></div>
@@ -99,7 +109,7 @@ table.liste td.navn .sti { color: var(--ink-soft); font-size: .84rem; margin-lef
         <div class="panel"><h2>Vejen rundt</h2><p class="lille">De hyppigste skridt fra én side til den næste.</p><div class="tabel-rul"><table class="liste" id="veje"></table></div></div>
         <div class="panel"><h2>Hvor går de fra siden?</h2><p class="lille">Den sidste side, et besøg så.</p><div class="tabel-rul"><table class="liste" id="ud"></table></div></div>
       </div>
-      <p class="forklaring">Et besøg er én person på én dag. Tallene kommer fra vores egen server uden cookies: ingen kan genkendes fra den ene dag til den næste, så den samme person, der kommer igen i morgen, tæller som et nyt besøg. En hel skoleklasse på samme netværk og med ens computere kan tælle som ganske få besøg. Browsere, der har bedt om ikke at blive fulgt, bliver slet ikke talt, og det gør administratorsiderne heller ikke. Se <a href="/privatliv#statistik">privatlivssiden</a>.</p>
+      <p class="forklaring">Et besøg er én person på én dag. Grundtallene kommer fra vores egen server uden cookies: ingen kan genkendes fra den ene dag til den næste, så den samme person, der kommer igen i morgen, tæller som et nyt besøg — medmindre de har sagt ja til statistik i cookie-banneret. Børnenes sider (spillene og elev-login) bliver aldrig koblet til en cookie. En hel skoleklasse på samme netværk og med ens computere kan tælle som ganske få besøg. Browsere, der har bedt om ikke at blive fulgt, bliver slet ikke talt, og det gør administratorsiderne heller ikke. Se <a href="/privatliv#statistik">privatlivssiden</a>.</p>
     </div>
   </div>
 </main>
@@ -112,7 +122,7 @@ table.liste td.navn .sti { color: var(--ink-soft); font-size: .84rem; margin-lef
     '/': 'Forside', '/runeborg': 'Om Runeborg', '/spil/runeborg/': 'Spil Runeborg',
     '/regnehelten': 'Om Regnehelten', '/spil/': 'Spil Regnehelten', '/for-voksne': 'For voksne',
     '/om': 'Om os', '/login': 'Log ind', '/opret': 'Opret konto', '/konto': 'Min konto',
-    '/login-kort': 'Login-kort', '/privatliv': 'Privatliv og cookies', '/404 (findes ikke)': 'Siden findes ikke'
+    '/login-kort': 'Login-kort', '/privatliv': 'Privatliv og cookies', '/nyhedsbrev': 'Nyhedsbrev', '/404 (findes ikke)': 'Siden findes ikke'
   };
   var dage = 30;
 
@@ -137,6 +147,36 @@ table.liste td.navn .sti { color: var(--ink-soft); font-size: .84rem; margin-lef
   function vej(v) {
     var d = v.split(' → ');
     return side(d[0]) + ' <strong aria-label="til">→</strong> ' + side(d[1]);
+  }
+
+  var MAALNAVNE = { nyhedsbrev: 'Nyhedsbrev', opret_konto: 'Oprettet konto', spil_regnehelten: 'Startede Regnehelten', spil_runeborg: 'Startede Runeborg' };
+  var MAALRAEKKE = ['nyhedsbrev', 'opret_konto', 'spil_regnehelten', 'spil_runeborg'];
+
+  function konvTabel(el, raekker, kolonne, tom) {
+    var html = '<thead><tr><th>' + kolonne + '</th><th class="t">Besøg</th>';
+    MAALRAEKKE.forEach(function (m) { html += '<th class="t">' + MAALNAVNE[m] + '</th>'; });
+    html += '<th class="t">Konvertering</th></tr></thead><tbody>';
+    raekker.forEach(function (r) {
+      var i_alt = 0;
+      html += '<tr><td class="navn">' + LF.esc(r.navn) + '</td><td class="t">' + tal(r.besoeg) + '</td>';
+      MAALRAEKKE.forEach(function (m) { var v = r.maal[m] || 0; i_alt += m === 'nyhedsbrev' || m === 'opret_konto' ? v : 0; html += '<td class="t">' + (v ? tal(v) : '–') + '</td>'; });
+      html += '<td class="t">' + (r.besoeg ? (Math.round(i_alt / r.besoeg * 1000) / 10).toString().replace('.', ',') + ' %' : '–') + '</td></tr>';
+    });
+    if (!raekker.length) html += '<tr><td colspan="' + (MAALRAEKKE.length + 3) + '" class="tom">' + tom + '</td></tr>';
+    el.innerHTML = html + '</tbody>';
+  }
+
+  function konverteringer(d) {
+    var m = {};
+    d.maal.forEach(function (x) { m[x[0]] = x[1]; });
+    $('maal').innerHTML = MAALRAEKKE.map(function (k) { return [tal(m[k] || 0), MAALNAVNE[k]]; }).map(kort).join('');
+    konvTabel($('maal-kilder'), d.maal_kilder, 'Kilde', 'Ingen besøg i perioden endnu.');
+    konvTabel($('kampagner'), d.maal_kampagner, 'Kampagne', 'Ingen besøg fra kampagnelinks i perioden.');
+    var s = d.samtykke, pct = function (v) { return s.i_alt ? Math.round(v / s.i_alt * 100) + ' %' : '–'; };
+    $('samtykke').innerHTML = [
+      [tal(s.i_alt), 'Svar i banneret'], [pct(s.statistik), 'Ja til statistik'],
+      [pct(s.afvis_alle), 'Afviste alt'], [tal(d.genkendte.tilbage) + ' af ' + tal(d.genkendte.med_id), 'Kom igen en anden dag']
+    ].map(kort).join('');
   }
 
   function hent() {
@@ -164,6 +204,7 @@ table.liste td.navn .sti { color: var(--ink-soft); font-size: .84rem; margin-lef
       });
       if (!d.sider.length) html += '<tr><td colspan="3" class="tom">Ingen besøg i perioden endnu.</td></tr>';
       $('sider').innerHTML = html + '</tbody>';
+      konverteringer(d);
     }).catch(function (err) { $('indlaeser').hidden = false; $('indlaeser').textContent = err.message; });
   }
 

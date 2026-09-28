@@ -175,20 +175,27 @@ case 'besoeg':
         $pr_dag[date('Y-m-d', $fra + $i * 86400 + 7200)] = ['b' => [], 'v' => 0];
     }
     $visninger = 0;
-    $s = db()->prepare('SELECT dag, besoeger, side, fra, kilde, mobil FROM besoeg WHERE tid >= ? ORDER BY id');
+    $s = db()->prepare('SELECT dag, besoeger, side, fra, kilde, mobil, kampagne, bid FROM besoeg WHERE tid >= ? ORDER BY id');
     $s->execute([$fra]);
     while ($r = $s->fetch()) {
         $noegle = $r['dag'] . $r['besoeger'];
         $visninger++;
         if (!isset($besoeg[$noegle])) {
             $besoeg[$noegle] = ['ind' => $r['side'], 'kilde' => $r['kilde'], 'mobil' => (int) $r['mobil'],
-                                'sider' => 0, 'sidst' => '', 'spil' => false];
+                                'sider' => 0, 'sidst' => '', 'spil' => false,
+                                'kampagne' => $r['kampagne'], 'bid' => $r['bid']];
         }
         $b = &$besoeg[$noegle];
         $b['sider']++;
         // Kom de ind direkte og senere via et link, er det linket, der tæller
         if ($b['kilde'] === '' && $r['kilde'] !== '') {
             $b['kilde'] = $r['kilde'];
+        }
+        if ($b['kampagne'] === '' && $r['kampagne'] !== '') {
+            $b['kampagne'] = $r['kampagne'];
+        }
+        if ($b['bid'] === '' && $r['bid'] !== '') {
+            $b['bid'] = $r['bid'];
         }
         if ($b['sidst'] !== '' && $b['sidst'] !== $r['side']) {
             $vej = $b['sidst'] . ' → ' . $r['side'];
@@ -223,7 +230,83 @@ case 'besoeg':
         $side_liste[] = [$side, $v, count($sidebesoeg[$side])];
     }
 
+    // --- konverteringer ---------------------------------------------------
+    // Et mål bliver givet til den kilde, besøget kom fra. Har den besøgende
+    // sagt ja til statistik (bid), er det den FØRSTE kilde, vi nogensinde
+    // har set for id'et — så tæller en annonce i mandags, selv om
+    // tilmeldingen først kom torsdag, direkte.
+    $foerste_kilde = $foerste_kampagne = [];
+    $bids = array_values(array_unique(array_filter(array_column($besoeg, 'bid'))));
+    $mrows = alle('SELECT dag, besoeger, bid, navn FROM maal WHERE tid >= ?', [$fra]);
+    foreach ($mrows as $m) {
+        if ($m['bid'] !== '') {
+            $bids[] = $m['bid'];
+        }
+    }
+    $bids = array_values(array_unique($bids));
+    foreach (array_chunk($bids, 400) as $del) {
+        $pl = implode(',', array_fill(0, count($del), '?'));
+        foreach (alle("SELECT bid, kilde, kampagne FROM besoeg WHERE bid IN ($pl) ORDER BY id", $del) as $r) {
+            if (!isset($foerste_kilde[$r['bid']]) && $r['kilde'] !== '') {
+                $foerste_kilde[$r['bid']] = $r['kilde'];
+            }
+            if (!isset($foerste_kampagne[$r['bid']]) && $r['kampagne'] !== '') {
+                $foerste_kampagne[$r['bid']] = $r['kampagne'];
+            }
+        }
+    }
+    $maal_tal = $maal_kilde = $maal_kampagne = [];
+    foreach ($mrows as $m) {
+        $v = $besoeg[$m['dag'] . $m['besoeger']] ?? null;
+        $k = $m['bid'] !== '' && isset($foerste_kilde[$m['bid']]) ? $foerste_kilde[$m['bid']] : ($v['kilde'] ?? '');
+        $kamp = $m['bid'] !== '' && isset($foerste_kampagne[$m['bid']]) ? $foerste_kampagne[$m['bid']] : ($v['kampagne'] ?? '');
+        $maal_tal[$m['navn']] = ($maal_tal[$m['navn']] ?? 0) + 1;
+        $kn = kildenavn($k);
+        $maal_kilde[$kn][$m['navn']] = ($maal_kilde[$kn][$m['navn']] ?? 0) + 1;
+        if ($kamp !== '') {
+            $maal_kampagne[$kamp][$m['navn']] = ($maal_kampagne[$kamp][$m['navn']] ?? 0) + 1;
+        }
+    }
+    // Kilder og kampagner med besøg, mål og konverteringsrate
+    $kilde_besoeg = $kampagne_besoeg = [];
+    foreach ($besoeg as $b) {
+        $kn = kildenavn($b['kilde']);
+        $kilde_besoeg[$kn] = ($kilde_besoeg[$kn] ?? 0) + 1;
+        if ($b['kampagne'] !== '') {
+            $kampagne_besoeg[$b['kampagne']] = ($kampagne_besoeg[$b['kampagne']] ?? 0) + 1;
+        }
+    }
+    $konv = function (array $besoeg_pr, array $maal_pr): array {
+        $ud = [];
+        foreach (array_unique(array_merge(array_keys($besoeg_pr), array_keys($maal_pr))) as $k) {
+            $ud[] = ['navn' => (string) $k, 'besoeg' => $besoeg_pr[$k] ?? 0, 'maal' => $maal_pr[$k] ?? (object) []];
+        }
+        usort($ud, fn($a, $b) => (array_sum((array) $b['maal']) <=> array_sum((array) $a['maal'])) ?: ($b['besoeg'] <=> $a['besoeg']));
+        return array_slice($ud, 0, 20);
+    };
+
+    // --- samtykke og tilbagevendende ---------------------------------------
+    $samtykke = ['i_alt' => 0, 'tillad_alle' => 0, 'afvis_alle' => 0, 'valgt' => 0, 'statistik' => 0, 'markedsfoering' => 0];
+    foreach (alle('SELECT valg, statistik, markedsfoering FROM samtykker WHERE tid >= ?', [$fra]) as $r) {
+        $samtykke['i_alt']++;
+        $samtykke[$r['valg']]++;
+        $samtykke['statistik'] += (int) $r['statistik'];
+        $samtykke['markedsfoering'] += (int) $r['markedsfoering'];
+    }
+    $med_id = array_values(array_unique(array_filter(array_column($besoeg, 'bid'))));
+    $tilbage = 0;
+    foreach (array_chunk($med_id, 400) as $del) {
+        $pl = implode(',', array_fill(0, count($del), '?'));
+        $tilbage += (int) vaerdi("SELECT COUNT(*) FROM (SELECT bid FROM besoeg WHERE bid IN ($pl)
+                                  GROUP BY bid HAVING COUNT(DISTINCT dag) > 1) x", $del);
+    }
+
     svar(['ok' => true, 'dage' => $dage,
+          'maal' => top($maal_tal, 10),
+          'maal_kilder' => $konv($kilde_besoeg, $maal_kilde),
+          'maal_kampagner' => $konv($kampagne_besoeg, $maal_kampagne),
+          'samtykke' => $samtykke,
+          'genkendte' => ['med_id' => count($med_id), 'tilbage' => $tilbage],
           'tal' => ['besoeg' => $antal, 'visninger' => $visninger,
                     'sider_pr_besoeg' => $antal ? round($visninger / $antal, 1) : 0,
                     'mobil' => $antal ? round($mobil / $antal * 100) : 0,
