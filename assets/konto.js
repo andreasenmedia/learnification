@@ -41,6 +41,14 @@ window.LF = LF;
     }).then(svar, netfejl);
   };
 
+  /** Fremskridtet i et gemt spil som en lille linje under spilletiden. */
+  LF.gemt = function (g) {
+    if (!g) return '';
+    return '<br><span class="lille gemt' + (g.faerdig ? ' faerdig' : '') + '" title="'
+      + LF.esc(g.detalje + ' · gemt ' + LF.dato(g.opdateret)) + '">'
+      + (g.faerdig ? '★ ' : '') + LF.esc(g.tekst) + '</span>';
+  };
+
   /** Tekst ind i HTML uden at den kan blive til kode. */
   LF.esc = function (s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {

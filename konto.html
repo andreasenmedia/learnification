@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=4">
-<link rel="stylesheet" href="/assets/konto.css?v=2">
+<link rel="stylesheet" href="/assets/konto.css?v=3">
 </head>
 <body>
 
@@ -150,7 +150,7 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=2"></script>
+<script src="/assets/konto.js?v=3"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -222,7 +222,7 @@
         g.elever.forEach(function (e) {
           html += '<tr data-elev="' + e.id + '"><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>'
             + '<td class="elevkode">' + LF.esc(e.kode) + '</td>';
-          spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + '</td>'; });
+          spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + LF.gemt(e.gemt[s]) + '</td>'; });
           html += '<td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>' + LF.tid(e.tid.i_alt) + '</strong></td>'
             + '<td class="t">' + LF.dato(e.tid.sidst) + '</td>'
             + '<td class="handling ingen-print"><button type="button" class="link-knap" data-ret-elev>Omdøb</button>'
@@ -246,6 +246,16 @@
     if (d.voksen_tid.i_alt > 0) {
       html += '<div class="panel"><p style="margin:0;"><strong>Du har selv prøvet spillene i ' + LF.tid(d.voksen_tid.i_alt)
         + '.</strong> Den tid tæller med i tallene øverst.</p></div>';
+    }
+    var egne = spil.filter(function (s) { return d.voksen_gemt[s]; }).map(function (s) {
+      var g = d.voksen_gemt[s];
+      return LF.esc(d.spil[s]) + ': ' + (g.faerdig ? '★ ' : '') + LF.esc(g.tekst) + ' <span class="lille">(' + LF.esc(g.detalje) + ')</span>';
+    });
+    if (egne.length) {
+      html += '<div class="panel"><p style="margin:0;"><strong>Dine egne gemte spil</strong> — ' + egne.join(' · ') + '</p></div>';
+    }
+    if (d.grupper.some(function (g) { return g.elever.length; })) {
+      html += '<p class="lille ingen-print" style="margin:14px 0 0;">Under spilletiden står, hvor langt hvert barn er nået. Spillene gemmer af sig selv, så man kan spille videre på en anden computer eller tablet ved at logge ind med den samme kode. Hold musen over for flere detaljer.</p>';
     }
     $('grupper').innerHTML = html;
 

@@ -126,46 +126,6 @@ function konti_med_tal(): array
     return $ud;
 }
 
-/**
- * Et gemt spil som en kort status til overblikket: hvor langt, og om det
- * er gennemført. null, hvis der ikke er noget (eller det er startet forfra).
- * Formatet er spillenes eget — se til_gem() i Regnehelten og fresh() i
- * spil/runeborg/js/game.js, hvis tallene her en dag ser forkerte ud.
- */
-function gemt_status(string $spil, string $data, int $opdateret): ?array
-{
-    $d = json_decode($data, true);
-    if (!is_array($d) || !empty($d['slettet'])) {
-        return null;
-    }
-    if ($spil === 'regnehelten') {
-        $kapitel = max(0, min(6, (int) ($d['chapter'] ?? 0)));
-        $faerdig = !empty($d['faerdig']) || $kapitel >= 6;
-        return ['faerdig' => $faerdig, 'opdateret' => $opdateret,
-                'tekst' => $faerdig ? 'Gennemført' : 'Kapitel ' . min(6, $kapitel + 1) . ' af 6',
-                'detalje' => 'Regnekraft ' . (int) ($d['confidence'] ?? 0) . ' %'];
-    }
-    if ($spil === 'runeborg') {
-        $hoved = $ekstra = 0;
-        foreach ((array) ($d['q'] ?? []) as $id => $status) {
-            if ($status !== 'done') {
-                continue;
-            }
-            if (preg_match('/^q\d+$/', (string) $id)) {
-                $hoved++;
-            } elseif (preg_match('/^s\d+$/', (string) $id)) {
-                $ekstra++;
-            }
-        }
-        $faerdig = (($d['q']['q10'] ?? '') === 'done');
-        return ['faerdig' => $faerdig, 'opdateret' => $opdateret,
-                'tekst' => $faerdig ? 'Gennemført' : $hoved . ' af 11 missioner',
-                'detalje' => $ekstra . ' af 3 ekstramissioner · ' . count((array) ($d['runes'] ?? []))
-                             . ' af 8 runestykker · ' . (int) ($d['gold'] ?? 0) . ' guld'];
-    }
-    return null;
-}
-
 /** Et værtsnavn eller en ?ref=-kode som et navn, man kan læse. */
 function kildenavn(string $k): string
 {
@@ -398,20 +358,7 @@ case 'konto':
     if (!$k) {
         fejl('Kontoen findes ikke.', 404);
     }
-    // Gemte spil på kontoen: pr. elev, og den voksnes egne
-    $gemt = [];
-    $voksen_gemt = (object) [];
-    foreach (alle('SELECT elev_id, spil, data, opdateret FROM gemte_spil WHERE konto_id = ?', [$k['id']]) as $g) {
-        $st = gemt_status($g['spil'], $g['data'], (int) $g['opdateret']);
-        if (!$st) {
-            continue;
-        }
-        if ($g['elev_id'] === null) {
-            $voksen_gemt->{$g['spil']} = $st;
-        } else {
-            $gemt[(int) $g['elev_id']][$g['spil']] = $st;
-        }
-    }
+    [$gemt, $voksen_gemt] = gemte_spil_paa_konto((int) $k['id']);
     $grupper = [];
     foreach (alle('SELECT * FROM grupper WHERE konto_id = ? ORDER BY klassetrin, navn', [$k['id']]) as $g) {
         $elever = [];

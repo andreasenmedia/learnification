@@ -56,12 +56,14 @@ function klassetrin_ind(): ?int
 $h = handling();
 
 if ($h === 'oversigt') {
+    [$gemt, $voksen_gemt] = gemte_spil_paa_konto($kid);
     $grupper = [];
     foreach (alle('SELECT * FROM grupper WHERE konto_id = ? ORDER BY klassetrin, navn', [$kid]) as $g) {
         $elever = [];
         foreach (alle('SELECT * FROM elever WHERE gruppe_id = ? ORDER BY kaldenavn', [$g['id']]) as $e) {
             $elever[] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
-                         'kode' => $e['kode'], 'tid' => spilletid('elev_id = ?', [$e['id']])];
+                         'kode' => $e['kode'], 'tid' => spilletid('elev_id = ?', [$e['id']]),
+                         'gemt' => $gemt[(int) $e['id']] ?? (object) []];
         }
         $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'],
                       'klassetrin' => $g['klassetrin'] !== null ? (int) $g['klassetrin'] : null,
@@ -73,6 +75,7 @@ if ($h === 'oversigt') {
           'grupper' => $grupper,
           'tid' => spilletid('konto_id = ?', [$kid]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$kid]),
+          'voksen_gemt' => $voksen_gemt,
           'dage' => pr_dag('konto_id = ?', [$kid], 14),
           'spil' => SPIL]);
 }

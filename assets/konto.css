@@ -221,3 +221,8 @@ details.foldud[open] summary { margin-bottom: 12px; }
   .login-kort { page-break-inside: avoid; }
   .kode { background: #fff !important; color: #000 !important; border: 2px solid #000; }
 }
+
+/* ---------- gemte spil (under spilletiden i elevtabellerne) -------------- */
+
+.liste .gemt { white-space: nowrap; }
+.liste .gemt.faerdig { color: var(--gold-dark); font-weight: 600; }
