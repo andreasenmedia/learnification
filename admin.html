@@ -11,6 +11,10 @@
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=4">
 <link rel="stylesheet" href="/assets/konto.css?v=2">
+<style>
+  .liste .gemt { white-space: nowrap; }
+  .liste .gemt.faerdig { color: var(--gold-dark); font-weight: 600; }
+</style>
 </head>
 <body>
 
@@ -194,12 +198,22 @@
         var x = d.tid.spil[s] || { i_alt: 0, gange: 0 };
         spk.push([LF.tid(x.i_alt), d.spil[s] + ' · ' + x.gange + ' gange']);
       });
+      Object.keys(d.spil).forEach(function (s) {
+        var g = (d.gemte || {})[s] || { i_alt: 0, faerdige: 0 };
+        spk.push([String(g.i_alt), 'Gemte i ' + d.spil[s] + ' · ' + g.faerdige + ' gennemført']);
+      });
       $('tal-spil').innerHTML = spk.map(kort).join('');
       LF.soejler($('dage'), d.dage);
       tabel();
     }).catch(function (err) { vis('indlaeser'); $('indlaeser').textContent = err.message; });
   }
 
+  // Fremskridtet i et gemt spil, under spilletiden i elevtabellen
+  function gemtLinje(g) {
+    if (!g) return '';
+    return '<br><span class="lille gemt' + (g.faerdig ? ' faerdig' : '') + '" title="' + LF.esc(g.detalje + ' · gemt ' + LF.dato(g.opdateret)) + '">'
+      + (g.faerdig ? '★ ' : '') + LF.esc(g.tekst) + '</span>';
+  }
   function kort(t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + LF.esc(t[1]) + '</div></div>'; }
 
   function tabel() {
@@ -306,7 +320,7 @@
         html += '<th class="t">Gange</th><th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
         g.elever.forEach(function (e) {
           html += '<tr><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>';
-          spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + '</td>'; });
+          spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + gemtLinje(e.gemt[s]) + '</td>'; });
           html += '<td class="t">' + e.tid.gange + '</td><td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>'
             + LF.tid(e.tid.i_alt) + '</strong></td><td class="t">' + LF.dato(e.tid.sidst) + '</td></tr>';
         });
@@ -314,6 +328,10 @@
       });
       var ekstra = [];
       if (d.voksen_tid.i_alt) ekstra.push('Den voksne har selv spillet i ' + LF.tid(d.voksen_tid.i_alt) + '.');
+      spil.forEach(function (s) {
+        var g = d.voksen_gemt[s];
+        if (g) ekstra.push('Den voksnes eget gemte ' + LF.esc(d.spil[s]) + ': ' + LF.esc(g.tekst) + ' (' + LF.esc(g.detalje) + ', gemt ' + LF.dato(g.opdateret) + ').');
+      });
       if (d.slettede_tid.i_alt) ekstra.push('Elever, der er slettet igen, har spillet i ' + LF.tid(d.slettede_tid.i_alt) + '.');
       if (ekstra.length) html += '<div class="panel"><p style="margin:0;">' + ekstra.join(' ') + '</p></div>';
       if (!d.grupper.length) html += '<div class="panel"><p class="tom" style="margin:0;">Kontoen har ingen klasser endnu.</p></div>';

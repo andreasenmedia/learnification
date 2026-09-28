@@ -126,6 +126,46 @@ function konti_med_tal(): array
     return $ud;
 }
 
+/**
+ * Et gemt spil som en kort status til overblikket: hvor langt, og om det
+ * er gennemført. null, hvis der ikke er noget (eller det er startet forfra).
+ * Formatet er spillenes eget — se til_gem() i Regnehelten og fresh() i
+ * spil/runeborg/js/game.js, hvis tallene her en dag ser forkerte ud.
+ */
+function gemt_status(string $spil, string $data, int $opdateret): ?array
+{
+    $d = json_decode($data, true);
+    if (!is_array($d) || !empty($d['slettet'])) {
+        return null;
+    }
+    if ($spil === 'regnehelten') {
+        $kapitel = max(0, min(6, (int) ($d['chapter'] ?? 0)));
+        $faerdig = !empty($d['faerdig']) || $kapitel >= 6;
+        return ['faerdig' => $faerdig, 'opdateret' => $opdateret,
+                'tekst' => $faerdig ? 'Gennemført' : 'Kapitel ' . min(6, $kapitel + 1) . ' af 6',
+                'detalje' => 'Regnekraft ' . (int) ($d['confidence'] ?? 0) . ' %'];
+    }
+    if ($spil === 'runeborg') {
+        $hoved = $ekstra = 0;
+        foreach ((array) ($d['q'] ?? []) as $id => $status) {
+            if ($status !== 'done') {
+                continue;
+            }
+            if (preg_match('/^q\d+$/', (string) $id)) {
+                $hoved++;
+            } elseif (preg_match('/^s\d+$/', (string) $id)) {
+                $ekstra++;
+            }
+        }
+        $faerdig = (($d['q']['q10'] ?? '') === 'done');
+        return ['faerdig' => $faerdig, 'opdateret' => $opdateret,
+                'tekst' => $faerdig ? 'Gennemført' : $hoved . ' af 11 missioner',
+                'detalje' => $ekstra . ' af 3 ekstramissioner · ' . count((array) ($d['runes'] ?? []))
+                             . ' af 8 runestykker · ' . (int) ($d['gold'] ?? 0) . ' guld'];
+    }
+    return null;
+}
+
 /** Et værtsnavn eller en ?ref=-kode som et navn, man kan læse. */
 function kildenavn(string $k): string
 {
@@ -321,6 +361,19 @@ case 'besoeg':
 case 'overblik':
     $konti = konti_med_tal();
     $uge = time() - 7 * 86400;
+    // Gemte spil pr. spil: hvor mange, og hvor mange der er gennemført
+    $gemte = [];
+    foreach (array_keys(SPIL) as $s) {
+        $gemte[$s] = ['i_alt' => 0, 'faerdige' => 0];
+    }
+    foreach (alle("SELECT g.spil, g.data, g.opdateret FROM gemte_spil g JOIN konti k ON k.id = g.konto_id
+                   WHERE k.type != 'admin'") as $g) {
+        $st = isset($gemte[$g['spil']]) ? gemt_status($g['spil'], $g['data'], (int) $g['opdateret']) : null;
+        if ($st) {
+            $gemte[$g['spil']]['i_alt']++;
+            $gemte[$g['spil']]['faerdige'] += $st['faerdig'] ? 1 : 0;
+        }
+    }
     svar(['ok' => true,
           'konti' => $konti,
           'tal' => [
@@ -337,6 +390,7 @@ case 'overblik':
           ],
           'tid' => spilletid("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", []),
           'dage' => pr_dag("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", [], 30),
+          'gemte' => $gemte,
           'spil' => SPIL]);
 
 case 'konto':
@@ -344,13 +398,28 @@ case 'konto':
     if (!$k) {
         fejl('Kontoen findes ikke.', 404);
     }
+    // Gemte spil på kontoen: pr. elev, og den voksnes egne
+    $gemt = [];
+    $voksen_gemt = (object) [];
+    foreach (alle('SELECT elev_id, spil, data, opdateret FROM gemte_spil WHERE konto_id = ?', [$k['id']]) as $g) {
+        $st = gemt_status($g['spil'], $g['data'], (int) $g['opdateret']);
+        if (!$st) {
+            continue;
+        }
+        if ($g['elev_id'] === null) {
+            $voksen_gemt->{$g['spil']} = $st;
+        } else {
+            $gemt[(int) $g['elev_id']][$g['spil']] = $st;
+        }
+    }
     $grupper = [];
     foreach (alle('SELECT * FROM grupper WHERE konto_id = ? ORDER BY klassetrin, navn', [$k['id']]) as $g) {
         $elever = [];
         foreach (alle('SELECT * FROM elever WHERE gruppe_id = ? ORDER BY kaldenavn', [$g['id']]) as $e) {
             $elever[] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
                          'sidst_inde' => $e['sidst_inde'] !== null ? (int) $e['sidst_inde'] : null,
-                         'tid' => spilletid('elev_id = ?', [$e['id']])];
+                         'tid' => spilletid('elev_id = ?', [$e['id']]),
+                         'gemt' => $gemt[(int) $e['id']] ?? (object) []];
         }
         $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'],
                       'klassetrin' => $g['klassetrin'] !== null ? (int) $g['klassetrin'] : null,
@@ -364,6 +433,7 @@ case 'konto':
           'grupper' => $grupper,
           'tid' => spilletid('konto_id = ?', [$k['id']]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$k['id']]),
+          'voksen_gemt' => $voksen_gemt,
           'slettede_tid' => spilletid("konto_id = ? AND hvem = 'elev' AND elev_id IS NULL", [$k['id']]),
           'dage' => pr_dag('konto_id = ?', [$k['id']], 30),
           'spil' => SPIL]);
