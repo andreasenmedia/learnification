@@ -60,10 +60,11 @@ dagbogen, og senere missioner bruger dem — fx er de spor, man fremlægger for
 borgmesteren, præcis dem, der står i spillerens dagbog. Tilføjer man en
 mission, skal den have `requires` og gerne `uses` (vises i dagbogen).
 
-**Spillet sender kun spilletid** (se "Login og testkonti"). Eventyret
-gemmes i browserens `localStorage` (`runeborg-v1[-elev.<id>]` og
-`runeborg-indstillinger`), og der er intet `resultat.php`-kald. Skal det
-ændres, skal teksten om privatliv på `/runeborg` rettes samtidig.
+**Spillet sender spilletid og det gemte eventyr** (se "Gemte spil").
+Eventyret gemmes i `localStorage` (`runeborg-v1[-elev.<id>]` og
+`runeborg-indstillinger`) og, når man er logget ind, også på serveren via
+`js/gem.js`. Der er intet `resultat.php`-kald. Skal det ændres, skal
+`/privatliv#gemte-spil` rettes samtidig.
 
 **Berøringsskærme:** joystick, E-knap og skærmtastatur (QWERTY med æøå til
 navnet, taltastatur til regneopgaver) dukker op ved første berøring og
@@ -519,6 +520,16 @@ ligesom de andre mails. Kommer den ikke frem, så tjek SPF/DKIM for domænet
 hos Simply.com.
 
 ## Gemte spil
+
+Begge spil gemmer på serveren, når man er logget ind, så man kan fortsætte
+på en anden enhed. **Runeborg** (`spil/runeborg/js/gem.js`, siden
+2026-09-28): `save()` i game.js skriver som før til `localStorage` og giver
+det samme videre til `RB.gem`, som sender det op efter 1,5 s (med det samme,
+når fanen lukkes eller skjules). `runeborg-synk-<spiller>` husker udgaven og
+om kopien nåede op; gamle eventyr, der kun lå i browseren, bliver sendt op
+første gang, hvis serveren intet har. "Start forfra" gemmer
+`{"slettet":true}` på serveren, så "Fortsæt" ikke kommer igen. Konflikt →
+`UI.konflikt()` → det nyeste hentes, og siden genindlæses.
 
 Regnehelten gemmer selv (`gemning.py` i spillets repo): efter hver runde,
 ved dørskift, efter pausespil og hvert 20. sekund, hvis spilleren har flyttet

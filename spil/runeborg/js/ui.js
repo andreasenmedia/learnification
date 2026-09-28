@@ -415,21 +415,36 @@
     },
 
     // ---------------------------------------------------------------- titel
+    // hasSave er navnet fra det gemte eventyr ('' = intet gemt)
     title: function (hasSave) {
       return new Promise(function (resolve) {
         var s = el('div', 'screen-full'), c = el('div', 'title-card px'); s.appendChild(c);
         c.appendChild(el('h1', null, 'Runeborg'));
         c.appendChild(el('p', 'sub', 'Et eventyr om en grøn brønd, et hav af rygter — og de beviser, der skal til for at finde sandheden.'));
         var row = el('div', 'row');
-        if (hasSave) { var cont = el('button', 'btn primary', 'Fortsæt eventyret'); cont.type = 'button'; row.appendChild(cont); cont.addEventListener('click', function () { RB.audio.unlock(); pop(s); resolve('continue'); }); }
+        if (hasSave) { var cont = el('button', 'btn primary', 'Fortsæt som ' + esc(hasSave)); cont.type = 'button'; row.appendChild(cont); cont.addEventListener('click', function () { RB.audio.unlock(); pop(s); resolve('continue'); }); }
         var nw = el('button', 'btn' + (hasSave ? '' : ' primary'), 'Nyt eventyr'); nw.type = 'button'; row.appendChild(nw);
         nw.addEventListener('click', function () {
           if (hasSave && !window.confirm('Et nyt eventyr sletter det, du har gemt. Vil du det?')) return;
           RB.audio.unlock(); pop(s); resolve('new');
         });
         c.appendChild(row);
-        c.appendChild(el('p', 'tiny', 'Eventyret gemmes i din egen browser. Mens spillet er til test, sendes kun, hvor længe du har spillet. <a href="/for-voksne#data">Hvad gemmes?</a>'));
+        c.appendChild(el('p', 'tiny', 'Eventyret gemmes af sig selv. Er du logget ind, kan du spille videre på en anden computer eller tablet. <a href="/for-voksne#data">Hvad gemmes?</a>'));
         push(s); (row.querySelector('.primary') || nw).focus();
+      });
+    },
+
+    // En anden skærm har gemt nyere fremskridt — hent det, før der spilles videre
+    konflikt: function () {
+      return new Promise(function (resolve) {
+        var bg = el('div', 'modal-bg'), m = el('div', 'menu px'); bg.appendChild(m);
+        m.setAttribute('role', 'alertdialog'); m.setAttribute('aria-modal', 'true');
+        m.appendChild(el('h2', null, 'Du har spillet videre et andet sted'));
+        m.appendChild(el('p', null, 'Eventyret er gemt på en anden computer eller tablet, efter du startede her. Vi henter det nyeste, så du ikke mister noget.'));
+        var ok = el('button', 'btn primary', 'Hent det nyeste'); ok.type = 'button'; m.appendChild(ok);
+        ok.addEventListener('click', function () { ok.disabled = true; resolve(); });
+        bg.addEventListener('keydown', function (e) { e.stopPropagation(); if (e.key === 'Enter' || e.key === 'e' || e.key === 'E') resolve(); });
+        push(bg); ok.focus();
       });
     },
 

@@ -39,9 +39,20 @@
   }
   var FOTO = (location.hash.match(/foto=(\w+)/) || [])[1];   // tools/runeborg-billeder.py tager skærmbilleder sådan
   // Gem først, når et rigtigt spil er i gang — titelskærmens baggrundsby må
-  // aldrig overskrive det, man har gemt.
-  function save() { if (!S || FOTO || !started) return; try { localStorage.setItem(SAVE, JSON.stringify(S)); } catch (e) { /* privat vindue */ } }
-  function load() { try { var s = JSON.parse(localStorage.getItem(SAVE)); return s && s.v === 1 ? s : null; } catch (e) { return null; } }
+  // aldrig overskrive det, man har gemt. Det gemte ligger i localStorage og,
+  // når man er logget ind, også på serveren (js/gem.js), så man kan spille
+  // videre på en anden skærm. `nu` sender med det samme (når fanen lukkes).
+  // `laast` bliver sat, når en anden skærm har gemt noget nyere: så må den
+  // her fane ikke gemme mere, før spilleren har hentet det nyeste.
+  var laast = false;
+  function save(nu) {
+    if (!S || FOTO || !started || laast) return;
+    var d = JSON.stringify(S);
+    try { localStorage.setItem(SAVE, d); } catch (e) { /* privat vindue */ }
+    RB.gem.gem(d, nu === true);
+  }
+  function lokal() { try { return localStorage.getItem(SAVE); } catch (e) { return null; } }
+  function parse(tekst) { try { var s = JSON.parse(tekst); return s && s.v === 1 ? s : null; } catch (e) { return null; } }
   RB.saveSettings = function () {
     try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, voice: RB.voice.on, big: document.body.classList.contains('big') })); } catch (e) { }
   };
@@ -51,7 +62,19 @@
       RB.audio.setMusic(s.music !== false); RB.audio.setSfx(s.sfx !== false); RB.voice.on = s.voice !== false; document.body.classList.toggle('big', !!s.big);
     } catch (e) { }
   }
-  RB.resetGame = function () { try { localStorage.removeItem(SAVE); } catch (e) { } location.reload(); };
+  RB.resetGame = function () {
+    laast = true;
+    try { localStorage.removeItem(SAVE); } catch (e) { }
+    RB.gem.nulstil().then(function () { location.reload(); });
+  };
+  RB.gem.naarKonflikt(function () {
+    laast = true;
+    UI.konflikt().then(function () {
+      var d = RB.gem.tagNyeste();
+      try { if (parse(d)) localStorage.setItem(SAVE, d); else localStorage.removeItem(SAVE); } catch (e) { }
+      location.reload();
+    });
+  });
 
   // ---------------------------------------------------------------- verden
   function applyWorldFlags() {
@@ -586,6 +609,8 @@
 
   async function boot() {
     K = RB.content; UI = RB.ui; UI.init(); resize();
+    // Spørg serveren med det samme — svaret skal bruges, når titlen kommer
+    var hentning = FOTO ? null : RB.gem.hent(lokal());
     loadSettings();
     world = RB.buildWorld();
     catSheet = RB.makeCat(); dragonSheet = makeDragon();
@@ -595,8 +620,8 @@
     requestAnimationFrame(loop);
     if (document.fonts && document.fonts.ready) { try { await Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1500); })]); } catch (e) { } }
     if (FOTO) { foto(FOTO); return; }
-    var saved = load();
-    var choice = await UI.title(!!saved);
+    var saved = parse(await hentning);
+    var choice = await UI.title(saved ? saved.name || 'Lærling' : '');
     if (choice === 'continue' && saved) {
       S = saved; RB.state = S; if (!S.q.q0) S.q.q0 = 'active'; begin();
       UI.toast('Velkommen tilbage, <b>' + RB.esc(S.name) + '</b>!');
@@ -630,6 +655,10 @@
     face: function (d) { S.dir = d; }
   };
 
-  window.addEventListener('pagehide', save);
+  window.addEventListener('pagehide', function () { save(true); });
+  // På en telefon skifter man app i stedet for at lukke fanen
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') save(true);
+  });
   boot();
 })();

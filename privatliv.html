@@ -99,7 +99,8 @@
     <div class="tabel"><table>
       <thead><tr><th>Navn</th><th>Hvad det gør</th><th>Holder</th></tr></thead>
       <tbody>
-        <tr><td><code>runeborg-v1</code><br><code>runeborg-v1-elev.&lt;nr&gt;</code></td><td>Hvor langt man er nået i Runeborg — ét for hvert barn, der er logget ind.</td><td>Til man starter forfra eller rydder browseren</td></tr>
+        <tr><td><code>runeborg-v1</code><br><code>runeborg-v1-elev.&lt;nr&gt;</code></td><td>Hvor langt man er nået i Runeborg — ét for hvert barn, der er logget ind. Er man logget ind, er det en kopi af det, der er gemt hos os (se "Gemte spil").</td><td>Til man starter forfra eller rydder browseren</td></tr>
+        <tr><td><code>runeborg-synk-&lt;nr&gt;</code></td><td>Hvilken udgave af det gemte eventyr kopien i browseren bygger på, så en gammel fane ikke gemmer oven i nyere fremskridt fra en anden skærm.</td><td>Til man starter forfra eller rydder browseren</td></tr>
         <tr><td><code>runeborg-indstillinger</code></td><td>Om musik, lydeffekter og oplæsning er slået til, og om teksten skal være stor.</td><td>Til man rydder browseren</td></tr>
         <tr><td><code>lf-tester</code></td><td>At denne browser har meldt sig til testen, så vi ikke spørger igen.</td><td>Til man rydder browseren</td></tr>
         <tr><td><code>regnehelten-gem:&lt;nr&gt;</code></td><td>En kopi af det gemte Regnehelten-spil (se "Gemte spil" nedenfor), så intet går tabt, hvis nettet forsvinder et øjeblik.</td><td>Til man starter forfra eller rydder browseren</td></tr>
@@ -107,7 +108,12 @@
     </table></div>
 
     <h2 id="gemte-spil" style="margin-top:44px;">Gemte spil</h2>
-    <p>Regnehelten gemmer af sig selv, hvor langt man er nået, så man kan spille videre — også på en anden computer eller tablet. Er man logget ind, ligger det gemte spil på vores server under barnets login (eller den voksnes konto): fornavnet og udseendet fra spillet, klassetrin, hvor langt i historien man er, Regnekraft, hvad der er i tasken, hvor i verden man står, og de opgaver, der er løst i omgangen. Det bliver slettet sammen med barnet eller kontoen under <a href="/konto">Min konto</a>.</p>
+    <p>Begge spil gemmer af sig selv, hvor langt man er nået, så man kan spille videre — også på en anden computer eller tablet. Er man logget ind, ligger det gemte spil på vores server under barnets login (eller den voksnes konto):</p>
+    <ul>
+      <li><strong>Regnehelten:</strong> fornavnet og udseendet fra spillet, klassetrin, hvor langt i historien man er, Regnekraft, hvad der er i tasken, hvor i verden man står, og de opgaver, der er løst i omgangen.</li>
+      <li><strong>Runeborg:</strong> heltenavnet og klassen fra spillet, hvilke missioner der er klaret, spor, evner, runestykker, guld, hvor i byen man står, og hvordan opgaverne gik.</li>
+    </ul>
+    <p>Det bliver slettet sammen med barnet eller kontoen under <a href="/konto">Min konto</a>. "Start forfra" i spillet sletter også det gemte hos os.</p>
 
     <h2 id="statistik" style="margin-top:44px;">Besøgsstatistik</h2>
     <p>Vi vil gerne vide, hvordan folk finder siden, og hvilke sider de kigger på, så vi kan gøre den bedre. Det måler vi selv på vores eget webhotel — der er ingen Google Analytics eller lignende, og ingen andre får tallene.</p>
@@ -142,7 +148,7 @@
         <tr><td>Statistik-cookiens tilfældige nummer (<code>lf_bes</code>)</td><td>For at se, om folk kommer igen, og hvad der fik dem til at melde sig til</td><td>Samtykke (litra a)</td></tr>
         <tr><td>Dit svar i cookie-banneret med tidspunkt og et tilfældigt nummer</td><td>For at kunne bevise, at vi har dit samtykke</td><td>Retlig forpligtelse (litra c, jf. art. 7, stk. 1)</td></tr>
         <tr><td>Nyhedsbrevet: mail, fornavn, rolle, tilmeldingsside, samtykketekst og tidspunkter</td><td>For at sende dig nyt fra os</td><td>Samtykke (litra a) og markedsføringslovens § 10</td></tr>
-        <tr><td>Gemte spil i Regnehelten</td><td>For at man kan spille videre, også på en anden enhed</td><td>Aftale (litra b)</td></tr>
+        <tr><td>Gemte spil i Regnehelten og Runeborg</td><td>For at man kan spille videre, også på en anden enhed</td><td>Aftale (litra b)</td></tr>
       </tbody>
     </table></div>
     <p><strong>Hvor længe:</strong> kontoen og børnenes oplysninger til I sletter dem under <a href="/konto">Min konto</a> — det sker med det samme. IP-koden i højst en time. Besøgsstatistikken i 13 måneder. Samtykkebeviser i 3 år. Nyhedsbrevet, til du afmelder dig. Testresultater og tilmeldinger slettes, når testperioden er slut. Vi giver intet videre og sælger intet.</p>
@@ -153,7 +159,7 @@
     <p>Er du utilfreds med, hvordan vi behandler oplysningerne, kan du klage til <a href="https://www.datatilsynet.dk">Datatilsynet</a>, Carl Jacobsens Vej 35, 2500 Valby.</p>
 
     <h2 id="slet" style="margin-top:44px;">Sådan sletter du det hele fra browseren</h2>
-    <p>Log ud, og slet derefter data for learnification.dk i browserens indstillinger — i Chrome og Edge under <em>Indstillinger → Privatliv → Cookies og andre webstedsdata</em>, i Safari under <em>Indstillinger → Avanceret → Webstedsdata</em>. Bemærk, at Runeborg så starter forfra.</p>
+    <p>Log ud, og slet derefter data for learnification.dk i browserens indstillinger — i Chrome og Edge under <em>Indstillinger → Privatliv → Cookies og andre webstedsdata</em>, i Safari under <em>Indstillinger → Avanceret → Webstedsdata</em>. Er du logget ind, ligger spillene stadig gemt hos os, til du trykker "Start forfra" eller sletter barnet eller kontoen.</p>
 
     <h2 id="ansvarlig" style="margin-top:44px;">Dataansvarlig</h2>
     <p>Andreasen Media<br>Lindegaarden 12, 1.<br>9400 Nørresundby<br>CVR 40908757<br><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></p>
