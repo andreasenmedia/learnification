@@ -405,6 +405,10 @@ function opret_tabeller(PDO $pdo): void
                 FOREIGN KEY (nyhedsbrev_id) REFERENCES nyhedsbrev(id) ON DELETE CASCADE
             )$slut",
         ],
+        // Velkomstmailen (api/_velkomst.php): hvornår kontoen sidst fik den
+        7 => [
+            'ALTER TABLE konti ADD COLUMN velkomst_sendt INTEGER',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

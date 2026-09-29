@@ -10,6 +10,13 @@
  *   GET  ?handling=eksport      alle konti som CSV til Excel
  *   GET  ?handling=besoeg&dage= besøgsstatistikken til /statistik
  *
+ *   Velkomstmailen (_velkomst.php), fra /admin#velkomst:
+ *   GET  ?handling=velkomst     hvem der har fået den, og hvor mange der mangler
+ *   POST velkomst_vis {id?}     mailen som HTML for en konto
+ *   POST velkomst_test {id?}    send den til administratoren selv
+ *   POST velkomst_en {id}       send den til én konto (også igen)
+ *   POST velkomst_send {gruppe, spring_over}  en bunke; kaldes igen til tilbage = 0
+ *
  * DEN FØRSTE ADMINISTRATOR. Første gang /admin bliver åbnet, skriver
  * serveren en tilfældig nøgle i opsaetningsnoegle.txt i datamappen
  * (learnification-data/ over public_html, eller public_html/data/). Den
@@ -376,7 +383,8 @@ case 'konto':
           'konto' => ['id' => (int) $k['id'], 'type' => $k['type'], 'navn' => $k['navn'], 'kontakt' => $k['kontakt'],
                       'bynavn' => $k['bynavn'], 'email' => $k['email'], 'status' => $k['status'],
                       'oprettet' => (int) $k['oprettet'],
-                      'sidst_inde' => $k['sidst_inde'] !== null ? (int) $k['sidst_inde'] : null],
+                      'sidst_inde' => $k['sidst_inde'] !== null ? (int) $k['sidst_inde'] : null,
+                      'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null],
           'grupper' => $grupper,
           'tid' => spilletid('konto_id = ?', [$k['id']]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$k['id']]),
@@ -399,6 +407,100 @@ case 'saet_status':
         kør('DELETE FROM logins WHERE konto_id = ?', [tal('id')]);
     }
     svar(['ok' => true]);
+
+// ---- velkomstmailen (se _velkomst.php) ----
+
+case 'velkomst':
+    require_once __DIR__ . '/_velkomst.php';
+    $grupper = [];
+    foreach (VELKOMST_GRUPPER as $g => $navn) {
+        $grupper[$g] = ['navn' => $navn, 'antal' => (int) vaerdi('SELECT COUNT(*) FROM konti k WHERE ' . velkomst_hvor($g))];
+    }
+    $konti = [];
+    foreach (alle("SELECT k.id, k.type, k.navn, k.email, k.status, k.oprettet, k.velkomst_sendt,
+                          EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id AND s.sekunder > 0) AS spillet
+                   FROM konti k WHERE k.type != 'admin' ORDER BY k.oprettet DESC") as $k) {
+        $konti[] = ['id' => (int) $k['id'], 'type' => $k['type'], 'navn' => $k['navn'], 'email' => $k['email'],
+                    'status' => $k['status'], 'oprettet' => (int) $k['oprettet'], 'spillet' => (bool) $k['spillet'],
+                    'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null];
+    }
+    svar(['ok' => true, 'grupper' => $grupper, 'konti' => $konti,
+          'mig' => kraev_admin()['email'], 'smtp' => smtp_opsaetning() !== null]);
+
+case 'velkomst_vis':
+case 'velkomst_test':
+    // Vist eller sendt til administratoren selv — som den ser ud for en
+    // bestemt konto, eller for en ny familie, hvis der ikke er valgt nogen
+    kraev_egen_side();
+    require_once __DIR__ . '/_velkomst.php';
+    $mig = kraev_admin();
+    $k = tal('id') ? en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('id')]) : null;
+    $k = $k ?: ['id' => 0, 'type' => 'foraelder', 'navn' => $mig['navn'], 'kontakt' => $mig['navn'], 'email' => $mig['email']];
+    [$tekst, $html, $headere] = velkomst_mail($k);
+    if ($h === 'velkomst_vis') {
+        svar(['ok' => true, 'html' => $html, 'til' => $k['email']]);
+    }
+    bremse('velkomst-test', (string) $mig['id'], 20, 3600);
+    if (!send_mail($mig['email'], '[TEST] ' . VELKOMST_EMNE, $tekst, $html, $headere)) {
+        fejl('Mailen blev ikke sendt: ' . (post_fejl() ?: 'ukendt fejl'), 502);
+    }
+    svar(['ok' => true, 'til' => $mig['email']]);
+
+case 'velkomst_en':
+    // Én konto, også hvis den har fået den før (fx efter en fejl)
+    kraev_egen_side();
+    require_once __DIR__ . '/_velkomst.php';
+    $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('id')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    if ($k['status'] === 'spaerret') {
+        fejl('Kontoen er spærret.');
+    }
+    if (!velkomst_send($k)) {
+        fejl('Mailen blev ikke sendt: ' . (post_fejl() ?: 'ukendt fejl'), 502);
+    }
+    svar(['ok' => true]);
+
+case 'velkomst_send':
+    // En bunke ad gangen, som nyhedsbrevet. "velkomst_sendt" bliver sat,
+    // før mailen går, så to faner ikke sender den samme. Fejler den, bliver
+    // den sat tilbage — og siden sender id'et med i spring_over, så den
+    // ikke bliver prøvet igen og igen i samme runde.
+    kraev_egen_side();
+    require_once __DIR__ . '/_velkomst.php';
+    $gruppe = felt('gruppe', 20);
+    if (!isset(VELKOMST_GRUPPER[$gruppe])) {
+        fejl('Vælg, hvem den skal sendes til.');
+    }
+    $spring = array_slice(array_values(array_filter(array_map('intval', (array) (input()['spring_over'] ?? [])))), 0, 1000);
+    $ikke = $spring ? ' AND k.id NOT IN (' . implode(',', $spring) . ')' : '';
+    @set_time_limit(60);
+    $sendt = $fejlet = 0;
+    $nye_fejl = [];
+    $sidste_fejl = '';
+    $stop = microtime(true) + 20;
+    foreach (alle('SELECT * FROM konti k WHERE ' . velkomst_hvor($gruppe) . $ikke . ' ORDER BY k.id LIMIT 25') as $k) {
+        if (!kør('UPDATE konti SET velkomst_sendt = ? WHERE id = ? AND velkomst_sendt IS NULL', [time(), $k['id']])) {
+            continue;
+        }
+        if (velkomst_send($k)) {
+            $sendt++;
+        } else {
+            kør('UPDATE konti SET velkomst_sendt = NULL WHERE id = ?', [$k['id']]);
+            $fejlet++;
+            $nye_fejl[] = (int) $k['id'];
+            $sidste_fejl = post_fejl();
+        }
+        if (microtime(true) > $stop) {
+            break;
+        }
+    }
+    $spring = array_merge($spring, $nye_fejl);
+    $tilbage = (int) vaerdi('SELECT COUNT(*) FROM konti k WHERE ' . velkomst_hvor($gruppe)
+                            . ($spring ? ' AND k.id NOT IN (' . implode(',', $spring) . ')' : ''));
+    svar(['ok' => true, 'sendt' => $sendt, 'fejlet' => $fejlet, 'fejl' => $sidste_fejl,
+          'spring_over' => $spring, 'tilbage' => $tilbage]);
 
 case 'eksport':
     $konti = konti_med_tal();

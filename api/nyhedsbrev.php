@@ -24,7 +24,7 @@
 
 declare(strict_types=1);
 require __DIR__ . '/_kerne.php';
-require __DIR__ . '/_nyhedsbrev.php';
+require_once __DIR__ . '/_nyhedsbrev.php';
 
 function skjul_mail(string $email): string
 {

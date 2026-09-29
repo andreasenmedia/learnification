@@ -527,6 +527,19 @@ den, står i `udsendelse_modtagere` (DB v6), så en afbrudt udsendelse kan
 sendes færdig fra historikken, uden at nogen får den to gange. Lokalt havner
 mailene i `post.txt` i datamappen (`LF_POSTKASSE`).
 
+## Velkomstmailen
+
+`api/_velkomst.php`: "sådan kommer I i gang" + en Log ind-knap til den voksne
+på en konto. Går af sig selv ved oprettelse (`api/konto.php`), og under
+**/admin → Velkomstmail** kan den sendes til alle, der ikke har fået den, eller
+kun til dem, hvor ingen har spillet — plus til én konto ad gangen (også igen).
+Teksten tilpasser sig: skole/familie, ingen elever endnu / elever, der ikke har
+spillet / X af Y har spillet. `konti.velkomst_sendt` (DB v7) husker, hvem der
+har fået den; spærrede konti og administratoren får den aldrig. Links får
+`utm_source=velkomstmail`. Det er en **servicemail** om deres egen konto
+(de sagde ja til, at vi må skrive om testen) — kommer der tilbud eller reklame
+i den, er den markedsføring og må kun gå til nyhedsbrevets aktive.
+
 ## Mails fra siden
 
 DNS for learnification.dk er Simply.coms standard og skal ikke røres:

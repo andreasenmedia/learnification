@@ -72,6 +72,7 @@
         <div class="knapper">
           <a class="btn btn-sm" href="/statistik">Besøg på siden</a>
           <a class="btn btn-sm" href="#nyhedsbrev">Nyhedsbrev</a>
+          <a class="btn btn-sm" href="#velkomst">Velkomstmail</a>
           <a class="btn btn-sm" href="/api/admin.php?handling=eksport">Hent som Excel (CSV)</a>
           <a class="btn btn-sm" href="/konto">Min egen konto</a>
           <button type="button" class="btn btn-sm" data-logud>Log ud</button>
@@ -147,6 +148,36 @@
       </div>
     </div>
 
+    <!-- Velkomstmailen -->
+    <div id="velkomst" hidden>
+      <a href="#" class="tilbage">&larr; Alle konti</a>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Til de voksne med en konto</p><h1>Velkomstmail</h1>
+          <p>Sådan kommer I i gang — og en påmindelse om at logge ind. Den går af sig selv til nye konti, lige når de er oprettet. Herunder kan du sende den til dem, der ikke har fået den. Den tilpasser sig kontoen: skole eller familie, og om der er elever, og om de har spillet.</p></div>
+      </div>
+      <p class="besked fejl" id="v-smtp" hidden>Mailene bliver sendt med PHP's mail() og bliver derfor ikke DKIM-signeret, så mange modtagere afviser dem. Læg smtp.php i datamappen (se README under "Mails fra siden"), før du sender.</p>
+      <div class="tal-raekke" id="v-tal"></div>
+      <form class="panel" id="v-form" novalidate>
+        <h2>Send velkomstmailen</h2>
+        <p class="besked" id="v-besked"></p>
+        <div class="felt"><label for="v-gruppe">Modtagere</label><select id="v-gruppe"></select></div>
+        <p class="lille" style="margin:-4px 0 0;">Spærrede konti får den aldrig. Det er en servicemail om deres egen konto — ikke et nyhedsbrev — så den må ikke rumme tilbud eller reklame.</p>
+        <div class="knapper" style="margin-top:18px;">
+          <button type="submit" class="btn btn-primary" id="v-send">Send</button>
+          <button type="button" class="btn btn-sm" id="v-test">Send en test til mig</button>
+          <button type="button" class="btn btn-sm" id="v-vis">Forhåndsvis</button>
+        </div>
+        <div id="v-forhaand" hidden style="margin-top:18px;">
+          <p class="lille" id="v-forhaand-til" style="margin:0 0 8px;"></p>
+          <iframe id="v-ramme" title="Forhåndsvisning af velkomstmailen" sandbox="" style="width:100%;height:620px;border:2px solid var(--paper-edge);border-radius:12px;background:#faf7f0;"></iframe>
+        </div>
+      </form>
+      <div class="panel">
+        <h2>Konti</h2>
+        <div class="tabel-rul"><table class="liste" id="v-liste"></table></div>
+      </div>
+    </div>
+
     <!-- Én konto -->
     <div id="detalje" hidden>
       <a href="#" class="tilbage" id="tilbage">&larr; Alle konti</a>
@@ -170,7 +201,7 @@
   var alle = [], spilnavne = {};
 
   function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
-  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst'].forEach(function (x) { $(x).hidden = x !== id; }); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -201,6 +232,7 @@
     var m = location.hash.match(/konto=(\d+)/);
     if (m) visKonto(+m[1]);
     else if (location.hash === '#nyhedsbrev') visNyhed();
+    else if (location.hash === '#velkomst') visVelkomst();
     else visOverblik();
   }
   window.addEventListener('hashchange', rute);
@@ -436,6 +468,111 @@
     LF.send('nyhedsbrev', 'fjern', { id: +b.dataset.fjern }).then(visNyhed, function (err) { alert(err.message); });
   });
 
+  // --- velkomstmailen -------------------------------------------------------
+  var vGrupper = {}, vKonti = [], vSender = false;
+  function visVelkomst() {
+    return LF.hent('admin', 'velkomst').then(function (d) {
+      vGrupper = d.grupper; vKonti = d.konti;
+      vis('velkomst');
+      $('v-smtp').hidden = !!d.smtp;
+      $('v-test').textContent = 'Send en test til ' + d.mig;
+      var sendt = vKonti.filter(function (k) { return k.velkomst_sendt; }).length;
+      $('v-tal').innerHTML = [[sendt, 'Har fået den'], [d.grupper.mangler.antal, 'Mangler den'],
+                              [d.grupper.ikke_spillet.antal, 'Mangler den og har ikke spillet']].map(kort).join('');
+      var valgt = $('v-gruppe').value || 'mangler';
+      $('v-gruppe').innerHTML = Object.keys(vGrupper).map(function (g) {
+        return '<option value="' + g + '"' + (g === valgt ? ' selected' : '') + '>' + LF.esc(vGrupper[g].navn + ' (' + vGrupper[g].antal + ')') + '</option>';
+      }).join('');
+      vKnap();
+      var html = '<thead><tr><th>Konto</th><th>Type</th><th class="t">Oprettet</th><th>Har spillet</th><th class="t">Velkomstmail</th><th></th></tr></thead><tbody>';
+      vKonti.forEach(function (k) {
+        html += '<tr><td><strong>' + LF.esc(k.navn) + '</strong><br><span class="lille">' + LF.esc(k.email) + '</span></td>'
+          + '<td>' + TYPE[k.type] + (k.status === 'spaerret' ? ' ' + maerke('spaerret') : '') + '</td>'
+          + '<td class="t">' + LF.dato(k.oprettet) + '</td><td>' + (k.spillet ? 'Ja' : 'Nej') + '</td>'
+          + '<td class="t">' + (k.velkomst_sendt ? LF.dato(k.velkomst_sendt) : '<span class="maerke ny">Ikke sendt</span>') + '</td>'
+          + '<td class="t"><button type="button" class="link-knap" data-vvis="' + k.id + '">Vis</button>'
+          + (k.status !== 'spaerret' ? ' · <button type="button" class="link-knap" data-ven="' + k.id + '">' + (k.velkomst_sendt ? 'Send igen' : 'Send') + '</button>' : '')
+          + '</td></tr>';
+      });
+      if (!vKonti.length) html += '<tr><td colspan="6" class="tom">Ingen konti endnu.</td></tr>';
+      $('v-liste').innerHTML = html + '</tbody>';
+    }).catch(function (err) { alert(err.message); location.hash = ''; });
+  }
+  function vKnap() {
+    if (vSender) return;
+    var g = vGrupper[$('v-gruppe').value], n = g ? g.antal : 0;
+    $('v-send').textContent = 'Send til ' + n + (n === 1 ? ' konto' : ' konti');
+    $('v-send').disabled = !n;
+  }
+  $('v-gruppe').addEventListener('change', vKnap);
+
+  // Den første konto, der ville få den — så forhåndsvisningen er en rigtig
+  function vFoerste() {
+    var g = $('v-gruppe').value;
+    var k = vKonti.filter(function (k) { return !k.velkomst_sendt && k.status !== 'spaerret' && (g !== 'ikke_spillet' || !k.spillet); })[0];
+    return k ? k.id : 0;
+  }
+  function vVis(id) {
+    return LF.send('admin', 'velkomst_vis', { id: id }).then(function (d) {
+      $('v-forhaand').hidden = false;
+      $('v-forhaand-til').textContent = 'Sådan ser den ud for ' + d.til + ':';
+      $('v-ramme').srcdoc = d.html;
+      $('v-forhaand').scrollIntoView({ block: 'start' });
+    }, function (err) { LF.besked($('v-besked'), err.message, 'fejl'); });
+  }
+  $('v-vis').addEventListener('click', function () { vVis(vFoerste()); });
+  $('v-test').addEventListener('click', function () {
+    var knap = this;
+    LF.travl(knap, true);
+    LF.send('admin', 'velkomst_test', { id: vFoerste() }).then(function (d) {
+      LF.besked($('v-besked'), 'Testen er sendt til ' + d.til + '.', 'ok');
+    }, function (err) { LF.besked($('v-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
+  });
+
+  $('v-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var gruppe = $('v-gruppe').value, g = vGrupper[gruppe];
+    if (!g || !g.antal) return;
+    if (!confirm('Send velkomstmailen til ' + g.antal + (g.antal === 1 ? ' konto' : ' konti') + ' (' + g.navn.toLowerCase() + ')?')) return;
+    var i_alt = 0, fejl = 0, spring = [], sidsteFejl = '';
+    vSender = true; $('v-send').disabled = true;
+    window.onbeforeunload = function () { return 'Velkomstmailen er ved at blive sendt.'; };
+    function stop() { vSender = false; window.onbeforeunload = null; }
+    function bunke() {
+      return LF.send('admin', 'velkomst_send', { gruppe: gruppe, spring_over: spring }).then(function (d) {
+        i_alt += d.sendt; fejl += d.fejlet; spring = d.spring_over;
+        if (d.fejl) sidsteFejl = d.fejl;
+        if (d.tilbage > 0 && (d.sendt || d.fejlet)) {
+          LF.besked($('v-besked'), 'Sender … ' + i_alt + ' sendt, ' + d.tilbage + ' tilbage. Luk ikke siden.', 'ok');
+          return new Promise(function (ok) { setTimeout(ok, 800); }).then(bunke);
+        }
+        stop();
+        LF.besked($('v-besked'), 'Færdig: sendt til ' + i_alt + (i_alt === 1 ? ' konto' : ' konti')
+          + (fejl ? '. ' + fejl + ' kunne ikke sendes (' + sidsteFejl + ') — de står stadig som "Ikke sendt"' : '') + '.', fejl ? 'fejl' : 'ok');
+        return visVelkomst();
+      });
+    }
+    bunke().catch(function (err) {
+      stop();
+      LF.besked($('v-besked'), err.message + ' — ' + i_alt + ' er sendt. Tryk Send igen for at sende resten.', 'fejl');
+      return visVelkomst();
+    });
+  });
+
+  $('v-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-vvis]');
+    if (b) { vVis(+b.dataset.vvis); return; }
+    b = e.target.closest('[data-ven]');
+    if (!b) return;
+    var k = vKonti.filter(function (k) { return k.id === +b.dataset.ven; })[0];
+    if (!confirm('Send velkomstmailen til ' + k.email + (k.velkomst_sendt ? ' igen' : '') + '?')) return;
+    LF.send('admin', 'velkomst_en', { id: k.id }).then(function () {
+      LF.besked($('v-besked'), 'Velkomstmailen er sendt til ' + k.email + '.', 'ok');
+      return visVelkomst();
+    }, function (err) { LF.besked($('v-besked'), err.message, 'fejl'); });
+  });
+
   // --- én konto -------------------------------------------------------------
   function visKonto(id) {
     LF.hent('admin', 'konto', { id: id }).then(function (d) {
@@ -446,7 +583,8 @@
       $('d-navn').textContent = k.navn;
       $('d-info').innerHTML = LF.esc([skole ? k.kontakt : '', k.bynavn].filter(Boolean).join(' · '))
         + (skole || k.bynavn ? ' · ' : '') + '<a href="mailto:' + LF.esc(k.email) + '">' + LF.esc(k.email) + '</a>'
-        + '<br><span class="lille">Oprettet ' + LF.dato(k.oprettet) + ' · sidst logget ind ' + LF.dato(k.sidst_inde) + '</span>';
+        + '<br><span class="lille">Oprettet ' + LF.dato(k.oprettet) + ' · sidst logget ind ' + LF.dato(k.sidst_inde)
+        + (k.type !== 'admin' ? ' · <a href="#velkomst">velkomstmail</a> ' + (k.velkomst_sendt ? 'sendt ' + LF.dato(k.velkomst_sendt) : 'ikke sendt') : '') + '</span>';
       var knapper = '';
       if (k.type !== 'admin') {
         if (k.status !== 'godkendt') knapper += '<button type="button" class="btn btn-sm btn-primary" data-status="godkendt">' + (k.status === 'spaerret' ? 'Åbn igen' : 'Godkend') + '</button>';

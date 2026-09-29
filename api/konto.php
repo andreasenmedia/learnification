@@ -122,9 +122,14 @@ case 'opret':
         . 'Tidspunkt: ' . date('d-m-Y H:i') . "\n\n"
         . "Godkend eller spær den i overblikket:\n" . adresse() . "/admin\n");
 
+    // Velkomstmailen: sådan kommer I i gang. Går den ikke igennem, kan den
+    // sendes igen fra /admin#velkomst — kontoen er oprettet under alle omstændigheder.
+    require_once __DIR__ . '/_velkomst.php';
+    velkomst_send(en('SELECT * FROM konti WHERE id = ?', [$id]));
+
     // Nyhedsbrevet er sit eget flueben — aldrig en del af at oprette kontoen
     if (!empty(input()['nyhedsbrev'])) {
-        require __DIR__ . '/_nyhedsbrev.php';
+        require_once __DIR__ . '/_nyhedsbrev.php';
         nyhedsbrev_tilmeld($email, $type === 'skole' ? $kontakt : $navn,
                            $type === 'skole' ? 'laerer' : 'foraelder', '/opret');
     }
