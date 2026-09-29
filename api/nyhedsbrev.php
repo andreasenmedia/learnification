@@ -11,6 +11,14 @@
  *   GET  ?handling=eksport                               de aktive som CSV
  *   POST fjern {id}                                      slet helt (retten til at blive glemt)
  *
+ *   Sende nyhedsbreve (fra /admin#nyhedsbrev):
+ *   GET  ?handling=udsendelser                           modtagere pr. gruppe + det, der er sendt
+ *   POST forhaandsvis {emne, tekst, maalgruppe, hilsen}  mailen som HTML
+ *   POST test {emne, tekst, maalgruppe, hilsen}          send den til administratoren selv
+ *   POST opret {emne, tekst, maalgruppe, hilsen}         gem udsendelsen -> {id}
+ *   POST send {id}                                       send en bunke; kaldes igen til tilbage = 0
+ *   POST slet_udsendelse {id}                            kun hvis den ikke er sendt til nogen
+ *
  * Reglerne står i _nyhedsbrev.php.
  */
 
@@ -128,6 +136,132 @@ case 'fjern':
     kraev_egen_side();
     kør('DELETE FROM nyhedsbrev WHERE id = ?', [tal('id')]);
     svar(['ok' => true]);
+
+case 'udsendelser':
+    $tal = [];
+    foreach (NYHEDSBREV_MAALGRUPPER as $g => [$navn]) {
+        $tal[$g] = ['navn' => $navn, 'antal' => (int) vaerdi('SELECT COUNT(*) FROM nyhedsbrev WHERE ' . nyhedsbrev_aktive($g))];
+    }
+    $ud = [];
+    foreach (alle('SELECT u.*, (SELECT COUNT(*) FROM udsendelse_modtagere m WHERE m.udsendelse_id = u.id AND m.ok = 1) AS sendt,
+                          (SELECT COUNT(*) FROM udsendelse_modtagere m WHERE m.udsendelse_id = u.id AND (m.ok = 0 OR m.ok IS NULL)) AS fejlet
+                   FROM udsendelser u ORDER BY u.oprettet DESC') as $u) {
+        $ud[] = ['id' => (int) $u['id'], 'emne' => $u['emne'], 'tekst' => $u['tekst'],
+                 'maalgruppe' => NYHEDSBREV_MAALGRUPPER[$u['maalgruppe']][0] ?? $u['maalgruppe'],
+                 'kampagne' => $u['kampagne'], 'oprettet' => (int) $u['oprettet'],
+                 'faerdig' => $u['faerdig'] !== null ? (int) $u['faerdig'] : null,
+                 'sendt' => (int) $u['sendt'], 'fejlet' => (int) $u['fejlet'],
+                 'tilbage' => $u['faerdig'] !== null ? 0 : tilbage($u)];
+    }
+    svar(['ok' => true, 'grupper' => $tal, 'udsendelser' => $ud, 'mig' => kraev_admin()['email']]);
+
+case 'forhaandsvis':
+case 'test':
+    kraev_egen_side();
+    $u = udkast();
+    $mig = kraev_admin();
+    [$tekst, $html, $headere] = nyhedsbrev_mail($u, ['navn' => $mig['navn'], 'noegle' => '']);
+    if (handling() === 'forhaandsvis') {
+        svar(['ok' => true, 'html' => $html]);
+    }
+    bremse('nyhedsbrev-test', (string) $mig['id'], 20, 3600);
+    if (!send_mail($mig['email'], '[TEST] ' . $u['emne'], $tekst, $html, $headere)) {
+        fejl('Serveren ville ikke sende mailen. Prøv igen om lidt.', 502);
+    }
+    svar(['ok' => true, 'til' => $mig['email']]);
+
+case 'opret':
+    // Gemmer udsendelsen. Selve mailene går af sted med "send" bagefter.
+    kraev_egen_side();
+    $u = udkast();
+    if (!(int) vaerdi('SELECT COUNT(*) FROM nyhedsbrev WHERE ' . nyhedsbrev_aktive($u['maalgruppe']))) {
+        fejl('Der er ingen aktive modtagere i den gruppe.');
+    }
+    kør('INSERT INTO udsendelser (emne, tekst, maalgruppe, hilsen, kampagne, oprettet) VALUES (?, ?, ?, ?, ?, ?)',
+        [$u['emne'], $u['tekst'], $u['maalgruppe'], $u['hilsen'], $u['kampagne'], time()]);
+    svar(['ok' => true, 'id' => (int) db()->lastInsertId()]);
+
+case 'send':
+    // Sender en lille bunke ad gangen, så en lang liste ikke løber ind i
+    // webhotellets tidsgrænse. Siden kalder igen, til der ikke er flere.
+    // Hvem der allerede har fået den, står i udsendelse_modtagere — så en
+    // afbrudt udsendelse kan bare startes igen. De aktive bliver slået op
+    // hver gang, så den, der afmelder sig undervejs, ikke får den.
+    kraev_egen_side();
+    $u = en('SELECT * FROM udsendelser WHERE id = ?', [tal('id')]);
+    if (!$u) {
+        fejl('Udsendelsen findes ikke.', 404);
+    }
+    @set_time_limit(60);
+    $sendt = $fejlet = 0;
+    $stop = microtime(true) + 20;
+    foreach (alle('SELECT * FROM nyhedsbrev n WHERE ' . nyhedsbrev_aktive($u['maalgruppe']) . '
+                   AND NOT EXISTS (SELECT 1 FROM udsendelse_modtagere m WHERE m.udsendelse_id = ? AND m.nyhedsbrev_id = n.id)
+                   ORDER BY n.id LIMIT 25', [$u['id']]) as $r) {
+        try {
+            // Først skrive, så sende: kom en anden fane først, springes den over
+            kør('INSERT INTO udsendelse_modtagere (udsendelse_id, nyhedsbrev_id, tid) VALUES (?, ?, ?)',
+                [$u['id'], $r['id'], time()]);
+        } catch (PDOException $e) {
+            continue;
+        }
+        [$tekst, $html, $headere] = nyhedsbrev_mail($u, $r);
+        $ok = send_mail($r['email'], $u['emne'], $tekst, $html, $headere);
+        kør('UPDATE udsendelse_modtagere SET ok = ? WHERE udsendelse_id = ? AND nyhedsbrev_id = ?',
+            [$ok ? 1 : 0, $u['id'], $r['id']]);
+        $ok ? $sendt++ : $fejlet++;
+        if (microtime(true) > $stop) {
+            break;
+        }
+    }
+    $tilbage = tilbage($u);
+    if ($tilbage === 0) {
+        kør('UPDATE udsendelser SET faerdig = ? WHERE id = ? AND faerdig IS NULL', [time(), $u['id']]);
+    }
+    svar(['ok' => true, 'sendt' => $sendt, 'fejlet' => $fejlet, 'tilbage' => $tilbage]);
+
+case 'slet_udsendelse':
+    // Kun kladder, der aldrig er sendt til nogen — resten er historik
+    kraev_egen_side();
+    $id = tal('id');
+    if ((int) vaerdi('SELECT COUNT(*) FROM udsendelse_modtagere WHERE udsendelse_id = ?', [$id])) {
+        fejl('Den er allerede sendt til nogen og bliver stående i historikken.');
+    }
+    kør('DELETE FROM udsendelser WHERE id = ?', [$id]);
+    svar(['ok' => true]);
+}
+
+/** Aktive i udsendelsens gruppe, som ikke har fået den endnu. */
+function tilbage(array $u): int
+{
+    return (int) vaerdi('SELECT COUNT(*) FROM nyhedsbrev n WHERE ' . nyhedsbrev_aktive($u['maalgruppe']) . '
+                         AND NOT EXISTS (SELECT 1 FROM udsendelse_modtagere m WHERE m.udsendelse_id = ? AND m.nyhedsbrev_id = n.id)',
+                        [$u['id']]);
+}
+
+/** Emne, tekst og målgruppe fra formularen i /admin — tjekket. */
+function udkast(): array
+{
+    $emne = felt('emne', 150);
+    $tekst = input()['tekst'] ?? '';
+    $tekst = is_string($tekst) ? trim(str_replace("\r\n", "\n", $tekst)) : '';
+    $tekst = preg_replace('/[\x00-\x08\x0B-\x1F\x7F]/u', '', $tekst) ?? '';
+    $gruppe = felt('maalgruppe', 20);
+    if ($emne === '') {
+        fejl('Skriv et emne.');
+    }
+    if ($tekst === '') {
+        fejl('Skriv noget i mailen.');
+    }
+    if (laengde($tekst) > 20000) {
+        fejl('Mailen er for lang — hold den under 20.000 tegn.');
+    }
+    if (!isset(NYHEDSBREV_MAALGRUPPER[$gruppe])) {
+        fejl('Vælg, hvem den skal sendes til.');
+    }
+    return ['emne' => $emne, 'tekst' => $tekst, 'maalgruppe' => $gruppe,
+            'hilsen' => empty(input()['hilsen']) ? 0 : 1,
+            'kampagne' => 'nyhedsbrev-' . date('Y-m-d')];
 }
 
 fejl('Ukendt handling.', 404);

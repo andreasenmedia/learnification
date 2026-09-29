@@ -18,6 +18,10 @@ $rod = dirname(__DIR__);
 if (!getenv('LF_DATAMAPPE')) {
     putenv('LF_DATAMAPPE=' . sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'learnification-lokal');
 }
+// Ingen mailserver her: mails havner i post.txt i datamappen
+if (!getenv('LF_POSTKASSE')) {
+    putenv('LF_POSTKASSE=' . getenv('LF_DATAMAPPE') . DIRECTORY_SEPARATOR . 'post.txt');
+}
 
 $sti = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
 

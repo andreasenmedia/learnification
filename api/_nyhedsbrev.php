@@ -80,3 +80,101 @@ function nyhedsbrev_afmeldlink(string $noegle): string
 {
     return adresse() . '/nyhedsbrev?afmeld=' . $noegle;
 }
+
+// ------------------------------------------------------------ udsendelser
+
+// Hvem en udsendelse kan gå til. "andet" tager også dem, der ikke har sagt,
+// hvem de er.
+const NYHEDSBREV_MAALGRUPPER = [
+    'alle' => ['Alle aktive', "1 = 1"],
+    'foraelder' => ['Forældre', "rolle = 'foraelder'"],
+    'laerer' => ['Lærere / skoler', "rolle = 'laerer'"],
+    'andet' => ['Andet / ikke oplyst', "rolle IN ('andet', '')"],
+];
+
+// Afsenderen skal kunne ses i hver markedsføringsmail
+const NYHEDSBREV_AFSENDER = 'Learnification · Andreasen Media · CVR 40908757 · Lindegaarden 12, 1., 9400 Nørresundby';
+
+/** SQL for de aktive i en målgruppe: bekræftet, ikke afmeldt. */
+function nyhedsbrev_aktive(string $maalgruppe): string
+{
+    $hvor = NYHEDSBREV_MAALGRUPPER[$maalgruppe][1] ?? '1 = 0';
+    return "bekraeftet IS NOT NULL AND afmeldt IS NULL AND $hvor";
+}
+
+/**
+ * Links til vores egen side får utm_source og utm_campaign på, så
+ * /statistik kan vise, hvad nyhedsbrevet fører til. Andres links får lov
+ * at være i fred.
+ */
+function nyhedsbrev_maerk_links(string $tekst, string $kampagne): string
+{
+    return preg_replace_callback('#https?://(www\.)?learnification\.dk[^\s<>"\')\]]*#i', function ($m) use ($kampagne) {
+        $url = rtrim($m[0], '.,;:!?');
+        $rest = substr($m[0], strlen($url));
+        if (preg_match('/[?&]utm_/', $url)) {
+            return $m[0];
+        }
+        [$url, $anker] = explode('#', $url, 2) + ['', null];
+        $url .= (strpos($url, '?') === false ? '?' : '&')
+            . 'utm_source=nyhedsbrev&utm_campaign=' . rawurlencode($kampagne);
+        return $url . ($anker !== null ? '#' . $anker : '') . $rest;
+    }, $tekst) ?? $tekst;
+}
+
+/**
+ * Almindelig tekst til HTML: tom linje = nyt afsnit, links bliver klikbare.
+ * Linkteksten er adressen, som den blev skrevet; kampagnemærket står kun i href.
+ */
+function nyhedsbrev_html_afsnit(string $tekst, string $kampagne): string
+{
+    $ud = '';
+    foreach (preg_split('/\n\s*\n/', trim($tekst)) ?: [] as $afsnit) {
+        $h = htmlspecialchars(trim($afsnit), ENT_QUOTES, 'UTF-8');
+        $h = preg_replace_callback('#https?://[^\s<>"]+#', function ($m) use ($kampagne) {
+            $url = rtrim($m[0], '.,;:!?)');
+            $rest = substr($m[0], strlen($url));
+            $href = htmlspecialchars(nyhedsbrev_maerk_links(htmlspecialchars_decode($url), $kampagne), ENT_QUOTES, 'UTF-8');
+            return '<a href="' . $href . '" style="color:#8f5b18;">' . $url . '</a>' . $rest;
+        }, $h) ?? $h;
+        $ud .= '<p style="margin:0 0 16px;">' . nl2br($h, false) . "</p>\n";
+    }
+    return $ud;
+}
+
+/**
+ * Selve mailen til én modtager: [tekst, html, headere]. $r er en linje fra
+ * nyhedsbrev-tabellen (eller en falsk til test og forhåndsvisning).
+ */
+function nyhedsbrev_mail(array $u, array $r): array
+{
+    $tekst = str_replace("\r\n", "\n", $u['tekst']);
+    if ($u['hilsen']) {
+        $fornavn = trim(explode(' ', trim($r['navn']))[0] ?? '');
+        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n" . $tekst;
+    }
+    $afmeld = $r['noegle'] !== '' ? nyhedsbrev_afmeldlink($r['noegle']) : adresse() . '/nyhedsbrev';
+    $hvorfor = 'Du får denne mail, fordi du har meldt dig til nyt fra Learnification.';
+
+    $ren = nyhedsbrev_maerk_links($tekst, $u['kampagne']) ."\n\n-- \n" . $hvorfor . "\nAfmeld med ét klik: " . $afmeld . "\n" . NYHEDSBREV_AFSENDER . "\n";
+
+    $e = fn(string $s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+    $html = '<!DOCTYPE html><html lang="da"><head><meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1"><title>' . $e($u['emne']) . '</title></head>'
+        . '<body style="margin:0;padding:0;background:#faf7f0;">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf7f0;"><tr><td align="center" style="padding:28px 14px;">'
+        . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">'
+        . '<tr><td style="padding:0 6px 16px;font:700 20px Georgia,serif;color:#2a2118;">'
+        . '<span style="display:inline-block;width:14px;height:14px;background:#ce8a2e;border-radius:4px;margin-right:8px;"></span>Learnification</td></tr>'
+        . '<tr><td style="background:#ffffff;border:2px solid #eadfca;border-radius:14px;padding:28px 26px;'
+        . 'font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#2a2118;">'
+        . nyhedsbrev_html_afsnit($tekst, $u['kampagne'])
+        . '</td></tr>'
+        . '<tr><td style="padding:18px 6px 0;font:13px/1.5 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#6b5d4d;">'
+        . $e($hvorfor) . ' <a href="' . $e($afmeld) . '" style="color:#6b5d4d;">Afmeld med ét klik</a>.<br>'
+        . $e(NYHEDSBREV_AFSENDER)
+        . '</td></tr></table></td></tr></table></body></html>';
+
+    $headere = ['Reply-To' => MODTAGER, 'List-Unsubscribe' => '<' . $afmeld . '>'];
+    return [$ren, $html, $headere];
+}

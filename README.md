@@ -515,9 +515,20 @@ dem, der må få mails, med et personligt afmeldingslink
 CSV'en i jeres mailprogram). Afmelding kræver et klik på en knap, så
 mailprogrammer, der åbner links af sig selv, ikke afmelder folk.
 
-Bekræftelsesmailen sendes med PHP's `mail()` fra `no-reply@learnification.dk`
-ligesom de andre mails. Kommer den ikke frem, så tjek SPF/DKIM for domænet
-hos Simply.com.
+**Sende nyhedsbreve** gøres samme sted: vælg modtagere (alle aktive,
+forældre, lærere eller andet), skriv emne og tekst, forhåndsvis, send en test
+til dig selv, og send. Hver mail er personlig ("Hej Anna,"), kommer som både
+tekst og HTML og har afmeldingslink, `List-Unsubscribe` og afsenderens
+CVR/adresse i bunden; svar går til `kontakt@learnification.dk`. Links til
+learnification.dk får `utm_source=nyhedsbrev&utm_campaign=nyhedsbrev-<dato>`,
+så /statistik viser, hvad hvert brev fører til. Siden sender 25 ad gangen
+(`api/nyhedsbrev.php?handling=send`), til der ikke er flere; hvem der har fået
+den, står i `udsendelse_modtagere` (DB v6), så en afbrudt udsendelse kan
+sendes færdig fra historikken, uden at nogen får den to gange. Lokalt havner
+mailene i `post.txt` i datamappen (`LF_POSTKASSE`).
+
+Alle mails sendes med PHP's `mail()` fra `no-reply@learnification.dk`.
+Kommer de ikke frem, så tjek SPF/DKIM for domænet hos Simply.com.
 
 ## Gemte spil
 

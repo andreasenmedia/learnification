@@ -380,6 +380,31 @@ function opret_tabeller(PDO $pdo): void
             )$slut",
             'CREATE INDEX samtykker_tid ON samtykker(tid)',
         ],
+        // Udsendte nyhedsbreve (api/nyhedsbrev.php). En linje i
+        // udsendelse_modtagere bliver skrevet, FØR mailen går af sted, så
+        // ingen kan få den samme mail to gange — heller ikke hvis to faner
+        // sender på én gang, eller hvis en udsendelse bliver genoptaget.
+        6 => [
+            "CREATE TABLE udsendelser (
+                id $id,
+                emne $tekst NOT NULL,
+                tekst TEXT NOT NULL,
+                maalgruppe $tekst NOT NULL,
+                hilsen INTEGER NOT NULL DEFAULT 1,
+                kampagne $tekst NOT NULL DEFAULT '',
+                oprettet INTEGER NOT NULL,
+                faerdig INTEGER
+            )$slut",
+            "CREATE TABLE udsendelse_modtagere (
+                udsendelse_id INTEGER NOT NULL,
+                nyhedsbrev_id INTEGER NOT NULL,
+                tid INTEGER NOT NULL,
+                ok INTEGER,
+                PRIMARY KEY (udsendelse_id, nyhedsbrev_id),
+                FOREIGN KEY (udsendelse_id) REFERENCES udsendelser(id) ON DELETE CASCADE,
+                FOREIGN KEY (nyhedsbrev_id) REFERENCES nyhedsbrev(id) ON DELETE CASCADE
+            )$slut",
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
@@ -619,14 +644,43 @@ function nyt_ikon(int $gruppe_id): string
 
 // ---------------------------------------------------------------- post
 
-function send_mail(string $til, string $emne, string $tekst): void
+/**
+ * Send en mail. Med $html bliver den sendt i to udgaver (almindelig tekst og
+ * HTML), og mailprogrammet viser den bedste. $ekstra er flere headere, fx
+ * 'Reply-To' => '...'. Svarer, om serveren tog imod mailen.
+ */
+function send_mail(string $til, string $emne, string $tekst, ?string $html = null, array $ekstra = []): bool
 {
     // Emnet kodes, så æ, ø og å kommer rigtigt frem
     $emne = '=?UTF-8?B?' . base64_encode($emne) . '?=';
-    @mail($til, $emne, $tekst,
-          'From: Learnification <' . AFSENDER . ">\r\n"
-          . "Content-Type: text/plain; charset=utf-8\r\n"
-          . 'Content-Transfer-Encoding: 8bit');
+    $h = 'From: Learnification <' . AFSENDER . ">\r\n";
+    foreach ($ekstra as $navn => $vaerdi) {
+        $h .= $navn . ': ' . str_replace(["\r", "\n"], '', $vaerdi) . "\r\n";
+    }
+
+    // På egen maskine er der ingen mailserver — der lægges mailen i en fil
+    if (getenv('LF_POSTKASSE')) {
+        return (bool) file_put_contents(getenv('LF_POSTKASSE'),
+            "==== " . date('d-m-Y H:i:s') . " til $til\r\n$h" . 'Subject: ' . $emne . "\r\n\r\n$tekst\r\n\r\n"
+            . ($html !== null ? "---- HTML ----\r\n$html\r\n\r\n" : ''), FILE_APPEND | LOCK_EX);
+    }
+
+    if ($html === null) {
+        return @mail($til, $emne, $tekst, $h
+            . "Content-Type: text/plain; charset=utf-8\r\n"
+            . 'Content-Transfer-Encoding: 8bit');
+    }
+    $graense = 'lf-' . bin2hex(random_bytes(12));
+    $krop = "--$graense\r\n"
+        . "Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
+        . quoted_printable_encode($tekst) . "\r\n"
+        . "--$graense\r\n"
+        . "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
+        . quoted_printable_encode($html) . "\r\n"
+        . "--$graense--\r\n";
+    return @mail($til, $emne, $krop, $h
+        . "MIME-Version: 1.0\r\n"
+        . "Content-Type: multipart/alternative; boundary=\"$graense\"");
 }
 
 function adresse(): string
