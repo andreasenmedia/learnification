@@ -16,6 +16,8 @@
  *   POST velkomst_test {id?}    send den til administratoren selv
  *   POST velkomst_en {id}       send den til én konto (også igen)
  *   POST velkomst_send {gruppe, spring_over}  en bunke; kaldes igen til tilbage = 0
+ *   POST paamind_vis / paamind_test {id?}  påmindelsen (api/paamind.php kører den selv)
+ *   POST paamind_koer           send påmindelserne, der er klar, nu
  *
  * DEN FØRSTE ADMINISTRATOR. Første gang /admin bliver åbnet, skriver
  * serveren en tilfældig nøgle i opsaetningsnoegle.txt i datamappen
@@ -417,15 +419,49 @@ case 'velkomst':
         $grupper[$g] = ['navn' => $navn, 'antal' => (int) vaerdi('SELECT COUNT(*) FROM konti k WHERE ' . velkomst_hvor($g))];
     }
     $konti = [];
-    foreach (alle("SELECT k.id, k.type, k.navn, k.email, k.status, k.oprettet, k.velkomst_sendt,
+    foreach (alle("SELECT k.id, k.type, k.navn, k.email, k.status, k.oprettet, k.velkomst_sendt, k.paamindelse_sendt,
                           EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id AND s.sekunder > 0) AS spillet
                    FROM konti k WHERE k.type != 'admin' ORDER BY k.oprettet DESC") as $k) {
         $konti[] = ['id' => (int) $k['id'], 'type' => $k['type'], 'navn' => $k['navn'], 'email' => $k['email'],
                     'status' => $k['status'], 'oprettet' => (int) $k['oprettet'], 'spillet' => (bool) $k['spillet'],
-                    'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null];
+                    'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null,
+                    'paamindelse_sendt' => $k['paamindelse_sendt'] !== null ? (int) $k['paamindelse_sendt'] : null];
     }
     svar(['ok' => true, 'grupper' => $grupper, 'konti' => $konti,
-          'mig' => kraev_admin()['email'], 'smtp' => smtp_opsaetning() !== null]);
+          'mig' => kraev_admin()['email'], 'smtp' => smtp_opsaetning() !== null,
+          'paamind' => ['url' => adresse() . '/api/paamind.php?noegle=' . paamind_noegle(),
+                        'klar' => (int) vaerdi('SELECT COUNT(*) FROM konti k WHERE ' . paamind_hvor()),
+                        'venter' => paamind_venter(),
+                        'sendt' => (int) vaerdi('SELECT COUNT(*) FROM konti WHERE paamindelse_sendt IS NOT NULL'),
+                        'dage' => PAAMIND_EFTER / 86400, 'timer' => PAAMIND_TIMER,
+                        'status' => (object) paamind_status()]]);
+
+case 'paamind_vis':
+case 'paamind_test':
+    // Som velkomst_vis/_test, men påmindelsen
+    kraev_egen_side();
+    require_once __DIR__ . '/_velkomst.php';
+    $mig = kraev_admin();
+    $k = tal('id') ? en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('id')]) : null;
+    $k = $k ?: en('SELECT * FROM konti k WHERE ' . paamind_hvor() . ' ORDER BY k.oprettet LIMIT 1');
+    $k = $k ?: ['id' => 0, 'type' => 'foraelder', 'navn' => $mig['navn'], 'kontakt' => $mig['navn'], 'email' => $mig['email']];
+    [$tekst, $html, $headere] = paamind_mail($k);
+    if ($h === 'paamind_vis') {
+        svar(['ok' => true, 'html' => $html, 'til' => $k['email']]);
+    }
+    bremse('velkomst-test', (string) $mig['id'], 20, 3600);
+    if (!send_mail($mig['email'], '[TEST] ' . PAAMIND_EMNE, $tekst, $html, $headere)) {
+        fejl('Mailen blev ikke sendt: ' . (post_fejl() ?: 'ukendt fejl'), 502);
+    }
+    svar(['ok' => true, 'til' => $mig['email']]);
+
+case 'paamind_koer':
+    // "Send dem, der skal have den, nu" — samme regler som cronjobbet,
+    // bare uden tidsrummet, for det er administratoren, der trykker
+    kraev_egen_side();
+    require_once __DIR__ . '/_velkomst.php';
+    @set_time_limit(60);
+    svar(['ok' => true] + paamind_koer('admin'));
 
 case 'velkomst_vis':
 case 'velkomst_test':

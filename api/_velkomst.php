@@ -103,3 +103,142 @@ function velkomst_hvor(string $gruppe): string
     }
     return $hvor;
 }
+
+// ------------------------------------------------------------ påmindelsen
+
+/*
+ * Én påmindelse til en konto, hvor intet barn har spillet endnu, et par
+ * dage efter oprettelsen. Den går af sted fra api/paamind.php, som Simply.coms
+ * cronjob åbner hver time (adressen står på /admin#velkomst). Kun én gang
+ * pr. konto — det står i mailen, og det skal blive ved med at være sandt.
+ */
+
+const PAAMIND_EMNE = 'Er I kommet i gang med Learnification?';
+const PAAMIND_EFTER = 3 * 86400;        // så længe efter oprettelsen
+const PAAMIND_HOEJST = 30 * 86400;      // ældre konti får ingen
+const PAAMIND_TIMER = [9, 19];          // kun mellem kl. 9 og 19
+
+/** SQL: intet barn på kontoen har spillet endnu (den voksnes egne spil tæller ikke). */
+const PAAMIND_IKKE_SPILLET = 'NOT EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id
+                              AND s.elev_id IS NOT NULL AND s.sekunder > 0)';
+
+/** De konti, der skal have den nu. */
+function paamind_hvor(): string
+{
+    $nu = time();
+    return "k.type != 'admin' AND k.status != 'spaerret' AND k.paamindelse_sendt IS NULL
+            AND k.paamindelse_fejl < 3
+            AND k.oprettet <= " . ($nu - PAAMIND_EFTER) . ' AND k.oprettet > ' . ($nu - PAAMIND_HOEJST)
+        . ' AND ' . PAAMIND_IKKE_SPILLET;
+}
+
+/** Konti, der får den senere, hvis ingen spiller inden da. */
+function paamind_venter(): int
+{
+    return (int) vaerdi("SELECT COUNT(*) FROM konti k WHERE k.type != 'admin' AND k.status != 'spaerret'
+                         AND k.paamindelse_sendt IS NULL AND k.oprettet > ? AND " . PAAMIND_IKKE_SPILLET,
+                        [time() - PAAMIND_EFTER]);
+}
+
+/** Mailen til én konto: [tekst, html, headere]. */
+function paamind_mail(array $k): array
+{
+    $skole = $k['type'] === 'skole';
+    $st = velkomst_status((int) ($k['id'] ?? 0));
+    $fornavn = trim(explode(' ', trim($skole ? $k['kontakt'] : $k['navn']))[0] ?? '');
+    if (preg_match('/^famili/i', $fornavn)) {
+        $fornavn = '';
+    }
+    $side = adresse();
+    $boern = $skole ? 'elever' : 'børn';
+
+    $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
+        . 'For et par dage siden oprettede du en konto' . ($skole ? ' til ' . $k['navn'] : '')
+        . " på Learnification, men der er ingen $boern, der har spillet endnu.\n\n";
+    if ($st['elever'] === 0) {
+        $tekst .= ($skole ? 'Det næste skridt er at oprette en klasse under Min konto og skrive elevernes fornavne — ét pr. linje.'
+                          : 'Det næste skridt er at tilføje børnene under Min konto — fornavn eller kaldenavn er nok.')
+            . " Så får hvert barn sin egen kode, og I kan gå i gang. Det tager et par minutter.\n\n";
+    } else {
+        $tekst .= 'I har ' . $st['elever'] . ' ' . ($st['elever'] === 1 ? ($skole ? 'elev' : 'barn') : $boern)
+            . ' på kontoen, så I er næsten i mål. Udskriv login-kortene under Min konto, og lad '
+            . ($skole ? 'eleverne' : 'børnene') . " gå ind på $side/login og skrive deres kode. "
+            . "Så kan de vælge Runeborg eller Regnehelten.\n\n";
+    }
+    $tekst .= "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
+        . "Venlig hilsen\nLearnification";
+
+    $hvorfor = 'Du får denne påmindelse én gang, fordi du har oprettet en konto på learnification.dk, '
+        . 'og ingen har spillet endnu. Vi sender ikke flere.';
+    $ren = nyhedsbrev_maerk_links($tekst . "\n\nLog ind: $side/login", 'paamindelse', 'velkomstmail')
+        . "\n\n-- \n" . $hvorfor . "\n" . NYHEDSBREV_AFSENDER . "\n";
+
+    $e = fn(string $s) => htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+    $html = mail_ramme(PAAMIND_EMNE,
+        nyhedsbrev_html_afsnit($tekst, 'paamindelse', 'velkomstmail')
+        . '<p style="margin:8px 0 0;"><a href="' . $e(nyhedsbrev_maerk_links($side . '/login', 'paamindelse', 'velkomstmail'))
+        . '" style="display:inline-block;background:#ce8a2e;color:#ffffff;font-weight:700;text-decoration:none;'
+        . 'padding:12px 22px;border-radius:999px;">Log ind</a></p>',
+        $e($hvorfor) . '<br>' . $e(NYHEDSBREV_AFSENDER));
+
+    return [$ren, $html, ['Reply-To' => MODTAGER]];
+}
+
+/**
+ * Send påmindelsen til dem, der skal have den nu — højst $max. Kontoen
+ * bliver markeret, FØR mailen går, så to kørsler ikke sender den samme.
+ * Fejler den, tæller paamindelse_fejl op, og den bliver prøvet igen ved en
+ * senere kørsel (højst 3 gange i alt).
+ */
+function paamind_koer(string $hvem, int $max = 25): array
+{
+    $sendt = $fejlet = 0;
+    $sidste_fejl = '';
+    $stop = microtime(true) + 20;
+    foreach (alle('SELECT * FROM konti k WHERE ' . paamind_hvor() . ' ORDER BY k.oprettet LIMIT ' . $max) as $k) {
+        if (!kør('UPDATE konti SET paamindelse_sendt = ? WHERE id = ? AND paamindelse_sendt IS NULL', [time(), $k['id']])) {
+            continue;
+        }
+        [$tekst, $html, $headere] = paamind_mail($k);
+        if (send_mail($k['email'], PAAMIND_EMNE, $tekst, $html, $headere)) {
+            $sendt++;
+        } else {
+            kør('UPDATE konti SET paamindelse_sendt = NULL, paamindelse_fejl = paamindelse_fejl + 1 WHERE id = ?', [$k['id']]);
+            $fejlet++;
+            $sidste_fejl = post_fejl();
+        }
+        if (microtime(true) > $stop) {
+            break;
+        }
+    }
+    $koersel = ['tid' => time(), 'hvem' => $hvem, 'sendt' => $sendt, 'fejlet' => $fejlet, 'fejl' => $sidste_fejl];
+    paamind_gem_status(['koersel' => $koersel]);
+    return $koersel;
+}
+
+/**
+ * {cron: sidste gang cronjobbet kaldte (også om natten), koersel: den sidste
+ * rigtige kørsel} — til /admin, så man kan se, at det virker.
+ */
+function paamind_status(): array
+{
+    $d = json_decode((string) @file_get_contents(datamappe() . '/paamindelse-status.json'), true);
+    return is_array($d) ? $d : [];
+}
+
+function paamind_gem_status(array $nyt): void
+{
+    @file_put_contents(datamappe() . '/paamindelse-status.json',
+        json_encode(array_merge(paamind_status(), $nyt), JSON_UNESCAPED_UNICODE), LOCK_EX);
+}
+
+/** Nøglen i cronjobbets adresse. Laves første gang, den skal bruges. */
+function paamind_noegle(): string
+{
+    $fil = datamappe() . '/cron-noegle.txt';
+    if (!is_file($fil)) {
+        @file_put_contents($fil, bin2hex(random_bytes(16)), LOCK_EX);
+        @chmod($fil, 0640);
+    }
+    return trim((string) @file_get_contents($fil));
+}

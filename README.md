@@ -540,6 +540,16 @@ har fået den; spærrede konti og administratoren får den aldrig. Links får
 (de sagde ja til, at vi må skrive om testen) — kommer der tilbud eller reklame
 i den, er den markedsføring og må kun gå til nyhedsbrevets aktive.
 
+**Påmindelsen** (også `_velkomst.php`): én mail til konti, hvor intet barn
+har spillet 3 dage efter oprettelsen (højst 30 dage gamle), kun kl. 9-19 og
+kun én gang pr. konto — det lover mailen. Den sendes af
+`api/paamind.php?noegle=<nøgle>`, som **Simply.coms cronjob** åbner hver time
+(Kontrolpanel → Website → Cronjobs; adressen med nøglen står på
+/admin → Velkomstmail, nøglen i `cron-noegle.txt` i datamappen). Siden viser,
+hvornår cronjobbet sidst kaldte (`paamindelse-status.json`), og advarer, hvis
+det er mere end 3 timer siden. `konti.paamindelse_sendt` / `paamindelse_fejl`
+(DB v8): en fejlet mail bliver prøvet igen ved de næste kørsler, højst 3 gange.
+
 ## Mails fra siden
 
 DNS for learnification.dk er Simply.coms standard og skal ikke røres:

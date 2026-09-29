@@ -172,6 +172,24 @@
           <iframe id="v-ramme" title="Forhåndsvisning af velkomstmailen" sandbox="" style="width:100%;height:620px;border:2px solid var(--paper-edge);border-radius:12px;background:#faf7f0;"></iframe>
         </div>
       </form>
+      <div class="panel" id="p-panel">
+        <h2>Automatisk påmindelse</h2>
+        <p id="p-regler"></p>
+        <p class="besked" id="p-besked"></p>
+        <p class="besked fejl" id="p-cron-mangler" hidden></p>
+        <div class="tal-raekke" id="p-tal"></div>
+        <div class="felt" style="margin-top:14px;">
+          <label for="p-url">Adressen til cronjobbet <span>— hemmelig, del den ikke</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;"><input id="p-url" readonly style="flex:1 1 320px;font-family:monospace;font-size:.85rem;"><button type="button" class="btn btn-sm" id="p-kopier">Kopiér</button></div>
+          <p class="hj">I Simply.coms kontrolpanel: <strong>Website → Cronjobs</strong> → tilføj adressen, og vælg <strong>hver time</strong>. Brug adressen præcis som den står — cronjobbet følger ikke omdirigeringer.</p>
+        </div>
+        <div class="knapper">
+          <button type="button" class="btn btn-sm" id="p-koer">Send dem, der er klar, nu</button>
+          <button type="button" class="btn btn-sm" id="p-test">Send en test til mig</button>
+          <button type="button" class="btn btn-sm" id="p-vis">Forhåndsvis</button>
+        </div>
+      </div>
+
       <div class="panel">
         <h2>Konti</h2>
         <div class="tabel-rul"><table class="liste" id="v-liste"></table></div>
@@ -484,18 +502,20 @@
         return '<option value="' + g + '"' + (g === valgt ? ' selected' : '') + '>' + LF.esc(vGrupper[g].navn + ' (' + vGrupper[g].antal + ')') + '</option>';
       }).join('');
       vKnap();
-      var html = '<thead><tr><th>Konto</th><th>Type</th><th class="t">Oprettet</th><th>Har spillet</th><th class="t">Velkomstmail</th><th></th></tr></thead><tbody>';
+      var html = '<thead><tr><th>Konto</th><th>Type</th><th class="t">Oprettet</th><th>Har spillet</th><th class="t">Velkomstmail</th><th class="t">Påmindelse</th><th></th></tr></thead><tbody>';
       vKonti.forEach(function (k) {
         html += '<tr><td><strong>' + LF.esc(k.navn) + '</strong><br><span class="lille">' + LF.esc(k.email) + '</span></td>'
           + '<td>' + TYPE[k.type] + (k.status === 'spaerret' ? ' ' + maerke('spaerret') : '') + '</td>'
           + '<td class="t">' + LF.dato(k.oprettet) + '</td><td>' + (k.spillet ? 'Ja' : 'Nej') + '</td>'
           + '<td class="t">' + (k.velkomst_sendt ? LF.dato(k.velkomst_sendt) : '<span class="maerke ny">Ikke sendt</span>') + '</td>'
+          + '<td class="t">' + LF.dato(k.paamindelse_sendt) + '</td>'
           + '<td class="t"><button type="button" class="link-knap" data-vvis="' + k.id + '">Vis</button>'
           + (k.status !== 'spaerret' ? ' · <button type="button" class="link-knap" data-ven="' + k.id + '">' + (k.velkomst_sendt ? 'Send igen' : 'Send') + '</button>' : '')
           + '</td></tr>';
       });
-      if (!vKonti.length) html += '<tr><td colspan="6" class="tom">Ingen konti endnu.</td></tr>';
+      if (!vKonti.length) html += '<tr><td colspan="7" class="tom">Ingen konti endnu.</td></tr>';
       $('v-liste').innerHTML = html + '</tbody>';
+      visPaamind(d.paamind);
     }).catch(function (err) { alert(err.message); location.hash = ''; });
   }
   function vKnap() {
@@ -512,10 +532,10 @@
     var k = vKonti.filter(function (k) { return !k.velkomst_sendt && k.status !== 'spaerret' && (g !== 'ikke_spillet' || !k.spillet); })[0];
     return k ? k.id : 0;
   }
-  function vVis(id) {
-    return LF.send('admin', 'velkomst_vis', { id: id }).then(function (d) {
+  function vVis(id, handling) {
+    return LF.send('admin', handling || 'velkomst_vis', { id: id }).then(function (d) {
       $('v-forhaand').hidden = false;
-      $('v-forhaand-til').textContent = 'Sådan ser den ud for ' + d.til + ':';
+      $('v-forhaand-til').textContent = (handling === 'paamind_vis' ? 'Påmindelsen' : 'Velkomstmailen') + ', som den ser ud for ' + d.til + ':';
       $('v-ramme').srcdoc = d.html;
       $('v-forhaand').scrollIntoView({ block: 'start' });
     }, function (err) { LF.besked($('v-besked'), err.message, 'fejl'); });
@@ -571,6 +591,52 @@
       LF.besked($('v-besked'), 'Velkomstmailen er sendt til ' + k.email + '.', 'ok');
       return visVelkomst();
     }, function (err) { LF.besked($('v-besked'), err.message, 'fejl'); });
+  });
+
+  // --- påmindelsen ---------------------------------------------------------
+  function visPaamind(p) {
+    $('p-regler').textContent = 'Går af sig selv til konti, hvor intet barn har spillet ' + p.dage + ' dage efter oprettelsen'
+      + ' (højst 30 dage gamle). Kun én gang pr. konto, og kun mellem kl. ' + p.timer[0] + ' og ' + p.timer[1] + '.'
+      + ' Den husker dem på at logge ind og fortæller, hvad det næste skridt er.';
+    $('p-tal').innerHTML = [[p.klar, 'Klar til at få den nu'], [p.venter, 'Får den senere, hvis ingen spiller'],
+                            [p.sendt, 'Har fået den']].map(kort).join('');
+    $('p-url').value = p.url;
+    $('p-koer').textContent = 'Send dem, der er klar, nu (' + p.klar + ')';
+    $('p-koer').disabled = !p.klar;
+    var st = p.status || {}, nu = Date.now() / 1000, tekst = '';
+    if (!st.cron) tekst = 'Cronjobbet har ikke kørt endnu, så påmindelserne går ikke af sig selv. Sæt det op i Simply.coms kontrolpanel med adressen herunder.';
+    else if (nu - st.cron > 3 * 3600) tekst = 'Cronjobbet har ikke kørt siden ' + LF.dato(st.cron) + '. Tjek det i Simply.coms kontrolpanel under Website → Cronjobs.';
+    $('p-cron-mangler').textContent = tekst;
+    $('p-cron-mangler').hidden = !tekst;
+    var k = st.koersel;
+    if (!tekst) LF.besked($('p-besked'), 'Cronjobbet kører — sidst ' + LF.dato(st.cron) + '.'
+      + (k ? ' Sidste kørsel: ' + LF.dato(k.tid) + ', ' + k.sendt + ' sendt' + (k.fejlet ? ', ' + k.fejlet + ' fejlede (' + k.fejl + ')' : '') + '.' : ''), k && k.fejlet ? 'fejl' : 'ok');
+    else LF.besked($('p-besked'), '');
+  }
+  $('p-kopier').addEventListener('click', function () {
+    var knap = this;
+    $('p-url').select();
+    (navigator.clipboard ? navigator.clipboard.writeText($('p-url').value) : Promise.reject()).catch(function () { document.execCommand('copy'); })
+      .then(function () { knap.textContent = 'Kopieret'; setTimeout(function () { knap.textContent = 'Kopiér'; }, 1500); });
+  });
+  $('p-vis').addEventListener('click', function () { vVis(0, 'paamind_vis'); });
+  $('p-test').addEventListener('click', function () {
+    var knap = this;
+    LF.travl(knap, true);
+    LF.send('admin', 'paamind_test', {}).then(function (d) {
+      LF.besked($('p-besked'), 'Testen af påmindelsen er sendt til ' + d.til + '.', 'ok');
+    }, function (err) { LF.besked($('p-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
+  });
+  $('p-koer').addEventListener('click', function () {
+    var knap = this;
+    if (!confirm('Send påmindelsen nu til dem, der er klar til den?')) return;
+    LF.travl(knap, true);
+    LF.send('admin', 'paamind_koer', {}).then(function (d) {
+      return visVelkomst().then(function () {
+        LF.besked($('p-besked'), 'Sendt: ' + d.sendt + (d.fejlet ? ', men ' + d.fejlet + ' fejlede (' + d.fejl + ') — de bliver prøvet igen ved næste kørsel' : '') + '.', d.fejlet ? 'fejl' : 'ok');
+      });
+    }, function (err) { LF.besked($('p-besked'), err.message, 'fejl'); LF.travl(knap, false); });
   });
 
   // --- én konto -------------------------------------------------------------

@@ -409,6 +409,12 @@ function opret_tabeller(PDO $pdo): void
         7 => [
             'ALTER TABLE konti ADD COLUMN velkomst_sendt INTEGER',
         ],
+        // Påmindelsen (api/paamind.php): sendt én gang, og hvor mange gange
+        // den er fejlet — efter 3 fejl bliver den ikke prøvet mere
+        8 => [
+            'ALTER TABLE konti ADD COLUMN paamindelse_sendt INTEGER',
+            'ALTER TABLE konti ADD COLUMN paamindelse_fejl INTEGER NOT NULL DEFAULT 0',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
