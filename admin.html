@@ -109,6 +109,7 @@
 
       <form class="panel" id="skriv" novalidate>
         <h2>Skriv et nyhedsbrev</h2>
+        <p class="besked fejl" id="s-smtp" hidden>Mailene bliver sendt med PHP's mail() og bliver derfor ikke DKIM-signeret — domænets DMARC-regel (p=reject) betyder, at mange modtagere afviser dem. Læg smtp.php i datamappen (se README under "Mails fra siden"), før du sender.</p>
         <p class="besked" id="skriv-besked"></p>
         <div class="felt-raekke">
           <div class="felt"><label for="s-gruppe">Modtagere</label><select id="s-gruppe"></select></div>
@@ -304,6 +305,7 @@
         return '<option value="' + g + '"' + (g === valgt ? ' selected' : '') + '>' + LF.esc(grupper[g].navn + ' (' + grupper[g].antal + ')') + '</option>';
       }).join('');
       $('s-test').textContent = 'Send en test til ' + d.mig;
+      $('s-smtp').hidden = !!d.smtp;
       opdaterSendKnap();
 
       var html = '<thead><tr><th>Emne</th><th>Til</th><th class="t">Sendt</th><th class="t">Modtagere</th><th></th></tr></thead><tbody>';

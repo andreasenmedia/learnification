@@ -644,43 +644,71 @@ function nyt_ikon(int $gruppe_id): string
 
 // ---------------------------------------------------------------- post
 
+require_once __DIR__ . '/_post.php';
+
 /**
  * Send en mail. Med $html bliver den sendt i to udgaver (almindelig tekst og
  * HTML), og mailprogrammet viser den bedste. $ekstra er flere headere, fx
- * 'Reply-To' => '...'. Svarer, om serveren tog imod mailen.
+ * 'Reply-To' => '...'. Svarer, om mailserveren tog imod mailen — hvis ikke,
+ * står grunden i post_fejl().
+ *
+ * Går gennem websmtp.simply.com, når smtp.php ligger i datamappen (se
+ * _post.php) — ellers bliver mailen hverken DKIM-signeret eller godkendt af
+ * domænets DMARC.
  */
 function send_mail(string $til, string $emne, string $tekst, ?string $html = null, array $ekstra = []): bool
 {
+    post_fejl('');
+    if (preg_match('/[\r\n<>,;]/', $til) || !filter_var($til, FILTER_VALIDATE_EMAIL)) {
+        post_fejl('Ugyldig modtager');
+        return false;
+    }
     // Emnet kodes, så æ, ø og å kommer rigtigt frem
     $emne = '=?UTF-8?B?' . base64_encode($emne) . '?=';
     $h = 'From: Learnification <' . AFSENDER . ">\r\n";
     foreach ($ekstra as $navn => $vaerdi) {
         $h .= $navn . ': ' . str_replace(["\r", "\n"], '', $vaerdi) . "\r\n";
     }
+    $h .= "MIME-Version: 1.0\r\n";
+
+    if ($html === null) {
+        $h .= "Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable";
+        $krop = quoted_printable_encode($tekst);
+    } else {
+        $graense = 'lf-' . bin2hex(random_bytes(12));
+        $h .= "Content-Type: multipart/alternative; boundary=\"$graense\"";
+        $krop = "--$graense\r\n"
+            . "Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
+            . quoted_printable_encode($tekst) . "\r\n"
+            . "--$graense\r\n"
+            . "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
+            . quoted_printable_encode($html) . "\r\n"
+            . "--$graense--\r\n";
+    }
+
+    $smtp = smtp_opsaetning();
+    if ($smtp) {
+        $domaene = substr(strrchr(AFSENDER, '@') ?: '@learnification.dk', 1);
+        return smtp_send($smtp, AFSENDER, $til,
+            'Date: ' . date('r') . "\r\n"
+            . 'Message-ID: <' . bin2hex(random_bytes(16)) . '@' . $domaene . ">\r\n"
+            . "To: <$til>\r\n"
+            . "Subject: $emne\r\n"
+            . $h . "\r\n\r\n" . $krop);
+    }
 
     // På egen maskine er der ingen mailserver — der lægges mailen i en fil
     if (getenv('LF_POSTKASSE')) {
         return (bool) file_put_contents(getenv('LF_POSTKASSE'),
-            "==== " . date('d-m-Y H:i:s') . " til $til\r\n$h" . 'Subject: ' . $emne . "\r\n\r\n$tekst\r\n\r\n"
+            "==== " . date('d-m-Y H:i:s') . " til $til\r\n$h\r\n" . 'Subject: ' . $emne . "\r\n\r\n$tekst\r\n\r\n"
             . ($html !== null ? "---- HTML ----\r\n$html\r\n\r\n" : ''), FILE_APPEND | LOCK_EX);
     }
 
-    if ($html === null) {
-        return @mail($til, $emne, $tekst, $h
-            . "Content-Type: text/plain; charset=utf-8\r\n"
-            . 'Content-Transfer-Encoding: 8bit');
+    $ok = @mail($til, $emne, $krop, $h);
+    if (!$ok) {
+        post_fejl('PHP\'s mail() ville ikke sende den');
     }
-    $graense = 'lf-' . bin2hex(random_bytes(12));
-    $krop = "--$graense\r\n"
-        . "Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
-        . quoted_printable_encode($tekst) . "\r\n"
-        . "--$graense\r\n"
-        . "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n"
-        . quoted_printable_encode($html) . "\r\n"
-        . "--$graense--\r\n";
-    return @mail($til, $emne, $krop, $h
-        . "MIME-Version: 1.0\r\n"
-        . "Content-Type: multipart/alternative; boundary=\"$graense\"");
+    return $ok;
 }
 
 function adresse(): string

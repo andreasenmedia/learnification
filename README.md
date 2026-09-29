@@ -527,8 +527,28 @@ den, står i `udsendelse_modtagere` (DB v6), så en afbrudt udsendelse kan
 sendes færdig fra historikken, uden at nogen får den to gange. Lokalt havner
 mailene i `post.txt` i datamappen (`LF_POSTKASSE`).
 
-Alle mails sendes med PHP's `mail()` fra `no-reply@learnification.dk`.
-Kommer de ikke frem, så tjek SPF/DKIM for domænet hos Simply.com.
+## Mails fra siden
+
+DNS for learnification.dk er Simply.coms standard og skal ikke røres:
+SPF `v=spf1 include:spf.simply.com -all`, DKIM som CNAME'erne
+`simplycom1._domainkey → dkim1.simply.com` og `simplycom2._domainkey →
+dkim2.simply.com`, og DMARC `_dmarc → dmarc.simply.com` med **p=reject**.
+
+Netop p=reject gør, at mails fra PHP's `mail()` bliver afvist mange steder:
+de bliver ikke DKIM-signeret. Kun mails gennem **websmtp.simply.com** (port
+587, STARTTLS, login med en postkasse på domænet) bliver signeret. Derfor
+sender `send_mail()` i `api/_kerne.php` gennem SMTP (`api/_post.php`), når der
+ligger en fil `smtp.php` i datamappen `learnification-data/` (ved siden af
+public_html — ALDRIG i repoet):
+
+    <?php return ['bruger' => 'no-reply@learnification.dk', 'kode' => '...'];
+
+Postkassen oprettes under Mail i Simply.coms kontrolpanel. Mangler filen,
+bruges `mail()` som før, og /admin → Nyhedsbrev viser en rød advarsel. Går
+noget galt, står mailserverens svar i fejlbeskeden ved "Send en test til mig".
+Et forkert kodeord bliver kun prøvet én gang pr. forespørgsel, så postkassen
+ikke bliver spærret. (De gamle `tilmeld.php` og `resultat.php` bruger stadig
+`mail()` til beskeder til kontakt@.)
 
 ## Gemte spil
 

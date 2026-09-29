@@ -153,7 +153,8 @@ case 'udsendelser':
                  'sendt' => (int) $u['sendt'], 'fejlet' => (int) $u['fejlet'],
                  'tilbage' => $u['faerdig'] !== null ? 0 : tilbage($u)];
     }
-    svar(['ok' => true, 'grupper' => $tal, 'udsendelser' => $ud, 'mig' => kraev_admin()['email']]);
+    svar(['ok' => true, 'grupper' => $tal, 'udsendelser' => $ud, 'mig' => kraev_admin()['email'],
+          'smtp' => smtp_opsaetning() !== null]);
 
 case 'forhaandsvis':
 case 'test':
@@ -166,7 +167,7 @@ case 'test':
     }
     bremse('nyhedsbrev-test', (string) $mig['id'], 20, 3600);
     if (!send_mail($mig['email'], '[TEST] ' . $u['emne'], $tekst, $html, $headere)) {
-        fejl('Serveren ville ikke sende mailen. Prøv igen om lidt.', 502);
+        fejl('Mailen blev ikke sendt: ' . (post_fejl() ?: 'ukendt fejl'), 502);
     }
     svar(['ok' => true, 'til' => $mig['email']]);
 
