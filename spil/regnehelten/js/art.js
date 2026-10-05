@@ -202,6 +202,31 @@
       '.........kook...', '.........koeok..', '.kkk.....koooonk', '.kookkkkkooook..', '...koooooooook..', '...koowoooowok..',
       '...kook...kook..', '...kk.k...k.kk..', '................', '................']
   ];
+  // ---------------------------------------------------------------- kapitel 2 og 3: dyr og markedsboder
+  // Dyrene tegnes direkte (ingen skabeloner): aben, pingvinen og geden — to billeder, så de bevæger sig
+  RH.drawAnimal = function (c, kind, x, y, t) {
+    var b = Math.floor(t / 28) % 2;
+    if (kind === 'pingvin') {
+      R(c, x + 4, y + 4 + b, 8, 10 - b, C.k); R(c, x + 5, y + 3 + b, 6, 2, C.k); R(c, x + 6, y + 7 + b, 4, 6 - b, '#f4ecdc');
+      P(c, x + 6, y + 5 + b, '#fff'); P(c, x + 9, y + 5 + b, '#fff'); R(c, x + 7, y + 6 + b, 2, 1, '#e8943a');
+      R(c, x + 3, y + 8 + b, 1, 4, C.k); R(c, x + 12, y + 8 + b, 1, 4, C.k);
+      R(c, x + 5, y + 14, 2, 1, '#e8943a'); R(c, x + 9, y + 14, 2, 1, '#e8943a');
+    } else if (kind === 'abe') {
+      var br = '#8a5a32', br2 = '#6a3e22', tan = '#e8c090';
+      R(c, x + 4, y + 7, 8, 6, C.k); R(c, x + 5, y + 8, 6, 4, br);
+      R(c, x + 4, y + 2 + b, 8, 6, C.k); R(c, x + 5, y + 3 + b, 6, 5, br); R(c, x + 6, y + 5 + b, 4, 3, tan);
+      R(c, x + 3, y + 4 + b, 2, 2, C.k); R(c, x + 11, y + 4 + b, 2, 2, C.k); P(c, x + 6, y + 5 + b, C.k); P(c, x + 9, y + 5 + b, C.k);
+      R(c, x + 3, y + 8, 1, 4, br2); R(c, x + 12, y + 8, 1, 4, br2); R(c, x + 12 + b, y + 7, 2, 1, br2); R(c, x + 13 + b, y + 4, 1, 4, br2);
+      R(c, x + 5, y + 13, 2, 2, C.k); R(c, x + 9, y + 13, 2, 2, C.k);
+    } else if (kind === 'ged') {
+      var wh = '#f4ecdc', gr = '#c8c0b0';
+      R(c, x + 2, y + 7, 10, 5, C.k); R(c, x + 3, y + 7, 9, 4, wh); R(c, x + 3, y + 10, 9, 1, gr);
+      R(c, x + 10, y + 4 + b, 4, 5, C.k); R(c, x + 11, y + 5 + b, 3, 3, wh); P(c, x + 12, y + 6 + b, C.k);
+      R(c, x + 11, y + 2 + b, 1, 3, '#c8b48c'); R(c, x + 13, y + 3 + b, 1, 2, '#c8b48c'); R(c, x + 12, y + 8 + b, 1, 2, wh);
+      R(c, x + 3, y + 11, 1, 3, C.k); R(c, x + 6, y + 11, 1, 3, C.k); R(c, x + 9, y + 11, 1, 3, C.k); R(c, x + 11, y + 11, 1, 3, C.k);
+      R(c, x + 1, y + 7, 2, 2, wh);
+    }
+  };
   RH.makeDog = function () {
     var cv = canvas(32, 16), c = cv.getContext('2d');
     var col = { k: C.k, o: '#c8904a', w: '#f4e6cc', e: C.k, n: '#2a1a14' };
@@ -211,7 +236,8 @@
 
   // ---------------------------------------------------------------- fliser
   // Alt, man ikke kan gå igennem. Døre, låger og indvendige døre styres af kortet.
-  var SOLID = 'ThFlBkcGPSmu1sRKLWYMOQAj~' + 'XbdqwHnvCioVy[eUpzr$NJ%&';
+  // 3: markedsbod, 4: kasser med frugt, 5: blomsterspande (kapitel 3)
+  var SOLID = 'ThFlBkcGPSmu1sRKLWYMOQAj~' + 'XbdqwHnvCioVy[eUpzr$NJ%&' + '345';
   RH.SOLID = SOLID;
 
   function grass(c, x, y, tx, ty) {
@@ -239,6 +265,28 @@
   function gravel(c, x, y, tx, ty) {
     R(c, x, y, T, T, '#b9a888');
     for (var i = 0; i < 9; i++) P(c, x + (hash(tx, ty, i) * 16 | 0), y + (hash(tx, ty, i + 9) * 16 | 0), i % 3 ? '#9e8c6c' : '#d6caa8');
+  }
+  // Markedsbod: stribet markise og en disk med varer
+  function stallT(c, x, y, tx, ty) {
+    grass(c, x, y, tx, ty);
+    var col = ['#c8282e', '#2c8a4e', '#2c4a9c'][((tx + ty) % 3 + 3) % 3];
+    R(c, x, y + 1, 16, 7, C.k);
+    for (var i = 0; i < 4; i++) { R(c, x + i * 4, y + 2, 2, 5, col); R(c, x + i * 4 + 2, y + 2, 2, 5, '#f4f4f0'); }
+    R(c, x + 1, y + 8, 2, 5, C.wd0); R(c, x + 13, y + 8, 2, 5, C.wd0);
+    R(c, x, y + 11, 16, 5, C.k); R(c, x + 1, y + 12, 14, 3, C.wd2); R(c, x + 1, y + 12, 14, 1, C.wd3);
+    R(c, x + 3, y + 10, 3, 2, '#e0a82c'); R(c, x + 8, y + 10, 3, 2, '#c8282e'); R(c, x + 12, y + 10, 2, 2, '#56a86e');
+  }
+  function fruitCrates(c, x, y, tx, ty) {
+    grass(c, x, y, tx, ty);
+    R(c, x + 1, y + 7, 14, 8, C.k); R(c, x + 2, y + 8, 12, 6, C.wd2); R(c, x + 2, y + 11, 12, 1, C.wd1);
+    [[3, 5, '#c8282e'], [6, 4, '#e0a82c'], [9, 5, '#56a86e'], [12, 4, '#c8282e'], [5, 6, '#e0a82c'], [10, 6, '#c8282e']].forEach(function (a) { R(c, x + a[0], y + a[1], 3, 3, a[2]); P(c, x + a[0], y + a[1], '#fff3c4'); });
+  }
+  function flowerBuckets(c, x, y, tx, ty) {
+    grass(c, x, y, tx, ty);
+    [[2, '#c8282e'], [7, '#e0a82c'], [12, '#9868c0']].forEach(function (a) {
+      R(c, x + a[0] - 1, y + 9, 5, 6, C.k); R(c, x + a[0], y + 10, 3, 4, '#8a8a96');
+      R(c, x + a[0], y + 5, 3, 4, a[1]); P(c, x + a[0] + 1, y + 4, a[1]); P(c, x + a[0], y + 6, '#f4ecdc'); R(c, x + a[0] + 1, y + 8, 1, 2, '#357a42');
+    });
   }
   function isRoad(ch) { return ch === 'a' || ch === '-' || ch === 'x' || ch === '1'; }
   function sidewalk(c, x, y, tx, ty, map) {
@@ -789,6 +837,9 @@
       case 'Q': shopWindow(c, x, y, tx, ty, map); break;
       case 'D': door(c, x, y, tx, ty, map); break;
       case 'A': kioskHatch(c, x, y, tx, ty, map); break;
+      case '3': stallT(c, x, y, tx, ty); break;
+      case '4': fruitCrates(c, x, y, tx, ty); break;
+      case '5': flowerBuckets(c, x, y, tx, ty); break;
       // indendørs
       case '_': woodFloor(c, x, y, tx, ty); break;
       case ';': lino(c, x, y, tx, ty); break;
@@ -884,6 +935,22 @@
     hundeben: { c: { k: C.k, w: '#e8e2ce', g: '#c4bca6' }, r: ['............', '............', '.kk......kk.', 'kwwk....kwwk', 'kwwwkkkkkwwk', '.kwwwwwwwwk.', '.kwwwwwwwwk.', 'kwwgkkkkgwwk', 'kwwk....kwwk', '.kk......kk.', '............', '............'] },
     noegle: { c: { k: C.k, y: '#ceb060', d: '#967c3e' }, r: ['............', '..kkkk......', '.kyyyyk.....', 'kyykkyyk....', 'kyk..kyk....', 'kyykkyykkkkk', '.kyyyyyyyyyk', '..kkkkkkdkyk', '........kkdk', '..........kk', '............', '............'] }
   };
+  // Kapitel 2 og 3
+  Object.assign(ICONS, {
+    billet: { c: { k: C.k, y: '#f0c860', d: '#c89a3a', w: '#fff3c4' }, r: ['............', '............', '.kkkkkkkkkk.', 'kyyyyykyyyyk', 'kywwwwkyyyyk', 'kyyyyykyyyyk', 'kywwwwkyyyyk', 'kyyyyykyyyyk', 'kdddddkddddk', '.kkkkkkkkkk.', '............', '............'] },
+    banan: { c: { k: C.k, y: '#ecd05a' }, r: ['............', '.........kk.', '........kyyk', '.......kyyk.', '......kyyyk.', '.....kyyyk..', '....kyyyk...', '...kyyyk....', '..kyyyk.....', '.kyyyk......', '.kkkk.......', '............'] },
+    fjer: { c: { k: C.k, b: '#6aa8e8', l: '#c4e0ff' }, r: ['..........kk', '.........kbk', '........kbbk', '.......kbbbk', '......kbbbk.', '.....kbblk..', '....kbbbk...', '...kbbbk....', '..kbbk......', '.kbk........', 'kk..........', '............'] },
+    forstoerrelsesglas: { c: { k: C.k, w: '#bfe8ff', l: '#ffffff', d: '#8a5a32' }, r: ['...kkkk.....', '..kwwwwk....', '.kwlwwwwk...', '.kwwwwwwk...', '.kwwwwwwk...', '.kwwwwwwk...', '..kwwwwk....', '...kkkkd....', '........dd..', '.........dd.', '..........dk', '............'] },
+    diplom: { c: { k: C.k, w: '#f6f0d8', r: '#c8282e' }, r: ['............', '.kkkkkkkkkk.', '.kwwwwwwwwk.', '.kwkkkkkkwk.', '.kwwwwwwwwk.', '.kwkkkkkkwk.', '.kwwwwwwwwk.', '.kwwwrrwwwk.', '.kwwrrrrwwk.', '.kwwwrrwwwk.', '.kkkkkkkkkk.', '............'] },
+    kurv: { c: { k: C.k, w: '#c89a58', d: '#8a6234' }, r: ['....kkkk....', '...k....k...', '...k....k...', '.kkkkkkkkkk.', 'kwwwwwwwwwwk', 'kdwdwdwdwdwk', 'kwdwdwdwdwdk', 'kdwdwdwdwdwk', '.kwdwdwdwdk.', '.kkkkkkkkkk.', '............', '............'] },
+    bolle: { c: { k: C.k, w: '#e8b060', l: '#fcdc9c', d: '#b07a38' }, r: ['............', '....kkkk....', '..kkwwwwkk..', '.kwwwlwwwwk.', 'kwwlwwwwwwwk', 'kwwwwwwwwwdk', 'kwwwwwwwwddk', '.kdwwwwwddk.', '..kkddddkk..', '....kkkk....', '............', '............'] },
+    honning: { c: { k: C.k, y: '#e8a830', l: '#ffe08a', w: '#f4ecdc', d: '#8a5a32' }, r: ['............', '...kkkkkk...', '...kddddk...', '..kkkkkkkk..', '.kyyyyyyyyk.', '.kylyyyyyyk.', '.kyyyyyyyyk.', '.kyyyywwwyk.', '.kyyyywwwyk.', '.kyyyyyyyyk.', '..kkkkkkkk..', '............'] },
+    bamse: { c: { k: C.k, b: '#b8844a', w: '#f0d8b0' }, r: ['..kk....kk..', '.kbbk..kbbk.', '.kbbkkkkbbk.', '..kbbbbbbk..', '..kbkbbkbk..', '..kbbwwbbk..', '...kbkkbk...', '..kkbbbbkk..', '.kbbbbbbbbk.', '.kbbk..kbbk.', '..kk....kk..', '............'] },
+    blomst: { c: { k: C.k, r: '#e45c88', y: '#ecd05a', g: '#3a8a4a' }, r: ['....kkkk....', '...krrrrk...', '..krrrrrrk..', '..krryyrrk..', '..krryyrrk..', '..krrrrrrk..', '...krrrrk...', '.....gg.....', '..gg.gg.gg..', '...gggggg...', '.....gg.....', '............'] },
+    maedal: { c: { k: C.k, y: '#ecc65c', l: '#fff0b0', d: '#d0a63e', r: '#c8282e' }, r: ['..kk....kk..', '..kr....rk..', '...kr..rk...', '....krrk....', '...kkkkkk...', '..kyyyyyyk..', '.kyylyyyyyk.', '.kyyyyyydyk.', '.kyyyyyyyyk.', '..kddddddk..', '...kkkkkk...', '............'] },
+    flaske: { c: { k: C.k, b: '#4a90d8', l: '#b4daff', w: '#f4f4f0' }, r: ['....kkkk....', '....kwwk....', '....kwwk....', '...kbbbbk...', '..kbllbbbk..', '..kblbbbbk..', '..kbbbbbbk..', '..kbbwwbbk..', '..kbbwwbbk..', '..kbbbbbbk..', '...kkkkkk...', '............'] },
+    aeble: { c: { k: C.k, r: '#d8384a', l: '#ff9aa4', d: '#a82434', g: '#4a9a4a' }, r: ['.....kk.....', '....kgk.....', '..kkkgkkk...', '.krrrrrrrk..', 'krrlrrrrrrk.', 'krlrrrrrrrk.', 'krrrrrrrrrk.', 'krrrrrrrdrk.', '.krrrrrrdk..', '..krrrrdk...', '...kkkkk....', '............'] }
+  });
   RH.iconSvg = function (id, size) {
     var I = ICONS[id]; if (!I) return '';
     var s = '<svg viewBox="0 0 12 12" width="' + (size || 48) + '" height="' + (size || 48) + '" shape-rendering="crispEdges" aria-hidden="true">';

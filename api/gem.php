@@ -22,6 +22,7 @@
 
 declare(strict_types=1);
 require __DIR__ . '/_kerne.php';
+require_once __DIR__ . '/_spoergeskema.php';
 
 const MAKS_DATA = 60000;   // tegn — et gemt Regnehelten fylder et par kB
 
@@ -64,6 +65,10 @@ case 'gem':
               'data' => $gemt['data'], 'udgave' => (int) $gemt['udgave']], 409);
     }
 
+    // Blev spillet lige nu klaret til ende (sidste kapitel)? Så får kontoen spørgeskemaet
+    $var_faerdig = $gemt && ($st = gemt_status($spil, $gemt['data'], 0)) && $st['faerdig'];
+    $nu_faerdig = ($st = gemt_status($spil, $data, 0)) && $st['faerdig'];
+
     $ny = $gemt ? (int) $gemt['udgave'] + 1 : 1;
     if ($gemt) {
         kør('UPDATE gemte_spil SET data = ?, udgave = ?, enhed = ?, opdateret = ? WHERE hvem = ? AND spil = ?',
@@ -72,6 +77,9 @@ case 'gem':
         kør('INSERT INTO gemte_spil (konto_id, elev_id, hvem, spil, data, udgave, enhed, opdateret)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             [(int) $h['konto']['id'], $elev_id, $hvem, $spil, $data, $ny, $enhed, time()]);
+    }
+    if ($nu_faerdig && !$var_faerdig) {
+        skema_udloes((int) $h['konto']['id'], 'faerdig', $elev_id, $spil);
     }
     svar(['ok' => true, 'udgave' => $ny]);
 }

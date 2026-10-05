@@ -72,6 +72,26 @@
       });
     },
 
+    // Et spørgsmål med valgknapper — giver nummeret på det valgte svar
+    ask: function (who, text, choices) {
+      return new Promise(function (resolve) {
+        var d = el('div', 'dialog px' + (who ? '' : ' narrator'));
+        if (who) { var pc = RH.portrait(who.sheet, 64); pc.className = 'portrait'; d.appendChild(pc); }
+        var box = el('div');
+        if (who) box.appendChild(el('div', 'who', esc(who.name)));
+        box.appendChild(el('div', 'say', text));
+        var ch = el('div', 'choices');
+        choices.forEach(function (c, i) {
+          var b = btn('btn', esc(c));
+          b.addEventListener('click', function () { RH.voice.stop(); pop(d); resolve(i); });
+          ch.appendChild(b);
+        });
+        box.appendChild(ch); d.appendChild(box); push(d);
+        RH.voice.speak(text, who ? who.id : null);
+        setTimeout(function () { var f = ch.querySelector('button'); if (f) f.focus(); }, 30);
+      });
+    },
+
     toast: function (html) {
       var t = el('div', 'toast', html);
       document.getElementById('toasts').appendChild(t);
@@ -212,6 +232,8 @@
         toggle('Oplæsning af dialog', function () { return RH.voice.on; }, function (v) { RH.voice.on = v; });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
         if (RH.canFullscreen) toggle('Fuld skærm', function () { return RH.isFullscreen(); }, function () { RH.toggleFullscreen(); });
+        var kapB = btn('btn', 'Kapitler'); m.appendChild(kapB);
+        kapB.addEventListener('click', function () { pop(bg); resolve('kapitler'); });
         var restart = btn('btn', 'Start forfra'); m.appendChild(restart);
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/regnehelten'; home.style.textDecoration = 'none'; m.appendChild(home);
         // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
@@ -233,13 +255,22 @@
 
     // ---------------------------------------------------------------- titel
     // hasSave er navnet fra det gemte spil ('' = intet gemt)
-    title: function (hasSave) {
+    // info: {kap, kapnavn, naeste} — kapitlet, man står i, og navnet på det næste, hvis det er låst op
+    title: function (hasSave, info) {
+      info = info || {};
       return new Promise(function (resolve) {
         var s = el('div', 'screen-full'), c = el('div', 'title-card px'); s.appendChild(c);
         c.appendChild(el('h1', null, 'Regnehelten'));
         c.appendChild(el('p', 'sub', 'En helt almindelig skoledag — fuld af tal. Kan du vise Hr. Poulsen, hvad du kan?'));
         var row = el('div', 'row');
-        if (hasSave) { var cont = btn('btn primary', 'Fortsæt som ' + esc(hasSave)); row.appendChild(cont); cont.addEventListener('click', function () { RH.audio.unlock(); pop(s); resolve('continue'); }); }
+        if (hasSave) {
+          var cont = btn('btn' + (info.naeste ? '' : ' primary'), 'Fortsæt som ' + esc(hasSave) + (info.kapnavn ? ' <small>· ' + esc(info.kapnavn) + '</small>' : '')); row.appendChild(cont);
+          cont.addEventListener('click', function () { RH.audio.unlock(); pop(s); resolve('continue'); });
+          if (info.naeste) {
+            var nxt = btn('btn primary', 'Næste kapitel: ' + esc(info.naeste) + ' →'); row.insertBefore(nxt, cont);
+            nxt.addEventListener('click', function () { RH.audio.unlock(); pop(s); resolve('naeste'); });
+          }
+        }
         var nw = btn('btn' + (hasSave ? '' : ' primary'), 'Nyt spil'); row.appendChild(nw);
         nw.addEventListener('click', function () {
           if (hasSave && !window.confirm('Et nyt spil sletter det, du har gemt. Vil du det?')) return;
@@ -306,11 +337,13 @@
     },
 
     // ---------------------------------------------------------------- slut
-    ending: function (rows, badges, ord, poulsen) {
+    // opt: {titel, tekst, rundt, naeste} — naeste er navnet på det næste kapitel (eller tom). Resolver 'naeste' eller undefined.
+    ending: function (rows, badges, ord, poulsen, opt) {
+      opt = opt || {};
       return new Promise(function (resolve) {
         var s = el('div', 'screen-full'), c = el('div', 'end px'); s.appendChild(c);
-        c.appendChild(el('h2', null, 'Du klarede det!'));
-        c.appendChild(el('p', null, 'I går kunne du ikke se, hvor regnestykkerne startede. I dag har du regnet dig gennem en hel dag. Her er, hvad du har vist, at du kan:'));
+        c.appendChild(el('h2', null, esc(opt.titel || 'Du klarede det!')));
+        c.appendChild(el('p', null, esc(opt.tekst || '')));
         var list = el('div', 'cando');
         rows.forEach(function (r) {
           var st = ''; for (var i = 0; i < 3; i++) st += i < r.stars ? '★' : '<span class="off">★</span>';
@@ -326,12 +359,74 @@
         c.appendChild(bd);
         c.appendChild(el('p', 'task-help', 'Stjernerne viser, hvor tit du ramte i første forsøg. Men læg mærke til vedholdenheden: hver gang du prøvede igen efter en fejl, lærte du noget, du ikke kunne før.'));
         var row = el('div', 'end-row');
-        var again = btn('btn', 'Gå rundt i kvarteret');
-        var home = el('a', 'btn primary', 'Tilbage til Learnification'); home.href = '/regnehelten'; home.style.textDecoration = 'none';
+        var again = btn('btn', esc(opt.rundt || 'Gå rundt i kvarteret'));
+        var home = el('a', 'btn', 'Tilbage til Learnification'); home.href = '/regnehelten'; home.style.textDecoration = 'none';
+        var nxt = null;
+        if (opt.naeste) {
+          nxt = btn('btn primary', 'Næste kapitel: ' + esc(opt.naeste) + ' →');
+          row.appendChild(nxt);
+          nxt.addEventListener('click', function () { pop(s); resolve('naeste'); });
+        } else { home.className = 'btn primary'; }
         row.appendChild(again); row.appendChild(home); c.appendChild(row);
         again.addEventListener('click', function () { pop(s); resolve(); });
-        push(s); again.focus();
+        push(s); (nxt || again).focus();
       });
+    },
+
+    // Kort mellem to kapitler: "Kapitel 2 · Udflugten" og en linje om, hvor og hvornår vi er
+    kapitelkort: function (n, navn, tekst, klasseTekst) {
+      return new Promise(function (resolve) {
+        var s = el('div', 'screen-full'), c = el('div', 'title-card px'); s.appendChild(c);
+        c.appendChild(el('p', 'sub', 'Kapitel ' + n));
+        c.appendChild(el('h1', null, esc(navn)));
+        if (tekst) c.appendChild(el('p', 'sub', esc(tekst)));
+        if (klasseTekst) c.appendChild(el('p', 'tiny', esc(klasseTekst)));
+        var go = btn('btn primary', 'Begynd');
+        var row = el('div', 'row'); row.appendChild(go); c.appendChild(row);
+        go.addEventListener('click', function () { pop(s); resolve(); });
+        push(s); go.focus();
+      });
+    },
+
+    // Kapitelliste: [{n, navn, status: klaret|igang|klar|laast}] — resolver nummeret på det kapitel, man vil i gang med
+    kapitler: function (liste) {
+      return new Promise(function (resolve) {
+        var bg = el('div', 'modal-bg'), m = el('div', 'menu px'); bg.appendChild(m);
+        m.appendChild(el('h2', null, 'Kapitler'));
+        m.appendChild(el('p', 'task-help', 'Et kapitel bliver låst op, når du har klaret det før. For hvert kapitel bliver opgaverne ét klassetrin sværere.'));
+        var tekst = { klaret: '✓ Klaret', igang: '► Her er du nu', klar: 'Klar — start', laast: '🔒 Klar det forrige først' };
+        liste.forEach(function (k) {
+          var b = btn('btn' + (k.status === 'klar' ? ' primary' : ''));
+          b.innerHTML = '<span>' + k.n + '. ' + esc(k.navn) + '</span><span>' + tekst[k.status] + '</span>';
+          if (k.status !== 'klar') b.disabled = true;
+          else b.addEventListener('click', function () { pop(bg); resolve(k.n); });
+          m.appendChild(b);
+        });
+        var close = btn('btn', 'Luk'); m.appendChild(close);
+        function done() { pop(bg); resolve(null); }
+        close.addEventListener('click', done);
+        bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); done(); } });
+        push(bg); close.focus();
+      });
+    },
+
+    // Prøvetiden er brugt (LFSpil i /assets/spilletid.js). Ingen vej tilbage ind i spillet:
+    // en voksen kan åbne for mere tid i /admin, og så virker en ny indlæsning af siden.
+    tidSlut: function () {
+      var s = el('div', 'screen-full'), c = el('div', 'end px'); s.appendChild(c);
+      c.appendChild(el('h2', null, 'Tak, fordi du spillede!'));
+      c.appendChild(el('p', null, 'Du har brugt hele din spilletid i Learnification. Det, du nåede, er gemt.'));
+      c.appendChild(el('p', 'task-help', 'Vil du spille videre, kan en voksen åbne for mere tid. Så kan du hente spillet igen og fortsætte, hvor du slap.'));
+      var row = el('div', 'end-row');
+      var home = el('a', 'btn primary', 'Tilbage til Learnification'); home.href = '/regnehelten'; home.style.textDecoration = 'none';
+      row.appendChild(home);
+      if (window.LFSpil && window.LF_SPILLER) {
+        var ud = btn('btn', 'Log ud');
+        ud.addEventListener('click', function () { LFSpil.logUd('/login'); });
+        row.appendChild(ud);
+      }
+      c.appendChild(row);
+      push(s); home.focus();
     },
 
     // ---------------------------------------------------------------- pausespil: Klæd om
@@ -497,7 +592,7 @@
     var grid = el('div', 'bag');
     bag.owned.forEach(function (id) {
       var it = K.ITEMS[id], d = el('div', 'bag-item');
-      d.insertAdjacentHTML('beforeend', RH.iconSvg(id, 52));
+      d.insertAdjacentHTML('beforeend', RH.iconSvg(it.icon || id, 52));
       var txt = el('div');
       txt.appendChild(el('b', null, esc(it.name) + (bag.counts[id] > 1 ? ' <span class="meta">x' + bag.counts[id] + '</span>' : '')));
       txt.appendChild(el('div', 'meta', esc(it.desc)));

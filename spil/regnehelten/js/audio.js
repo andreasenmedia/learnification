@@ -69,6 +69,9 @@
     klasse: { bpm: 64, vol: 0.26, mel: 'G4:4 - - E4:3 - C4:4 - - F4:4 - - E4:3 - D4:4 - - -:2', pad: 'C3:8 C3:8 A2:8 F2:8 G2:8 C3:8 G2:8 C3:8' },
     park: { bpm: 66, vol: 0.30, mel: 'A4:3 - C5:2 E5:4 - - D5:2 C5:4 - G4:3 - A4:2 C5:4 - - A4:4 -:3', pad: 'A2:8 E3:8 F2:8 C3:8 G2:8 D3:8 A2:8 A2:8' },
     bibliotek: { bpm: 58, vol: 0.22, mel: 'E4:4 - - G4:4 - - A4:4 - - G4:4 - - E4:4 - - D4:4 - - E4:6 -:4', pad: 'A2:8 A2:8 E3:8 E3:8 F2:8 C3:8 A2:8 A2:8' },
+    // Kapitel 2: Dyreparken — let og legende. Kapitel 3: markedet — en rolig vals i G-dur.
+    zoo: { bpm: 86, vol: 0.30, mel: 'E5:2 - G5:2 E5:2 C5:3 - D5:2 E5:2 G5:3 - E5:2 D5:2 C5:4 - - A4:2 C5:2 D5:3 - E5:4 -:2', pad: 'C3:8 G2:8 A2:8 F2:8 C3:8 F2:8 G2:8 C3:8' },
+    marked: { bpm: 92, vol: 0.30, mel: 'D5:2 B4:2 G4:3 - A4:2 B4:2 D5:3 - E5:2 D5:2 B4:3 - A4:2 G4:2 A4:4 - - D5:2 B4:2 G4:4 -:2', pad: 'G2:8 D3:8 C3:8 D3:8 G2:8 E3:8 D3:8 G2:8' },
     slut: { bpm: 74, vol: 0.42, mel: 'C5:3 - E5:2 G5:4 - - E5:2 F5:3 - E5:4 - D5:3 - C5:2 E5:4 - - C5:5 -:3', pad: 'C3:8 G2:8 A2:8 F2:8 F2:8 C3:8 G2:8 C3:8' }
   };
   function theme(name) {

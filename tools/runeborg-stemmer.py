@@ -42,6 +42,9 @@ PROFIL = {
     'hilde': (-1, 1.12), 'ole': (-4, 1.12), 'sigrid': (4, 1.0), 'bodil': (1, 1.0), 'aksel': (4, 0.95),
     'durin': (-5, 1.05), 'liv': (2, 1.05), 'knud': (0, 0.95), 'bjorn': (-5, 1.1), 'esben': (-2, 1.0),
     'ulf': (-4, 1.05), 'baron': (-2, 1.12),
+    # kapitel 2 og 3
+    'fenja': (2, 1.0), 'tuk': (-5, 1.12), 'brage': (-4, 1.2), 'mads': (-3, 1.08),
+    'orla': (0, 1.02), 'rane': (-1, 0.97), 'tilde': (3, 1.0), 'soeren': (-4, 1.18), 'maja': (3, 1.05),
 }
 
 STR = r"'((?:[^'\\\n]|\\.)*)'"
@@ -132,14 +135,17 @@ def speaker(arg):
 
 def lines():
     found = set()
-    content = open(os.path.join(SPIL, 'js', 'content.js'), encoding='utf-8').read()
-    game = open(os.path.join(SPIL, 'js', 'game.js'), encoding='utf-8').read()
+    js = os.path.join(SPIL, 'js')
+    # kapitel 1 ligger i content.js, kapitel 2 og 3 i kapitel2.js og kapitel3.js
+    filer = [open(os.path.join(js, f), encoding='utf-8').read()
+             for f in ('content.js', 'kapitel2.js', 'kapitel3.js') if os.path.exists(os.path.join(js, f))]
+    game = open(os.path.join(js, 'game.js'), encoding='utf-8').read()
 
     def spoken(expr):
         # alle tekststykker i et udtryk, der ligner sætninger (med mellemrum)
         return [unesc(s) for s in re.findall(STR, expr) if ' ' in s]
 
-    for src in (content, game):
+    for src in filer + [game]:
         for m in re.finditer(r'g\.(say|ask)\(', src):
             parts = split_top(call_args(src, m.end() - 1))
             if len(parts) < 2:
@@ -147,18 +153,24 @@ def lines():
             who = speaker(parts[0])
             for t in spoken(parts[1]):
                 found.add((who, t))
-    for m in re.finditer(r"rumor\('\w+', '(\w+)', " + STR + r"\)", content):
-        found.add((m.group(1), unesc(m.group(2))))
-    block = content[content.index('var lockedDoors'):]
-    block = block[:block.index('};')]
-    for t in re.findall(r": " + STR, block):
-        found.add(('fortaeller', unesc(t)))
-    for title, t in re.findall(r"title: " + STR + r", t: " + STR, content):
-        found.add(('fortaeller', 'Runestykke: ' + unesc(title) + '. ' + unesc(t)))
-    for look in re.findall(r"takeSample\(g, '\w+', '[^']*', " + STR + r"\)", content):
-        found.add(('fortaeller', 'Du fylder måleglasset. ' + unesc(look)))
-    for q in re.findall(r"\bq: " + STR, content):
-        found.add(('fortaeller', unesc(q)))
+    for content in filer:
+        # rygter og forklaringer: rumor('nøgle', 'person', 'tekst') / hypo(...)
+        for m in re.finditer(r"(?:rumor|hypo)\('\w+', '(\w+)', " + STR + r"\)", content):
+            found.add((m.group(1), unesc(m.group(2))))
+        # stationerne i kapitel 2: station(g, 'flag', 'nøgle', 'navn', 'indledning', ...)
+        for m in re.finditer(r"station\(g, '\w+', '\w+', '[^']*', " + STR, content):
+            found.add(('fortaeller', unesc(m.group(1))))
+        if 'var lockedDoors' in content:
+            block = content[content.index('var lockedDoors'):]
+            block = block[:block.index('};')]
+            for t in re.findall(r": " + STR, block):
+                found.add(('fortaeller', unesc(t)))
+        for title, t in re.findall(r"title: " + STR + r", t: " + STR, content):
+            found.add(('fortaeller', 'Runestykke: ' + unesc(title) + '. ' + unesc(t)))
+        for look in re.findall(r"takeSample\(g, '\w+', '[^']*', " + STR + r"\)", content):
+            found.add(('fortaeller', 'Du fylder måleglasset. ' + unesc(look)))
+        for q in re.findall(r"q: " + STR, content):
+            found.add(('fortaeller', unesc(q)))
     # personer uden egen klang (fx Glød) bliver læst af fortælleren
     return sorted((w if w in PROFIL else 'fortaeller', t) for w, t in found)
 

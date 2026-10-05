@@ -44,13 +44,14 @@
       var e = emner[s.emne || 'andet'] || (emner[s.emne || 'andet'] = { opgaver: 0, foerste: 0 });
       e.opgaver++; if (s.foerste_forsoeg) e.foerste++;
     });
-    var kapitel = ['q0', 'q1', 'q2', 'q3', 'q4', 'q5'].filter(function (q) { return S.q[q] === 'done'; }).length;
+    // antal klarede hovedmissioner på tværs af kapitlerne (q0-q5, k2q0-k2q5, k3q0-k3q5)
+    var kapitel = Object.keys(S.q).filter(function (q) { return /^(k\d)?q\d$/.test(q) && S.q[q] === 'done'; }).length;
     return {
       id: S.res.id, navn: S.name, klasse: S.klasse, trin: RH.opgaver.trin(S.klasse).navn,
       minutter: Math.round(S.res.sek / 6) / 10,
       opgaver: svar.length, foerste_forsoeg: rigtige, klaret: klaret,
       procent: svar.length ? Math.round(100 * rigtige / svar.length) : 0,
-      regnekraft: S.kraft, kapitel: kapitel, faerdig: !!S.res.faerdig,
+      regnekraft: S.kraft, kapitel: kapitel, kap: S.kap || 1, klaret: (S.klaret || []).join(','), faerdig: !!S.res.faerdig,
       emner: emner, detaljer: svar
     };
   }

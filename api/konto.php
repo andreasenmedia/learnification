@@ -44,7 +44,7 @@ if ($h === 'mig') {
         }
         svar(['ok' => true, 'logget_ind' => false]);
     }
-    $ud = ['ok' => true, 'logget_ind' => true, 'konto' => konto_ud($x['konto'])];
+    $ud = ['ok' => true, 'logget_ind' => true, 'konto' => konto_ud($x['konto']), 'tid' => tid_status($x)];
     if ($x['elev']) {
         $e = $x['elev'];
         $ud['hvem'] = 'elev';

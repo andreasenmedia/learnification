@@ -311,9 +311,62 @@
     bogreol: function (g) { return g.say(null, 'Matematikbøger. Række efter række af dem.'); }
   };
 
+  // ---------------------------------------------------------------- kapitler
+  // Kapitel 1 er dagen ovenfor. Kapitel 2 (udflugten) og 3 (lørdagsmarkedet) ligger i
+  // kapitel2.js og kapitel3.js og lægger deres personer, missioner og opgavesæt oveni med
+  // RH.content.tilfoej({...}). Alt i et kapitel har en kap-markering, så Dagbogen kun viser det,
+  // man har nået. Sværhedsgraden stiger ét klassetrin pr. kapitel: S.klasse = startKlasse + kap − 1
+  // (højst 6. klasse) — det bestemmer game.js, når et kapitel begynder.
+  var KAPITLER = 3;
+  var kapitler = {
+    1: {
+      navn: 'En almindelig skoledag', start: null,
+      tod: function (S) {
+        if (S.cut) return 'igaar';
+        if (S.q.q1 !== 'done') return 'tidlig';
+        if (S.q.q3 !== 'done') return 'morgen';
+        if (S.q.q5 !== 'done') return 'formiddag';
+        return 'eftermiddag';
+      },
+      efterTitel: 'Dagen er klaret!', efterMaal: 'Gå rundt, og hjælp dem, der stadig har brug for det',
+      efter: { npc: 'poulsen' }, sider: ['s1', 's2', 's3', 's4', 's5', 's6'],
+      slut: {
+        titel: 'Du klarede det!',
+        tekst: 'I går kunne du ikke se, hvor regnestykkerne startede. I dag har du regnet dig gennem en hel dag. Her er, hvad du har vist, at du kan:',
+        rundt: 'Gå rundt i kvarteret'
+      }
+    }
+  };
+  function kapNu() { return kapitler[(RH.state && RH.state.kap) || 1] || kapitler[1]; }
+
+  function tilfoej(e) {
+    var kap = e.kap;
+    [[npcs, e.npcs], [places, e.places], [placePos, e.placePos], [lockedDoors, e.lockedDoors], [ENC, e.enc], [REWARDS, e.rewards], [ITEMS, e.items],
+     [on, e.on], [offer, e.offer]].forEach(function (par) {
+      Object.keys(par[1] || {}).forEach(function (k) { par[0][k] = par[1][k]; });
+    });
+    // Replikker til personer, der også findes i et tidligere kapitel (fx Oskar og Hr. Poulsen), gælder kun i det her kapitel
+    [[idle, e.idle], [placeIdle, e.placeIdle]].forEach(function (par) {
+      Object.keys(par[1] || {}).forEach(function (k) {
+        var gammel = par[0][k], ny = par[1][k];
+        par[0][k] = gammel ? function (g) { return (g.S.kap || 1) === kap ? ny(g) : gammel(g); } : ny;
+      });
+    });
+    (e.things || []).forEach(function (t) { t.kap = kap; things.push(t); });
+    (e.bog || []).forEach(function (p) { BOG.push(p); });
+    (e.quests || []).forEach(function (q) { q.kap = kap; quests.push(q); byId[q.id] = q; });
+    kapitler[kap] = e.meta;
+  }
+
   // ---------------------------------------------------------------- opslag
   async function talk(g, id) {
     var S = g.S;
+    // Efter et kapitel: personen, der sender én videre til næste kapitel
+    var kp = kapitler[S.kap || 1], nxt = kapitler[(S.kap || 1) + 1];
+    if (kp && kp.efter && kp.efter.npc === id && (S.klaret || []).indexOf(S.kap || 1) >= 0 && nxt) {
+      var c = await g.ask(id, nxt.tilbud || 'Der er mere at regne på. Kommer du med?', ['Ja — afsted: ' + nxt.navn + '!', 'Ikke lige nu.']);
+      if (c === 0) { await g.naesteKapitel(); return; }
+    }
     for (var i = 0; i < quests.length; i++) {
       var q = quests[i];
       if (S.q[q.id] === 'active' && on[q.id] && on[q.id][id]) return on[q.id][id](g);
@@ -331,8 +384,10 @@
     talk: talk, available: available, ENC: ENC, REWARDS: REWARDS, REWARD_PCT: REWARD_PCT, ITEMS: ITEMS, PAUSESPIL: PAUSESPIL,
     PLAYS_PER_ITEM: PLAYS_PER_ITEM, MAX_PLAYS: MAX_PLAYS, BOG: BOG,
     SKIN: SKIN, HAIRC: HAIRC, CLOTH: CLOTH, PANTS: PANTS, STYLES: STYLES, EXTRAS: EXTRAS, STD_LOOK: STD_LOOK,
+    KAPITLER: KAPITLER, kapitler: kapitler, tilfoej: tilfoej, kapNu: kapNu, main: main, side: side,
     quest: function (id) { return byId[id]; },
-    questList: function () { return quests; },
+    // Missioner til Dagbogen: kun dem fra de kapitler, spilleren har nået
+    questList: function () { var k = (RH.state && RH.state.kap) || 1; return quests.filter(function (q) { return (q.kap || 1) <= k; }); },
     goal: function (id) { var q = byId[id], gl = q.goal; return typeof gl === 'function' ? gl(RH.state) : gl; },
     // Hvem skal have et "!" (har en ekstramission til dig) og hvem et "?" (din mission fortsætter her)
     markers: function (S) {
@@ -350,12 +405,6 @@
       return null;
     },
     // Dagen går: tidlig morgen med gadelygterne tændt, så formiddag og eftermiddag
-    timeOfDay: function (S) {
-      if (S.cut) return 'igaar';
-      if (S.q.q1 !== 'done') return 'tidlig';
-      if (S.q.q3 !== 'done') return 'morgen';
-      if (S.q.q5 !== 'done') return 'formiddag';
-      return 'eftermiddag';
-    }
+    timeOfDay: function (S) { return kapNu().tod(S); }
   };
 })();

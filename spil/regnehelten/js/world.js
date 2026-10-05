@@ -152,7 +152,7 @@
     m.rect(0, 0, w, 2, 'X'); m.rect(0, h - 1, w, 1, 'X'); m.rect(0, 0, 1, h, 'X'); m.rect(w - 1, 0, 1, h, 'X');
     return m;
   }
-  function exitTo(m, x, y, tx, ty) { m.set(x, y, 'E'); m.door(x, y, 'by', tx, ty, 'down'); m.spots.exit = [x, y]; }
+  function exitTo(m, x, y, tx, ty, to) { m.set(x, y, 'E'); m.door(x, y, to || 'by', tx, ty, 'down'); m.spots.exit = [x, y]; }
 
   function hjem() {
     var m = room('hjem', 22, 14, 'wood', 'hjem', 'Hjemme', 'hjem');
@@ -218,7 +218,126 @@
     return m;
   }
 
+  // ------------------------------------------------------------------ kapitel 2: Dyreparken
+  // Busparkeringen i syd, billetlugen og lågen, så pladsen midt i parken med kiosken. Aberne ligger mod vest,
+  // pingvinerne mod øst (og inde i pingvinhuset), gederne og legepladsen mod nordvest, og græsset til
+  // madpakkerne og fremlæggelsen mod nord.
+  function zoo() {
+    var W = 48, H = 34, m = new Map('zoo', W, H, '.');
+    m.name = 'Dyreparken'; m.music = 'zoo'; m.outdoor = true;
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) if (RH.hash(x, y, 33) < 0.05) m.set(x, y, ',');
+    m.rect(0, 0, W, 2, 'T'); m.rect(0, H - 2, W, 2, 'T'); m.rect(0, 0, 2, H, 'T'); m.rect(W - 2, 0, 2, H, 'T');
+    // parkeringen og bussen (to bil-felter i træk, så den ligner en bus)
+    m.rect(12, 28, 24, 4, 'a'); m.rect(12, 27, 24, 1, '=');
+    m.set(19, 29, '1'); m.set(20, 29, '1'); m.set(21, 29, '1'); m.set(26, 30, '1'); m.set(30, 29, '1');
+    m.set(14, 27, 'l'); m.lamps.push([14, 27]); m.set(33, 27, 'l'); m.lamps.push([33, 27]);
+    // indgangen: hegn med billetlugen og en låge, indtil billetterne er købt
+    m.rect(4, 22, 40, 1, 'F');
+    m.set(23, 22, 'g'); m.set(24, 22, 'g');
+    house(m, 17, 19, 5, 4, 'R', 'M', null, {}); m.set(19, 22, 'A'); m.set(20, 22, 'A');       // billetlugen
+    sign(m, 19, 20, 'BILLETTER', '#c8282e', '#f4f4f0', 6);
+    house(m, 26, 19, 5, 4, 'K', 'M', null, {}); m.set(28, 22, 'A');                           // kiosk til dem, der skal ud igen
+    // bred sti fra lågen op til pladsen og ud til alle sider
+    m.rect(22, 11, 4, 11, '='); m.rect(16, 15, 24, 2, '='); m.rect(16, 12, 1, 3, '='); m.rect(22, 3, 4, 8, ':');
+    m.rect(18, 9, 12, 2, '=');
+    // pladsen med kiosken, bænke og blomster
+    house(m, 29, 11, 6, 4, 'R', 'M', null, {}); m.set(31, 14, 'A'); m.set(32, 14, 'A');
+    sign(m, 31, 12, 'KIOSKEN', '#ffcc4d', '#1a1420', 4);
+    m.set(27, 16, 'B'); m.set(28, 16, 'B'); m.set(19, 17, 'B'); m.set(20, 17, 'B'); m.set(35, 17, 'c'); m.set(17, 17, 'c'); m.set(19, 18, 's');
+    [[17, 11], [27, 12], [20, 13], [24, 14]].forEach(function (p) { m.set(p[0], p[1], ','); });
+    [[18, 15], [29, 15], [14, 12], [36, 13]].forEach(function (p) { m.set(p[0], p[1], 'l'); m.lamps.push(p); });
+    // aberne mod vest: hegn, træer, sand og en klatrestativ
+    m.rect(4, 8, 12, 1, 'F'); m.rect(4, 8, 1, 10, 'F'); m.rect(4, 17, 12, 1, 'F'); m.rect(15, 8, 1, 4, 'F'); m.rect(15, 14, 1, 4, 'F');
+    m.rect(5, 9, 10, 8, 'f'); m.set(8, 11, 'T'); m.set(11, 13, 'T'); m.set(7, 15, 'T'); m.set(13, 10, 'T'); m.set(10, 9, 'P');
+    sign(m, 9, 7, 'ABEHUSET', '#8a5a32', '#f4f4f0', 12); m.set(11, 7, 's');
+    // pingvinerne mod øst: huset med bassinet indeni
+    house(m, 36, 4, 8, 7, 'K', 'W', 3, { windows: [1, 2, 5, 6] });                           // pingvinhuset, dør (39,10)
+    sign(m, 39, 5, 'PINGVINERNE', '#2c4a9c', '#f4f4f0', 6);
+    m.rect(39, 11, 2, 4, '=');
+    // gederne og legepladsen mod nordvest
+    m.rect(6, 3, 12, 1, 'F'); m.rect(6, 3, 1, 4, 'F'); m.rect(17, 3, 1, 4, 'F'); m.rect(6, 6, 12, 1, 'F');
+    m.rect(7, 4, 10, 2, 'f'); m.set(13, 4, 't'); m.set(9, 5, 'T');
+    sign(m, 11, 2, 'GEDERNE', '#56a86e', '#f4f4f0', 12);
+    m.set(17, 5, ':'); m.rect(18, 5, 4, 1, ':');
+    // madpakkegræsset mod nord: borde og bænke
+    m.rect(19, 3, 10, 5, ','); m.set(20, 4, 'w'); m.set(21, 4, 'w'); m.set(24, 6, 'w'); m.set(25, 6, 'w'); m.set(26, 4, 'B'); m.set(27, 4, 'B');
+    sign(m, 23, 2, 'MADPAKKEGRÆS', '#c8282e', '#f4f4f0', 12);
+    // skov rundt
+    [[6, 20], [10, 24], [40, 24], [43, 26], [4, 29], [44, 31], [8, 31], [41, 2], [3, 3], [31, 7], [32, 4], [12, 19], [38, 20], [45, 12]].forEach(function (p) { m.set(p[0], p[1], 'T'); });
+    [[14, 20], [34, 24], [16, 24], [30, 25]].forEach(function (p) { m.set(p[0], p[1], 't'); });
+    m.door(39, 10, 'pingvinhus', 5, 10, 'up');
+    m.lock(23, 22, 'zooInd', 'Billetterne er ikke købt endnu — gå hen til billetlugen først.');
+    m.lock(24, 22, 'zooInd', 'Billetterne er ikke købt endnu — gå hen til billetlugen først.');
+    m.zones.push([2, 2, 44, 22, 'zoo']);
+    m.spots = { start: [22, 26], billet: [20, 23] };
+    return m;
+  }
+  function pingvinhus() {
+    var m = room('pingvinhus', 12, 12, 'lino', 'butik', 'Pingvinhuset', 'skole');
+    m.rect(2, 3, 8, 4, '~');                                        // bassinet (smal kant på siderne, så man kan gå rundt om det)
+    m.set(2, 8, 'c'); m.set(9, 8, 'B'); m.set(10, 8, 'B'); m.set(1, 10, 'j'); m.set(10, 10, 'j');
+    m.set(5, 1, 'N');
+    exitTo(m, 5, 11, 39, 11, 'zoo');
+    m.lamps.push([5, 2]);
+    return m;
+  }
+
+  // ------------------------------------------------------------------ kapitel 3: Lørdagsmarkedet
+  // Torvet midt i byen med boder i tre rækker, bageriet, loppemarkedet og blomsterboden. Mor og Far er i gang med at
+  // handle, og klassens bod står for enden af torvet.
+  function marked() {
+    var W = 50, H = 32, m = new Map('marked', W, H, '.');
+    m.name = 'Torvet'; m.music = 'marked'; m.outdoor = true;
+    for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) if (RH.hash(x, y, 51) < 0.04) m.set(x, y, ',');
+    m.rect(0, 0, W, 2, 'T'); m.rect(0, H - 2, W, 2, 'T'); m.rect(0, 0, 2, H, 'T'); m.rect(W - 2, 0, 2, H, 'T');
+    // torvet og gaderne
+    m.rect(8, 8, 34, 16, '=');
+    m.rect(22, 24, 6, 6, '=');
+    m.rect(0, 26, 22, 2, '='); m.rect(28, 26, 22, 2, '=');
+    // huse rundt om: bageriet, banken, kaffebaren og to boligblokke
+    house(m, 4, 3, 9, 5, 'R', 'W', 4, { windows: [1, 2, 6, 7], chimney: 6 });                  // bageriet, dør (8,7)
+    sign(m, 8, 4, 'BAGERI', '#c8282e', '#f4f4f0', 6);
+    house(m, 15, 3, 7, 5, 'K', 'Y', null, { windows: [1, 5] });
+    house(m, 28, 3, 8, 5, 'K', 'W', null, { windows: [1, 2, 5, 6] });
+    house(m, 38, 3, 8, 5, 'R', 'M', null, { windows: [2, 5], chimney: 1 });
+    // boderne: række 1 (frugt og grønt) og række 2 (loppemarked), og en blomsterbod
+    [10, 12, 14, 16].forEach(function (x) { m.set(x, 12, '3'); });                              // frugt og grønt
+    [10, 12, 14, 16].forEach(function (x) { m.set(x, 13, '4'); });
+    [22, 24, 26, 28].forEach(function (x) { m.set(x, 12, '3'); });                              // honning, ost og marmelade
+    [34, 36, 38, 40].forEach(function (x) { m.set(x, 12, '3'); });                              // loppemarked
+    [34, 36, 38, 40].forEach(function (x) { m.set(x, 13, '4'); });
+    [13, 15].forEach(function (x) { m.set(x, 19, '3'); }); m.set(11, 19, '5'); m.set(12, 19, '5'); // blomsterboden
+    [32, 34, 36].forEach(function (x) { m.set(x, 19, '3'); });                                  // klassens egen bod, for enden
+    m.set(21, 17, 'N'); m.set(22, 17, 'N');
+    m.set(25, 16, 'B'); m.set(26, 16, 'B'); m.set(18, 20, 'B'); m.set(19, 20, 'B'); m.set(30, 22, 'c'); m.set(8, 20, 'c');
+    [[9, 9], [20, 9], [31, 9], [41, 9], [9, 22], [41, 22], [25, 22]].forEach(function (p) { m.set(p[0], p[1], 'l'); m.lamps.push(p); });
+    sign(m, 12, 11, 'FRUGT & GRØNT', '#2c8a4e', '#f4f4f0', 4);
+    sign(m, 36, 11, 'LOPPEMARKED', '#8a5a32', '#f4f4f0', 4);
+    sign(m, 25, 11, 'HONNING', '#e0a82c', '#1a1420', 4);
+    sign(m, 12, 18, 'BLOMSTER', '#c8508a', '#f4f4f0', 4);
+    sign(m, 34, 18, 'VORES BOD', '#2c4a9c', '#f4f4f0', 4);
+    // træer og blomsterkasser i torvets belægning, så den ikke ligger helt nøgen hen
+    [[20, 15], [29, 15], [20, 21], [29, 21], [9, 15], [40, 15], [9, 21], [40, 21]].forEach(function (p) { m.set(p[0], p[1], 'T'); });
+    [[10, 10], [14, 10], [18, 10], [22, 10], [27, 10], [31, 10], [35, 10], [39, 10], [12, 22], [18, 22], [31, 22], [37, 22]].forEach(function (p) { m.set(p[0], p[1], 'j'); });
+    [[3, 10], [46, 11], [4, 24], [45, 24], [18, 29], [31, 29], [47, 4], [3, 5]].forEach(function (p) { m.set(p[0], p[1], 'T'); });
+    [[7, 12], [44, 14], [8, 24], [43, 21]].forEach(function (p) { m.set(p[0], p[1], 't'); });
+    m.door(8, 7, 'bageri', 7, 10, 'up');
+    m.zones.push([2, 2, 46, 28, 'marked']);
+    m.spots = { start: [24, 28] };
+    return m;
+  }
+  function bageri() {
+    var m = room('bageri', 15, 12, 'wood', 'butik', 'Bageriet', 'butik');
+    m.rect(1, 1, 5, 1, 'p'); m.rect(9, 1, 5, 1, 'p'); m.set(7, 1, 'N');
+    m.rect(2, 4, 11, 1, 'C'); m.set(1, 8, 'c'); m.set(13, 8, 'j');
+    m.rect(5, 7, 5, 2, 'Z');
+    exitTo(m, 7, 11, 8, 8, 'marked');
+    m.lamps.push([7, 2]);
+    return m;
+  }
+
   RH.buildWorld = function () {
-    return { by: kvarter(), hjem: hjem(), butik: butik(), bibliotek: bibliotek(), skole: skole(), klasse: klasse() };
+    return { by: kvarter(), hjem: hjem(), butik: butik(), bibliotek: bibliotek(), skole: skole(), klasse: klasse(),
+             zoo: zoo(), pingvinhus: pingvinhus(), marked: marked(), bageri: bageri() };
   };
 })();

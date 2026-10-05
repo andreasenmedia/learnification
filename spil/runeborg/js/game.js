@@ -35,7 +35,8 @@
 
   // ---------------------------------------------------------------- tilstand
   function fresh(name, cls) {
-    return { v: 1, name: name, cls: cls, map: 'laug', x: 6, y: 5, dir: 'up', q: { q0: 'active' }, flags: {}, clues: [], skills: [], runes: [], gold: 0, solved: {}, stats: {}, persist: 0, seen: {}, talks: 0 };
+    // kap = kapitlet, man spiller nu; klaret = de kapitler, man har gennemført (låser det næste op)
+    return { v: 2, kap: 1, klaret: [], name: name, cls: cls, map: 'laug', x: 6, y: 5, dir: 'up', q: { q0: 'active' }, flags: {}, clues: [], skills: [], runes: [], gold: 0, solved: {}, stats: {}, persist: 0, seen: {}, talks: 0 };
   }
   var FOTO = (location.hash.match(/foto=(\w+)/) || [])[1];   // tools/runeborg-billeder.py tager skærmbilleder sådan
   // Gem først, når et rigtigt spil er i gang — titelskærmens baggrundsby må
@@ -52,7 +53,16 @@
     RB.gem.gem(d, nu === true);
   }
   function lokal() { try { return localStorage.getItem(SAVE); } catch (e) { return null; } }
-  function parse(tekst) { try { var s = JSON.parse(tekst); return s && s.v === 1 ? s : null; } catch (e) { return null; } }
+  // v1 (før kapitlerne) bliver til kapitel 1; var det klaret, er kapitel 1 klaret
+  function parse(tekst) {
+    try {
+      var s = JSON.parse(tekst);
+      if (!s || (s.v !== 1 && s.v !== 2)) return null;
+      if (s.v === 1) { s.v = 2; s.kap = 1; s.klaret = s.q && s.q.q10 === 'done' ? [1] : []; }
+      s.klaret = s.klaret || []; s.kap = s.kap || 1;
+      return s;
+    } catch (e) { return null; }
+  }
   RB.saveSettings = function () {
     try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, voice: RB.voice.on, big: document.body.classList.contains('big') })); } catch (e) { }
   };
@@ -81,6 +91,7 @@
     world.by.flags.gateOpen = !!S.flags.gateOpen;
     world.farveri.flags.valveClosed = !!S.flags.f_valve;
     world.by.flags.green = !S.flags.clean; world.farveri.flags.green = !S.flags.clean;
+    Object.keys(world).forEach(function (id) { if (world[id].applyFlags) world[id].applyFlags(S, world[id]); });   // kapitel 2 og 3
   }
   function prerender(map) {
     var fr = [0, 1].map(function (f) {
@@ -169,7 +180,9 @@
     seen: function (k) { if (S.seen[k]) return true; S.seen[k] = true; return false; },
     toast: function (h) { UI.toast(h); },
     refresh: refresh,
-    epilogue: epilogue
+    epilogue: epilogue,
+    flyt: flyt,
+    naesteKapitel: naesteKapitel
   };
   function areaKey(label) { for (var k in K.AREA) if (K.AREA[k] === label) return k; return null; }
 
@@ -198,7 +211,7 @@
     var r = K.runes.filter(function (x) { return x.id === id; })[0];
     S.runes.push(id); RB.audio.sfx('pick'); save(); hud();
     await g.say(null, '<b>Runestykke: ' + RB.esc(r.title) + '</b><br>' + RB.esc(r.t), 'Runestykke: ' + r.title + '. ' + r.t);
-    UI.toast('<b>Runestykker: ' + S.runes.length + ' af ' + K.runes.length + '</b>');
+    UI.toast('<b>Runestykker: ' + S.runes.length + ' af ' + K.runesNu().length + '</b>');
   }
 
   // ---------------------------------------------------------------- bevægelse
@@ -294,7 +307,7 @@
     Object.keys(K.placePos).forEach(function (p) { var pp = K.placePos[p]; if (marks[p] && pp[0] === S.map) RB.drawMarker(ctx, pp[1] * T - cx, pp[2] * T - cy - 12, marks[p], tick); });
 
     lighting(m, cx, cy);
-    if (m.id === 'by') weather(cx, cy);
+    if (m.outdoor) weather(cx, cy, m.weather);
     if (started) arrow(cx, cy);
   }
 
@@ -308,7 +321,7 @@
     if (e.kind === 'npc') {
       if (K.npcs[e.id].dragon) { RB.drawShadow(ctx, x, y); var b = Math.floor(tick / 40) % 2; ctx.drawImage(dragonSheet, 0, 0, T, T, x, y - b, T, T); if (tick % 200 < 60) { var p = (tick % 200) / 60; ctx.fillStyle = 'rgba(200,200,210,' + (1 - p) + ')'; ctx.fillRect(x + 7, y + 2 - p * 10, 2, 2); } return; }
       drawChar(sheetFor(e.id), x, y, e.dir || 'down', 0);
-    } else if (e.kind === 'sample') {
+    } else if (e.kind === 'sample' || e.kind === 'station') {
       ctx.fillStyle = '#633c22'; ctx.fillRect(x + 7, y + 6, 2, 9);
       ctx.fillStyle = '#e8d8b4'; ctx.fillRect(x + 4, y + 4, 8, 4);
       RB.drawSparkle(ctx, x, y - 6, tick, '#9ad0ff');
@@ -333,15 +346,15 @@
   };
   function lighting(m, cx, cy) {
     var tod = K.timeOfDay(S), L = TINT[tod];
-    if (m.id !== 'by') L = { fill: 'rgba(255,170,90,0.08)', mul: m.id === 'farveri' ? 'rgb(170,175,210)' : 'rgb(245,225,200)', lamp: 0.55, fly: 0 };
+    if (!m.outdoor) L = { fill: 'rgba(255,170,90,0.08)', mul: m.id === 'farveri' ? 'rgb(170,175,210)' : 'rgb(245,225,200)', lamp: 0.55, fly: 0 };
     ctx.save();
     if (L.mul) { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = L.mul; ctx.fillRect(0, 0, VW, VH); }
     if (L.fill) { ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = L.fill; ctx.fillRect(0, 0, VW, VH); }
     if (L.lamp > 0) {
       ctx.globalCompositeOperation = 'lighter';
       var flick = 0.92 + Math.sin(tick / 7) * 0.04 + Math.sin(tick / 3.3) * 0.03;
-      m.lamps.forEach(function (p) { glow(p[0] * T + 8 - cx, p[1] * T + 4 - cy, 34, L.lamp * flick, '255,170,80'); });
-      if (m.id === 'by') m.windows.forEach(function (p) {
+      m.lamps.forEach(function (p) { glow(p[0] * T + 8 - cx, p[1] * T + 4 - cy, p[3] || 34, L.lamp * flick, p[2] || '255,170,80'); });   // p[2]/p[3]: egen farve og størrelse (fx lysende svampe)
+      if (m.windows.length) m.windows.forEach(function (p) {
         var a = L.lamp * 0.8; if (a <= 0.1) return;
         ctx.fillStyle = 'rgba(255,190,90,' + a + ')'; ctx.fillRect(p[0] * T + 4 - cx, p[1] * T + 4 - cy, 8, 7);
         glow(p[0] * T + 8 - cx, p[1] * T + 10 - cy, 16, a * 0.5, '255,180,90');
@@ -349,7 +362,7 @@
       if (tod === 'fest' && m.id === 'by') festLights(cx, cy);
     }
     ctx.restore();
-    if (L.fly && m.id === 'by') fireflies(L.fly);
+    if (L.fly && m.outdoor) fireflies(L.fly);
     // blød vignet — hyggeligt, og øjet søger mod midten
     var v = ctx.createRadialGradient(VW / 2, VH / 2, VH * 0.45, VW / 2, VH / 2, VW * 0.62);
     v.addColorStop(0, 'rgba(20,10,30,0)'); v.addColorStop(1, 'rgba(20,10,30,0.38)');
@@ -398,8 +411,8 @@
       ctx.fillRect(Math.round(p.x - r - cx), Math.round(p.y - r - cy), Math.ceil(r * 2), Math.ceil(r * 2));
     }
   }
-  function weather(cx, cy) {
-    var cols = ['#e0a82c', '#d8584a', '#c86a2a', '#ffe070'];
+  function weather(cx, cy, slags) {
+    var cols = slags === 'hav' ? ['#e8f0f8', '#c8d8e8', '#ffffff'] : ['#e0a82c', '#d8584a', '#c86a2a', '#ffe070'];   // havnen: måger og skumsprøjt i stedet for blade
     while (leaves.length < 14) leaves.push({ x: Math.random() * (VW + 40), y: -Math.random() * VH, s: 0.25 + Math.random() * 0.35, p: Math.random() * 6.28, c: cols[(Math.random() * 4) | 0] });
     leaves.forEach(function (l) {
       l.p += 0.04; l.y += l.s; l.x += Math.sin(l.p) * 0.45 - 0.18;
@@ -418,9 +431,20 @@
     if (!p && K.placePos[t]) p = K.placePos[t];
     if (!p) return null;
     if (p[0] === S.map) return [p[1], p[2]];
-    var m = mapNow();
-    if (S.map !== 'by') return m.spots.exit || null;
-    for (var i = 0; i < m.doors.length; i++) if (m.doors[i].to === p[0]) return [m.doors[i].x, m.doors[i].y];
+    return doorToward(S.map, p[0]);
+  }
+  // Første dør på kortet, man står på, der fører mod kortet `til` (bredde-først over alle døre)
+  function doorToward(fra, til) {
+    var seen = {}, queue = [], m0 = world[fra];
+    seen[fra] = true;
+    m0.doors.forEach(function (d) { queue.push({ map: d.to, first: [d.x, d.y] }); });
+    while (queue.length) {
+      var it = queue.shift();
+      if (it.map === til) return it.first;
+      if (seen[it.map] || !world[it.map]) continue;
+      seen[it.map] = true;
+      world[it.map].doors.forEach(function (d) { queue.push({ map: d.to, first: it.first }); });
+    }
     return null;
   }
   function arrow(cx, cy) {
@@ -441,10 +465,11 @@
   function hud() {
     if (!S) return;
     var mt = K.mainTarget(S);
-    document.getElementById('hud-quest-title').textContent = mt ? mt.q.title : (S.flags.clean ? 'Høstfest i Runeborg' : '');
-    document.getElementById('hud-quest-goal').textContent = mt ? K.goal(mt.q.id) : (S.flags.clean ? 'Nyd festen — og find de sidste runestykker' : '');
+    var kp = K.kapNu(), klaret = (S.klaret || []).indexOf(S.kap || 1) >= 0;
+    document.getElementById('hud-quest-title').textContent = mt ? mt.q.title : (klaret ? kp.efterTitel : '');
+    document.getElementById('hud-quest-goal').textContent = mt ? K.goal(mt.q.id) : (klaret ? kp.efterMaal : '');
     document.getElementById('hud-gold').textContent = S.gold;
-    document.getElementById('hud-runes').textContent = S.runes.length + '/' + K.runes.length;
+    document.getElementById('hud-runes').textContent = S.runes.length + '/' + K.runesNu().length;
   }
   function updatePrompt() {
     var el = document.getElementById('prompt');
@@ -452,37 +477,89 @@
     var f = facing();
     if (!f) { el.hidden = true; return; }
     var label = 'Undersøg';
-    if (f.ent) label = f.ent.kind === 'npc' ? (K.npcs[f.ent.id].dragon ? 'Klap Glød' : 'Tal med ' + K.npcs[f.ent.id].name.split(',')[0]) : f.ent.kind === 'rune' ? 'Saml runestykket op' : f.ent.kind === 'cat' ? 'Kald på katten' : 'Tag en vandprøve';
+    if (f.ent) label = f.ent.kind === 'npc' ? (K.npcs[f.ent.id].dragon ? 'Klap Glød' : 'Tal med ' + K.npcs[f.ent.id].name.split(',')[0]) : f.ent.kind === 'rune' ? 'Saml runestykket op' : f.ent.kind === 'cat' ? 'Kald på katten' : f.ent.kind === 'station' ? 'Undersøg stedet' : 'Tag en vandprøve';
     else if (f.place && /^sign/.test(f.place)) label = 'Læs skiltet';
     else if (f.place === 'tavle') label = 'Læs opslagene';
     el.innerHTML = '<span class="key">E</span> ' + RB.esc(label);
     el.hidden = false;
   }
 
-  // ---------------------------------------------------------------- slutningen
-  async function epilogue() {
+  // ---------------------------------------------------------------- slutningen og kapitlerne
+  // Et kapitel slutter med sin egen scene (kapitel 1 her, de andre i kapitler[n].slut.scene),
+  // og så kommer "Jeg kan …"-skærmen. Er der et næste kapitel, er det nu låst op.
+  async function flyt(map, x, y, dir, musik) {
     var f = document.getElementById('fade'); f.classList.add('on');
     await new Promise(function (r) { setTimeout(r, 400); });
-    S.map = 'by'; S.x = 24; S.y = 22; S.dir = 'up';
-    player.px = S.x * T; player.py = S.y * T; cat.trail = [[24, 23]]; cat.x = 24; cat.y = 23; cat.px = cat.x * T; cat.py = cat.y * T;
-    refresh(); snapCam(); RB.audio.music('fest'); save(); hud();
+    S.map = map; S.x = x; S.y = y; S.dir = dir || 'down';
+    player.px = S.x * T; player.py = S.y * T; player.moving = false;
+    cat.trail = [[x, y + 1]]; cat.x = x; cat.y = y + 1; cat.px = cat.x * T; cat.py = cat.y * T;
+    refresh(); snapCam();
+    if (musik !== null) RB.audio.music(musik || (mapNow().music === 'by' && S.flags.clean ? 'fest' : mapNow().music));
+    save(); hud();
     f.classList.remove('on');
-    await g.say(null, 'Samme aften hælder Hilde og Zara Klarvandseliksiren i Månebrønden. Vandet bruser, bobler — og bliver klart som en efterårshimmel.');
-    await g.say(null, 'Hele Runeborg samles på torvet. Nogen hænger lygter op. Gorm deler græskarsuppe ud. Lærke spiller sin nye vise.');
-    await g.say('brynja', 'Det her, {navn} — det var ikke et sværd, der reddede byen. Det var spørgsmål, målinger og mod til at sige imod. Du er en rigtig eventyrer nu.');
-    await g.say('hilde', 'Og husk: der er altid te i min kedel.');
-    var rows = K.CANDO.map(function (c) {
+  }
+
+  async function epilogue() { await kapSlut(); }
+  async function kapSlut() {
+    var n = S.kap || 1, kp = K.kapitler[n];
+    if (n === 1) {
+      await flyt('by', 24, 22, 'up', 'fest');
+      await g.say(null, 'Samme aften hælder Hilde og Zara Klarvandseliksiren i Månebrønden. Vandet bruser, bobler — og bliver klart som en efterårshimmel.');
+      await g.say(null, 'Hele Runeborg samles på torvet. Nogen hænger lygter op. Gorm deler græskarsuppe ud. Lærke spiller sin nye vise.');
+      await g.say('brynja', 'Det her, {navn} — det var ikke et sværd, der reddede byen. Det var spørgsmål, målinger og mod til at sige imod. Du er en rigtig eventyrer nu.');
+      await g.say('hilde', 'Og husk: der er altid te i min kedel.');
+    } else {
+      await kp.slut.scene(g);
+    }
+    if (S.klaret.indexOf(n) < 0) S.klaret.push(n);
+    save(true); hud();
+    var rows = K.CANDO.filter(function (c) { return (c[2] || 1) === n; }).map(function (c) {
       var st = S.stats[c[0]]; if (!st || !st.n) return null;
       var r = st.first / st.n; return { t: c[1], stars: r >= 0.85 ? 3 : r >= 0.5 ? 2 : 1 };
     }).filter(Boolean);
-    var sides = ['s1', 's2', 's3'].filter(function (id) { return S.q[id] === 'done'; }).length;
+    var sider = (kp.sider || []).filter(function (id) { return S.q[id] === 'done'; }).length;
+    var rk = K.runesIKap(n), fundet = rk.filter(function (r) { return S.runes.indexOf(r.id) >= 0; }).length;
     var badges = [
       'Vedholdenhed: du prøvede igen og klarede det ' + S.persist + ' ' + (S.persist === 1 ? 'gang' : 'gange'),
-      'Nysgerrighed: ' + S.runes.length + ' af ' + K.runes.length + ' runestykker',
-      'Ekstramissioner: ' + sides + ' af 3'
+      'Nysgerrighed: ' + fundet + ' af ' + rk.length + ' runestykker',
+      'Ekstramissioner: ' + sider + ' af ' + (kp.sider || []).length
     ];
     if (S.flags.catFollow) badges.push('Mis fulgte dig hele vejen');
-    await UI.ending(rows, badges);
+    var nxt = K.kapitler[n + 1];
+    var valg = await UI.ending(rows, badges, { titel: kp.slut.titel, tekst: kp.slut.tekst, rundt: kp.slut.rundt, naeste: nxt ? nxt.navn : null });
+    if (valg === 'naeste') await naesteKapitel();
+  }
+
+  // Det næste kapitel er låst op, når det før er klaret
+  function kapStatus(n) {
+    if ((S.klaret || []).indexOf(n) >= 0) return 'klaret';
+    if ((S.kap || 1) === n) return 'igang';
+    if (n === 1 || (S.klaret || []).indexOf(n - 1) >= 0) return 'klar';
+    return 'laast';
+  }
+  async function naesteKapitel() { await startKapitel((S.kap || 1) + 1); }
+  async function startKapitel(n) {
+    var kp = K.kapitler[n];
+    if (!kp || kapStatus(n) === 'laast') return;
+    var f = document.getElementById('fade'); f.classList.add('on');
+    await new Promise(function (r) { setTimeout(r, 400); });
+    S.kap = n;
+    var st = kp.start || {};
+    S.map = st.map; S.x = st.x; S.y = st.y; S.dir = st.dir || 'down';
+    player.px = S.x * T; player.py = S.y * T; player.moving = false;
+    cat.trail = [[S.x, S.y + 1]]; cat.x = S.x; cat.y = S.y + 1; cat.px = cat.x * T; cat.py = cat.y * T;
+    refresh(); snapCam(); RB.audio.music(mapNow().music); hud();
+    f.classList.remove('on');
+    save(true);
+    await UI.kapitelkort(n, kp.navn, kp.kort);
+    await kp.intro(g);
+  }
+  // Kapitel-menuen (Pause → Kapitler): ✓ klaret, ► i gang, "Start" når det er låst op
+  async function kapitelMenu() {
+    var liste = [];
+    for (var n = 1; n <= K.KAPITLER; n++) liste.push({ n: n, navn: K.kapitler[n] ? K.kapitler[n].navn : '…', status: K.kapitler[n] ? kapStatus(n) : 'laast' });
+    var valg = await UI.kapitler(liste);
+    if (valg && kapStatus(valg) === 'klar' && valg !== (S.kap || 1)) await startKapitel(valg);
   }
 
   // ---------------------------------------------------------------- input
@@ -509,7 +586,10 @@
   window.addEventListener('blur', function () { heldOrder = []; });
   document.addEventListener('visibilitychange', function () { heldOrder = []; });
   function openBook() { if (busy || UI.isOpen()) return; heldOrder = []; run(function () { return UI.book(); }); }
-  function openMenu() { if (busy || UI.isOpen()) return; heldOrder = []; run(function () { return UI.menu(); }); }
+  function openMenu() {
+    if (busy || UI.isOpen()) return; heldOrder = [];
+    run(async function () { if ((await UI.menu()) === 'kapitler') await kapitelMenu(); });
+  }
   // Fuld skærm. Knappen skjules, hvor browseren ikke kan (fx iPhone-Safari).
   var root = document.documentElement;
   var canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
@@ -596,8 +676,22 @@
     return c;
   }
 
+  // Prøvetiden (LFSpil i /assets/spilletid.js): en venlig besked 4 minutter før,
+  // og når den er brugt, gemmes spillet og en slutskærm lukker det ned.
+  var tidSlutVist = false;
+  RB.tidSnart = function (sek) {
+    if (UI) UI.toast('<b>Snart er din spilletid brugt.</b><br>Der er ' + Math.max(1, Math.round(sek / 60)) + ' minutter tilbage.');
+  };
+  RB.tidSlut = function () {
+    if (tidSlutVist || !UI) return;       // før boot() har lavet UI: boot() spørger selv
+    tidSlutVist = true;
+    save(true);
+    UI.tidSlut();
+  };
+
   function begin() {
     started = true;
+    if (window.LFSpil) LFSpil.aktiv(true);   // først nu tæller tiden (ikke på titelskærmen)
     player.px = S.x * T; player.py = S.y * T;
     sheets.player = RB.makeSheet(K.classes[S.cls].look);
     cat.trail = [[S.x, S.y + 1]]; cat.x = S.x; cat.y = S.y + 1; cat.px = cat.x * T; cat.py = cat.y * T;
@@ -621,9 +715,17 @@
     if (document.fonts && document.fonts.ready) { try { await Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1500); })]); } catch (e) { } }
     if (FOTO) { foto(FOTO); return; }
     var saved = parse(await hentning);
-    var choice = await UI.title(saved ? saved.name || 'Lærling' : '');
-    if (choice === 'continue' && saved) {
+    if ((window.LFSpil && LFSpil.tidSlut()) || tidSlutVist) { RB.tidSlut(); return; }   // prøvetiden er allerede brugt
+    var info = null;
+    if (saved) {
+      var nk = (saved.kap || 1) + 1;
+      info = { kap: saved.kap, kapnavn: saved.kap > 1 && K.kapitler[saved.kap] ? K.kapitler[saved.kap].navn : '',
+               naeste: saved.klaret.indexOf(saved.kap) >= 0 && K.kapitler[nk] ? K.kapitler[nk].navn : '' };
+    }
+    var choice = await UI.title(saved ? saved.name || 'Lærling' : '', info);
+    if ((choice === 'continue' || choice === 'naeste') && saved) {
       S = saved; RB.state = S; if (!S.q.q0) S.q.q0 = 'active'; begin();
+      if (choice === 'naeste') { await run(naesteKapitel); return; }
       UI.toast('Velkommen tilbage, <b>' + RB.esc(S.name) + '</b>!');
       return;
     }
@@ -651,6 +753,8 @@
   // Til test fra konsollen: RB.debug.S, RB.debug.tp('by', 24, 20), RB.debug.face('up')
   RB.debug = {
     get S() { return S; }, get held() { return heldOrder; }, g: g, interact: interact, refresh: refresh, entities: function () { return entities(); },
+    kapitel: function (n) { if (S.klaret.indexOf(n - 1) < 0 && n > 1) S.klaret.push(n - 1); return run(function () { return startKapitel(n); }); },
+    kapSlut: function () { return run(kapSlut); }, world: function () { return world; },
     tp: function (m, x, y, d) { S.map = m; S.x = x; S.y = y; if (d) S.dir = d; player.px = x * T; player.py = y * T; snapCam(); hud(); },
     face: function (d) { S.dir = d; }
   };

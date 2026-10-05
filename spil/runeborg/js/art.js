@@ -157,7 +157,8 @@
 
   // ---------------------------------------------------------------- fliser
   // En flise kan se på sine naboer (fx vand, der møder land, og tagskæg).
-  var SOLID = '#TtrRBPGWSODsNbcwlmfgxaXLCQqUVYnvIpMJ/%j';
+  // d: dødt træ, k: kulmile, e: robåd, i: fisketørrestativ, y: fyrlygte, 1: sluse (kapitel 2 og 3)
+  var SOLID = '#TtrRBPGWSODsNbcwlmfgxaXLCQqUVYnvIpMJ/%jdkeiy1';
   RB.SOLID = SOLID;
 
   function grass(c, x, y, tx, ty) {
@@ -216,7 +217,7 @@
     if (map && !isWater(map.at(tx - 1, ty))) R(c, x, y, 1, T, a[3]);
     if (map && !isWater(map.at(tx + 1, ty))) R(c, x + 15, y, 1, T, a[0]);
   }
-  function isWater(ch) { return ch === '~' || ch === 'z' || ch === 'H'; }
+  function isWater(ch) { return ch === '~' || ch === 'z' || ch === 'H' || ch === 'e' || ch === '1'; }
 
   function tree(c, x, y, tx, ty) {
     grass(c, x, y, tx, ty);
@@ -476,6 +477,56 @@
     R(c, x + 3, y + 8, 3, 6, C.k); R(c, x + 4, y + 9, 1, 4, '#c89aff');
   }
 
+  // ---------------------------------------------------------------- kapitel 2 og 3: skov og havn
+  function deadTree(c, x, y, tx, ty) {
+    grass(c, x, y, tx, ty);
+    var o = '#2a2832', g1 = '#8a8896', g2 = '#b4b2c0', g0 = '#5a586a';
+    R(c, x + 7, y + 5, 3, 10, o); R(c, x + 8, y + 5, 1, 9, g1); R(c, x + 6, y + 14, 5, 1, o);
+    R(c, x + 4, y + 4, 3, 2, o); R(c, x + 5, y + 4, 1, 1, g1); R(c, x + 3, y + 2, 2, 3, o); R(c, x + 3, y + 2, 1, 2, g0);
+    R(c, x + 10, y + 3, 3, 2, o); R(c, x + 11, y + 3, 1, 1, g1); R(c, x + 12, y + 1, 2, 3, o); R(c, x + 12, y + 1, 1, 2, g0);
+    R(c, x + 8, y + 1, 2, 4, o); P(c, x + 8, y + 1, g2);
+    if (hash(tx, ty, 6) < 0.5) { P(c, x + 5, y + 7, g0); P(c, x + 11, y + 9, g0); }
+  }
+  function glowShroom(c, x, y, tx, ty) {
+    grass(c, x, y, tx, ty);
+    var cols = ['#6fe0d0', '#9af0e0', '#58c8e8'];
+    [[3, 9, 0], [8, 6, 1], [11, 10, 2]].forEach(function (m) {
+      var cc = cols[m[2]];
+      R(c, x + m[0] + 1, y + m[1] + 3, 1, 3, C.wh);
+      R(c, x + m[0], y + m[1], 3, 3, C.k); R(c, x + m[0], y + m[1] + 1, 3, 2, cc); P(c, x + m[0] + 1, y + m[1], cc); P(c, x + m[0] + 1, y + m[1] + 1, C.wh);
+    });
+  }
+  function kiln(c, x, y, tx, ty) {
+    dirt(c, x, y, tx, ty);
+    R(c, x + 1, y + 4, 14, 11, C.k); R(c, x + 2, y + 3, 12, 11, C.k);
+    R(c, x + 3, y + 4, 10, 10, C.d0); R(c, x + 4, y + 4, 8, 3, C.d1); R(c, x + 3, y + 10, 10, 3, '#2a1a10');
+    R(c, x + 6, y + 2, 4, 3, C.k); R(c, x + 7, y + 3, 2, 2, '#c85a2a'); P(c, x + 7, y + 3, C.y1);
+    P(c, x + 5, y + 8, C.d2); P(c, x + 10, y + 7, C.d2); P(c, x + 8, y + 9, C.d2);
+  }
+  function boat(c, x, y, tx, ty, f, map) {
+    water(c, x, y, tx, ty, f, false, map);
+    var bob = f ? 1 : 0;
+    R(c, x + 1, y + 6 + bob, 14, 7, C.k); R(c, x + 2, y + 7 + bob, 12, 5, C.wd2); R(c, x + 2, y + 7 + bob, 12, 1, C.wd3);
+    R(c, x + 3, y + 10 + bob, 10, 1, C.wd1); R(c, x + 7, y + 5 + bob, 2, 2, C.wd0); R(c, x + 4, y + 8 + bob, 2, 1, C.wd1);
+    P(c, x + 12, y + 5 + bob, C.wd3); R(c, x + 12, y + 3 + bob, 1, 3, C.wd0);
+  }
+  function fishRack(c, x, y, tx, ty, base) {
+    base(c, x, y, tx, ty);
+    R(c, x + 1, y + 2, 2, 13, C.wd0); R(c, x + 13, y + 2, 2, 13, C.wd0); R(c, x + 1, y + 3, 14, 2, C.wd1); R(c, x + 1, y + 3, 14, 1, C.wd3);
+    [3, 6, 9, 12].forEach(function (fx) { R(c, x + fx, y + 5, 2, 6, '#8aa8c0'); R(c, x + fx, y + 5, 1, 6, '#c4d8e8'); P(c, x + fx + 1, y + 10, C.k); });
+  }
+  function lantern(c, x, y, tx, ty) {
+    wallStone(c, x, y, tx, ty, true);
+    R(c, x + 2, y + 1, 12, 14, C.k); R(c, x + 3, y + 2, 10, 12, C.y1); R(c, x + 4, y + 3, 8, 10, C.y2); R(c, x + 6, y + 5, 4, 6, C.wh);
+    R(c, x + 7, y + 2, 2, 12, C.k2); R(c, x + 3, y + 7, 10, 1, C.k2);
+  }
+  function sluice(c, x, y, tx, ty, f, open, map) {
+    water(c, x, y, tx, ty, f, false, map);
+    R(c, x, y, 3, T, C.wd0); R(c, x + 13, y, 3, T, C.wd0);
+    if (open) { R(c, x + 3, y, 10, 3, C.wd2); R(c, x + 3, y, 10, 1, C.wd3); for (var i = 0; i < 3; i++) R(c, x + 4 + i * 3, y + 4 + ((f * 3 + i * 4) % 10), 2, 1, C.w3); }
+    else { R(c, x + 3, y, 10, 15, C.wd1); for (var j = 0; j < 4; j++) R(c, x + 3, y + 2 + j * 4, 10, 1, C.wd0); R(c, x + 6, y + 6, 4, 3, C.s2); }
+  }
+
   // floorOf: hvilket gulv der ligger under en møbelflise (fra kortets egen indstilling)
   RB.drawTile = function (c, map, tx, ty, f) {
     var ch = map.at(tx, ty), x = tx * T, y = ty * T;
@@ -535,6 +586,13 @@
       case 'p': valve(c, x, y, tx, ty, !(map.flags && map.flags.valveClosed)); break;
       case '/': ironDoor(c, x, y, tx, ty, map.isOpen && map.isOpen(tx, ty)); break;
       case '%': crystal(c, x, y, tx, ty); break;
+      case 'd': deadTree(c, x, y, tx, ty); break;
+      case 'u': glowShroom(c, x, y, tx, ty); break;
+      case 'k': kiln(c, x, y, tx, ty); break;
+      case 'e': boat(c, x, y, tx, ty, f, map); break;
+      case 'i': fishRack(c, x, y, tx, ty, baseFor(map, tx, ty)); break;
+      case 'y': lantern(c, x, y, tx, ty); break;
+      case '1': sluice(c, x, y, tx, ty, f, map.flags && map.flags.sluiceOpen, map); break;
       default: R(c, x, y, T, T, '#000');
     }
   };
@@ -545,7 +603,7 @@
     for (var i = 0; i < n.length; i++) { if (n[i] === '=') return cobble; if (n[i] === ':') return dirt; if (n[i] === '.' || n[i] === ',') return grass; }
     return grass;
   }
-  RB.isAnimated = function (ch) { return 'zH~UVv'.indexOf(ch) >= 0; };
+  RB.isAnimated = function (ch) { return 'zH~UVve1'.indexOf(ch) >= 0; };
 
   // ---------------------------------------------------------------- effekter
   RB.drawMarker = function (c, x, y, kind, t) {

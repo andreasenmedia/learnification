@@ -38,6 +38,9 @@ PROFIL = {
     'mor': (3, 1.0), 'ida': (5, 0.95), 'far': (-3, 1.05), 'oskar': (4, 0.95), 'emma': (5, 1.0), 'sofie': (5, 0.95),
     'poulsen': (-2, 1.1), 'kioskmand': (-1, 1.0), 'bibliotekar': (2, 1.1), 'viggo': (5, 0.95), 'hundelufter': (-1, 1.05),
     'pedel': (-4, 1.1), 'sportslaerer': (-2, 0.95), 'nabo': (-3, 1.15), 'ekspedient': (3, 1.0), 'bogorm': (4, 1.05),
+    # kapitel 2 og 3
+    'buschauffoer': (1, 1.0), 'billet': (-3, 1.1), 'kioskdame': (2, 1.0), 'passer': (-2, 1.0),
+    'bager': (3, 1.0), 'frugtmand': (-4, 1.0), 'loppe': (-3, 1.15), 'blomsterkone': (4, 0.97),
 }
 
 STR = r"'((?:[^'\\\n]|\\.)*)'"
@@ -129,16 +132,19 @@ def speaker(arg):
 
 def lines():
     found = set()
-    content = open(os.path.join(SPIL, 'js', 'content.js'), encoding='utf-8').read()
-    game = open(os.path.join(SPIL, 'js', 'game.js'), encoding='utf-8').read()
-    world = open(os.path.join(SPIL, 'js', 'world.js'), encoding='utf-8').read()
+    js = os.path.join(SPIL, 'js')
+    # kapitel 1 ligger i content.js, kapitel 2 og 3 i kapitel2.js og kapitel3.js
+    filer = [open(os.path.join(js, f), encoding='utf-8').read()
+             for f in ('content.js', 'kapitel2.js', 'kapitel3.js') if os.path.exists(os.path.join(js, f))]
+    game = open(os.path.join(js, 'game.js'), encoding='utf-8').read()
+    world = open(os.path.join(js, 'world.js'), encoding='utf-8').read()
 
     def spoken(expr):
         # alle tekststykker i et udtryk, der ligner sætninger (med mellemrum)
         return [unesc(s) for s in re.findall(STR, expr) if ' ' in s]
 
-    for src in (content, game):
-        for m in re.finditer(r'g\.say\(', src):
+    for src in filer + [game]:
+        for m in re.finditer(r'g\.(say|ask)\(', src):
             parts = split_top(call_args(src, m.end() - 1))
             if len(parts) < 2:
                 continue
@@ -148,14 +154,19 @@ def lines():
             who = speaker(parts[0])
             for t in spoken(','.join(parts[1:])):
                 found.add((who, t))
-    # opgavesættenes intro og after: [['mor', 'Der er du ...'], ...]
-    enc = content[content.index('var ENC = {'):content.index('var REWARD_PCT')]
-    for who, t in re.findall(r"\[\s*'(\w+)',\s*" + STR + r"\s*\]", enc):
-        found.add((who, unesc(t)))
-    block = content[content.index('var lockedDoors'):]
-    block = block[:block.index('};')]
-    for t in re.findall(r": " + STR, block):
-        found.add(('fortaeller', unesc(t)))
+    for content in filer:
+        # opgavesættenes intro og after: [['mor', 'Der er du ...'], ...] (ENC i kapitel 1, enc i kapitel 2 og 3)
+        for start in ('var ENC = {', 'var enc = {'):
+            if start in content:
+                enc = content[content.index(start):]
+                enc = enc[:enc.index('var REWARD_PCT')] if 'var REWARD_PCT' in enc else enc[:enc.index('var rewards')]
+                for who, t in re.findall(r"\[\s*'(\w+)',\s*" + STR + r"\s*\]", enc):
+                    found.add((who, unesc(t)))
+        if 'var lockedDoors' in content:
+            block = content[content.index('var lockedDoors'):]
+            block = block[:block.index('};')]
+            for t in re.findall(r": " + STR, block):
+                found.add(('fortaeller', unesc(t)))
     for t in re.findall(r"m\.lock\(\d+, \d+, '\w+', " + STR + r"\)", world):
         found.add(('fortaeller', unesc(t)))
     # personer uden egen klang bliver læst af fortælleren

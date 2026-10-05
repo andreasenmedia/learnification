@@ -740,9 +740,60 @@
     'by:31,5': 'Hildes hytte. Der hænger urter til tørre over døren.'
   };
 
+  // ---------------------------------------------------------------- kapitler
+  // Kapitel 1 er historien ovenfor. Kapitel 2 og 3 ligger i kapitel2.js og
+  // kapitel3.js og lægger deres personer, missioner og opgaver oveni med
+  // RB.content.tilfoej({...}). Alt i et kapitel har en kap-markering, så
+  // dagbogen, tællerne og tiden på dagen kun viser det, spilleren har nået.
+  var KAPITLER = 3;
+  var kapitler = {
+    1: {
+      navn: 'Den grønne brønd', start: { map: 'laug', x: 6, y: 5, dir: 'up' },
+      tod: function (S) {
+        if (S.flags.clean) return 'fest';
+        if (S.q.q10 === 'active') return 'nat';
+        if (S.q.q6 === 'done') return 'aften';
+        if (S.q.q3 === 'done') return 'eftermiddag';
+        return 'morgen';
+      },
+      efterTitel: 'Høstfest i Runeborg', efterMaal: 'Nyd festen — og find de sidste runestykker',
+      // Efter festen: Brynja har nyt fra Mosekrogen
+      efter: { npc: 'brynja' },
+      sider: ['s1', 's2', 's3'],
+      slut: {
+        titel: 'Runeborg er reddet!',
+        tekst: 'Brønden er klar igen, Hilde er fri, og farveriet har fået et filter. Og det var ikke et sværd, der gjorde det — det var beviser. Her er, hvad du har vist, at du kan:',
+        rundt: 'Gå rundt i byen'
+      }
+    }
+  };
+  function kapNu() { return kapitler[(RB.state && RB.state.kap) || 1] || kapitler[1]; }
+
+  function tilfoej(e) {
+    var kap = e.kap;
+    Object.keys(e.areas || {}).forEach(function (k) { AREA[k] = e.areas[k]; });
+    (e.cando || []).forEach(function (c) { CANDO.push(c.concat([kap])); });
+    [[npcs, e.npcs], [clues, e.clues], [skills, e.skills], [places, e.places], [placePos, e.placePos], [lockedDoors, e.lockedDoors],
+     [on, e.on], [offer, e.offer], [idle, e.idle], [placeIdle, e.placeIdle]].forEach(function (par) {
+      Object.keys(par[1] || {}).forEach(function (k) { par[0][k] = par[1][k]; });
+    });
+    Object.keys(e.skills || {}).forEach(function (k) { skills[k].kap = kap; });
+    (e.things || []).forEach(function (t) { t.kap = kap; things.push(t); });
+    (e.runes || []).forEach(function (r) { r.kap = kap; runes.push(r); });
+    (e.quests || []).forEach(function (q) { q.kap = kap; quests.push(q); byId[q.id] = q; });
+    kapitler[kap] = e.meta;
+  }
+
   // ---------------------------------------------------------------- opslag
   async function talk(g, id) {
     var S = g.S;
+    // Efter et kapitel: personen, der sender én videre til næste kapitel
+    var kp = kapitler[S.kap || 1];
+    if (kp && kp.efter && kp.efter.npc === id && (S.klaret || []).indexOf(S.kap || 1) >= 0 && kapitler[(S.kap || 1) + 1]) {
+      var nx = kapitler[(S.kap || 1) + 1];
+      var c = await g.ask(id, nx.tilbud || 'Der er nyt at undersøge. Kommer du med?', ['Ja — afsted til ' + nx.navn + '!', 'Ikke lige nu.']);
+      if (c === 0) { await g.naesteKapitel(); return; }
+    }
     for (var i = 0; i < quests.length; i++) {
       var q = quests[i];
       if (S.q[q.id] === 'active' && on[q.id] && on[q.id][id]) return on[q.id][id](g);
@@ -759,8 +810,14 @@
     AREA: AREA, CANDO: CANDO, classes: classes, npcs: npcs, things: things, runes: runes, places: places, placePos: placePos,
     clues: clues, skills: skills, lockedDoors: lockedDoors, script: script,
     talk: talk, available: available,
+    KAPITLER: KAPITLER, kapitler: kapitler, tilfoej: tilfoej, kapNu: kapNu,
     quest: function (id) { return byId[id]; },
-    questList: function () { return quests; },
+    // Missioner til dagbogen: kun dem fra de kapitler, spilleren har nået
+    questList: function () { var k = (RB.state && RB.state.kap) || 1; return quests.filter(function (q) { return (q.kap || 1) <= k; }); },
+    // Runestykker og evner i det kapitel, man er nået til (til tællere og dagbog)
+    runesNu: function () { var k = (RB.state && RB.state.kap) || 1; return runes.filter(function (r) { return (r.kap || 1) <= k; }); },
+    runesIKap: function (kap) { return runes.filter(function (r) { return (r.kap || 1) === kap; }); },
+    skillsNu: function () { var k = (RB.state && RB.state.kap) || 1, ud = {}; Object.keys(skills).forEach(function (id) { if ((skills[id].kap || 1) <= k) ud[id] = skills[id]; }); return ud; },
     goal: function (id) { var q = byId[id], g = q.goal; return typeof g === 'function' ? g(RB.state) : g; },
     // Hvem skal have et "!" (har en ekstramission til dig) og hvem et "?" (din mission fortsætter her)
     markers: function (S) {
@@ -776,12 +833,6 @@
       for (var j = 0; j < quests.length; j++) { var q2 = quests[j]; if (q2.side && S.q[q2.id] === 'active') return { q: q2, t: q2.target(S) }; }
       return null;
     },
-    timeOfDay: function (S) {
-      if (S.flags.clean) return 'fest';
-      if (S.q.q10 === 'active') return 'nat';
-      if (S.q.q6 === 'done') return 'aften';
-      if (S.q.q3 === 'done') return 'eftermiddag';
-      return 'morgen';
-    }
+    timeOfDay: function (S) { return kapNu().tod(S); }
   };
 })();

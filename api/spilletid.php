@@ -5,7 +5,10 @@
  * mus eller skærm inden for de sidste to minutter, og sender dem hertil
  * hvert halve minut:
  *
- *   POST {handling: "puls", spil, id, sek}   -> {ok, id}
+ *   POST {handling: "puls", spil, id, sek}   -> {ok, id, tid}
+ *
+ * tid = prøvetiden (tid_status() i _kerne.php): {graense_sek, brugt_sek,
+ * tilbage_sek, slut}. Spillet viser en slutskærm, når slut er sand.
  *
  * Første puls har intet id; så bliver der startet en ny omgang, og id'et
  * kommer retur. Har en omgang ligget stille i over en halv time, bliver
@@ -19,6 +22,7 @@
 
 declare(strict_types=1);
 require __DIR__ . '/_kerne.php';
+require_once __DIR__ . '/_spoergeskema.php';
 
 const MAKS_PR_PULS = 90;       // sekunder
 const PAUSE_NY_OMGANG = 1800;  // sekunder
@@ -65,8 +69,22 @@ if (!$s) {
     $sek = min($sek, $nu - (int) $s['sidst'] + 10, MAKS_PR_PULS);
 }
 
+// Prøvetiden: aldrig mere tid end der er tilbage (tid_status() i _kerne.php).
+// Er den allerede brugt, tælles der ikke videre — og kommer der en puls, hvor
+// grænsen lige er nået, går spørgeskemaet af sted (kun første gang pr. konto).
+$for = tid_status($h);
+if ($for['tilbage_sek'] !== null) {
+    $sek = min($sek, $for['tilbage_sek']);
+}
+
 kør('UPDATE sessioner SET sekunder = sekunder + ?, sidst = ? WHERE id = ?', [$sek, $nu, $s['id']]);
 if ($elev_id) {
     kør('UPDATE elever SET sidst_inde = ? WHERE id = ?', [$nu, $elev_id]);
 }
-svar(['ok' => true, 'id' => (int) $s['id']]);
+
+$efter = tid_status($h);
+if ($efter['slut']) {
+    // skema_udloes gør selv ingenting, hvis kontoen har fået det før
+    skema_udloes($konto_id, 'tid', $elev_id, $spil);
+}
+svar(['ok' => true, 'id' => (int) $s['id'], 'tid' => $efter]);

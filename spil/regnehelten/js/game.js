@@ -36,7 +36,8 @@
   // ---------------------------------------------------------------- tilstand
   function fresh(name, klasse, look) {
     return {
-      v: 2, name: name, klasse: klasse, look: look, map: 'klasse', x: 8, y: 9, dir: 'up', cut: true, tom: false,
+      // kap = kapitlet, man spiller nu; klaret = de kapitler, man har gennemført; klasse følger kapitlet (startKlasse + kap − 1, højst 6)
+      v: 3, kap: 1, klaret: [], startKlasse: klasse, name: name, klasse: klasse, look: look, map: 'klasse', x: 8, y: 9, dir: 'up', cut: true, tom: false,
       q: {}, flags: {}, sets: {}, loest: {}, runde: {}, mastery: {}, kraft: 10, total: { n: 0, first: 0 }, persist: 0,
       bag: { owned: [], counts: {}, plays: { fodbold: 0, dressup: 0 } }, seen: {}, talks: 0, res: RH.resultat.nyOmgang()
     };
@@ -65,8 +66,9 @@
     try {
       var s = typeof tekst === 'string' ? JSON.parse(tekst) : tekst;
       if (!s || s.slettet) return null;
-      if (s.v === 2) return s;
-      if (s.navn !== undefined && s.chapter !== undefined) return fraFoersteUdgave(s);
+      if (s.v === 2) { s.v = 3; s.kap = 1; s.klaret = s.q && s.q.q5 === 'done' ? [1] : []; s.startKlasse = s.klasse; }
+      if (s.v === 3) { s.klaret = s.klaret || []; s.kap = s.kap || 1; s.startKlasse = s.startKlasse || s.klasse; return s; }
+      if (s.navn !== undefined && s.chapter !== undefined) return parse(fraFoersteUdgave(s));
     } catch (e) { /* ødelagt */ }
     return null;
   }
@@ -94,7 +96,7 @@
     Object.keys(bag.plays || {}).forEach(function (k) { if (k in s.bag.plays) s.bag.plays[k] = Math.max(0, Math.min(K.MAX_PLAYS, bag.plays[k] | 0)); });
     if (d.resultat && d.resultat.id) { s.res.id = String(d.resultat.id); s.res.svar = d.resultat.svar || []; s.res.sek = d.resultat.sekunder | 0; s.res.faerdig = !!d.resultat.faerdig; }
     // Kom man helt i mål i Python-udgaven, står man i klassen bagefter
-    if (kap >= 6) { s.map = 'klasse'; s.x = 6; s.y = 4; s.dir = 'up'; }
+    if (kap >= 6) { s.map = 'klasse'; s.x = 6; s.y = 4; s.dir = 'up'; s.klaret = [1]; }
     else if (kap >= 2) { var steder = { 2: ['by', 8, 10], 3: ['by', 22, 13], 4: ['by', 51, 15], 5: ['skole', 13, 11] }[kap]; s.map = steder[0]; s.x = steder[1]; s.y = steder[2]; s.dir = 'down'; }
     return s;
   }
@@ -178,6 +180,7 @@
     get S() { return S; },
     get world() { return world; },
     say: function (id, text, speakText) { return UI.say(who(id), text, speakText); },
+    ask: function (id, text, choices) { return UI.ask(who(id), text, choices); },
     // Et helt opgavesæt. Giver {ratio} tilbage, eller null, hvis man trykkede "Senere".
     saet: async function (qid, saetNoegle, scene) {
       var specs = S.sets[qid];
@@ -198,7 +201,7 @@
         if (r.klaret) S.kraft = Math.min(100, S.kraft + (r.first ? 6 : 3));
         if (r.klaret && !r.first) { S.persist++; if (S.persist === 1 || S.persist % 5 === 0) UI.toast('<b>Vedholdenhed!</b> Du gav ikke op — det er sådan, man bliver god.'); }
         RH.resultat.noter(S, scene, bloom, sp, r);
-        RH.resultat.send(S, false);
+        RH.resultat.send(S, true);
         save(); hud();
       }
       var runde = S.runde[qid] || { n: 1, first: 0 }, ratio = runde.first / Math.max(1, runde.n);
@@ -241,6 +244,8 @@
     tid: function () { return K.timeOfDay(S); },
     refresh: refresh,
     epilogue: epilogue,
+    flyt: flyt,
+    naesteKapitel: function () { return naesteKapitel(); },
     // Åbningsscenen: klassen tømmes ...
     tomKlasse: function () { return fadeTo(function () { S.tom = true; npcDir = {}; }); },
     // ... og så er det i morgen
@@ -378,6 +383,7 @@
     var x = e.x * T - cx, y = e.y * T - cy;
     if (e.kind === 'npc') drawChar(sheetFor(e.id), x, y, e.dir || 'down', 0);
     else if (e.kind === 'dog') { RH.drawShadow(ctx, x, y); ctx.drawImage(dogSheet, (Math.floor(tick / 14) % 2) * 16, 0, 16, 16, x, y, 16, 16); }
+    else if (e.kind.indexOf('dyr_') === 0) { RH.drawShadow(ctx, x, y); RH.drawAnimal(ctx, e.kind.slice(4), x, y, tick + e.x * 11); }
   }
 
   // ---------------------------------------------------------------- stemning
@@ -392,10 +398,11 @@
     butik: function () { return { mul: null, lamp: 0 }; },
     bibliotek: function () { return { mul: 'rgb(246,230,204)', lamp: 0.4 }; },
     skole: function () { return { mul: 'rgb(238,240,250)', lamp: 0 }; },
-    klasse: function (t) { return t === 'igaar' ? { mul: 'rgb(186,192,214)', lamp: 0 } : { mul: 'rgb(240,240,250)', lamp: 0 }; }
+    klasse: function (t) { return t === 'igaar' ? { mul: 'rgb(186,192,214)', lamp: 0 } : { mul: 'rgb(240,240,250)', lamp: 0 }; },
+    standard: function () { return { mul: 'rgb(248,240,228)', lamp: 0.3 }; }
   };
   function lighting(m, cx, cy) {
-    var tod = K.timeOfDay(S), L = m.outdoor ? TINT[tod] || TINT.formiddag : INDE[m.id](tod);
+    var tod = K.timeOfDay(S), L = m.outdoor ? TINT[tod] || TINT.formiddag : (INDE[m.id] || INDE.standard)(tod);
     ctx.save();
     if (L.mul) { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = L.mul; ctx.fillRect(0, 0, VW, VH); }
     if (L.fill) { ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = L.fill; ctx.fillRect(0, 0, VW, VH); }
@@ -454,7 +461,6 @@
   }
 
   // Pil i kanten af skærmen, der viser vej til missionen
-  var VIA = { klasse: 'skole' };
   function targetPos() {
     var mt = K.mainTarget(S); if (!mt || !mt.t) return null;
     var t = mt.t, p = null;
@@ -462,10 +468,21 @@
     if (!p && K.placePos[t]) p = K.placePos[t];
     if (!p) return null;
     if (p[0] === S.map) return [p[1], p[2]];
-    var m = mapNow(), i;
-    for (i = 0; i < m.doors.length; i++) if (m.doors[i].to === p[0]) return [m.doors[i].x, m.doors[i].y];
-    if (S.map === 'by') for (i = 0; i < m.doors.length; i++) if (m.doors[i].to === VIA[p[0]]) return [m.doors[i].x, m.doors[i].y];
-    return m.spots.exit || null;
+    return doorToward(S.map, p[0]);
+  }
+  // Første dør på kortet, man står på, der fører mod kortet `til` (bredde-først over alle døre)
+  function doorToward(fra, til) {
+    var seen = {}, queue = [];
+    seen[fra] = true;
+    world[fra].doors.forEach(function (d) { queue.push({ map: d.to, first: [d.x, d.y] }); });
+    while (queue.length) {
+      var it = queue.shift();
+      if (it.map === til) return it.first;
+      if (seen[it.map] || !world[it.map]) continue;
+      seen[it.map] = true;
+      world[it.map].doors.forEach(function (d) { queue.push({ map: d.to, first: it.first }); });
+    }
+    return null;
   }
   function arrow(cx, cy) {
     var tp = targetPos(); if (!tp) return;
@@ -484,10 +501,10 @@
   // ---------------------------------------------------------------- HUD
   function hud() {
     if (!S) return;
-    var mt = K.mainTarget(S), slut = S.q.q5 === 'done';
+    var mt = K.mainTarget(S), kp = K.kapNu(), slut = (S.klaret || []).indexOf(S.kap || 1) >= 0;
     document.getElementById('hud').classList.toggle('cut', !!S.cut);
-    document.getElementById('hud-quest-title').textContent = mt ? mt.q.title : (slut ? 'Dagen er klaret!' : '');
-    document.getElementById('hud-quest-goal').textContent = mt ? K.goal(mt.q.id) : (slut ? 'Gå rundt, og hjælp dem, der stadig har brug for det' : '');
+    document.getElementById('hud-quest-title').textContent = mt ? mt.q.title : (slut ? kp.efterTitel : '');
+    document.getElementById('hud-quest-goal').textContent = mt ? K.goal(mt.q.id) : (slut ? kp.efterMaal : '');
     document.getElementById('hud-kraft').textContent = S.kraft + ' %';
     document.getElementById('hud-kraft-bar').style.width = S.kraft + '%';
     document.getElementById('hud-ting').textContent = S.bag.owned.length;
@@ -498,7 +515,7 @@
     var f = facing();
     if (!f) { el.hidden = true; return; }
     var label = 'Undersøg';
-    if (f.ent) label = f.ent.kind === 'dog' ? 'Hils på Sally' : 'Tal med ' + K.npcs[f.ent.id].name;
+    if (f.ent) label = f.ent.kind === 'dog' ? 'Hils på Sally' : f.ent.kind.indexOf('dyr_') === 0 ? 'Kig på dyret' : 'Tal med ' + K.npcs[f.ent.id].name;
     else if (f.place === 'skrivebord') label = 'Kig på skrivebordet';
     else if (f.place && /opslag|tilbud/.test(f.place)) label = 'Læs opslaget';
     else if (f.place && /skilt/.test(f.place)) label = 'Læs skiltet';
@@ -515,19 +532,64 @@
     if (r >= 0.5) return 'Du er et helt andet sted end i går. Du gik i gang med det samme, og du fandt fejlene, da du kiggede efter. Bliv ved med det.';
     return 'Det vigtigste er ikke, hvor mange du ramte. Det er, at du blev ved — også da det var svært. Det er præcis sådan, man lærer det her.';
   }
-  async function epilogue() {
-    S.res.faerdig = true; RH.resultat.send(S, true); save(true);
+  // Et kapitel slutter med sin egen scene (kapitler[n].slut.scene), og så kommer "Jeg kan …"-skærmen.
+  // Er der et næste kapitel, er det nu låst op.
+  async function flyt(map, x, y, dir) {
+    await fadeTo(function () {
+      S.map = map; S.x = x; S.y = y; S.dir = dir || 'down'; player.px = x * T; player.py = y * T; player.moving = false;
+      refresh(); snapCam(); musik(); save(); hud();
+    }, 500);
+  }
+  async function epilogue() { await kapSlut(); }
+  async function kapSlut() {
+    var n = S.kap || 1, kp = K.kapitler[n], sidste = n >= K.KAPITLER;
+    if (kp.slut && kp.slut.scene) await kp.slut.scene(g);
+    if (S.klaret.indexOf(n) < 0) S.klaret.push(n);
+    S.res.faerdig = sidste; RH.resultat.send(S, true); save(true);
     RH.audio.music('slut'); RH.audio.sfx('fanfare');
-    var rows = O.CAN.map(function (c) { return S.mastery[c[0]] ? { t: c[1], stars: S.mastery[c[0]] } : null; }).filter(Boolean);
-    var sides = ['s1', 's2', 's3', 's4', 's5', 's6'].filter(function (id) { return S.q[id] === 'done'; }).length;
+    var cand = (O.CAN_KAP && O.CAN_KAP[n]) || O.CAN;
+    var rows = cand.map(function (c) { return S.mastery[c[0]] ? { t: c[1], stars: S.mastery[c[0]] } : null; }).filter(Boolean);
+    var sider = (kp.sider || []).filter(function (id) { return S.q[id] === 'done'; }).length;
     var badges = [
       'Vedholdenhed: du prøvede igen og klarede det ' + S.persist + ' ' + (S.persist === 1 ? 'gang' : 'gange'),
       'Regnekraft: ' + S.kraft + ' %',
-      'Ekstramissioner: ' + sides + ' af 6',
+      'Ekstramissioner: ' + sider + ' af ' + (kp.sider || []).length,
       'Ting i tasken: ' + S.bag.owned.length
     ];
-    await UI.ending(rows, badges, laererensOrd(), who('poulsen'));
+    var nxt = K.kapitler[n + 1];
+    var valg = await UI.ending(rows, badges, laererensOrd(), who(kp.slut.ordFra || 'poulsen'), { titel: kp.slut.titel, tekst: kp.slut.tekst, rundt: kp.slut.rundt, naeste: nxt ? nxt.navn : null });
     musik();
+    if (valg === 'naeste') await naesteKapitel();
+  }
+
+  // Det næste kapitel er låst op, når det før er klaret
+  function kapStatus(n) {
+    if ((S.klaret || []).indexOf(n) >= 0) return 'klaret';
+    if ((S.kap || 1) === n) return 'igang';
+    if (n === 1 || (S.klaret || []).indexOf(n - 1) >= 0) return 'klar';
+    return 'laast';
+  }
+  function klasseFor(n) { return Math.min(6, (S.startKlasse || S.klasse) + n - 1); }
+  async function naesteKapitel() { await startKapitel((S.kap || 1) + 1); }
+  async function startKapitel(n) {
+    var kp = K.kapitler[n];
+    if (!kp || kapStatus(n) === 'laast') return;
+    await fadeTo(function () {
+      S.kap = n; S.klasse = klasseFor(n); S.cut = false; S.tom = false;
+      var st = kp.start || {};
+      S.map = st.map; S.x = st.x; S.y = st.y; S.dir = st.dir || 'down';
+      player.px = S.x * T; player.py = S.y * T; player.moving = false;
+      npcDir = {}; refresh(); snapCam(); musik(); hud(); save(true);
+    }, 700);
+    await UI.kapitelkort(n, kp.navn, kp.kort, O.trin(S.klasse).navn + ': opgaverne er nu på ' + O.trin(S.klasse).navn + 's niveau.');
+    await kp.intro(g);
+  }
+  // Kapitel-menuen (Pause → Kapitler): ✓ klaret, ► i gang, "Start" når det er låst op
+  async function kapitelMenu() {
+    var liste = [];
+    for (var n = 1; n <= K.KAPITLER; n++) liste.push({ n: n, navn: K.kapitler[n] ? K.kapitler[n].navn : '…', status: K.kapitler[n] ? kapStatus(n) : 'laast' });
+    var valg = await UI.kapitler(liste);
+    if (valg && kapStatus(valg) === 'klar' && valg !== (S.kap || 1)) await startKapitel(valg);
   }
 
   // ---------------------------------------------------------------- pausespil og bogen
@@ -573,7 +635,10 @@
   window.addEventListener('blur', function () { heldOrder = []; });
   document.addEventListener('visibilitychange', function () { heldOrder = []; });
   function openBook(tab) { if (busy || UI.isOpen() || S.cut) return; heldOrder = []; run(function () { return openBookAt(tab || 'missioner'); }); }
-  function openMenu() { if (busy || UI.isOpen()) return; heldOrder = []; run(function () { return UI.menu(); }); }
+  function openMenu() {
+    if (busy || UI.isOpen()) return; heldOrder = [];
+    run(async function () { if ((await UI.menu()) === 'kapitler') await kapitelMenu(); });
+  }
   // Fuld skærm. Knappen skjules, hvor browseren ikke kan (fx iPhone-Safari).
   var root = document.documentElement;
   var canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
@@ -652,8 +717,23 @@
   setInterval(function () { if (started && S && S.res && document.visibilityState === 'visible') S.res.sek += 5; }, 5000);
 
   // ---------------------------------------------------------------- start
+  // Prøvetiden (LFSpil i /assets/spilletid.js): en venlig besked 4 minutter før,
+  // og når den er brugt, gemmes spillet og en slutskærm lukker det ned.
+  var tidSlutVist = false;
+  RH.tidSnart = function (sek) {
+    if (UI) UI.toast('<b>Snart er din spilletid brugt.</b><br>Der er ' + Math.max(1, Math.round(sek / 60)) + ' minutter tilbage.');
+  };
+  RH.tidSlut = function () {
+    if (tidSlutVist || !UI) return;       // før boot() har lavet UI: boot() spørger selv
+    tidSlutVist = true;
+    save(true);
+    if (S && S.res && started) RH.resultat.send(S, true);
+    UI.tidSlut();
+  };
+
   function begin() {
     started = true;
+    if (window.LFSpil) LFSpil.aktiv(true);   // først nu tæller tiden (ikke på titelskærmen)
     RH.state = S;
     player.px = S.x * T; player.py = S.y * T;
     sheets.player = RH.makeSheet(S.look);
@@ -676,12 +756,20 @@
     if (document.fonts && document.fonts.ready) { try { await Promise.race([document.fonts.ready, new Promise(function (r) { setTimeout(r, 1500); })]); } catch (e) { } }
     if (FOTO) { foto(FOTO); return; }
     var saved = parse(await hentning);
-    var choice = await UI.title(saved ? saved.name : '');
-    if (choice === 'continue' && saved) {
+    if ((window.LFSpil && LFSpil.tidSlut()) || tidSlutVist) { RH.tidSlut(); return; }   // prøvetiden er allerede brugt
+    var info = null;
+    if (saved) {
+      var nk = (saved.kap || 1) + 1;
+      info = { kap: saved.kap, kapnavn: saved.kap > 1 && K.kapitler[saved.kap] ? K.kapitler[saved.kap].navn : '',
+               naeste: saved.klaret.indexOf(saved.kap) >= 0 && K.kapitler[nk] ? K.kapitler[nk].navn : '' };
+    }
+    var choice = await UI.title(saved ? saved.name : '', info);
+    if ((choice === 'continue' || choice === 'naeste') && saved) {
       S = saved;
       // Lukkede man fanen midt i åbningsscenen, springer vi frem til morgenen
       if (S.cut) { S.cut = false; S.tom = false; S.map = 'hjem'; S.x = 4; S.y = 3; S.dir = 'up'; if (!S.q.q0) S.q.q0 = 'active'; }
       begin();
+      if (choice === 'naeste') { await run(naesteKapitel); return; }
       UI.toast('Velkommen tilbage, <b>' + RH.esc(S.name) + '</b>! Du står lige der, hvor du slap.');
       return;
     }
@@ -719,7 +807,9 @@
   RH.debug = {
     get S() { return S; }, g: g, interact: interact, refresh: refresh, entities: function () { return entities(); },
     tp: function (m, x, y, d) { S.map = m; S.x = x; S.y = y; if (d) S.dir = d; player.moving = false; player.px = x * T; player.py = y * T; snapCam(); hud(); musik(); },
-    face: function (d) { S.dir = d; }, hud: hud, save: save
+    face: function (d) { S.dir = d; }, hud: hud, save: save,
+    kapitel: function (n) { if (n > 1 && S.klaret.indexOf(n - 1) < 0) S.klaret.push(n - 1); return run(function () { return startKapitel(n); }); },
+    kapSlut: function () { return run(kapSlut); }, world: function () { return world; }
   };
 
   window.addEventListener('pagehide', function () { save(true); RH.resultat.send(S, true); });

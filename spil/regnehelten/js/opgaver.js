@@ -633,6 +633,12 @@
   RH.opgaver = {
     TRIN: TRIN, KLASSER: KLASSER, STANDARD_KLASSE: STANDARD_KLASSE, trin: trin, regneloft: regneloft,
     SAET: SAET, CAN: CAN, lav: function (noegle, klasse) { return SAET[noegle].gen(trin(klasse)); },
-    checkNumeric: checkNumeric, checkCreative: checkCreative, fmt: fmt, kr: kr
+    checkNumeric: checkNumeric, checkCreative: checkCreative, fmt: fmt, kr: kr,
+    // Kapitel 2 og 3 (js/opgaver-kapitler.js) bygger deres sæt med de samme hjælpere
+    H: {
+      r: r, choice: choice, fd: fd, pyround: pyround, shuffle: shuffle, pad2: pad2, fak: fak, spring: spring, prGruppe: prGruppe, gangPar: gangPar,
+      beloeb: beloeb, tal: tal, plusPar: plusPar, regneloft: regneloft, makeCreative: makeCreative,
+      write: write, choose: choose, balance: balance, sequence: sequence, truefalse: truefalse, coins: coins, build: build, findall: findall
+    }
   };
 })();

@@ -113,11 +113,22 @@ function konti_med_tal(): array
         $aktive[(int) $r['konto_id']] = (int) $r['n'];
     }
 
+    // Det barn på kontoen, der har brugt mest af prøvetiden
+    $mest = [];
+    foreach (alle('SELECT konto_id, MAX(s) AS s FROM (SELECT konto_id, elev_id, SUM(sekunder) AS s FROM sessioner
+                   WHERE elev_id IS NOT NULL GROUP BY konto_id, elev_id) x GROUP BY konto_id') as $r) {
+        $mest[(int) $r['konto_id']] = (int) $r['s'];
+    }
+
     $ud = [];
     foreach (alle("SELECT * FROM konti WHERE type != 'admin' ORDER BY oprettet DESC") as $k) {
         $id = (int) $k['id'];
         $t = $tid[$id] ?? null;
         $ud[] = [
+            'maks_barn_sek' => $mest[$id] ?? 0,
+            'graense_sek' => !empty($k['fri_adgang']) ? null : (tidsgraense_min() + (int) $k['ekstra_min']) * 60,
+            'ekstra_min' => (int) $k['ekstra_min'], 'fri_adgang' => (int) $k['fri_adgang'],
+            'skema_sendt' => $k['skema_sendt'] !== null ? (int) $k['skema_sendt'] : null,
             'id' => $id, 'type' => $k['type'], 'navn' => $k['navn'], 'kontakt' => $k['kontakt'],
             'bynavn' => $k['bynavn'], 'email' => $k['email'], 'status' => $k['status'],
             'oprettet' => (int) $k['oprettet'],
@@ -375,6 +386,7 @@ case 'konto':
             $elever[] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
                          'sidst_inde' => $e['sidst_inde'] !== null ? (int) $e['sidst_inde'] : null,
                          'tid' => spilletid('elev_id = ?', [$e['id']]),
+                         'proeve' => tid_status(['konto' => $k, 'elev' => ['id' => $e['id']]]),
                          'gemt' => $gemt[(int) $e['id']] ?? (object) []];
         }
         $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'],
@@ -386,7 +398,11 @@ case 'konto':
                       'bynavn' => $k['bynavn'], 'email' => $k['email'], 'status' => $k['status'],
                       'oprettet' => (int) $k['oprettet'],
                       'sidst_inde' => $k['sidst_inde'] !== null ? (int) $k['sidst_inde'] : null,
-                      'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null],
+                      'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null,
+                      'ekstra_min' => (int) $k['ekstra_min'], 'fri_adgang' => (int) $k['fri_adgang'],
+                      'graense_min' => tidsgraense_min()],
+          'skemaer' => alle('SELECT id, aarsag, spil, elev_id, sendt, aabnet, besvaret FROM spoergeskemaer
+                             WHERE konto_id = ? ORDER BY id DESC', [$k['id']]),
           'grupper' => $grupper,
           'tid' => spilletid('konto_id = ?', [$k['id']]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$k['id']]),
@@ -407,6 +423,76 @@ case 'saet_status':
     }
     if ($status === 'spaerret') {
         kør('DELETE FROM logins WHERE konto_id = ?', [tal('id')]);
+    }
+    svar(['ok' => true]);
+
+// ---- prøvetiden og spørgeskemaet (se tid_status() og _spoergeskema.php) ----
+
+case 'tid':
+    // {id, handling2: ekstra|fri|nulstil, min}: giv en konto mere tid, fri adgang, eller tilbage til grundgrænsen
+    kraev_egen_side();
+    $id = tal('id');
+    if (!vaerdi("SELECT 1 FROM konti WHERE id = ? AND type != 'admin'", [$id])) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    $hv = felt('hvad', 10);
+    if ($hv === 'ekstra') {
+        $min = tal('min');
+        if ($min < 1 || $min > 100000) {
+            fejl('Skriv et antal minutter.');
+        }
+        kør('UPDATE konti SET ekstra_min = ekstra_min + ? WHERE id = ?', [$min, $id]);
+    } elseif ($hv === 'fri') {
+        kør('UPDATE konti SET fri_adgang = ? WHERE id = ?', [tal('til') ? 1 : 0, $id]);
+    } elseif ($hv === 'nulstil') {
+        kør('UPDATE konti SET ekstra_min = 0, fri_adgang = 0 WHERE id = ?', [$id]);
+    } else {
+        fejl('Ukendt valg.');
+    }
+    svar(['ok' => true]);
+
+case 'skemaer':
+    require_once __DIR__ . '/_spoergeskema.php';
+    $liste = alle("SELECT s.id, s.aarsag, s.spil, s.sendt, s.aabnet, s.besvaret, s.svar, k.id AS konto_id, k.navn,
+                          k.type, k.email, e.kaldenavn
+                   FROM spoergeskemaer s JOIN konti k ON k.id = s.konto_id LEFT JOIN elever e ON e.id = s.elev_id
+                   ORDER BY s.id DESC");
+    $tal = ['sendt' => 0, 'aabnet' => 0, 'besvaret' => 0];
+    $sum = $antal = [];
+    foreach ($liste as &$r) {
+        $tal['sendt'] += $r['sendt'] !== null ? 1 : 0;
+        $tal['aabnet'] += $r['aabnet'] !== null ? 1 : 0;
+        $tal['besvaret'] += $r['besvaret'] !== null ? 1 : 0;
+        $r['svar'] = $r['svar'] !== null ? json_decode($r['svar'], true) : null;
+        foreach ((array) $r['svar'] as $nøgle => $v) {
+            if ((SKEMA_SPOERGSMAAL[$nøgle][0] ?? '') === 'skala') {
+                $sum[$nøgle] = ($sum[$nøgle] ?? 0) + $v;
+                $antal[$nøgle] = ($antal[$nøgle] ?? 0) + 1;
+            }
+        }
+    }
+    unset($r);
+    $snit = [];
+    foreach ($sum as $nøgle => $s) {
+        $snit[$nøgle] = round($s / $antal[$nøgle], 2);
+    }
+    $sp = [];
+    foreach (SKEMA_SPOERGSMAAL as $nøgle => [$slags, $tekst, $valg]) {
+        $sp[$nøgle] = ['slags' => $slags, 'tekst' => $tekst, 'valg' => $valg];
+    }
+    svar(['ok' => true, 'tal' => $tal, 'snit' => $snit, 'skemaer' => $liste, 'spoergsmaal' => $sp]);
+
+case 'skema_gensend':
+    // Send mailen igen til en konto, hvis skema ikke er besvaret (samme link)
+    kraev_egen_side();
+    require_once __DIR__ . '/_spoergeskema.php';
+    $s = en('SELECT * FROM spoergeskemaer WHERE id = ? AND besvaret IS NULL', [tal('id')]);
+    $k = $s ? en('SELECT * FROM konti WHERE id = ?', [$s['konto_id']]) : null;
+    if (!$s || !$k) {
+        fejl('Skemaet findes ikke, eller det er allerede besvaret.', 404);
+    }
+    if (!skema_send_raekke($k, $s)) {
+        fejl('Mailen kunne ikke sendes: ' . post_fejl(), 502);
     }
     svar(['ok' => true]);
 

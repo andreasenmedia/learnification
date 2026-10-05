@@ -33,5 +33,7 @@ if ($time < PAAMIND_TIMER[0] || $time >= PAAMIND_TIMER[1]) {
 }
 
 @set_time_limit(60);
+require_once __DIR__ . '/_spoergeskema.php';
+$skemaer = skema_genforsoeg();
 $s = paamind_koer('cron');
-echo 'OK — sendt: ' . $s['sendt'] . ', fejlet: ' . $s['fejlet'] . ($s['fejl'] !== '' ? ' (' . $s['fejl'] . ')' : '') . "\n";
+echo ($skemaer > 0 ? "Spørgeskemaer sendt igen: $skemaer. " : '') . 'OK — sendt: ' . $s['sendt'] . ', fejlet: ' . $s['fejlet'] . ($s['fejl'] !== '' ? ' (' . $s['fejl'] . ')' : '') . "\n";

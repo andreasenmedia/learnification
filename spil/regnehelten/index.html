@@ -14,7 +14,7 @@
 <link rel="canonical" href="https://learnification.dk/spil/regnehelten/">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/runeborg.css?v=1">
-<link rel="stylesheet" href="regnehelten.css?v=1">
+<link rel="stylesheet" href="regnehelten.css?v=3">
 </head>
 <body>
 
@@ -60,22 +60,29 @@
 
 <!-- Login foran spillet og måling af spilletid. KRAEV_LOGIN = false
      lader alle spille igen, når testen er slut (se også Runeborg). -->
-<script src="/assets/spilletid.js?v=1"></script>
+<script src="/assets/spilletid.js?v=2"></script>
 <script>
 var KRAEV_LOGIN = true;
-LFSpil.start({ spil: 'regnehelten', kraevLogin: KRAEV_LOGIN,
-               bruger: function (d) { window.LF_SPILLER = d; } });
+// aktiv: false — tiden tæller først, når spillet er i gang (game.js begin()), ikke på titelskærmen.
+// Prøvetiden er 60 min pr. barn på tværs af begge spil (tid_status() i api/_kerne.php).
+LFSpil.start({ spil: 'regnehelten', kraevLogin: KRAEV_LOGIN, aktiv: false,
+               bruger: function (d) { window.LF_SPILLER = d; },
+               tidenErGaaet: function () { if (window.RH && RH.tidSlut) RH.tidSlut(); },
+               snartSlut: function (sek) { if (window.RH && RH.tidSnart) RH.tidSnart(sek); } });
 </script>
-<script src="js/art.js?v=1"></script>
-<script src="js/audio.js?v=1"></script>
-<script src="js/world.js?v=1"></script>
-<script src="js/voice.js?v=1"></script>
-<script src="js/opgaver.js?v=1"></script>
-<script src="js/ui.js?v=1"></script>
-<script src="js/content.js?v=1"></script>
-<script src="js/gem.js?v=1"></script>
-<script src="js/resultat.js?v=1"></script>
-<script src="js/game.js?v=1"></script>
+<script src="js/art.js?v=3"></script>
+<script src="js/audio.js?v=3"></script>
+<script src="js/world.js?v=3"></script>
+<script src="js/voice.js?v=2"></script>
+<script src="js/opgaver.js?v=3"></script>
+<script src="js/opgaver-kapitler.js?v=2"></script>
+<script src="js/ui.js?v=4"></script>
+<script src="js/content.js?v=3"></script>
+<script src="js/kapitel2.js?v=2"></script>
+<script src="js/kapitel3.js?v=2"></script>
+<script src="js/gem.js?v=2"></script>
+<script src="js/resultat.js?v=3"></script>
+<script src="js/game.js?v=4"></script>
 <script src="/assets/besoeg.js?v=2" defer></script>
 <script>
 // Første tryk eller tast i spillet tæller som "startet Regnehelten" i statistikken

@@ -6,8 +6,11 @@
        spil: 'regnehelten',           // skal stå i SPIL i api/_kerne.php
        kraevLogin: true,              // sendes til /login, hvis ingen er logget ind
        bruger: function (mig) {},     // kaldes med svaret fra /api/konto.php?handling=mig
-       aktiv: false                   // tæl først, når siden siger LFSpil.aktiv(true)
+       aktiv: false,                  // tæl først, når siden siger LFSpil.aktiv(true)
+       tidenErGaaet: function () {},  // prøvetiden (60 min pr. barn) er brugt op
+       snartSlut: function (sek) {}   // 4 minutter tilbage
      });
+     LFSpil.tidSlut()                 // er den allerede brugt? (svaret kan nå frem før spillet er klar)
      LFSpil.lyt(iframe.contentWindow) // tastatur og klik inde i en ramme tæller også
 
    HVAD DER TÆLLER SOM SPILLETID. Et sekund tæller, når siden er fremme på
@@ -26,6 +29,35 @@ var LFSpil = (function () {
 
   var spil = '', aktiv = true, logget_ind = false;
   var omgang = 0, venter = 0, sidstRoert = Date.now(), siden = 0;
+
+  // Prøvetiden (tid_status() i api/_kerne.php). tilbage er null uden grænse.
+  var tilbage = null, slut = false, snartVarslet = false, opt = {};
+  var SNART = 4 * 60;           // sekunder: så meget tid er tilbage ved "snart slut"
+
+  function sync(t) {
+    if (!t) return;
+    tilbage = t.tilbage_sek === null || t.tilbage_sek === undefined ? null : Math.max(0, t.tilbage_sek - venter);
+    if (t.slut) tidenErGaaet();
+    else vurder();
+  }
+
+  // Fanger, at tiden er brugt (kaldes højst én gang)
+  function tidenErGaaet() {
+    if (slut) return;
+    slut = true;
+    tilbage = 0;
+    aktiv = false;
+    if (opt.tidenErGaaet) opt.tidenErGaaet();
+  }
+
+  function vurder() {
+    if (tilbage === null || slut) return;
+    if (tilbage <= 0) { send(); tidenErGaaet(); return; }
+    if (tilbage <= SNART && !snartVarslet) {
+      snartVarslet = true;
+      if (opt.snartSlut) opt.snartSlut(tilbage);
+    }
+  }
 
   function roert() { sidstRoert = Date.now(); }
 
@@ -53,7 +85,7 @@ var LFSpil = (function () {
       method: 'POST', credentials: 'same-origin', keepalive: true,
       headers: { 'Content-Type': 'application/json' }, body: krop(sek)
     }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.ok) omgang = d.id;
+      if (d.ok) { omgang = d.id; sync(d.tid); }
       else if (d.besked === 'Ikke logget ind.') { logget_ind = false; }
     }).catch(function () { venter += sek; });   // prøv igen næste gang
   }
@@ -74,11 +106,13 @@ var LFSpil = (function () {
     if (document.visibilityState !== 'visible') return;
     if (Date.now() - sidstRoert > TOMGANG) return;
     venter++;
+    if (tilbage !== null) { tilbage--; vurder(); }
     if (++siden >= HVER) { siden = 0; send(); }
   }
 
   function start(o) {
     spil = o.spil;
+    opt = o;
     if (o.aktiv === false) aktiv = false;
     var harCookie = /(?:^|;\s*)lf_in=/.test(document.cookie);
 
@@ -95,6 +129,7 @@ var LFSpil = (function () {
         logget_ind = true;
         sidstRoert = Date.now();
         if (o.bruger) o.bruger(d);
+        sync(d.tid);
       })
       .catch(function () {
         // Serveren svarer ikke. Så lader vi hellere barnet spille end at
@@ -120,7 +155,10 @@ var LFSpil = (function () {
   return {
     start: start,
     lyt: lyt,
-    aktiv: function (v) { aktiv = !!v; if (v) roert(); },
+    aktiv: function (v) { aktiv = !!v && !slut; if (v) roert(); },
+    // Er prøvetiden brugt? Spillet spørger, når det er klar (svaret kan nå frem før det)
+    tidSlut: function () { return slut; },
+    tilbage: function () { return tilbage; },
     logUd: logUd
   };
 })();

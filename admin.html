@@ -73,6 +73,7 @@
           <a class="btn btn-sm" href="/statistik">Besøg på siden</a>
           <a class="btn btn-sm" href="#nyhedsbrev">Nyhedsbrev</a>
           <a class="btn btn-sm" href="#velkomst">Velkomstmail</a>
+          <a class="btn btn-sm" href="#spoergeskema">Spørgeskema</a>
           <a class="btn btn-sm" href="/api/admin.php?handling=eksport">Hent som Excel (CSV)</a>
           <a class="btn btn-sm" href="/konto">Min egen konto</a>
           <button type="button" class="btn btn-sm" data-logud>Log ud</button>
@@ -196,6 +197,26 @@
       </div>
     </div>
 
+    <!-- Spørgeskemaet -->
+    <div id="skemaer" hidden>
+      <a href="#" class="tilbage">&larr; Alle konti</a>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Efter prøvetiden</p><h1>Spørgeskema</h1>
+          <p>Den voksne på kontoen får skemaet på mail én gang: første gang et barn har brugt hele prøvetiden, eller har klaret sidste kapitel i et spil. Her kan du følge, hvem der har åbnet og besvaret det.</p></div>
+        <div class="knapper"><button type="button" class="btn btn-sm btn-primary" id="sk-csv">Hent svar som CSV</button></div>
+      </div>
+      <div class="tal-raekke" id="sk-tal"></div>
+      <div class="panel" id="sk-snit-boks" hidden>
+        <h2>Gennemsnit (1-5)</h2>
+        <div class="tal-raekke" id="sk-snit"></div>
+      </div>
+      <div class="panel">
+        <h2>Udsendte skemaer</h2>
+        <div class="tabel-rul"><table class="liste" id="sk-liste"></table></div>
+      </div>
+      <div class="panel" id="sk-svar" hidden></div>
+    </div>
+
     <!-- Én konto -->
     <div id="detalje" hidden>
       <a href="#" class="tilbage" id="tilbage">&larr; Alle konti</a>
@@ -219,7 +240,7 @@
   var alle = [], spilnavne = {};
 
   function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
-  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'skemaer'].forEach(function (x) { $(x).hidden = x !== id; }); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -251,6 +272,7 @@
     if (m) visKonto(+m[1]);
     else if (location.hash === '#nyhedsbrev') visNyhed();
     else if (location.hash === '#velkomst') visVelkomst();
+    else if (location.hash === '#spoergeskema') visSkemaer();
     else visOverblik();
   }
   window.addEventListener('hashchange', rute);
@@ -285,6 +307,13 @@
     }).catch(function (err) { vis('indlaeser'); $('indlaeser').textContent = err.message; });
   }
 
+  // "42 min / 60 min", "Slut" når den er brugt, "Fri" uden grænse
+  function proevetid(brugt, graense) {
+    if (graense === null) return '<span class="lille">Fri adgang</span>';
+    var t = LF.tid(brugt) + ' / ' + LF.tid(graense);
+    return brugt >= graense ? '<strong>' + t + ' · slut</strong>' : t;
+  }
+
   function kort(t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + LF.esc(t[1]) + '</div></div>'; }
 
   function tabel() {
@@ -294,7 +323,7 @@
         && (!q || (k.navn + ' ' + k.kontakt + ' ' + k.email + ' ' + k.bynavn).toLowerCase().indexOf(q) >= 0);
     });
     var html = '<thead><tr><th>Konto</th><th>Type</th><th>Status</th><th class="t">Oprettet</th><th class="t">Elever</th>'
-      + '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
+      + '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Prøvetid (mest brugte barn)</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
     r.forEach(function (k) {
       html += '<tr class="klik" data-id="' + k.id + '" tabindex="0"><td><strong>' + LF.esc(k.navn) + '</strong><br><span class="lille">'
         + LF.esc([k.type === 'skole' ? k.kontakt : '', k.email, k.bynavn].filter(Boolean).join(' · ')) + '</span></td>'
@@ -302,9 +331,10 @@
         + '<td class="t">' + LF.dato(k.oprettet) + '</td>'
         + '<td class="t">' + k.elever_spillet + ' / ' + k.elever + '</td>'
         + '<td class="t">' + LF.tid(k.uge) + '</td><td class="t"><strong>' + LF.tid(k.i_alt) + '</strong></td>'
+        + '<td class="t">' + proevetid(k.maks_barn_sek, k.graense_sek) + '</td>'
         + '<td class="t">' + LF.dato(k.sidst_spillet) + '</td></tr>';
     });
-    if (!r.length) html += '<tr><td colspan="8" class="tom">' + (alle.length ? 'Ingen konti passer til søgningen.' : 'Ingen testkonti endnu.') + '</td></tr>';
+    if (!r.length) html += '<tr><td colspan="9" class="tom">' + (alle.length ? 'Ingen konti passer til søgningen.' : 'Ingen testkonti endnu.') + '</td></tr>';
     $('konti').innerHTML = html + '</tbody>';
   }
   ['soeg', 'f-type', 'f-status'].forEach(function (id) { $(id).addEventListener('input', tabel); });
@@ -639,6 +669,80 @@
     }, function (err) { LF.besked($('p-besked'), err.message, 'fejl'); LF.travl(knap, false); });
   });
 
+  // --- spørgeskemaet --------------------------------------------------------
+  var skemaData = null;
+  var AARSAG = { tid: 'Brugte prøvetiden', faerdig: 'Klarede spillet' };
+  var SPILNAVN = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
+
+  function svarTekst(sp, nøgle, v) {
+    var s = sp[nøgle];
+    if (!s) return '';
+    if (s.slags === 'valg') return (s.valg || {})[v] || v;
+    if (s.slags === 'flere') return v.map(function (x) { return (s.valg || {})[x] || x; }).join(', ');
+    return String(v);
+  }
+
+  function visSkemaer() {
+    LF.hent('admin', 'skemaer').then(function (d) {
+      skemaData = d;
+      vis('skemaer');
+      var rate = d.tal.sendt ? Math.round(d.tal.besvaret / d.tal.sendt * 100) + ' %' : '–';
+      $('sk-tal').innerHTML = [[d.tal.sendt, 'Sendt'], [d.tal.aabnet, 'Åbnet'], [d.tal.besvaret, 'Besvaret'], [rate, 'Svarprocent']].map(kort).join('');
+      var snit = Object.keys(d.snit).map(function (k) { return [String(d.snit[k]).replace('.', ','), d.spoergsmaal[k].tekst]; });
+      $('sk-snit-boks').hidden = !snit.length;
+      $('sk-snit').innerHTML = snit.map(kort).join('');
+      var html = '<thead><tr><th>Konto</th><th>Barn</th><th>Grund</th><th>Spil</th><th class="t">Sendt</th><th class="t">Åbnet</th><th class="t">Besvaret</th><th></th></tr></thead><tbody>';
+      d.skemaer.forEach(function (s) {
+        html += '<tr class="klik" data-sk="' + s.id + '" tabindex="0"><td><a href="#konto=' + s.konto_id + '"><strong>' + LF.esc(s.navn) + '</strong></a><br><span class="lille">' + LF.esc(s.email) + '</span></td>'
+          + '<td>' + LF.esc(s.kaldenavn || '–') + '</td><td>' + (AARSAG[s.aarsag] || '') + '</td><td>' + LF.esc(SPILNAVN[s.spil] || s.spil || '–') + '</td>'
+          + '<td class="t">' + LF.dato(s.sendt) + '</td><td class="t">' + LF.dato(s.aabnet) + '</td>'
+          + '<td class="t">' + (s.besvaret ? '<strong>' + LF.dato(s.besvaret) + '</strong>' : '–') + '</td>'
+          + '<td class="t">' + (s.besvaret ? '' : '<button type="button" class="btn btn-sm" data-gensend="' + s.id + '">Send igen</button>') + '</td></tr>';
+      });
+      if (!d.skemaer.length) html += '<tr><td colspan="8" class="tom">Ingen skemaer sendt endnu. De går af sted, når et barn har brugt prøvetiden eller klaret sidste kapitel.</td></tr>';
+      $('sk-liste').innerHTML = html + '</tbody>';
+      $('sk-svar').hidden = true;
+    }).catch(function (err) { vis('indlaeser'); $('indlaeser').textContent = err.message; });
+  }
+
+  $('sk-liste').addEventListener('click', function (e) {
+    var g = e.target.closest('[data-gensend]');
+    if (g) {
+      LF.travl(g, true);
+      LF.send('admin', 'skema_gensend', { id: +g.dataset.gensend })
+        .then(function () { g.textContent = 'Sendt'; }, function (err) { alert(err.message); LF.travl(g, false); });
+      return;
+    }
+    if (e.target.closest('a')) return;
+    var tr = e.target.closest('tr[data-sk]'); if (!tr || !skemaData) return;
+    var s = skemaData.skemaer.filter(function (x) { return x.id === +tr.dataset.sk; })[0];
+    var boks = $('sk-svar');
+    if (!s || !s.svar) { boks.hidden = false; boks.innerHTML = '<p class="tom" style="margin:0;">Ikke besvaret endnu.</p>'; return; }
+    var sp = skemaData.spoergsmaal;
+    boks.innerHTML = '<h2>Svar fra ' + LF.esc(s.navn) + '</h2><dl>' + Object.keys(sp).filter(function (k) { return s.svar[k] != null; }).map(function (k) {
+      return '<dt><strong>' + LF.esc(sp[k].tekst) + '</strong></dt><dd style="margin:0 0 12px;">' + LF.esc(svarTekst(sp, k, s.svar[k])) + '</dd>';
+    }).join('') + '</dl>';
+    boks.hidden = false;
+    boks.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  $('sk-csv').addEventListener('click', function () {
+    if (!skemaData) return;
+    var sp = skemaData.spoergsmaal, nøgler = Object.keys(sp);
+    var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+    var rækker = [['Konto', 'Mail', 'Barn', 'Grund', 'Spil', 'Sendt', 'Besvaret'].concat(nøgler.map(function (k) { return sp[k].tekst; }))];
+    var dato = function (t) { return t ? new Date(t * 1000).toISOString().slice(0, 16).replace('T', ' ') : ''; };
+    skemaData.skemaer.forEach(function (s) {
+      rækker.push([s.navn, s.email, s.kaldenavn || '', AARSAG[s.aarsag] || '', SPILNAVN[s.spil] || s.spil || '', dato(s.sendt), dato(s.besvaret)]
+        .concat(nøgler.map(function (k) { return s.svar && s.svar[k] != null ? svarTekst(sp, k, s.svar[k]) : ''; })));
+    });
+    var csv = '﻿' + rækker.map(function (r) { return r.map(q).join(';'); }).join('\r\n');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'spoergeskema-svar.csv';
+    a.click();
+  });
+
   // --- én konto -------------------------------------------------------------
   function visKonto(id) {
     LF.hent('admin', 'konto', { id: id }).then(function (d) {
@@ -650,9 +754,17 @@
       $('d-info').innerHTML = LF.esc([skole ? k.kontakt : '', k.bynavn].filter(Boolean).join(' · '))
         + (skole || k.bynavn ? ' · ' : '') + '<a href="mailto:' + LF.esc(k.email) + '">' + LF.esc(k.email) + '</a>'
         + '<br><span class="lille">Oprettet ' + LF.dato(k.oprettet) + ' · sidst logget ind ' + LF.dato(k.sidst_inde)
-        + (k.type !== 'admin' ? ' · <a href="#velkomst">velkomstmail</a> ' + (k.velkomst_sendt ? 'sendt ' + LF.dato(k.velkomst_sendt) : 'ikke sendt') : '') + '</span>';
+        + (k.type !== 'admin' ? ' · <a href="#velkomst">velkomstmail</a> ' + (k.velkomst_sendt ? 'sendt ' + LF.dato(k.velkomst_sendt) : 'ikke sendt') : '')
+        + (k.type !== 'admin' ? '<br>Prøvetid: ' + (k.fri_adgang ? 'fri adgang' : (k.graense_min + k.ekstra_min) + ' min pr. barn' + (k.ekstra_min ? ' (heraf ' + k.ekstra_min + ' ekstra)' : ''))
+          + ' · spørgeskema: ' + (d.skemaer.length ? d.skemaer.map(function (s) {
+              return (s.besvaret ? 'besvaret ' + LF.dato(s.besvaret) : s.aabnet ? 'åbnet ' + LF.dato(s.aabnet) : 'sendt ' + LF.dato(s.sendt));
+            }).join(', ') : 'ikke sendt') : '') + '</span>';
       var knapper = '';
       if (k.type !== 'admin') {
+        knapper += '<button type="button" class="btn btn-sm" data-tid="ekstra" data-min="30">+30 min</button>'
+          + '<button type="button" class="btn btn-sm" data-tid="ekstra" data-min="60">+60 min</button>'
+          + '<button type="button" class="btn btn-sm" data-tid="fri" data-til="' + (k.fri_adgang ? 0 : 1) + '">' + (k.fri_adgang ? 'Fjern fri adgang' : 'Fri adgang') + '</button>'
+          + (k.ekstra_min || k.fri_adgang ? '<button type="button" class="btn btn-sm" data-tid="nulstil">Tilbage til ' + k.graense_min + ' min</button>' : '');
         if (k.status !== 'godkendt') knapper += '<button type="button" class="btn btn-sm btn-primary" data-status="godkendt">' + (k.status === 'spaerret' ? 'Åbn igen' : 'Godkend') + '</button>';
         if (k.status !== 'spaerret') knapper += '<button type="button" class="btn btn-sm" data-status="spaerret">Spær</button>';
       }
@@ -673,12 +785,13 @@
         if (!g.elever.length) { html += '<p class="tom">Ingen elever.</p></section>'; return; }
         html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>Elev</th>';
         spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });
-        html += '<th class="t">Gange</th><th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
+        html += '<th class="t">Gange</th><th class="t">7 dage</th><th class="t">I alt</th><th class="t">Prøvetid</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
         g.elever.forEach(function (e) {
           html += '<tr><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>';
           spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + LF.gemt(e.gemt[s]) + '</td>'; });
           html += '<td class="t">' + e.tid.gange + '</td><td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>'
-            + LF.tid(e.tid.i_alt) + '</strong></td><td class="t">' + LF.dato(e.tid.sidst) + '</td></tr>';
+            + LF.tid(e.tid.i_alt) + '</strong></td><td class="t">' + proevetid(e.proeve.brugt_sek, e.proeve.graense_sek)
+            + '</td><td class="t">' + LF.dato(e.tid.sidst) + '</td></tr>';
         });
         html += '</tbody></table></div></section>';
       });
@@ -696,6 +809,12 @@
   }
 
   $('d-knapper').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-tid]');
+    if (t) {
+      LF.send('admin', 'tid', { id: +this.dataset.id, hvad: t.dataset.tid, min: +t.dataset.min || 0, til: +t.dataset.til || 0 })
+        .then(rute, function (err) { alert(err.message); });
+      return;
+    }
     var b = e.target.closest('[data-status]'); if (!b) return;
     var s = b.dataset.status;
     if (s === 'spaerret' && !confirm('Spær kontoen? Den voksne og alle børnene bliver logget ud og kan ikke logge ind igen, før du åbner den.')) return;

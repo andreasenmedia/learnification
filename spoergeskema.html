@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spørgeskema — Learnification</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#faf7f0">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
+<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/konto.css?v=3">
+<style>
+  .skema h2 { margin-bottom: 4px; }
+  .skema fieldset { border: 0; padding: 0; margin: 0 0 26px; }
+  .skema legend { font-weight: 700; margin-bottom: 10px; padding: 0; }
+  .skema .valg label { display: flex; gap: 10px; align-items: center; padding: 8px 0; cursor: pointer; }
+  .skema .skala { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .skema .skala label { cursor: pointer; }
+  .skema .skala input { position: absolute; opacity: 0; }
+  .skema .skala span { display: inline-flex; width: 48px; height: 48px; align-items: center; justify-content: center;
+    border: 2px solid #eadfca; border-radius: 12px; font-weight: 700; background: #fff; }
+  .skema .skala input:checked + span { background: #ce8a2e; border-color: #8f5b18; color: #fff; }
+  .skema .skala input:focus-visible + span { outline: 3px solid #8f5b18; outline-offset: 2px; }
+  .skema .ender { display: flex; justify-content: space-between; font-size: 14px; color: #6b5d4d; margin-top: 6px; max-width: 290px; }
+  .skema textarea { width: 100%; min-height: 90px; font: inherit; padding: 10px; border: 2px solid #eadfca; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+  </div>
+</nav>
+
+<main class="konto-side">
+  <div class="wrap">
+    <div class="panel smal skema" id="skema">
+      <h2>Hvordan gik det?</h2>
+      <p id="intro">Henter spørgeskemaet …</p>
+      <form id="form" novalidate hidden></form>
+      <p class="besked" id="besked" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var n = new URLSearchParams(location.search).get('n') || '';
+  var form = $('form'), besked = $('besked');
+
+  function fejl(t) { besked.textContent = t; besked.className = 'besked fejl'; }
+  function el(tag, attrs, tekst) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) e.setAttribute(k, attrs[k]);
+    if (tekst) e.textContent = tekst;
+    return e;
+  }
+
+  function bygSpoergsmaal(s) {
+    var fs = el('fieldset'), lg = el('legend', {}, s.tekst);
+    fs.appendChild(lg);
+    if (s.slags === 'valg' || s.slags === 'flere') {
+      var boks = el('div', { 'class': 'valg' });
+      Object.keys(s.valg).forEach(function (k) {
+        var l = el('label'), i = el('input', { type: s.slags === 'valg' ? 'radio' : 'checkbox', name: s.nøgle, value: k });
+        l.appendChild(i); l.appendChild(el('span', {}, s.valg[k])); boks.appendChild(l);
+      });
+      fs.appendChild(boks);
+    } else if (s.slags === 'skala') {
+      var sk = el('div', { 'class': 'skala' });
+      for (var v = 1; v <= 5; v++) {
+        var l2 = el('label'), i2 = el('input', { type: 'radio', name: s.nøgle, value: v });
+        l2.appendChild(i2); l2.appendChild(el('span', {}, String(v))); sk.appendChild(l2);
+      }
+      fs.appendChild(sk);
+      var e = el('div', { 'class': 'ender' });
+      e.appendChild(el('span', {}, '1 = slet ikke enig')); e.appendChild(el('span', {}, '5 = helt enig'));
+      fs.appendChild(e);
+    } else {
+      fs.appendChild(el('textarea', { name: s.nøgle, maxlength: '2000', 'aria-label': s.tekst }));
+    }
+    return fs;
+  }
+
+  function samlSvar() {
+    var svar = {};
+    form.querySelectorAll('input:checked').forEach(function (i) {
+      if (i.type === 'checkbox') (svar[i.name] = svar[i.name] || []).push(i.value);
+      else svar[i.name] = i.value;
+    });
+    form.querySelectorAll('textarea').forEach(function (t) { if (t.value.trim()) svar[t.name] = t.value; });
+    return svar;
+  }
+
+  fetch('/api/spoergeskema.php?handling=hent&n=' + encodeURIComponent(n), { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d.ok) { $('intro').textContent = d.besked || 'Linket virker ikke.'; return; }
+      if (d.besvaret) { $('intro').textContent = 'Skemaet er allerede besvaret — tak for hjælpen!'; return; }
+      $('intro').textContent = (d.barn ? d.barn + ' har prøvet ' + (d.spil || 'Learnification') + '. ' : '')
+        + 'Det tager to minutter, og du kan springe over, hvad du vil.';
+      d.spoergsmaal.forEach(function (s) { form.appendChild(bygSpoergsmaal(s)); });
+      form.appendChild(el('button', { 'class': 'btn btn-primary', type: 'submit' }, 'Send svar'));
+      form.hidden = false;
+    }).catch(function () { $('intro').textContent = 'Kunne ikke komme i kontakt med serveren. Prøv linket igen om lidt.'; });
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var knap = form.querySelector('button');
+    knap.disabled = true;
+    fetch('/api/spoergeskema.php', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-LF': '1' },
+      body: JSON.stringify({ handling: 'svar', n: n, svar: samlSvar() })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) { fejl(d.besked || 'Noget gik galt.'); knap.disabled = false; return; }
+      form.hidden = true;
+      $('intro').textContent = 'Tak! Dine svar er sendt.';
+      besked.textContent = '';
+    }).catch(function () { fejl('Kunne ikke sende. Prøv igen om lidt.'); knap.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>

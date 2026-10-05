@@ -56,6 +56,10 @@
     bog: { bpm: 70, mel: 'E5 . - G5 . - B5 . A5 . - - - - - - D5 . - F#5 . - A5 . G5 . - - - - - -', ch: ['E3 B3', 'C3 G3', 'D3 A3', 'B2 F#3'] },
     alk: { bpm: 76, mel: 'A4 . C5 . E5 . D#5 . E5 . - - - - - - G4 . B4 . D5 . C#5 . D5 . - - - - - -', ch: ['A2 E3', 'F2 C3', 'G2 D3', 'E2 B2'] },
     farve: { bpm: 72, mel: 'D5 . - - C5 . - - Bb4 . A4 . - - - - D5 . - - F5 . E5 . D5 . - - - - - -', ch: ['D3 A3', 'Bb2 F3', 'C3 G3', 'A2 E3'] },
+    // Kapitel 2: en rolig skovsti i d-mol/dorisk, med lange pauser (mos, tåge og ugler)
+    skov: { bpm: 66, mel: 'D5 . - A4 . - C5 . D5 . F5 . - - - - E5 . - D5 . - C5 . A4 . - - - - - - G4 . - A4 . - D5 . - C5 . - - - - - -', ch: ['D3 A3', 'Bb2 F3', 'G2 D3', 'A2 E3'] },
+    // Kapitel 3: havnen — en let, vuggende melodi i g-dur
+    hav: { bpm: 92, mel: 'G4 . B4 D5 . B4 G4 . A4 B4 . - - - - - E5 . D5 B4 . D5 E5 . D5 B4 . - - - - - C5 . E5 G5 . E5 D5 . B4 A4 . - G4 . A4 B4 . G4 - - - - -', ch: ['G2 D3', 'C3 G3', 'E3 B3', 'D3 A3'] },
     fest: { bpm: 112, mel: 'G5 . E5 C5 . E5 G5 . C6 . - - B5 . A5 . F5 . A5 . C6 . B5 . G5 . - - - - - -', ch: ['C3 G3', 'F2 C3', 'D3 A3', 'G2 D3'] }
   };
 

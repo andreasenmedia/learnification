@@ -39,6 +39,7 @@ const SKOLEELEV_LEVETID = 10 * 3600;
 const HJEMMEBARN_LEVETID = 30 * 86400;
 
 const SPIL = ['regnehelten' => 'Regnehelten', 'runeborg' => 'Runeborg'];
+const KAPITLER = 3;                  // kapitler pr. spil — "færdig" er det sidste
 
 // Dyr til elevernes knapper. Hvert barn i en gruppe får sit eget.
 const IKONER = ['🦊', '🐻', '🐼', '🐸', '🦉', '🐢', '🦄', '🐝', '🐬', '🦁', '🐯', '🐨',
@@ -415,6 +416,29 @@ function opret_tabeller(PDO $pdo): void
             'ALTER TABLE konti ADD COLUMN paamindelse_sendt INTEGER',
             'ALTER TABLE konti ADD COLUMN paamindelse_fejl INTEGER NOT NULL DEFAULT 0',
         ],
+        // Prøvetiden (én time pr. barn, se tid_status()) og spørgeskemaet
+        // (api/_spoergeskema.php): ekstra minutter / fri adgang giver admin
+        // pr. konto, skema_sendt er claim-feltet (kun ét skema pr. konto)
+        9 => [
+            'ALTER TABLE konti ADD COLUMN ekstra_min INTEGER NOT NULL DEFAULT 0',
+            'ALTER TABLE konti ADD COLUMN fri_adgang INTEGER NOT NULL DEFAULT 0',
+            'ALTER TABLE konti ADD COLUMN skema_sendt INTEGER',
+            'ALTER TABLE konti ADD COLUMN skema_fejl INTEGER NOT NULL DEFAULT 0',
+            "CREATE TABLE spoergeskemaer (
+                id $id,
+                konto_id INTEGER NOT NULL,
+                noegle $tekst NOT NULL UNIQUE,
+                aarsag $tekst NOT NULL,
+                elev_id INTEGER,
+                spil $tekst,
+                sendt INTEGER,
+                aabnet INTEGER,
+                besvaret INTEGER,
+                svar TEXT,
+                FOREIGN KEY (konto_id) REFERENCES konti(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE INDEX spoergeskemaer_konto ON spoergeskemaer (konto_id)',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
@@ -745,6 +769,25 @@ function gemt_status(string $spil, string $data, int $opdateret): ?array
     if (!is_array($d) || !empty($d['slettet'])) {
         return null;
     }
+    // Udgaverne med kapitler (Runeborg v2, Regnehelten v3): færdig = sidste kapitel klaret
+    if (($spil === 'regnehelten' && (int) ($d['v'] ?? 0) >= 3) || ($spil === 'runeborg' && (int) ($d['v'] ?? 0) >= 2)) {
+        $klaret = array_map('intval', (array) ($d['klaret'] ?? []));
+        $kap = max(1, min(KAPITLER, (int) ($d['kap'] ?? 1)));
+        $faerdig = in_array(KAPITLER, $klaret, true);
+        $ekstra = 0;
+        foreach ((array) ($d['q'] ?? []) as $id => $status) {
+            if ($status === 'done' && preg_match('/^(k\d)?s\d+$/', (string) $id)) {
+                $ekstra++;
+            }
+        }
+        $detalje = $spil === 'regnehelten'
+            ? 'Regnekraft ' . (int) ($d['kraft'] ?? 0) . ' % · ' . count($klaret) . ' af ' . KAPITLER . ' kapitler klaret · ' . $ekstra . ' ekstramissioner'
+            : count($klaret) . ' af ' . KAPITLER . ' kapitler klaret · ' . $ekstra . ' ekstramissioner · '
+                . count((array) ($d['runes'] ?? [])) . ' runestykker · ' . (int) ($d['gold'] ?? 0) . ' guld';
+        return ['faerdig' => $faerdig, 'kapitel' => $kap, 'opdateret' => $opdateret,
+                'tekst' => $faerdig ? 'Gennemført' : 'Kapitel ' . $kap . ' af ' . KAPITLER,
+                'detalje' => $detalje];
+    }
     if ($spil === 'regnehelten' && (int) ($d['v'] ?? 0) === 2) {
         // Udgaven bygget som Runeborg (spil/regnehelten/js/game.js, fresh())
         $q = (array) ($d['q'] ?? []);
@@ -839,6 +882,38 @@ function spilletid(string $hvor, array $p): array
                                    'gange' => (int) $x['gange']];
     }
     return $ud;
+}
+
+// ------------------------------------------------------------ prøvetiden
+
+const TIDSGRAENSE_MIN = 60;          // minutter pr. barn på tværs af begge spil
+
+/** Grundgrænsen i minutter. tidsgraense.txt i datamappen overstyrer den (til test: 1). */
+function tidsgraense_min(): int
+{
+    $f = @file_get_contents(datamappe() . '/tidsgraense.txt');
+    return $f !== false && ctype_digit(trim($f)) ? (int) trim($f) : TIDSGRAENSE_MIN;
+}
+
+/**
+ * Hvor meget af prøvetiden en spiller har brugt. $h er hvem(). Et barn måles
+ * på sig selv, en voksen, der selv spiller, på den voksnes egne omgange.
+ * Administratorer og konti med fri adgang har ingen grænse (graense_sek = null).
+ * Ekstra minutter fra admin gælder alle på kontoen.
+ */
+function tid_status(array $h): array
+{
+    $k = $h['konto'];
+    $elev_id = $h['elev'] ? (int) $h['elev']['id'] : null;
+    $brugt = (int) ($elev_id
+        ? vaerdi('SELECT COALESCE(SUM(sekunder), 0) FROM sessioner WHERE elev_id = ?', [$elev_id])
+        : vaerdi('SELECT COALESCE(SUM(sekunder), 0) FROM sessioner WHERE konto_id = ? AND elev_id IS NULL', [$k['id']]));
+    if ($k['type'] === 'admin' || !empty($k['fri_adgang'])) {
+        return ['graense_sek' => null, 'brugt_sek' => $brugt, 'tilbage_sek' => null, 'slut' => false];
+    }
+    $graense = (tidsgraense_min() + (int) ($k['ekstra_min'] ?? 0)) * 60;
+    $tilbage = max(0, $graense - $brugt);
+    return ['graense_sek' => $graense, 'brugt_sek' => $brugt, 'tilbage_sek' => $tilbage, 'slut' => $tilbage <= 0];
 }
 
 /** Spilletid pr. dag de sidste $dage dage, som ['2026-09-25' => sekunder]. */
