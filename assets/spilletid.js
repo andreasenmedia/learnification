@@ -1,6 +1,6 @@
 /* Login foran spillene, og måling af spilletid.
 
-   Bruges af spillersiderne (/spil/ og /spil/runeborg/):
+   Bruges af spillersiderne (/spil/regnehelten/ og /spil/runeborg/):
 
      LFSpil.start({
        spil: 'regnehelten',           // skal stå i SPIL i api/_kerne.php

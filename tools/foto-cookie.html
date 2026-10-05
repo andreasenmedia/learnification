@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="da">
+<head><meta charset="UTF-8"><title>Foto</title></head>
+<body>
+<!-- Bruges af tools/regnehelten-billeder.py. Spillene kræver login i
+     testperioden; en (falsk) login-cookie lader dem starte på den lokale
+     server, hvor PHP ikke kører. Siden bliver ikke lagt op (tools/ er
+     udeladt i deploy.yml). -->
+<script>
+document.cookie = 'lf_in=elev.0; path=/';
+location.replace('/spil/regnehelten/#foto=' + location.hash.slice(1));
+</script>
+</body>
+</html>

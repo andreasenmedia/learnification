@@ -1,7 +1,8 @@
 # Learnification.dk
 
-Statisk hjemmeside for Learnification — danske læringsspil til børn. Første
-spil er **Regnehelten**, som kan spilles direkte i browseren.
+Statisk hjemmeside for Learnification — danske læringsspil til børn. Spillene
+er **Runeborg** og **Regnehelten**. Begge er skrevet i ren JavaScript, bygget
+på samme måde og spilles direkte i browseren.
 
 Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 
@@ -11,7 +12,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 |---|---|---|
 | `index.html` | `/` | Forside: hvad Learnification er, spilkort, skærmbilleder |
 | `regnehelten.html` | `/regnehelten` | Om spillet: steder, opgavetyper, Regnebogen, Regnekraft |
-| `spil/index.html` | `/spil/` | Selve spilleren — spillet i en ramme med tastaturhjælp |
+| `spil/index.html` | `/spil/` | Sender videre til `/spil/regnehelten/`, så gamle links og QR-koder virker |
 | `for-voksne.html` | `/for-voksne` | Forældre og lærere: hvad barnet øver, data, FAQ |
 | `om.html` | `/om` | Om Learnification |
 | `privatliv.html` | `/privatliv` | Privatlivs- og cookiepolitik. **Ret den, når noget nyt gemmes** |
@@ -19,7 +20,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `tilmeld.php` | — | Tager imod tilmeldinger til spørgeskemaet |
 | `resultat.php` | — | Tager imod resultater fra testomgangene |
 | `.htaccess` | — | Serveropsætning. **Læs den, før du retter i strukturen** |
-| `spil/regnehelten/` | — | Spilpakken fra pygbag. **Overskrives ved hver bygning** |
+| `spil/regnehelten/` | `/spil/regnehelten/` | Selve Regnehelten — bygget som Runeborg, ingen bygning |
 | `runeborg.html` | `/runeborg` | Om Runeborg: historien, PISA-grundlaget, missionerne |
 | `spil/runeborg/` | `/spil/runeborg/` | Selve Runeborg — skrevet direkte her, ingen bygning |
 | `login.html` | `/login` | Log ind: elev med sin egen kode, voksen med mail og kodeord, glemt kodeord |
@@ -97,8 +98,56 @@ starter den lokale server, åbner spillet i en usynlig Chrome med
 `#foto=<scene>` og gemmer `assets/billeder/runeborg-*.png`. Fototilstanden
 gemmer intet.
 
-`assets/billeder/*.png` er rigtige skærmbilleder fra spillet, lavet af
-`tools/screenshots.py` i spillets eget projekt.
+## Regnehelten
+
+Matematikspil for 1.-6. klasse. Det var oprindeligt skrevet i Python
+(pygame) og kørte i browseren som WebAssembly. I oktober 2026 blev det bygget
+om, så det er **bygget og spilles præcis som Runeborg**: samme motor, samme
+styring (piletaster/WASD eller joystick, `E`, `B` for Dagbogen, `Esc`), samme
+vinduer, skrift, gemning og oplæsning. Filerne i `spil/regnehelten/` **er**
+spillet — ingen bygning. Tæl `?v=` op i `spil/regnehelten/index.html`, når en
+`.js`- eller `.css`-fil er lavet om. Python-udgaven ligger stadig i
+`Claude/Projects/matematik-eventyr`, men er ikke længere den, siden kører.
+
+| Fil | Hvad |
+|---|---|
+| `js/opgaver.js` | **Matematikken**: klassetrinnene (Fælles Mål), regneloftet og de tolv opgavesæt. Oversat linje for linje fra `content.py` i Python-udgaven |
+| `js/content.js` | Historien: personer, missioner, opgavesættenes replikker, Regnebogens sider, tingene i tasken |
+| `js/world.js` | Kvarteret (hjem, supermarked, kiosk, bibliotek, skole, park) og de fem rum |
+| `js/art.js` | Grafikken — et dansk kvarter i oktober, tegnet i kode som Runeborgs |
+| `js/game.js` | Motoren (Runeborgs) plus opgavesæt, belønninger og pausespil |
+| `js/ui.js` | Dialog, de otte måder at svare på, Dagbogen (missioner, Regnebogen, tasken), Klæd om og Straffespark |
+| `js/audio.js` | De samme rolige temaer som i Python-udgaven, spillet på Runeborgs bløde klang |
+| `js/voice.js`, `js/gem.js` | Som i Runeborg |
+| `js/resultat.js` | Sender resultatet til `resultat.php` i samme format som før |
+
+**Klassetrinnene skal holde.** Efter enhver ændring i `js/opgaver.js`:
+
+```bash
+python tools/regnehelten-tjek.py
+```
+
+Den laver ca. 88.000 opgaver i en usynlig Chrome og måler hver eneste mod
+trinnenes regler (de samme som `tjek_klassetrin.py` i Python-udgaven:
+regningsarter, talområde, regneloft, fortegn) — og tjekker, at alle
+byg-selv-opgaver kan løses, og at hvert facit bliver godkendt.
+
+**Oplæsning:** `python tools/regnehelten-stemmer.py`, som i Runeborg.
+Opgaverne bliver lavet på stedet med nye tal hver gang, så de kan ikke
+indtales på forhånd; dem læser enhedens egen danske stemme op, hvis den har
+en (fx iPad). Ellers vises knappen "Læs op" ikke ved opgaven.
+
+**Gemte spil:** `regnehelten-v2[-elev.<id>]`, `regnehelten-synk-<id>` og
+`regnehelten-indstillinger` i `localStorage` og serveren via `js/gem.js`.
+Et spil gemt med Python-udgaven bliver læst og ført over
+(`fraFoersteUdgave()` i game.js): navn, klassetrin, udseende, hvor langt man
+nåede, Regnekraft, tasken og omgangens resultater. `gemt_status()` i
+`api/_kerne.php` kender begge formater.
+
+**Test fra konsollen:** `RH.debug.tp('by', 52, 10)` teleporterer,
+`RH.debug.S` er hele tilstanden. **Skærmbilleder:**
+`python tools/regnehelten-billeder.py` → `assets/billeder/regnehelten-*.png`
+(fototilstanden `#foto=<scene>`).
 
 ## Udseende
 
@@ -199,16 +248,15 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   logget ud med det samme.
 
 **Spilletid** bliver målt af `assets/spilletid.js` på begge spillersider. Et
-sekund tæller, når spillet er fremme på skærmen, spillet er i gang (på
-Regnehelten: efter der er trykket Spil), og nogen har rørt tastatur, mus
+sekund tæller, når spillet er fremme på skærmen, og nogen har rørt tastatur, mus
 eller skærm inden for to minutter. Tiden sendes til `api/spilletid.php` hvert
 halve minut og med `sendBeacon`, når fanen lukkes. Serveren lægger aldrig
 mere tid til, end der faktisk er gået siden sidste puls (højst 90 sek. ad
 gangen), og en pause på over en halv time starter en ny "omgang".
 
 **Sådan slukkes login-kravet**, når testen er slut: sæt
-`var KRAEV_LOGIN = true;` til `false` i både `spil/index.html` og
-`spil/runeborg/index.html`. Så kan alle spille, og tiden bliver stadig talt
+`var KRAEV_LOGIN = true;` til `false` i både `spil/regnehelten/index.html`
+og `spil/runeborg/index.html`. Så kan alle spille, og tiden bliver stadig talt
 for dem, der er logget ind. Login-kravet er lavet i JavaScript og er ikke en
 lås — spilfilerne kan hentes direkte. Skal spillene en dag bag betaling, skal
 de leveres gennem PHP i stedet.
@@ -296,11 +344,11 @@ Mens spillet er til test, sender det hjem, hvad spilleren nåede at løse.
 | `resultater.csv` | Én linje pr. omgang — navn, klassetrin, opgaver, hvor mange i første forsøg, procent, regnekraft, minutter, hvor langt de nåede, og om spillet blev spillet færdigt |
 | `resultater/<id>.json` | Hele omgangen, opgave for opgave: spørgsmål, emne, facit, antal forsøg |
 
-**Hvornår der bliver sendt.** Spillet sender selv, hver gang en runde er
-ovre, og når spillet er færdigt. Lukker nogen fanen midt i en opgave, når
-Python ikke at gøre noget — derfor lægger spillet hele tiden den nyeste
-udgave i sit `window.lfResultat`, og siden omkring spillet sender den med
-`navigator.sendBeacon`, som netop overlever, at siden forsvinder.
+**Hvornår der bliver sendt.** Spillet sender efter hver opgave (højst hvert
+8. sekund), når et opgavesæt er færdigt, når spillet er slut, og når fanen
+bliver lukket eller skjult — med `navigator.sendBeacon`, som netop
+overlever, at siden forsvinder (`js/resultat.js`). Omgangen ligger i det
+gemte spil, så en omgang, der fortsættes på en anden skærm, er den samme.
 
 Den samme omgang melder sig altså flere gange. Den bliver kendt på sit id
 og **opdateret** i CSV-filen, ikke lagt til igen. Der kommer kun mail, når
@@ -313,10 +361,9 @@ tilmeldingerne, og teksten på `/for-voksne` fortæller præcis, hvad der
 bliver sendt, og at det slettes, når testen er slut. Ændres der på, hvad
 spillet sender, **skal den tekst rettes samtidig** — den er et løfte.
 
-**Sådan slukkes det igen:** når testen er slut, fjernes afsendelsen ved at
-sætte `KRAEV_TILMELDING = false` i `spil/index.html` (så forsvinder porten)
-og slette `resultat.send(...)`-kaldene i spillets `main.py`. Så kører
-spillet igen uden at sende noget som helst.
+**Sådan slukkes det igen:** når testen er slut, slettes
+`RH.resultat.send(...)`-kaldene i `spil/regnehelten/js/game.js`. Så sender
+spillet ikke noget som helst.
 
 ## Læg siden op på Simply.com
 
@@ -361,82 +408,32 @@ gyldigt certifikat at møde dem med.
 Bruger du Simply.coms eget webhotel, peger domænet allerede på deres
 servere, og der skal ikke røres ved DNS.
 
-## Sådan bliver spillet opdateret
+## Sådan bliver spillene opdateret
 
-Spillet ligger i `Claude/Projects/matematik-eventyr`:
-
-```bash
-cd ~/Claude/Projects/matematik-eventyr
-python tools/build_web.py
-cd ~/Claude/Projects/learnification
-git rm spil/regnehelten/regnehelten.*.apk spil/regnehelten/regnehelten.*.tar.gz
-cp ~/Claude/Projects/matematik-eventyr/build/web/* spil/regnehelten/
-```
-
-**Bemærk `git rm`-linjen.** Spilpakken hedder `regnehelten.<stempel>.tar.gz`,
-hvor stemplet følger indholdet, så den hedder noget nyt, hver gang den er
-lavet om. Den gamle bliver derfor ikke skrevet over af `cp` — den skal
-fjernes, ellers ligger der to pakker og fylder. Bliver den fjernet i repoet,
-sletter FTP-uploaden den også på serveren.
-
-**Spilleren behøver ikke gøre noget for at få den nye udgave** — heller
-ikke en hård genindlæsning. Der er to lag om det:
-
-1. **Pakken skifter navn, når den skifter indhold.** En adresse, browseren
-   aldrig har set før, kan ikke ligge gammel i dens lager. Det er `tools/build_web.py`
-   i spillets projekt, der sætter stemplet på og skriver de to linjer om i
-   `index.html`, hvor indlæseren henter pakken.
-2. **Alt under `/spil/` bliver leveret med `Cache-Control: no-cache`**
-   (afsnit 6 i `.htaccess`), så browseren spørger serveren hver gang, om
-   `index.html` er lavet om — og det er dén fil, der peger på pakkens nye
-   navn. Er der ikke noget nyt, svarer serveren `304` uden at sende noget.
-
-Det første lag er dét, der virker; det andet er dét, der sørger for, at
-det første bliver opdaget. Før begge dele lå spilpakken en time i Chromes
-lager, uden at browseren overhovedet spurgte.
-
-Nye skærmbilleder til hjemmesiden:
-
-```bash
-cd ~/Claude/Projects/matematik-eventyr
-python tools/screenshots.py
-cp build/billeder/*.png ~/Claude/Projects/learnification/assets/billeder/
-```
+Begge spil ligger direkte i repoet: ret filerne, tæl `?v=` op i spillets
+`index.html`, og skub til `main`. Alt under `/spil/` bliver leveret med
+`Cache-Control: no-cache` (afsnit 6 i `.htaccess`), så browseren spørger
+serveren, om en fil er lavet om — og `?v=` sørger for, at en ny `.js`-fil
+aldrig blandes med en gammel.
 
 ## Ting man skal vide, før man laver om
 
 **`/spil/` er en mappe, ikke `spil.html`.** Det er med vilje. Ligger der
 både en fil `spil.html` og en mappe `spil/`, sender Apache folk i ring.
-Derfor hedder spillersiden `spil/index.html`.
-
-**Spillet skal hentes ind i rammen, før nogen klikker.** Browseren giver
-først et spil lyd og tastatur, når brugeren har rørt ved siden, og den
-tilstand gælder kun for rammer, der allerede findes på klikketidspunktet.
-Derfor har `<iframe id="game">` sin `src` fra start, og startskærmen ligger
-_oven på_ den. Laver man rammen først, når der trykkes "Spil", starter
-spillet aldrig.
+`spil/index.html` sender videre til `/spil/regnehelten/` — den skal blive
+liggende, for gamle links og QR-koder på tryksager peger på `/spil/`.
 
 **Retter du `style.css` eller `script.js`, så tæl `?v=` op.** Begge filer
 ligger en måned i de besøgendes browser, og uden et nyt tal i adressen får
 de, der har været her før, den gamle udgave. Tallet står i `<head>` på alle
 sider — de skal følges ad.
 
-**`.tar.gz` må ikke leveres med `Content-Encoding: gzip`.** Spillet pakker
-selv filen ud med Pythons `tarfile`. Pakker serveren den ud undervejs,
-fejler spillet. `RemoveEncoding .gz` i `.htaccess` er dét, der forhindrer
-det — fjern den ikke.
-
-**Sæt aldrig `Cross-Origin-Embedder-Policy` på spilsiden.** Spillet henter
-sin Python-motor fra `pygame-web.github.io`, og `require-corp` ville blokere
-den hentning.
-
 ## Afhængigheder udefra
 
-- **pygame-web.github.io** leverer Python-motoren til spillet (ca. 20-30 MB,
-  som browseren gemmer efter første besøg). Går den ned, kan spillet ikke
-  starte. Skal det undgås, kan motoren lægges på eget webhotel og pygbag
-  køres med `--cdn https://learnification.dk/motor/`. Det ville også gøre
-  GitHub til en tredjepart mindre — i dag står den på `/privatliv`.
+Ingen. Begge spil, skrifterne og oplæsningen ligger på vores eget webhotel.
+(Indtil oktober 2026 hentede Regnehelten sin Python-motor fra
+`pygame-web.github.io` hos GitHub; reglerne for `.tar.gz` i `.htaccess` er
+fra dengang og gør ingen skade.)
 
 ## Cookies og privatliv
 
@@ -489,8 +486,8 @@ IKKE har sagt ja:
 
 **Mål (konverteringer)** tælles med `LFMaal('navn')` fra siderne:
 `nyhedsbrev` (nyhedsbrev.js), `opret_konto` (opret.html),
-`spil_regnehelten` (spil/index.html, Spil-knappen) og `spil_runeborg`
-(første tryk i Runeborg). Nye navne skal også i `MAAL` i `api/besoeg.php`
+`spil_regnehelten` og `spil_runeborg` (første tryk eller tast i hvert
+spil). Nye navne skal også i `MAAL` i `api/besoeg.php`
 og `MAALRAEKKE` i `statistik.html`. Har den besøgende sagt ja til
 markedsføring, sendes målet også videre til pixels (`konvertering()` i
 `samtykke.js`).
@@ -585,14 +582,10 @@ første gang, hvis serveren intet har. "Start forfra" gemmer
 `{"slettet":true}` på serveren, så "Fortsæt" ikke kommer igen. Konflikt →
 `UI.konflikt()` → det nyeste hentes, og siden genindlæses.
 
-Regnehelten gemmer selv (`gemning.py` i spillets repo): efter hver runde,
-ved dørskift, efter pausespil og hvert 20. sekund, hvis spilleren har flyttet
-sig. I browseren sender spillet det gemte til `api/gem.php` (tabellen
-`gemte_spil`, én pr. spiller pr. spil) og lægger en kopi i `localStorage`.
-Siden sender altid den udgave med, den byggede videre på; har en anden skærm
-gemt noget nyere imens, svarer serveren 409, og spillet beder barnet hente
-det nyeste. Test lokalt på `127.0.0.1`, ikke `localhost` — på `localhost`
-henter pygbag sine pakker fra `localhost:8000`, og spillet starter aldrig.
+**Regnehelten** (`spil/regnehelten/js/gem.js`, siden 2026-10-05) gemmer
+præcis som Runeborg — efter hver opgave, ved dørskift og når fanen lukkes
+eller skjules. Et spil gemt med Python-udgaven (`gemning.py`) bliver ført
+over første gang.
 
 ## Test lokalt som på Simply.com
 
@@ -634,6 +627,5 @@ skrives ind i denne fil — repoet er offentligt.
 Vil serveren ikke tale FTPS, så skift `protocol: ftps` til `ftp` i
 workflow-filen — men så sendes adgangskoden ukrypteret.
 
-Spilpakken i `spil/regnehelten/` **er** med i repoet med vilje. Den bliver
-bygget i spillets eget projekt, ikke her, så uden den er der ikke noget at
-lægge op.
+Begge spil ligger direkte i repoet — der er ingen bygning og intet at
+hente fra andre projekter.

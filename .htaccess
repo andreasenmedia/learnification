@@ -15,8 +15,9 @@ DirectoryIndex index.html
 # 1. SPILLET - den vigtigste del af filen
 # ==========================================================================
 #
-# Spillet henter sig selv ned som regnehelten.tar.gz og pakker den ud i
-# browseren med Pythons tarfile ("r:gz").
+# (Fra Regneheltens foerste udgave, der var Python i browseren og hentede
+# sig selv som regnehelten.tar.gz. Begge spil er nu almindelig JavaScript,
+# saa reglerne her goer ikke noget laengere - men de skader heller ikke.)
 #
 # Mange Apache-servere er sat op til at sige Content-Encoding: gzip om alt
 # der ender paa .gz. Saa pakker browseren filen ud paa forhaand, spillet
@@ -37,9 +38,8 @@ DirectoryIndex index.html
   AddType font/woff2 .woff2
 </IfModule>
 
-# Spilmappen er bygget af pygbag og bliver skrevet over ved hver ny
-# bygning. Lad vaere med at rette i den - og hold reglerne nedenfor vaek
-# fra den.
+# Spilmapperne /spil/runeborg/ og /spil/regnehelten/ er almindelige filer:
+# HTML, JavaScript og lydfiler med oplaesningen.
 
 
 # ==========================================================================
@@ -130,9 +130,9 @@ ErrorDocument 404 /404.html
     Header set Content-Security-Policy "frame-ancestors 'self'"
   </FilesMatch>
 
-  # VIGTIGT: saet ALDRIG Cross-Origin-Embedder-Policy her. Spillet henter
-  # sin Python-motor fra pygame-web.github.io, og "require-corp" ville
-  # blokere den hentning, saa spillet bliver haengende i "Loading".
+  # Cross-Origin-Embedder-Policy er ikke sat. Regneheltens foerste udgave
+  # hentede sin Python-motor fra pygame-web.github.io, og "require-corp"
+  # blokerede den. Det goer spillet ikke laengere.
 </IfModule>
 
 # ==========================================================================

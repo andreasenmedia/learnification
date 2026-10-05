@@ -8,7 +8,7 @@ serveren (se exclude-listen i .github/workflows/deploy.yml).
 """
 import os
 import sys
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
 ROOT = sys.argv[1]
@@ -89,4 +89,6 @@ class Handler(SimpleHTTPRequestHandler):
         sys.stderr.write("%s %s\n" % (self.address_string(), fmt % args))
 
 
-HTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+# Med flere traade paa en gang: en enkelt traad haenger i browseren,
+# saa snart der kommer to forespoergsler samtidig.
+ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

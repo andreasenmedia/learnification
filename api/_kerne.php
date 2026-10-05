@@ -735,8 +735,9 @@ function adresse(): string
 /**
  * Et gemt spil som en kort status til overblikket (/admin og /konto): hvor langt, og om det
  * er gennemført. null, hvis der ikke er noget (eller det er startet forfra).
- * Formatet er spillenes eget — se til_gem() i Regnehelten og fresh() i
- * spil/runeborg/js/game.js, hvis tallene her en dag ser forkerte ud.
+ * Formatet er spillenes eget — se fresh() i spil/regnehelten/js/game.js og
+ * spil/runeborg/js/game.js (og til_gem() i Regneheltens første udgave),
+ * hvis tallene her en dag ser forkerte ud.
  */
 function gemt_status(string $spil, string $data, int $opdateret): ?array
 {
@@ -744,7 +745,28 @@ function gemt_status(string $spil, string $data, int $opdateret): ?array
     if (!is_array($d) || !empty($d['slettet'])) {
         return null;
     }
+    if ($spil === 'regnehelten' && (int) ($d['v'] ?? 0) === 2) {
+        // Udgaven bygget som Runeborg (spil/regnehelten/js/game.js, fresh())
+        $q = (array) ($d['q'] ?? []);
+        $hoved = $ekstra = 0;
+        foreach ($q as $id => $status) {
+            if ($status !== 'done') {
+                continue;
+            }
+            if (preg_match('/^q\d+$/', (string) $id)) {
+                $hoved++;
+            } elseif (preg_match('/^s\d+$/', (string) $id)) {
+                $ekstra++;
+            }
+        }
+        $faerdig = (($q['q5'] ?? '') === 'done');
+        return ['faerdig' => $faerdig, 'opdateret' => $opdateret,
+                'tekst' => $faerdig ? 'Gennemført' : $hoved . ' af 6 missioner',
+                'detalje' => 'Regnekraft ' . (int) ($d['kraft'] ?? 0) . ' % · ' . $ekstra . ' af 6 ekstramissioner · '
+                             . count((array) ($d['bag']['owned'] ?? [])) . ' ting i tasken'];
+    }
     if ($spil === 'regnehelten') {
+        // Den første udgave (Python i browseren)
         $kapitel = max(0, min(6, (int) ($d['chapter'] ?? 0)));
         $faerdig = !empty($d['faerdig']) || $kapitel >= 6;
         return ['faerdig' => $faerdig, 'opdateret' => $opdateret,

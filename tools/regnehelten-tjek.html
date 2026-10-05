@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="da">
+<head><meta charset="UTF-8"><title>Regnehelten — opgaver til tjek</title></head>
+<body>
+<!-- Bruges af tools/regnehelten-tjek.py: laver mange opgavesæt pr. klassetrin
+     med spillets egen opgaver.js og lægger dem som JSON i #ud. -->
+<pre id="ud">venter</pre>
+<script src="/spil/regnehelten/js/opgaver.js"></script>
+<script>
+(function () {
+  var O = RH.opgaver, runder = +(location.hash.slice(1) || 300), ud = [];
+  O.KLASSER.forEach(function (k) {
+    Object.keys(O.SAET).forEach(function (navn) {
+      for (var i = 0; i < runder; i++) O.lav(navn, k).forEach(function (sp) {
+        var fejl = null;
+        if (sp.kind === 'build') { var r = O.checkCreative(sp.puzzle.expr, sp.puzzle); if (!r[0]) fejl = 'byg-selv kan ikke løses med sit eget facit: ' + sp.puzzle.expr + ' (' + r[1] + ')'; }
+        if (sp.kind === 'write' || sp.kind === 'sequence') { if (!O.checkNumeric(String(sp.answer).replace('.', ','), sp.answer)) fejl = 'facit ' + sp.answer + ' godkendes ikke af talkontrollen'; }
+        ud.push({ k: k, navn: navn, sp: sp, fejl: fejl });
+      });
+    });
+  });
+  document.getElementById('ud').textContent = JSON.stringify(ud);
+})();
+</script>
+</body>
+</html>

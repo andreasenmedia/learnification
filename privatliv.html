@@ -9,7 +9,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Privatliv og cookies · Learnification">
 <meta property="og:description" content="Kun nødvendige cookies, ingen sporing og ingen reklamer. Her står præcis, hvad vi gemmer.">
-<meta property="og:image" content="https://learnification.dk/assets/billeder/titel.png">
+<meta property="og:image" content="https://learnification.dk/assets/billeder/regnehelten-titel.png">
 <meta property="og:url" content="https://learnification.dk/privatliv">
 <link rel="canonical" href="https://learnification.dk/privatliv">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -103,7 +103,9 @@
         <tr><td><code>runeborg-synk-&lt;nr&gt;</code></td><td>Hvilken udgave af det gemte eventyr kopien i browseren bygger på, så en gammel fane ikke gemmer oven i nyere fremskridt fra en anden skærm.</td><td>Til man starter forfra eller rydder browseren</td></tr>
         <tr><td><code>runeborg-indstillinger</code></td><td>Om musik, lydeffekter og oplæsning er slået til, og om teksten skal være stor.</td><td>Til man rydder browseren</td></tr>
         <tr><td><code>lf-tester</code></td><td>At denne browser har meldt sig til testen, så vi ikke spørger igen.</td><td>Til man rydder browseren</td></tr>
-        <tr><td><code>regnehelten-gem:&lt;nr&gt;</code></td><td>En kopi af det gemte Regnehelten-spil (se "Gemte spil" nedenfor), så intet går tabt, hvis nettet forsvinder et øjeblik.</td><td>Til man starter forfra eller rydder browseren</td></tr>
+        <tr><td><code>regnehelten-v2</code><br><code>regnehelten-v2-elev.&lt;nr&gt;</code></td><td>Hvor langt man er nået i Regnehelten — ét for hvert barn, der er logget ind. Er man logget ind, er det en kopi af det, der er gemt hos os (se "Gemte spil"). Et spil gemt med spillets første udgave (<code>regnehelten-gem:&lt;nr&gt;</code>) bliver læst, så man kan fortsætte.</td><td>Til man starter forfra eller rydder browseren</td></tr>
+        <tr><td><code>regnehelten-synk-&lt;nr&gt;</code></td><td>Hvilken udgave af det gemte spil kopien i browseren bygger på, så en gammel fane ikke gemmer oven i nyere fremskridt fra en anden skærm.</td><td>Til man starter forfra eller rydder browseren</td></tr>
+        <tr><td><code>regnehelten-indstillinger</code></td><td>Om musik, lydeffekter og oplæsning er slået til, og om teksten skal være stor.</td><td>Til man rydder browseren</td></tr>
       </tbody>
     </table></div>
 
@@ -132,7 +134,7 @@
 
     <h2 id="andre" style="margin-top:44px;">Hvem der ellers er involveret</h2>
     <p>Siden, skrifttyperne og al data ligger hos vores webhotel, <strong>Simply.com</strong> i Danmark, som er vores databehandler. Mails fra os bliver også sendt derfra.</p>
-    <p><strong>Én undtagelse:</strong> Regnehelten er skrevet i Python, og den motor, der kører Python i browseren, bliver hentet fra <code>pygame-web.github.io</code>, som drives af GitHub (ejet af Microsoft) i USA. Når spillet starter, ser GitHub derfor din IP-adresse og hvilken browser, du bruger — ligesom enhver side, man henter noget fra. GitHub får ikke navne, koder eller noget om, hvordan barnet spiller. GitHub er omfattet af EU-US Data Privacy Framework, som EU-Kommissionen har godkendt til overførsler til USA. Runeborg og resten af sitet henter intet fra andre.</p>
+    <p>Spillene og resten af sitet henter intet fra andre. (Indtil oktober 2026 hentede Regnehelten sin motor fra <code>pygame-web.github.io</code> hos GitHub. Det gør spillet ikke længere — det kører nu på samme måde som Runeborg, helt fra vores eget webhotel.)</p>
 
     <h2 id="gemmer" style="margin-top:44px;">Hvad vi gemmer, og hvorfor</h2>
     <p>Den fulde liste, skrevet i almindeligt sprog, står på <a href="/for-voksne#data">For forældre og lærere</a>. Kort fortalt:</p>
@@ -179,7 +181,7 @@
     </div>
     <div>
       <h4>Spil</h4>
-      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/">Spil Regnehelten</a></nav>
+      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/regnehelten/">Spil Regnehelten</a></nav>
     </div>
     <div>
       <h4>Learnification</h4>
