@@ -136,16 +136,17 @@
   var THROUGH = 'CmQnV';
 
   // Hvad står man over for? Personer bag en disk tæller med.
-  function facing() {
-    var fx = S.x + DX[S.dir], fy = S.y + DY[S.dir], m = mapNow();
+  function facingFrom(x, y, dir) {
+    var fx = x + DX[dir], fy = y + DY[dir], m = mapNow();
     var e = entityAt(fx, fy);
-    if (e) return { ent: e };
-    if (THROUGH.indexOf(m.at(fx, fy)) >= 0) { var e2 = entityAt(fx + DX[S.dir], fy + DY[S.dir]); if (e2) return { ent: e2 }; }
+    if (e) return { ent: e, x: fx, y: fy };
+    if (THROUGH.indexOf(m.at(fx, fy)) >= 0) { var e2 = entityAt(fx + DX[dir], fy + DY[dir]); if (e2) return { ent: e2, x: e2.x, y: e2.y }; }
     var key = S.map + ':' + fx + ',' + fy;
-    if (K.places[key]) return { place: K.places[key] };
-    if (K.lockedDoors[key]) return { locked: K.lockedDoors[key] };
+    if (K.places[key]) return { place: K.places[key], x: fx, y: fy };
+    if (K.lockedDoors[key]) return { locked: K.lockedDoors[key], x: fx, y: fy };
     return null;
   }
+  function facing() { return facingFrom(S.x, S.y, S.dir); }
 
   // ---------------------------------------------------------------- g: hjælpere til historien
   var g = {
@@ -255,9 +256,11 @@
         player.moving = false; player.px = S.x * T; player.py = S.y * T; arrive();
       }
     }
+    if (blockedInput) auto = null;
     if (!player.moving && !blockedInput) {
       var d = stickDir || (heldOrder.length ? heldOrder[heldOrder.length - 1] : null);
-      if (d) tryMove(d);
+      if (d) { auto = null; tryMove(d); }      // joystick og taster vinder over et tryk
+      else if (auto) autoSkridt();
     }
     // katten går i sporet efter spilleren
     if (S.flags.catFollow && cat.trail.length) {
@@ -637,8 +640,10 @@
     stickId = null; stickDir = null; zone.classList.remove('active');
     base.style.left = ''; base.style.bottom = ''; knob.style.transform = '';
   }
+  var stickNed = null;   // hvor og hvornår fingeren landede — et kort tryk er et tryk på verden
   zone.addEventListener('pointerdown', function (e) {
     e.preventDefault(); RB.audio.unlock(); wake();
+    stickNed = { x: e.clientX, y: e.clientY, t: performance.now() };
     stickId = e.pointerId; try { zone.setPointerCapture(e.pointerId); } catch (x) { }
     zone.classList.add('active');
     // joysticket flytter sig derhen, hvor tommelfingeren lander
@@ -652,9 +657,96 @@
     var br = base.getBoundingClientRect();
     moveStick(e.clientX - (br.left + br.width / 2), e.clientY - (br.top + br.height / 2));
   });
+  zone.addEventListener('pointerup', function (e) {
+    if (e.pointerId === stickId && erTryk(stickNed, e)) trykPaaVerden(e.clientX, e.clientY);
+  });
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { zone.addEventListener(ev, function (e) { if (e.pointerId === stickId) endStick(); }); });
-  document.getElementById('t-act').addEventListener('pointerdown', function (e) { e.preventDefault(); RB.audio.unlock(); interact(); });
+  document.getElementById('t-act').addEventListener('pointerdown', function (e) { e.preventDefault(); RB.audio.unlock(); if (!UI.advance()) interact(); });
   document.getElementById('t-book').addEventListener('pointerdown', function (e) { e.preventDefault(); openBook(); });
+
+  // ---------------------------------------------------------------- tryk på verden
+  // Tryk på en person eller ting: står man lige ved den, vender man sig og
+  // taler med den, som med E. Står man længere væk, går man selv derhen ad
+  // korteste vej først. Joystick og taster afbryder turen.
+  var auto = null;   // { vej: [retninger], dir, map }
+  function erTryk(ned, e) {
+    return !!ned && Math.abs(e.clientX - ned.x) < 14 && Math.abs(e.clientY - ned.y) < 14 && performance.now() - ned.t < 600;
+  }
+  // Pladserne (felt + retning), hvorfra man ser på feltet (tx, ty)
+  function pladserVed(tx, ty) {
+    var ud = [];
+    ['up', 'down', 'left', 'right'].forEach(function (dir) {
+      for (var n = 1; n <= 2; n++) {           // 2: hen over en disk
+        var x = tx - DX[dir] * n, y = ty - DY[dir] * n, f = facingFrom(x, y, dir);
+        if (f && f.x === tx && f.y === ty) ud.push({ x: x, y: y, dir: dir });
+      }
+    });
+    return ud;
+  }
+  // Korteste vej (bredde først) til en af pladserne. Døre går man uden om.
+  function vejTil(pladser) {
+    var m = mapNow(), fra = {}, koe = [[S.x, S.y]], set = 0;
+    fra[S.x + ',' + S.y] = null;
+    while (koe.length && set++ < 3000) {
+      var p = koe.shift(), k = p[0] + ',' + p[1];
+      for (var i = 0; i < pladser.length; i++) {
+        if (pladser[i].x === p[0] && pladser[i].y === p[1]) {
+          var vej = [];
+          while (fra[k]) { vej.unshift(fra[k].dir); k = fra[k].k; }
+          return { vej: vej, dir: pladser[i].dir, map: S.map };
+        }
+      }
+      ['up', 'down', 'left', 'right'].forEach(function (dir) {
+        var nx = p[0] + DX[dir], ny = p[1] + DY[dir], nk = nx + ',' + ny;
+        if (nk in fra || nx < 0 || ny < 0 || nx >= m.w || ny >= m.h) return;
+        if (blocked(nx, ny) || m.doorAt(nx, ny)) return;
+        fra[nk] = { k: k, dir: dir }; koe.push([nx, ny]);
+      });
+    }
+    return null;
+  }
+  function trykPaaVerden(cx, cy) {
+    if (!started || busy || UI.isOpen() || player.moving) return false;
+    var r = canvas.getBoundingClientRect();
+    var wx = (cx - r.left) * canvas.width / r.width + Math.round(cam.x);
+    var wy = (cy - r.top) * canvas.height / r.height + Math.round(cam.y);
+    var bx = Math.floor(wx / T), by = Math.floor(wy / T), felter = [];
+    // Feltet under fingeren først, så naboerne, hvis fingeren rammer tæt på kanten
+    for (var j = -1; j <= 1; j++) for (var i = -1; i <= 1; i++) {
+      var x = bx + i, y = by + j, dx = (x + 0.5) * T - wx, dy = (y + 0.5) * T - wy;
+      if (Math.sqrt(dx * dx + dy * dy) <= T * 0.95) felter.push({ x: x, y: y, d: dx * dx + dy * dy });
+    }
+    felter.sort(function (a, b) { return a.d - b.d; });
+    for (var n = 0; n < felter.length; n++) {
+      if (felter[n].x === S.x && felter[n].y === S.y) continue;
+      var pladser = pladserVed(felter[n].x, felter[n].y);
+      if (!pladser.length) continue;
+      var tur = vejTil(pladser);
+      if (!tur) continue;
+      auto = tur;
+      return true;
+    }
+    return false;
+  }
+  function autoSkridt() {
+    if (auto.map !== S.map) { auto = null; return; }
+    if (auto.vej.length) {
+      tryMove(auto.vej.shift());
+      if (!player.moving) auto = null;          // noget stod i vejen
+      return;
+    }
+    S.dir = auto.dir; auto = null;
+    interact();
+  }
+  var verdenNed = null;
+  canvas.addEventListener('pointerdown', function (e) { verdenNed = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  canvas.addEventListener('pointerup', function (e) {
+    if (e.button > 0 || !erTryk(verdenNed, e)) return;
+    verdenNed = null;
+    trykPaaVerden(e.clientX, e.clientY);
+  });
+  // Teksten nederst ("E Tal med …") kan man også trykke på
+  document.getElementById('prompt').addEventListener('click', function () { interact(); });
 
   // ---------------------------------------------------------------- løkken
   var last = 0, acc = 0;

@@ -25,9 +25,24 @@
     }
   });
 
+  // Tryk hvor som helst på skærmen går videre i dialog — ikke kun på
+  // tekstboksen. Et tryk tæller kun, hvis fingeren kom ned, EFTER at
+  // replikken kom frem; ellers ville trykket, der startede samtalen, springe
+  // den første replik over. Knapper (E, Bog, Menu, læs op) er undtaget.
+  var replikTid = 0, nede = {};
+  document.addEventListener('pointerdown', function (e) { nede[e.pointerId] = performance.now(); }, true);
+  document.addEventListener('pointerup', function (e) {
+    var t0 = nede[e.pointerId]; delete nede[e.pointerId];
+    if (!advanceFn || t0 === undefined || t0 < replikTid || e.button > 0) return;
+    if (e.target.closest && e.target.closest('button, a, input, textarea, select, label, #vkbd')) return;
+    advanceFn();
+  });
+
   var UI = RB.ui = {
     init: function () { layer = document.getElementById('layer'); },
     isOpen: function () { return open > 0; },
+    // E-knappen på skærmen: går videre i en replik, hvis der er en
+    advance: function () { if (!advanceFn) return false; advanceFn(); return true; },
 
     // ---------------------------------------------------------------- dialog
     say: function (who, text, speakText) {
@@ -62,8 +77,7 @@
           if (!done) { finish(); return; }
           advanceFn = null; RB.voice.stop(); RB.audio.sfx('blip'); pop(d); resolve();
         }
-        advanceFn = adv;
-        d.addEventListener('click', adv);
+        advanceFn = adv; replikTid = performance.now();
       });
     },
 

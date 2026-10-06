@@ -88,7 +88,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #prompt {
   position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
   background: rgba(20,15,28,.9); border: 2px solid var(--gold);
-  padding: 6px 14px; font-size: .9em; white-space: nowrap; pointer-events: none;
+  padding: 6px 14px; font-size: .9em; white-space: nowrap; cursor: pointer;
 }
 .key {
   display: inline-block; min-width: 1.5em; text-align: center;
