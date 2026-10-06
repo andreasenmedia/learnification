@@ -238,6 +238,8 @@
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/regnehelten'; home.style.textDecoration = 'none'; m.appendChild(home);
         // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
         if (window.LF_SPILLER && window.LFSpil) {
+          // Tilbage til spiloversigten; pagehide gemmer, før siden skifter
+          var andre = el('a', 'btn', 'Vælg et andet spil'); andre.href = '/spil/'; andre.style.textDecoration = 'none'; m.appendChild(andre);
           var hvem = LF_SPILLER.hvem === 'elev' ? LF_SPILLER.elev.kaldenavn : 'voksen';
           var ud = btn('btn', 'Log ud (' + esc(hvem) + ')'); m.appendChild(ud);
           ud.addEventListener('click', function () { LFSpil.logUd('/login'); });   // pagehide gemmer spillet

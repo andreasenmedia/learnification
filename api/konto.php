@@ -56,6 +56,15 @@ if ($h === 'mig') {
     } else {
         $ud['hvem'] = 'voksen';
     }
+    // Hvor langt er spilleren nået i hvert spil? Bruges på spiloversigten (/spil/)
+    $gemt = (object) [];
+    $noegle = $x['elev'] ? 'elev.' . (int) $x['elev']['id'] : 'voksen.' . (int) $x['konto']['id'];
+    foreach (alle('SELECT spil, data, opdateret FROM gemte_spil WHERE hvem = ?', [$noegle]) as $g) {
+        if (isset(SPIL[$g['spil']]) && ($st = gemt_status($g['spil'], $g['data'], (int) $g['opdateret']))) {
+            $gemt->{$g['spil']} = $st;
+        }
+    }
+    $ud['gemt'] = $gemt;
     svar($ud);
 }
 

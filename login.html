@@ -11,7 +11,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=4">
+<link rel="stylesheet" href="/assets/konto.css?v=5">
 </head>
 <body>
 
@@ -182,7 +182,7 @@
     LF.travl(knap, true);
     LF.send('elev', 'login', { kode: v }).then(function () {
       LF.besked($('kode-besked'), '');
-      if (!videre('')) return LF.hent('konto', 'mig').then(visInde);
+      videre('/spil/');
     }).catch(function (err) {
       LF.besked($('kode-besked'), err.message, 'fejl');
       $('kode').select();
@@ -195,7 +195,7 @@
     var knap = this.querySelector('button[type=submit]');
     LF.travl(knap, true);
     LF.send('konto', 'login', { email: $('email').value.trim(), kodeord: $('kodeord').value })
-      .then(function (d) { videre(d.type === 'admin' ? '/admin' : '/konto'); })
+      .then(function (d) { videre(d.type === 'admin' ? '/admin' : '/spil/'); })
       .catch(function (err) { LF.besked($('login-besked'), err.message, 'fejl'); LF.travl(knap, false); });
   });
 

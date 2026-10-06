@@ -12,7 +12,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 |---|---|---|
 | `index.html` | `/` | Forside: hvad Learnification er, spilkort, skærmbilleder |
 | `regnehelten.html` | `/regnehelten` | Om spillet: steder, opgavetyper, Regnebogen, Regnekraft |
-| `spil/index.html` | `/spil/` | Sender videre til `/spil/regnehelten/`, så gamle links og QR-koder virker |
+| `spil/index.html` | `/spil/` | Spiloversigten "Vælg et spil" — her lander man efter login og oprettelse, og "Spil nu" peger hertil. Kræver login |
 | `for-voksne.html` | `/for-voksne` | Forældre og lærere: hvad barnet øver, data, FAQ |
 | `om.html` | `/om` | Om Learnification |
 | `nyheder.html` | `/nyheder` | Nyheder: hvad der er sket på sitet, nyeste øverst. **Bygges af `tools/nyheder.py`** |
@@ -468,8 +468,17 @@ aldrig blandes med en gammel.
 
 **`/spil/` er en mappe, ikke `spil.html`.** Det er med vilje. Ligger der
 både en fil `spil.html` og en mappe `spil/`, sender Apache folk i ring.
-`spil/index.html` sender videre til `/spil/regnehelten/` — den skal blive
-liggende, for gamle links og QR-koder på tryksager peger på `/spil/`.
+`spil/index.html` er spiloversigten. Den skal blive liggende, for gamle
+links og QR-koder på tryksager peger på `/spil/` (dengang Regnehelten).
+
+**Efter login lander man på `/spil/`** og vælger selv spil: børn med kode,
+voksne (admin går til `/admin`), en ny konto fra `/opret` (`/spil/?ny=1`
+viser en velkomst) og "Log ind som <barn>" fra `/konto`. Kun hvis man kom
+fra `/opret?type=familie|skole`, går det til `/konto` for at sætte det op.
+Et `?til=` vinder stadig — kommer man fra et bestemt spil, går det tilbage
+dertil. Oversigten viser, hvor langt spilleren er nået i hvert spil
+(`gemt` i `konto.php?handling=mig`), og menuen i begge spil har
+"Vælg et andet spil". Nye spil skal have et kort her.
 
 **Retter du `style.css` eller `script.js`, så tæl `?v=` op.** Begge filer
 ligger en måned i de besøgendes browser, og uden et nyt tal i adressen får

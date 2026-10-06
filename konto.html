@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=4">
+<link rel="stylesheet" href="/assets/konto.css?v=5">
 </head>
 <body>
 
@@ -347,7 +347,7 @@
     if (e.target.matches('[data-som-elev]')) {
       if (confirm('Log ind som ' + elev.kaldenavn + '?\n\nDu bliver logget ud af din egen konto, og ' + elev.kaldenavn
           + ' kan spille med sit eget gemte spil og sin egen prøvetid. For at komme tilbage logger du ind med din mail og dit kodeord igen.'))
-        LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/login'); }, fejl);
+        LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/spil/'); }, fejl);
     } else if (e.target.matches('[data-ny-elevkode]')) {
       if (confirm('Lav en ny kode til ' + elev.kaldenavn + '?\n\nDen gamle holder op med at virke, og ' + elev.kaldenavn + ' bliver logget ud. Husk at udskrive et nyt login-kort.'))
         LF.send('klasse', 'ny_elevkode', { id: eid }).then(hent, fejl);

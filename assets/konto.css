@@ -115,6 +115,22 @@
 .spilvalg span { display: block; padding: 10px 14px; background: var(--paper); font: 600 1.15rem var(--display); }
 @media (max-width: 520px) { .spilvalg { grid-template-columns: 1fr; } }
 
+/* Spiloversigten (/spil/): et stort kort pr. spil */
+.spilkort { display: grid; gap: 22px; grid-template-columns: 1fr 1fr; }
+.spilkort article {
+  display: flex; flex-direction: column; background: var(--paper);
+  border: 3px solid var(--ink); border-radius: var(--r); overflow: hidden; box-shadow: 0 5px 0 var(--ink);
+}
+.spilkort .billede { display: block; background: var(--ink-deep); }
+.spilkort img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; image-rendering: pixelated; }
+.spilkort .indhold { display: flex; flex-direction: column; flex: 1; padding: 18px 22px 22px; }
+.spilkort h2 { font-size: 1.6rem; margin: 0 0 .3em; }
+.spilkort p { margin: 0 0 12px; }
+.spilkort .alder { margin-bottom: 10px; }
+.spilkort .status { color: var(--ink-soft); font-size: .95rem; margin-top: auto; padding-top: 4px; }
+.spilkort .btn { align-self: flex-start; }
+@media (max-width: 720px) { .spilkort { grid-template-columns: 1fr; } }
+
 .hej { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .hej .ikon { font-size: 2.8rem; line-height: 1; }
 .hej h2 { margin: 0; }

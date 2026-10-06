@@ -3,17 +3,184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spil Regnehelten — Learnification</title>
-<!-- Regnehelten ligger nu i /spil/regnehelten/ ligesom Runeborg i
-     /spil/runeborg/. Den her side sender videre, så gamle links, bogmærker
-     og QR-koder på tryksager stadig virker. -->
-<meta http-equiv="refresh" content="0; url=/spil/regnehelten/">
+<title>Vælg et spil — Learnification</title>
+<!-- Spiloversigten: her lander man lige efter login og oprettelse, og
+     "Spil nu" peger hertil. Siden kræver login ligesom spillene.
+     Gamle links og QR-koder til /spil/ (dengang Regnehelten) ender også her. -->
 <meta name="robots" content="noindex">
-<link rel="canonical" href="https://learnification.dk/spil/regnehelten/">
+<meta name="theme-color" content="#faf7f0">
+<link rel="canonical" href="https://learnification.dk/spil/">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script>location.replace('/spil/regnehelten/' + location.search);</script>
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
+<link rel="stylesheet" href="/assets/style.css?v=5">
+<link rel="stylesheet" href="/assets/konto.css?v=5">
 </head>
-<body style="font-family:sans-serif;background:#140f1c;color:#f4ecdc;padding:24px;">
-<p>Regnehelten er flyttet. <a href="/spil/regnehelten/" style="color:#ffcc4d;">Spil Regnehelten her</a>.</p>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/runeborg">Runeborg</a>
+      <a href="/regnehelten">Regnehelten</a>
+      <a href="/for-voksne">For voksne</a>
+      <a href="/nyheder">Nyheder</a>
+      <a href="/om">Om os</a>
+    </div>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/runeborg">Runeborg</a>
+  <a href="/regnehelten">Regnehelten</a>
+  <a href="/for-voksne">For voksne</a>
+  <a href="/nyheder">Nyheder</a>
+  <a href="/om">Om os</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+    <p class="midt lille" id="indlaeser">Henter dine spil …</p>
+    <p class="midt" id="fejl" hidden></p>
+
+    <div id="side" hidden>
+      <div class="panel guld" id="velkommen" hidden style="margin-bottom:28px;">
+        <h2>Velkommen — kontoen er klar</h2>
+        <p style="margin:0;">Vælg et spil herunder og gå i gang. Spillet gemmer af sig selv, så du kan fortsætte en anden dag eller på en anden computer. Skal dine børn eller en klasse også spille, sætter du det op under <a href="/konto">Min konto</a>.</p>
+      </div>
+
+      <div class="topbar">
+        <div class="hej" style="margin:0;">
+          <span class="ikon" id="ikon" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow" style="margin-bottom:6px;">Vælg et spil</p>
+            <h1 id="hej"></h1>
+            <p id="tid"></p>
+          </div>
+        </div>
+        <div class="knapper">
+          <a class="btn btn-sm" id="til-konto" href="/konto" hidden>Min konto</a>
+          <button type="button" class="btn btn-sm" id="log-ud">Log ud</button>
+        </div>
+      </div>
+
+      <!-- Runeborg står først, ligesom alle andre steder på siden -->
+      <div class="spilkort">
+        <article data-spil="runeborg">
+          <a class="billede" href="/spil/runeborg/" tabindex="-1" aria-hidden="true"><img src="/assets/billeder/runeborg-by.png" alt=""></a>
+          <div class="indhold">
+            <p class="alder"><span class="maerke">11–15 år</span> <span class="maerke godkendt" data-passer hidden>Passer til din klasse</span></p>
+            <h2>Runeborg</h2>
+            <p>Opklar mysteriet om den grønne brønd i en 8-bit fantasyverden — med læsning, kildekritik, forsøg og data.</p>
+            <p class="status" data-status></p>
+            <a class="btn btn-primary" href="/spil/runeborg/" data-knap>Spil Runeborg</a>
+          </div>
+        </article>
+        <article data-spil="regnehelten">
+          <a class="billede" href="/spil/regnehelten/" tabindex="-1" aria-hidden="true"><img src="/assets/billeder/regnehelten-by.png" alt=""></a>
+          <div class="indhold">
+            <p class="alder"><span class="maerke">7–12 år</span> <span class="maerke godkendt" data-passer hidden>Passer til din klasse</span></p>
+            <h2>Regnehelten</h2>
+            <p>En helt almindelig skoledag fuld af regneopgaver — med en matematikbog i tasken og ingen karakterer.</p>
+            <p class="status" data-status></p>
+            <a class="btn btn-primary" href="/spil/regnehelten/" data-knap>Spil Regnehelten</a>
+          </div>
+        </article>
+      </div>
+
+      <p class="lille midt" style="margin-top:26px;">Vil du vide mere først? <a href="/runeborg">Om Runeborg</a> · <a href="/regnehelten">Om Regnehelten</a></p>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/konto.js?v=3"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var NAVN = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
+  // Klassetrin, spillet passer til (Regnehelten 7-12 år, Runeborg 11-15 år)
+  var KLASSER = { runeborg: [5, 9], regnehelten: [1, 6] };
+
+  $('log-ud').addEventListener('click', function () {
+    LF.send('konto', 'logud').then(function () { location.replace('/login'); });
+  });
+
+  function tegn(d) {
+    var elev = d.hvem === 'elev';
+    $('indlaeser').hidden = true;
+    $('side').hidden = false;
+    $('velkommen').hidden = elev || !/ny=1/.test(location.search);
+
+    $('ikon').textContent = elev ? d.elev.ikon : '👋';
+    $('hej').textContent = 'Hej ' + (elev ? d.elev.kaldenavn : (d.konto.kontakt || d.konto.navn).split(' ')[0]) + '!';
+    if (!elev) {
+      $('til-konto').hidden = false;
+      if (d.konto.type === 'admin') { $('til-konto').href = '/admin'; $('til-konto').textContent = 'Overblik'; }
+    }
+
+    var t = d.tid || {};
+    $('tid').textContent = t.graense_sek == null ? 'Hvad har du lyst til at spille?'
+      : t.slut ? (elev ? 'Din spilletid er brugt. Det, du nåede, er gemt — spørg en voksen, hvis du vil spille videre.'
+                       : 'Prøvetiden er brugt. Det, du nåede, er gemt. Skriv til os, hvis du vil spille videre.')
+      : 'Du har ' + LF.tid(t.tilbage_sek) + ' tilbage af prøvetiden.';
+
+    var trin = elev && d.elev.klassetrin;
+    document.querySelectorAll('[data-spil]').forEach(function (kort) {
+      var spil = kort.dataset.spil, g = (d.gemt || {})[spil];
+      var status = kort.querySelector('[data-status]'), knap = kort.querySelector('[data-knap]');
+      if (g) {
+        status.innerHTML = (g.faerdig ? '<strong>★ Gennemført</strong>' : '<strong>' + LF.esc(g.tekst) + '</strong>')
+          + ' · gemt ' + LF.esc(LF.dato(g.opdateret));
+        status.title = g.detalje;
+        knap.textContent = g.faerdig ? 'Spil ' + NAVN[spil] + ' igen' : 'Fortsæt ' + NAVN[spil];
+      } else {
+        status.textContent = 'Ikke startet endnu';
+      }
+      if (trin) kort.querySelector('[data-passer]').hidden = !(trin >= KLASSER[spil][0] && trin <= KLASSER[spil][1]);
+    });
+  }
+
+  LF.hent('konto', 'mig').then(function (d) {
+    if (!d.logget_ind) { location.replace('/login?til=' + encodeURIComponent('/spil/')); return; }
+    tegn(d);
+  }).catch(function (err) {
+    $('indlaeser').hidden = true;
+    $('fejl').hidden = false;
+    $('fejl').innerHTML = LF.esc(err.message) + ' <a href="/spil/runeborg/">Runeborg</a> · <a href="/spil/regnehelten/">Regnehelten</a>';
+  });
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="1.5" y="1.5" width="29" height="29" rx="8" fill="#ce8a2e" stroke="#8f5b18" stroke-width="2.5"/><rect x="8" y="9" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="15" width="16" height="3" rx="1.5" fill="#faf7f0"/><rect x="8" y="21" width="9" height="3" rx="1.5" fill="#faf7f0"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/regnehelten/">Spil Regnehelten</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/nyheder">Nyheder</a><a href="/for-voksne">For forældre og lærere</a><a href="/privatliv">Privatliv og cookies</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=4" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>
