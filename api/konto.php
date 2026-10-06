@@ -75,7 +75,7 @@ case 'opret':
     $kodeord = (string) (input()['kodeord'] ?? '');
     tjek_kodeord($kodeord);
     if (empty(input()['samtykke'])) {
-        fejl('Sæt flueben ved, at du har læst, hvad vi gemmer.');
+        fejl('Sæt flueben ved, at du er fyldt 15 år og har læst, hvad vi gemmer.');
     }
 
     // En familie får sin gruppe med det samme — og børnene, hvis de er skrevet på
