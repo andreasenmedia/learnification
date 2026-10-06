@@ -441,6 +441,10 @@ case 'ny_konto':
     $f = tjek_kontofelter(['type' => felt('type', 20), 'navn' => felt('navn', 120), 'kontakt' => felt('kontakt', 120),
                            'bynavn' => felt('bynavn', 80), 'email' => felt('email', 190)]);
     $kodeord = (string) (input()['kodeord'] ?? '');
+    // Som på /opret: kontoen er til en, der er fyldt 15 år (yngre er børn med kode)
+    if (empty(input()['alder'])) {
+        fejl('Sæt flueben ved, at personen er fyldt 15 år.');
+    }
     if ($kodeord !== '' && (strlen($kodeord) < 8 || strlen($kodeord) > 200)) {
         fejl('Kodeordet skal være mindst 8 tegn — eller lad feltet stå tomt, så vælger de selv.');
     }

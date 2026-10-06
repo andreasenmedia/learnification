@@ -123,6 +123,7 @@
           <textarea id="ny-boern" placeholder="Emma&#10;Oskar"></textarea>
         </div>
         <p class="lille" id="ny-mail-tekst" style="margin:0 0 14px;">Uden kodeord sendes en mail med et link, hvor personen selv vælger kodeord.</p>
+        <label class="samtykke"><input type="checkbox" id="ny-alder"><span><strong>Personen, kontoen er til, er fyldt 15 år.</strong> Under 15 sættes på som barn med kode på en familie- eller skolekonto.</span></label>
         <label class="samtykke" id="ny-velkomst-felt" hidden><input type="checkbox" id="ny-velkomst" checked><span>Send velkomstmailen (sådan kommer man i gang) — husk selv at give kodeordet videre</span></label>
         <button class="btn btn-primary" type="submit">Opret konto</button>
       </form>
@@ -959,10 +960,11 @@
     LF.send('admin', 'ny_konto', {
       type: $('ny-type').value, navn: $('ny-navn').value.trim(), kontakt: $('ny-kontakt').value.trim(),
       bynavn: $('ny-by').value.trim(), email: $('ny-email').value.trim(), kodeord: $('ny-kode').value,
-      boern: $('ny-boern').value, velkomst: $('ny-velkomst').checked
+      boern: $('ny-boern').value, velkomst: $('ny-velkomst').checked, alder: $('ny-alder').checked
     }).then(function (d) {
       if (d.mail === false) alert('Kontoen er oprettet, men mailen kunne ikke sendes: ' + d.fejl);
       ['ny-navn', 'ny-kontakt', 'ny-by', 'ny-email', 'ny-kode', 'ny-boern'].forEach(function (x) { $(x).value = ''; });
+      $('ny-alder').checked = false;
       LF.besked($('ny-besked'), '');
       location.hash = 'konto=' + d.id;
     }).catch(function (err) {

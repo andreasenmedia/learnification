@@ -258,7 +258,8 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   godkendes eller spærres derfra. En spærret konto og alle dens elever bliver
   logget ud med det samme.
 - **Administratoren kan oprette og rette konti** i `/admin`: "Opret konto"
-  (`#ny-konto`) laver en godkendt konto af enhver type — med et kodeord, eller
+  (`#ny-konto`) laver en godkendt konto af enhver type (med påkrævet flueben
+  for, at personen er fyldt 15 år) — med et kodeord, eller
   uden, så får personen en mail med et link til selv at vælge et (7 dage).
   Under en konto: ret navn, mail, by, type og status; sæt et nyt kodeord eller
   send et link (24 timer); slet kontoen (mailadressen skal skrives som
