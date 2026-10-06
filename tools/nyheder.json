@@ -1,0 +1,146 @@
+{
+  "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
+  "nyheder": [
+    {
+      "id": "nyhedssiden-aabner",
+      "dato": "2026-10-06",
+      "maerke": "Siden",
+      "titel": "Nu kan du følge med i, hvad der sker",
+      "tekst": [
+        "Fra i dag skriver vi her, hver gang der sker noget nyt på Learnification: nye spil, nye kapitler og ting, der er blevet bedre. Så kan forældre og lærere hurtigt se, hvad der er kommet til, siden de sidst var forbi.",
+        "Vi har også skrevet sitets første to uger ind, så siden ikke starter tom. Du kan følge med med en RSS-læser, eller <a href=\"/#nyhedsbrev\">skrive dig op til nyhedsbrevet</a>, hvis du hellere vil have det på mail."
+      ]
+    },
+    {
+      "id": "nye-kapitler",
+      "dato": "2026-10-05",
+      "maerke": "Nyt kapitel",
+      "titel": "To nye kapitler i både Runeborg og Regnehelten",
+      "kort": "Runeborg fortsætter i Skoven ved Mosekrogen og Havnen i Saltvig, og i Regnehelten går turen til Dyreparken og Lørdagsmarkedet.",
+      "tekst": [
+        "Begge spil har nu tre kapitler. Når man har klaret et kapitel, åbner det næste — på titelskærmen eller i pausemenuen under <strong>Kapitler</strong>.",
+        "<strong>Runeborg</strong> fortsætter i <em>Skoven ved Mosekrogen</em>, hvor træerne er blevet grå, og landsbyen tror, at en trold er vred. Her skal man skelne det, man ser, fra det, man tror, og lave en fair undersøgelse. Kapitel 3, <em>Havnen i Saltvig</em>, handler om et mørkt fyr, et forsinket skib og en vægt, som byen skændes om — med tabeller, procent, målestok og tidevand.",
+        "I <strong>Regnehelten</strong> tager klassen på <em>Udflugten til Dyreparken</em>, og bagefter skal man hjælpe Far og Ida på <em>Lørdagsmarkedet</em> med priser, tilbud og byttepenge. Opgaverne bliver ét klassetrin sværere for hvert kapitel, så starter man i 3. klasse, regner man på 5. klasses niveau i kapitel 3."
+      ],
+      "link": { "tekst": "Spil Runeborg", "href": "/spil/runeborg/" }
+    },
+    {
+      "id": "proevetid-og-spoergeskema",
+      "dato": "2026-10-05",
+      "maerke": "Til voksne",
+      "titel": "En times prøvetid — og et kort spørgeskema bagefter",
+      "tekst": [
+        "Mens spillene er til test, kan hvert barn spille i alt én time, samlet for begge spil. Kort før tiden er gået, siger spillet til, og når den er brugt, bliver spillet gemt, så barnet kan fortsætte senere.",
+        "Når et barn har brugt sin time eller klaret et helt spil, får den voksne bag kontoen én mail med et kort spørgeskema om, hvordan det gik. Det er frivilligt at svare, men det er dét, vi bliver klogest af. Vil I gerne have mere tid, så <a href=\"mailto:kontakt@learnification.dk\">skriv til os</a>, så åbner vi for det."
+      ],
+      "link": { "tekst": "Læs mere for voksne", "href": "/for-voksne" }
+    },
+    {
+      "id": "regnehelten-bygget-om",
+      "dato": "2026-10-05",
+      "maerke": "Spil",
+      "titel": "Regnehelten er bygget om, så det spilles som Runeborg",
+      "tekst": [
+        "Regnehelten er skrevet forfra, så begge spil nu er bygget på samme måde. Et barn, der kan styre det ene, kan også styre det andet: piletaster eller joystick, <kbd>E</kbd> for at tale og svare og <kbd>B</kbd> for Dagbogen, hvor Regnebogen og tasken nu ligger som faner.",
+        "Spillet foregår i et dansk kvarter i oktober med hjem, købmand, kiosk, bibliotek, skole og park, og lyset følger dagen. Det starter med det samme i stedet for at hente en stor pakke først, replikkerne bliver læst op, og opgaverne følger stadig klassetrinnet. Gemte spil fra den gamle udgave er ført over."
+      ],
+      "billede": { "src": "/assets/billeder/regnehelten-by.png", "alt": "Regnehelten: kvarteret med huse, træer og vej i oktober." },
+      "link": { "tekst": "Spil Regnehelten", "href": "/spil/regnehelten/" }
+    },
+    {
+      "id": "velkomstmail-og-paamindelse",
+      "dato": "2026-09-29",
+      "maerke": "Til voksne",
+      "titel": "Hjælp til at komme i gang",
+      "tekst": [
+        "Når en voksen opretter en konto, kommer der nu en velkomstmail med de næste skridt: sæt børnene på, print login-kortene og log ind. Teksten passer til, om I er en skole eller en familie.",
+        "Har intet barn spillet tre dage efter, at kontoen blev oprettet, får I én venlig påmindelse — og kun én. Mailene kommer fra no-reply@learnification.dk og er aldrig reklame."
+      ]
+    },
+    {
+      "id": "gemte-spil",
+      "dato": "2026-09-28",
+      "maerke": "Spil",
+      "titel": "Fortsæt, hvor du slap — også på en anden skærm",
+      "tekst": [
+        "Begge spil gemmer nu på serveren under barnets egen kode. Et barn, der starter på skolens computer, kan spille videre på en tablet derhjemme, og titelskærmen siger bare <em>Fortsæt som …</em>",
+        "Den voksne kan på sin kontoside se, hvor langt hvert barn er nået i hvert spil."
+      ]
+    },
+    {
+      "id": "nyhedsbrev",
+      "dato": "2026-09-28",
+      "maerke": "Siden",
+      "titel": "Nyhedsbrev om nye spil",
+      "tekst": [
+        "Vil du høre først, når der kommer nye spil eller kapitler, kan du nu skrive dig op til vores nyhedsbrev — på forsiden eller på siden for voksne. Du skal bekræfte din tilmelding på mail, og du kan afmelde dig med ét klik.",
+        "Samtidig kan du selv vælge, hvilke cookies du siger ja til, under <em>Cookie-indstillinger</em> nederst på siden. Børnenes sider får aldrig andet end den cookie, der holder dem logget ind."
+      ],
+      "link": { "tekst": "Skriv dig op", "href": "/#nyhedsbrev" }
+    },
+    {
+      "id": "privatliv",
+      "dato": "2026-09-26",
+      "maerke": "Privatliv",
+      "titel": "Ingen besøg sendes videre til Google",
+      "tekst": [
+        "Skrifttyperne på siden ligger nu på vores egen server i stedet for hos Google, så dit besøg ikke bliver sendt videre. Vi har også vores egen enkle besøgsstatistik, der aldrig gemmer IP-adresser.",
+        "På den nye side <a href=\"/privatliv\">Privatliv og cookies</a> står der præcis, hvad der bliver gemt, hvorfor og hvor længe."
+      ]
+    },
+    {
+      "id": "login",
+      "dato": "2026-09-25",
+      "maerke": "Til voksne",
+      "titel": "Testkonti til skoler og familier",
+      "tekst": [
+        "Nu kan en lærer eller forælder <a href=\"/opret\">oprette en gratis testkonto</a> og sætte børnene på med et kaldenavn. Hvert barn får sin egen kode som RAVN-4827 og logger ind med den på <a href=\"/login\">learnification.dk/login</a> — uden mail og uden kodeord. Der er login-kort til udskrift, ét til hvert barn.",
+        "På kontosiden kan den voksne se, hvor længe hvert barn har spillet. Tiden tæller kun, mens spillet er fremme og i brug."
+      ],
+      "link": { "tekst": "Opret en konto", "href": "/opret" }
+    },
+    {
+      "id": "runeborg-laeser-op",
+      "dato": "2026-09-24",
+      "maerke": "Spil",
+      "titel": "Runeborg læser replikkerne op",
+      "tekst": [
+        "Alle replikker i Runeborg bliver nu læst op på dansk, og hver person i byen har sin egen stemme. I taleboblen kan man høre replikken igen, og i opgaverne kan man få spørgsmålet læst op. Oplæsningen kan slås fra i menuen.",
+        "Tekster, man selv skal læse og vurdere, bliver med vilje ikke læst op — det er dem, spillet øver. Samtidig kom der en knap til fuld skærm (eller tryk <kbd>F</kbd>)."
+      ]
+    },
+    {
+      "id": "runeborg",
+      "dato": "2026-09-24",
+      "maerke": "Nyt spil",
+      "titel": "Nyt spil: Runeborg",
+      "tekst": [
+        "Runeborg er et hyggeligt 8-bit fantasyeventyr for 5.-9. klasse. Byens brønd er blevet grøn, alle har et rygte om hvorfor, og som lærling i Eventyrerlauget skal man finde beviser i stedet for at tro på rygterne.",
+        "Spillet er bygget ud fra de områder, hvor danske elever klarede sig dårligst i PISA 2025: at finde information og vurdere kilder, at planlægge undersøgelser og læse data, og at regne med forhold, procent og målestok."
+      ],
+      "billede": { "src": "/assets/billeder/runeborg-by.png", "alt": "Runeborg: den lille fantasyby med huse, træer og efterårsblade." },
+      "link": { "tekst": "Om Runeborg", "href": "/runeborg" }
+    },
+    {
+      "id": "styrepind-og-regneloft",
+      "dato": "2026-09-22",
+      "maerke": "Spil",
+      "titel": "Styrepind på tablet og opgaver, der passer bedre",
+      "tekst": [
+        "På telefon og tablet styrer man nu Regnehelten med en styrepind, man trækker i med tommelfingeren, i stedet for et styrekryds.",
+        "Opgaverne holder sig også til, hvad et barn på hvert klassetrin kan regne i hovedet — ikke kun til, hvor store tallene må være."
+      ]
+    },
+    {
+      "id": "learnification-aabner",
+      "dato": "2026-09-21",
+      "maerke": "Siden",
+      "titel": "Learnification.dk er åben",
+      "tekst": [
+        "Første dag: Regnehelten kan spilles gratis direkte i browseren — på computer, tablet og telefon, uden at installere noget. Spillet er til 1.-6. klasse og spørger om klassetrin, så opgaverne passer til Fælles Mål for netop det trin.",
+        "Learnification er et lille dansk projekt, og spillene er til test. Vi vil meget gerne høre, hvordan det går, når de bliver prøvet af rigtige børn."
+      ],
+      "link": { "tekst": "Om Regnehelten", "href": "/regnehelten" }
+    }
+  ]
+}

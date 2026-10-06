@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Nyt fra Learnification</title>
+    <link>https://learnification.dk/nyheder</link>
+    <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
+    <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
+    <language>da</language>
+    <lastBuildDate>Tue, 06 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Nu kan du følge med i, hvad der sker</title>
+      <link>https://learnification.dk/nyheder#nyhedssiden-aabner</link>
+      <guid isPermaLink="false">learnification-nyhed-nyhedssiden-aabner</guid>
+      <pubDate>Tue, 06 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Siden</category>
+      <description><![CDATA[<p>Fra i dag skriver vi her, hver gang der sker noget nyt på Learnification: nye spil, nye kapitler og ting, der er blevet bedre. Så kan forældre og lærere hurtigt se, hvad der er kommet til, siden de sidst var forbi.</p><p>Vi har også skrevet sitets første to uger ind, så siden ikke starter tom. Du kan følge med med en RSS-læser, eller <a href="https://learnification.dk/#nyhedsbrev">skrive dig op til nyhedsbrevet</a>, hvis du hellere vil have det på mail.</p>]]></description>
+    </item>
+    <item>
+      <title>To nye kapitler i både Runeborg og Regnehelten</title>
+      <link>https://learnification.dk/nyheder#nye-kapitler</link>
+      <guid isPermaLink="false">learnification-nyhed-nye-kapitler</guid>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Nyt kapitel</category>
+      <description><![CDATA[<p>Begge spil har nu tre kapitler. Når man har klaret et kapitel, åbner det næste — på titelskærmen eller i pausemenuen under <strong>Kapitler</strong>.</p><p><strong>Runeborg</strong> fortsætter i <em>Skoven ved Mosekrogen</em>, hvor træerne er blevet grå, og landsbyen tror, at en trold er vred. Her skal man skelne det, man ser, fra det, man tror, og lave en fair undersøgelse. Kapitel 3, <em>Havnen i Saltvig</em>, handler om et mørkt fyr, et forsinket skib og en vægt, som byen skændes om — med tabeller, procent, målestok og tidevand.</p><p>I <strong>Regnehelten</strong> tager klassen på <em>Udflugten til Dyreparken</em>, og bagefter skal man hjælpe Far og Ida på <em>Lørdagsmarkedet</em> med priser, tilbud og byttepenge. Opgaverne bliver ét klassetrin sværere for hvert kapitel, så starter man i 3. klasse, regner man på 5. klasses niveau i kapitel 3.</p>]]></description>
+    </item>
+    <item>
+      <title>En times prøvetid — og et kort spørgeskema bagefter</title>
+      <link>https://learnification.dk/nyheder#proevetid-og-spoergeskema</link>
+      <guid isPermaLink="false">learnification-nyhed-proevetid-og-spoergeskema</guid>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Mens spillene er til test, kan hvert barn spille i alt én time, samlet for begge spil. Kort før tiden er gået, siger spillet til, og når den er brugt, bliver spillet gemt, så barnet kan fortsætte senere.</p><p>Når et barn har brugt sin time eller klaret et helt spil, får den voksne bag kontoen én mail med et kort spørgeskema om, hvordan det gik. Det er frivilligt at svare, men det er dét, vi bliver klogest af. Vil I gerne have mere tid, så <a href="mailto:kontakt@learnification.dk">skriv til os</a>, så åbner vi for det.</p>]]></description>
+    </item>
+    <item>
+      <title>Regnehelten er bygget om, så det spilles som Runeborg</title>
+      <link>https://learnification.dk/nyheder#regnehelten-bygget-om</link>
+      <guid isPermaLink="false">learnification-nyhed-regnehelten-bygget-om</guid>
+      <pubDate>Mon, 05 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>Regnehelten er skrevet forfra, så begge spil nu er bygget på samme måde. Et barn, der kan styre det ene, kan også styre det andet: piletaster eller joystick, <kbd>E</kbd> for at tale og svare og <kbd>B</kbd> for Dagbogen, hvor Regnebogen og tasken nu ligger som faner.</p><p>Spillet foregår i et dansk kvarter i oktober med hjem, købmand, kiosk, bibliotek, skole og park, og lyset følger dagen. Det starter med det samme i stedet for at hente en stor pakke først, replikkerne bliver læst op, og opgaverne følger stadig klassetrinnet. Gemte spil fra den gamle udgave er ført over.</p>]]></description>
+    </item>
+    <item>
+      <title>Hjælp til at komme i gang</title>
+      <link>https://learnification.dk/nyheder#velkomstmail-og-paamindelse</link>
+      <guid isPermaLink="false">learnification-nyhed-velkomstmail-og-paamindelse</guid>
+      <pubDate>Tue, 29 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Når en voksen opretter en konto, kommer der nu en velkomstmail med de næste skridt: sæt børnene på, print login-kortene og log ind. Teksten passer til, om I er en skole eller en familie.</p><p>Har intet barn spillet tre dage efter, at kontoen blev oprettet, får I én venlig påmindelse — og kun én. Mailene kommer fra no-reply@learnification.dk og er aldrig reklame.</p>]]></description>
+    </item>
+    <item>
+      <title>Fortsæt, hvor du slap — også på en anden skærm</title>
+      <link>https://learnification.dk/nyheder#gemte-spil</link>
+      <guid isPermaLink="false">learnification-nyhed-gemte-spil</guid>
+      <pubDate>Mon, 28 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>Begge spil gemmer nu på serveren under barnets egen kode. Et barn, der starter på skolens computer, kan spille videre på en tablet derhjemme, og titelskærmen siger bare <em>Fortsæt som …</em></p><p>Den voksne kan på sin kontoside se, hvor langt hvert barn er nået i hvert spil.</p>]]></description>
+    </item>
+    <item>
+      <title>Nyhedsbrev om nye spil</title>
+      <link>https://learnification.dk/nyheder#nyhedsbrev</link>
+      <guid isPermaLink="false">learnification-nyhed-nyhedsbrev</guid>
+      <pubDate>Mon, 28 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Siden</category>
+      <description><![CDATA[<p>Vil du høre først, når der kommer nye spil eller kapitler, kan du nu skrive dig op til vores nyhedsbrev — på forsiden eller på siden for voksne. Du skal bekræfte din tilmelding på mail, og du kan afmelde dig med ét klik.</p><p>Samtidig kan du selv vælge, hvilke cookies du siger ja til, under <em>Cookie-indstillinger</em> nederst på siden. Børnenes sider får aldrig andet end den cookie, der holder dem logget ind.</p>]]></description>
+    </item>
+    <item>
+      <title>Ingen besøg sendes videre til Google</title>
+      <link>https://learnification.dk/nyheder#privatliv</link>
+      <guid isPermaLink="false">learnification-nyhed-privatliv</guid>
+      <pubDate>Sat, 26 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Privatliv</category>
+      <description><![CDATA[<p>Skrifttyperne på siden ligger nu på vores egen server i stedet for hos Google, så dit besøg ikke bliver sendt videre. Vi har også vores egen enkle besøgsstatistik, der aldrig gemmer IP-adresser.</p><p>På den nye side <a href="https://learnification.dk/privatliv">Privatliv og cookies</a> står der præcis, hvad der bliver gemt, hvorfor og hvor længe.</p>]]></description>
+    </item>
+    <item>
+      <title>Testkonti til skoler og familier</title>
+      <link>https://learnification.dk/nyheder#login</link>
+      <guid isPermaLink="false">learnification-nyhed-login</guid>
+      <pubDate>Fri, 25 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Nu kan en lærer eller forælder <a href="https://learnification.dk/opret">oprette en gratis testkonto</a> og sætte børnene på med et kaldenavn. Hvert barn får sin egen kode som RAVN-4827 og logger ind med den på <a href="https://learnification.dk/login">learnification.dk/login</a> — uden mail og uden kodeord. Der er login-kort til udskrift, ét til hvert barn.</p><p>På kontosiden kan den voksne se, hvor længe hvert barn har spillet. Tiden tæller kun, mens spillet er fremme og i brug.</p>]]></description>
+    </item>
+    <item>
+      <title>Runeborg læser replikkerne op</title>
+      <link>https://learnification.dk/nyheder#runeborg-laeser-op</link>
+      <guid isPermaLink="false">learnification-nyhed-runeborg-laeser-op</guid>
+      <pubDate>Thu, 24 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>Alle replikker i Runeborg bliver nu læst op på dansk, og hver person i byen har sin egen stemme. I taleboblen kan man høre replikken igen, og i opgaverne kan man få spørgsmålet læst op. Oplæsningen kan slås fra i menuen.</p><p>Tekster, man selv skal læse og vurdere, bliver med vilje ikke læst op — det er dem, spillet øver. Samtidig kom der en knap til fuld skærm (eller tryk <kbd>F</kbd>).</p>]]></description>
+    </item>
+    <item>
+      <title>Nyt spil: Runeborg</title>
+      <link>https://learnification.dk/nyheder#runeborg</link>
+      <guid isPermaLink="false">learnification-nyhed-runeborg</guid>
+      <pubDate>Thu, 24 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Nyt spil</category>
+      <description><![CDATA[<p>Runeborg er et hyggeligt 8-bit fantasyeventyr for 5.-9. klasse. Byens brønd er blevet grøn, alle har et rygte om hvorfor, og som lærling i Eventyrerlauget skal man finde beviser i stedet for at tro på rygterne.</p><p>Spillet er bygget ud fra de områder, hvor danske elever klarede sig dårligst i PISA 2025: at finde information og vurdere kilder, at planlægge undersøgelser og læse data, og at regne med forhold, procent og målestok.</p>]]></description>
+    </item>
+    <item>
+      <title>Styrepind på tablet og opgaver, der passer bedre</title>
+      <link>https://learnification.dk/nyheder#styrepind-og-regneloft</link>
+      <guid isPermaLink="false">learnification-nyhed-styrepind-og-regneloft</guid>
+      <pubDate>Tue, 22 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>På telefon og tablet styrer man nu Regnehelten med en styrepind, man trækker i med tommelfingeren, i stedet for et styrekryds.</p><p>Opgaverne holder sig også til, hvad et barn på hvert klassetrin kan regne i hovedet — ikke kun til, hvor store tallene må være.</p>]]></description>
+    </item>
+    <item>
+      <title>Learnification.dk er åben</title>
+      <link>https://learnification.dk/nyheder#learnification-aabner</link>
+      <guid isPermaLink="false">learnification-nyhed-learnification-aabner</guid>
+      <pubDate>Mon, 21 Sep 2026 10:00:00 +0000</pubDate>
+      <category>Siden</category>
+      <description><![CDATA[<p>Første dag: Regnehelten kan spilles gratis direkte i browseren — på computer, tablet og telefon, uden at installere noget. Spillet er til 1.-6. klasse og spørger om klassetrin, så opgaverne passer til Fælles Mål for netop det trin.</p><p>Learnification er et lille dansk projekt, og spillene er til test. Vi vil meget gerne høre, hvordan det går, når de bliver prøvet af rigtige børn.</p>]]></description>
+    </item>
+  </channel>
+</rss>

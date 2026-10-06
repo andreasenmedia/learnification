@@ -49,4 +49,5 @@ jobs:
             **/.github/**
             **/tools/**
             README.md
+            CLAUDE.md
             .gitignore

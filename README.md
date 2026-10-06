@@ -15,6 +15,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `spil/index.html` | `/spil/` | Sender videre til `/spil/regnehelten/`, så gamle links og QR-koder virker |
 | `for-voksne.html` | `/for-voksne` | Forældre og lærere: hvad barnet øver, data, FAQ |
 | `om.html` | `/om` | Om Learnification |
+| `nyheder.html` | `/nyheder` | Nyheder: hvad der er sket på sitet, nyeste øverst. **Bygges af `tools/nyheder.py`** |
 | `privatliv.html` | `/privatliv` | Privatlivs- og cookiepolitik. **Ret den, når noget nyt gemmes** |
 | `404.html` | — | Vises ved forkert adresse |
 | `tilmeld.php` | — | Tager imod tilmeldinger til spørgeskemaet |
@@ -407,6 +408,27 @@ gyldigt certifikat at møde dem med.
 
 Bruger du Simply.coms eget webhotel, peger domænet allerede på deres
 servere, og der skal ikke røres ved DNS.
+
+## Nyheder
+
+`/nyheder` fortæller forældre og lærere, hvad der er kommet til: nye spil,
+nye kapitler, forbedringer og ændringer i, hvad der bliver gemt. Hver gang
+noget, en besøgende kan mærke, går live, skal der en nyhed med — også når
+ændringen er lavet af Claude (se `CLAUDE.md`).
+
+Nyhederne står i `tools/nyheder.json` (nyeste øverst; `id`, `dato`,
+`maerke`, `titel`, `tekst` som afsnit med lidt HTML, og frivilligt `kort`,
+`billede` og `link`). Ret der og kør
+
+```
+python tools/nyheder.py
+```
+
+som skriver listen ind i `nyheder.html`, de tre nyeste i "Seneste nyt" på
+forsiden (mellem `<!-- SENESTE-NYT:START/SLUT -->`), RSS-feedet
+`nyheder.xml` og datoen i `sitemap.xml`. Commit det hele sammen med selve
+ændringen. Skriv til en voksen, der ikke kender koden: hvad er nyt, og hvad
+betyder det for barnet eller klassen — ikke filnavne eller tekniske detaljer.
 
 ## Sådan bliver spillene opdateret
 

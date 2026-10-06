@@ -15,9 +15,10 @@
 <meta property="og:locale" content="da_DK">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://learnification.dk/">
+<link rel="alternate" type="application/rss+xml" title="Nyt fra Learnification" href="/nyheder.xml">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
-<link rel="stylesheet" href="/assets/style.css?v=4">
+<link rel="stylesheet" href="/assets/style.css?v=5">
 <link rel="stylesheet" href="/assets/nyhedsbrev.css?v=1">
 <script type="application/ld+json">
 [
@@ -66,6 +67,7 @@
       <a href="/runeborg">Runeborg</a>
       <a href="/regnehelten">Regnehelten</a>
       <a href="/for-voksne">For voksne</a>
+      <a href="/nyheder">Nyheder</a>
       <a href="/om">Om os</a>
       <a href="/login" class="nav-login">Log ind</a>
     </div>
@@ -80,6 +82,7 @@
   <a href="/runeborg">Runeborg</a>
   <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
+  <a href="/nyheder">Nyheder</a>
   <a href="/om">Om os</a>
   <a href="/login" class="nav-login">Log ind</a>
   <a href="/spil/runeborg/" class="btn btn-primary" style="width:fit-content;margin-top:8px;">Spil nu</a>
@@ -242,8 +245,40 @@
   </div>
 </section>
 
-<!-- ============ NYHEDSBREV ============ -->
+<!-- ============ SENESTE NYT ============ -->
 <section style="padding-top:0;">
+  <div class="wrap">
+    <div class="nyt-top">
+      <div>
+        <p class="eyebrow">Seneste nyt</p>
+        <h2>Det er kommet til</h2>
+      </div>
+      <a href="/nyheder" class="btn btn-sm">Alle nyheder &rarr;</a>
+    </div>
+    <div class="cards">
+<!-- SENESTE-NYT:START -->
+<article class="card nyhed-kort">
+  <p class="nyhed-meta"><time datetime="2026-10-06">6. oktober 2026</time><span class="maerke maerke-siden">Siden</span></p>
+  <h3><a href="/nyheder#nyhedssiden-aabner">Nu kan du følge med i, hvad der sker</a></h3>
+  <p>Fra i dag skriver vi her, hver gang der sker noget nyt på Learnification: nye spil, nye kapitler og ting, der er blevet bedre.</p>
+</article>
+<article class="card nyhed-kort">
+  <p class="nyhed-meta"><time datetime="2026-10-05">5. oktober 2026</time><span class="maerke maerke-nyt-kapitel">Nyt kapitel</span></p>
+  <h3><a href="/nyheder#nye-kapitler">To nye kapitler i både Runeborg og Regnehelten</a></h3>
+  <p>Runeborg fortsætter i Skoven ved Mosekrogen og Havnen i Saltvig, og i Regnehelten går turen til Dyreparken og Lørdagsmarkedet.</p>
+</article>
+<article class="card nyhed-kort">
+  <p class="nyhed-meta"><time datetime="2026-10-05">5. oktober 2026</time><span class="maerke maerke-voksne">Til voksne</span></p>
+  <h3><a href="/nyheder#proevetid-og-spoergeskema">En times prøvetid — og et kort spørgeskema bagefter</a></h3>
+  <p>Mens spillene er til test, kan hvert barn spille i alt én time, samlet for begge spil.</p>
+</article>
+<!-- SENESTE-NYT:SLUT -->
+    </div>
+  </div>
+</section>
+
+<!-- ============ NYHEDSBREV ============ -->
+<section id="nyhedsbrev" style="padding-top:0;">
   <div class="wrap">
     <form class="nb-boks" data-nyhedsbrev novalidate>
       <p class="eyebrow">Nyhedsbrev</p>
@@ -295,6 +330,7 @@
       <h4>Learnification</h4>
       <nav>
         <a href="/om">Om os</a>
+        <a href="/nyheder">Nyheder</a>
         <a href="/for-voksne">For forældre og lærere</a>
         <a href="/login">Log ind</a>
         <a href="/privatliv">Privatliv og cookies</a>
