@@ -39,6 +39,11 @@ const SKOLEELEV_LEVETID = 10 * 3600;
 const HJEMMEBARN_LEVETID = 30 * 86400;
 
 const SPIL = ['regnehelten' => 'Regnehelten', 'runeborg' => 'Runeborg'];
+
+// Kontotyperne. "privat" er en voksen, der selv spiller; "foraelder" har børn
+// på (gruppen "Familien"); "skole" har klasser. Administratoren er sin egen type.
+// Sætter en privat konto børn på, bliver den til en familiekonto (api/klasse.php).
+const KONTOTYPER = ['privat' => 'Til mig selv', 'foraelder' => 'Familie', 'skole' => 'Skole'];
 const KAPITLER = 3;                  // kapitler pr. spil — "færdig" er det sidste
 
 // Dyr til elevernes knapper. Hvert barn i en gruppe får sit eget.
@@ -662,6 +667,121 @@ function ny_elevkode(PDO $pdo): string
         }
     }
     fejl('Kunne ikke finde en ledig kode. Prøv igen.', 500);
+}
+
+/**
+ * Sæt børn på en gruppe ud fra en tekst med ét kaldenavn pr. linje (komma og
+ * semikolon virker også). Svarer, hvor mange der kom på. Bruges af /konto,
+ * /opret og /admin.
+ */
+function nye_elever(int $gruppe_id, string $raa, int $maks = 40): int
+{
+    $navne = [];
+    foreach (preg_split('/[\r\n,;]+/', $raa) ?: [] as $n) {
+        $n = trim(preg_replace('/[\x00-\x1F\x7F]/u', '', $n) ?? '');
+        $n = function_exists('mb_substr') ? mb_substr($n, 0, 30, 'UTF-8') : substr($n, 0, 30);
+        if ($n !== '' && !in_array(lille($n), array_map('lille', $navne), true)) {
+            $navne[] = $n;
+        }
+    }
+    if (!$navne) {
+        fejl('Skriv mindst ét navn.');
+    }
+    $findes = array_map('lille', array_column(
+        alle('SELECT kaldenavn FROM elever WHERE gruppe_id = ?', [$gruppe_id]), 'kaldenavn'));
+    if (count($findes) + count($navne) > $maks) {
+        fejl('Der kan højst være ' . $maks . ' elever i en gruppe.');
+    }
+    $dubletter = array_values(array_filter($navne, fn($n) => in_array(lille($n), $findes, true)));
+    if ($dubletter) {
+        fejl('Der er allerede en, der hedder ' . implode(', ', $dubletter)
+             . '. Skriv fx et forbogstav bagefter, så børnene kan kende forskel.');
+    }
+    $egen = !db()->inTransaction();
+    if ($egen) {
+        db()->beginTransaction();
+    }
+    foreach ($navne as $n) {
+        kør('INSERT INTO elever (gruppe_id, kaldenavn, ikon, kode, oprettet) VALUES (?, ?, ?, ?, ?)',
+            [$gruppe_id, $n, nyt_ikon($gruppe_id), ny_elevkode(db()), time()]);
+    }
+    if ($egen) {
+        db()->commit();
+    }
+    return count($navne);
+}
+
+/**
+ * Ret og tjek felterne til en ny eller rettet konto. $d har type, navn,
+ * kontakt, bynavn og email. Svarer med de rensede værdier — eller stopper med
+ * en fejl, man kan vise. $id er kontoen selv, når den rettes (mailen må gerne
+ * være dens egen).
+ */
+function tjek_kontofelter(array $d, int $id = 0): array
+{
+    $type = (string) ($d['type'] ?? '');
+    if (!isset(KONTOTYPER[$type])) {
+        fejl('Vælg, hvem kontoen er til.');
+    }
+    $navn = (string) ($d['navn'] ?? '');
+    $kontakt = (string) ($d['kontakt'] ?? '');
+    $email = lille((string) ($d['email'] ?? ''));
+    if (laengde($navn) < 2) {
+        fejl($type === 'skole' ? 'Skriv skolens navn.' : 'Skriv dit navn.');
+    }
+    if ($type === 'skole' && laengde($kontakt) < 2) {
+        fejl('Skriv navnet på kontaktpersonen.');
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        fejl('Den mailadresse ser ikke rigtig ud.');
+    }
+    if (vaerdi('SELECT 1 FROM konti WHERE email = ? AND id != ?', [$email, $id])) {
+        fejl('Der findes allerede en konto med den mailadresse. Prøv at logge ind, eller brug "Glemt kodeord".', 409);
+    }
+    return ['type' => $type, 'navn' => $navn, 'kontakt' => $type === 'skole' ? $kontakt : $navn,
+            'bynavn' => (string) ($d['bynavn'] ?? ''), 'email' => $email];
+}
+
+/**
+ * Opret en konto ud fra felter, der er tjekket med tjek_kontofelter(). En
+ * familie får sin gruppe "Familien" med det samme (og børnene i $boern, hvis
+ * der står nogen). Svarer med den nye kontos id.
+ */
+function opret_konto(array $f, string $kodeord_hash, string $status, string $boern = ''): int
+{
+    $nu = time();
+    db()->beginTransaction();
+    try {
+        kør('INSERT INTO konti (type, navn, kontakt, bynavn, email, kodeord, status, oprettet)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [$f['type'], $f['navn'], $f['kontakt'], $f['bynavn'], $f['email'], $kodeord_hash, $status, $nu]);
+        $id = (int) db()->lastInsertId();
+        if ($f['type'] === 'foraelder') {
+            kør('INSERT INTO grupper (konto_id, navn, klassetrin, kode, oprettet) VALUES (?, ?, NULL, ?, ?)',
+                [$id, 'Familien', ny_kode(), $nu]);
+            if (trim($boern) !== '') {
+                nye_elever((int) db()->lastInsertId(), $boern);
+            }
+        }
+        db()->commit();
+    } catch (Throwable $e) {
+        db()->rollBack();
+        throw $e;
+    }
+    return $id;
+}
+
+/**
+ * Et link, hvor den voksne selv vælger et (nyt) kodeord: /login#nulstil=…
+ * Gamle links til kontoen holder op med at virke.
+ */
+function nulstil_link(int $konto_id, int $gyldig): string
+{
+    $token = bin2hex(random_bytes(24));
+    kør('DELETE FROM nulstil WHERE konto_id = ? OR udloeber < ?', [$konto_id, time()]);
+    kør('INSERT INTO nulstil (token, konto_id, udloeber) VALUES (?, ?, ?)',
+        [hash('sha256', $token), $konto_id, time() + $gyldig]);
+    return adresse() . '/login#nulstil=' . $token;
 }
 
 /** Et dyr til en ny elev — det første, ingen andre i gruppen har. */

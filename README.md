@@ -231,10 +231,17 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
 
 **Hvem logger ind hvordan**
 
-- **Den voksne** (lærer eller forælder) opretter en konto på `/opret` med
-  mail og kodeord og logger ind på `/login` under "Jeg er voksen".
-- **En skole** laver klasser (fx 4.B) og skriver elevernes fornavne. **En
-  familie** får én gruppe, "Familien", med det samme.
+- **Den voksne** opretter en konto på `/opret` med navn, mail og kodeord og
+  logger ind på `/login` (mail og kodeord er det første, man ser dér; børnenes
+  kode-login står i en mindre boks under, og `/login#elev` går direkte til den).
+- **Alle konti starter som "til mig selv"** (`konti.type = 'privat'`): den
+  voksne spiller selv og har sin egen prøvetid. Skal der børn på, vælger man
+  det bagefter under `/konto` → "Skal andre også spille?" (`skift_type` i
+  `api/konto.php`): **Familie** får én gruppe, "Familien", og børnenes navne;
+  **Skole** får skolens navn (den voksne bliver kontaktperson) og laver så
+  klasser (fx 4.B) med elevernes fornavne. `/opret?type=skole` (eller
+  `familie`) åbner det rigtige valg på `/konto` lige efter oprettelsen.
+  Det går kun den vej — vil man tilbage, gør administratoren det.
 - **Hvert barn** får sin egen **kode** som `RAVN-4827` (dyr + fire cifre),
   går ind på `/login` og skriver den — så er det inde. Der er ingen navne at
   trykke på, så et barn kan ikke komme ind som en klassekammerat. Ingen mail
@@ -247,6 +254,14 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
 - Nye konti kan bruges med det samme, står som **Ny** i overblikket og kan
   godkendes eller spærres derfra. En spærret konto og alle dens elever bliver
   logget ud med det samme.
+- **Administratoren kan oprette og rette konti** i `/admin`: "Opret konto"
+  (`#ny-konto`) laver en godkendt konto af enhver type — med et kodeord, eller
+  uden, så får personen en mail med et link til selv at vælge et (7 dage).
+  Under en konto: ret navn, mail, by, type og status; sæt et nyt kodeord eller
+  send et link (24 timer); slet kontoen (mailadressen skal skrives som
+  bekræftelse); og sæt børn og klasser på, omdøb, giv ny kode og slet — det
+  går gennem `api/klasse.php` med `"konto": <id>`, som kun en administrator
+  må sende. Administratorkonti kan ikke rettes herfra.
 
 **Spilletid** bliver målt af `assets/spilletid.js` på begge spillersider. Et
 sekund tæller, når spillet er fremme på skærmen, og nogen har rørt tastatur, mus
@@ -321,7 +336,7 @@ adresse (rigtige tæller ikke, så en hel klasse bag én IP kan logge ind), logi
 | `api/klasse.php` | `oversigt`, `ny_gruppe`, `ret_gruppe`, `slet_gruppe`, `nye_elever`, `ret_elev`, `ny_elevkode`, `slet_elev` |
 | `api/elev.php` | `login` |
 | `api/spilletid.php` | `puls` |
-| `api/admin.php` | `status`, `opsaet`, `overblik`, `konto`, `saet_status`, `eksport` (CSV til Excel) |
+| `api/admin.php` | `status`, `opsaet`, `overblik`, `konto`, `saet_status`, `ny_konto`, `ret_konto`, `kodeord`, `slet_konto`, `eksport` (CSV til Excel) |
 
 ### Test lokalt med PHP
 

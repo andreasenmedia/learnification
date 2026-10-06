@@ -3,11 +3,12 @@
  * Voksenkonti: oprette, logge ind og ud, glemt kodeord, slette.
  *
  *   GET  ?handling=mig          hvem er logget ind (også elever)
- *   POST opret                  ny skole- eller forældrekonto
+ *   POST opret                  ny konto: til mig selv, familie eller skole
  *   POST login / logud
  *   POST glemt                  send et link til et nyt kodeord
  *   POST nulstil                sæt nyt kodeord med linket
  *   POST skift_kodeord, ret, slet_konto
+ *   POST skift_type {type, skolenavn?}  en konto "til mig selv" bliver familie eller skole
  *
  * Nye konti kan bruges med det samme. De står som "ny" i admin-overblikket,
  * til de er godkendt, og kan spærres derfra.
@@ -68,53 +69,26 @@ case 'opret':
     if (felt('hjemmeside') !== '') {
         svar(['ok' => true]);
     }
-    $type = felt('type', 20);
-    $navn = felt('navn', 120);
-    $kontakt = felt('kontakt', 120);
-    $bynavn = felt('bynavn', 80);
-    $email = lille(felt('email', 190));
+    $f = tjek_kontofelter(['type' => felt('type', 20), 'navn' => felt('navn', 120), 'kontakt' => felt('kontakt', 120),
+                           'bynavn' => felt('bynavn', 80), 'email' => felt('email', 190)]);
+    ['type' => $type, 'navn' => $navn, 'kontakt' => $kontakt, 'bynavn' => $bynavn, 'email' => $email] = $f;
     $kodeord = (string) (input()['kodeord'] ?? '');
-
-    if (!in_array($type, ['skole', 'foraelder'], true)) {
-        fejl('Vælg, om I er en skole eller en familie.');
-    }
-    if (laengde($navn) < 2) {
-        fejl($type === 'skole' ? 'Skriv skolens navn.' : 'Skriv dit navn.');
-    }
-    if ($type === 'skole' && laengde($kontakt) < 2) {
-        fejl('Skriv dit eget navn som kontaktperson.');
-    }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        fejl('Den mailadresse ser ikke rigtig ud.');
-    }
     tjek_kodeord($kodeord);
     if (empty(input()['samtykke'])) {
         fejl('Sæt flueben ved, at du har læst, hvad vi gemmer.');
     }
-    if (vaerdi('SELECT 1 FROM konti WHERE email = ?', [$email])) {
-        fejl('Der findes allerede en konto med den mailadresse. Prøv at logge ind, eller brug "Glemt kodeord".', 409);
-    }
 
+    // En familie får sin gruppe med det samme — og børnene, hvis de er skrevet på
     $nu = time();
-    db()->beginTransaction();
-    kør('INSERT INTO konti (type, navn, kontakt, bynavn, email, kodeord, status, oprettet)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-        [$type, $navn, $type === 'skole' ? $kontakt : $navn, $bynavn, $email,
-         password_hash($kodeord, PASSWORD_DEFAULT), 'ny', $nu]);
-    $id = (int) db()->lastInsertId();
-    // En familie får sin gruppe med det samme, så der kun er børn at tilføje
-    if ($type === 'foraelder') {
-        kør('INSERT INTO grupper (konto_id, navn, klassetrin, kode, oprettet) VALUES (?, ?, NULL, ?, ?)',
-            [$id, 'Familien', ny_kode(), $nu]);
-    }
-    db()->commit();
+    $id = opret_konto($f, password_hash($kodeord, PASSWORD_DEFAULT), 'ny',
+                      $type === 'foraelder' ? (string) (input()['boern'] ?? '') : '');
 
     log_ind($id, null, VOKSEN_LEVETID);
     kør('UPDATE konti SET sidst_inde = ? WHERE id = ?', [$nu, $id]);
 
     send_mail(MODTAGER, 'Ny testkonto: ' . $navn,
         "Der er oprettet en ny konto på Learnification.\n\n"
-        . 'Type:      ' . ($type === 'skole' ? 'Skole' : 'Forælder') . "\n"
+        . 'Type:      ' . KONTOTYPER[$type] . "\n"
         . "Navn:      $navn\n"
         . ($type === 'skole' ? "Kontakt:   $kontakt\n" : '')
         . ($bynavn !== '' ? "By:        $bynavn\n" : '')
@@ -130,8 +104,8 @@ case 'opret':
     // Nyhedsbrevet er sit eget flueben — aldrig en del af at oprette kontoen
     if (!empty(input()['nyhedsbrev'])) {
         require_once __DIR__ . '/_nyhedsbrev.php';
-        nyhedsbrev_tilmeld($email, $type === 'skole' ? $kontakt : $navn,
-                           $type === 'skole' ? 'laerer' : 'foraelder', '/opret');
+        nyhedsbrev_tilmeld($email, $kontakt,
+                           ['skole' => 'laerer', 'foraelder' => 'foraelder'][$type] ?? 'andet', '/opret');
     }
 
     svar(['ok' => true, 'besked' => 'Kontoen er oprettet.']);
@@ -166,15 +140,11 @@ case 'glemt':
     bremse('glemt-mail', $email, 3, 3600);
     $k = en('SELECT * FROM konti WHERE email = ? AND status != ?', [$email, 'spaerret']);
     if ($k) {
-        $token = bin2hex(random_bytes(24));
-        kør('DELETE FROM nulstil WHERE konto_id = ? OR udloeber < ?', [$k['id'], time()]);
-        kør('INSERT INTO nulstil (token, konto_id, udloeber) VALUES (?, ?, ?)',
-            [hash('sha256', $token), $k['id'], time() + 3600]);
         send_mail($k['email'], 'Nyt kodeord til Learnification',
             "Hej {$k['kontakt']}\n\n"
             . "Nogen (forhåbentlig dig) har bedt om et nyt kodeord til Learnification.\n"
             . "Klik her inden for en time for at vælge et nyt:\n\n"
-            . adresse() . '/login#nulstil=' . $token . "\n\n"
+            . nulstil_link((int) $k['id'], 3600) . "\n\n"
             . "Var det ikke dig, så skal du ikke gøre noget — dit gamle kodeord virker stadig.\n\n"
             . "Venlig hilsen\nLearnification\n");
     }
@@ -228,6 +198,33 @@ case 'ret':
     kør('UPDATE konti SET navn = ?, kontakt = ?, bynavn = ? WHERE id = ?',
         [$navn, $kontakt !== '' ? $kontakt : $k['kontakt'], $bynavn, $k['id']]);
     svar(['ok' => true, 'besked' => 'Gemt.']);
+
+case 'skift_type':
+    // Man opretter altid en konto til sig selv. Skal der børn på, gør man den
+    // bagefter til en familie (gruppen "Familien") eller en skole (klasser).
+    if ($k['type'] !== 'privat') {
+        fejl('Kontoen er allerede sat op til ' . (KONTOTYPER[$k['type']] ?? $k['type']) . '.');
+    }
+    $type = felt('type', 20);
+    if ($type === 'foraelder') {
+        db()->beginTransaction();
+        kør("UPDATE konti SET type = 'foraelder' WHERE id = ?", [$k['id']]);
+        kør('INSERT INTO grupper (konto_id, navn, klassetrin, kode, oprettet) VALUES (?, ?, NULL, ?, ?)',
+            [$k['id'], 'Familien', ny_kode(), time()]);
+        $gid = (int) db()->lastInsertId();
+        db()->commit();
+        svar(['ok' => true, 'gruppe' => $gid]);
+    }
+    if ($type === 'skole') {
+        $skole = felt('skolenavn', 120);
+        if (laengde($skole) < 2) {
+            fejl('Skriv skolens navn.');
+        }
+        // Skolens navn bliver kontoens navn, den voksne bliver kontaktperson
+        kør("UPDATE konti SET type = 'skole', navn = ?, kontakt = ? WHERE id = ?", [$skole, $k['navn'], $k['id']]);
+        svar(['ok' => true]);
+    }
+    fejl('Vælg familie eller skole.');
 
 case 'slet_konto':
     if ($k['type'] === 'admin') {

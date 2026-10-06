@@ -96,6 +96,13 @@
   font-size: 1.6rem; font-weight: 700; padding: 16px;
 }
 
+.kode-boks { background: var(--paper-2); }
+.kode-boks h2 { font-size: 1.2rem; }
+.kode-raekke { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.kode-raekke .felt { flex: 1 1 200px; margin-bottom: 0; }
+.kode-raekke .btn { flex: none; }
+.skjult { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
 .spilvalg { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; margin-top: 8px; }
 .spilvalg a {
   display: block; text-decoration: none; color: var(--ink);
@@ -226,3 +233,13 @@ details.foldud[open] summary { margin-bottom: 12px; }
 
 .liste .gemt { white-space: nowrap; }
 .liste .gemt.faerdig { color: var(--gold-dark); font-weight: 600; }
+
+/* ---------- kode-boksen på /login og konto-formularer i /admin ------------- */
+
+.kode-raekke .kode-felt input { font-size: 1.3rem; padding: 12px; }
+.kode-raekke .btn { min-height: 54px; }
+.admin-form { margin-top: 0; }
+.admin-form .felt-raekke { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* hidden skal vinde over display: flex/grid på felter og flueben */
+.konto-side [hidden] { display: none !important; }

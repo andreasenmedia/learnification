@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=4">
 </head>
 <body>
 
@@ -72,6 +72,7 @@
       <div class="topbar">
         <div><p class="eyebrow" style="margin-bottom:6px;">Administrator</p><h1>Testbrugere</h1></div>
         <div class="knapper">
+          <a class="btn btn-sm btn-primary" href="#ny-konto">Opret konto</a>
           <a class="btn btn-sm" href="/statistik">Besøg på siden</a>
           <a class="btn btn-sm" href="#nyhedsbrev">Nyhedsbrev</a>
           <a class="btn btn-sm" href="#velkomst">Velkomstmail</a>
@@ -91,11 +92,40 @@
         <h2>Konti</h2>
         <div class="filter">
           <input id="soeg" type="search" placeholder="Søg på navn, mail eller by" aria-label="Søg">
-          <select id="f-type" aria-label="Type"><option value="">Alle typer</option><option value="skole">Skoler</option><option value="foraelder">Familier</option></select>
+          <select id="f-type" aria-label="Type"><option value="">Alle typer</option><option value="privat">Til sig selv</option><option value="foraelder">Familier</option><option value="skole">Skoler</option></select>
           <select id="f-status" aria-label="Status"><option value="">Alle</option><option value="ny">Nye</option><option value="godkendt">Godkendte</option><option value="spaerret">Spærrede</option></select>
         </div>
         <div class="tabel-rul"><table class="liste" id="konti"></table></div>
       </div>
+    </div>
+
+    <!-- Opret en konto -->
+    <div id="opret" hidden>
+      <a href="#" class="tilbage">&larr; Alle konti</a>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Administrator</p><h1>Opret konto</h1>
+          <p>Kontoen bliver godkendt med det samme. Lad kodeordet stå tomt, så får personen en mail med et link til selv at vælge et (gælder 7 dage).</p></div>
+      </div>
+      <form class="panel admin-form" id="ny-form" novalidate>
+        <p class="besked" id="ny-besked"></p>
+        <div class="felt"><label for="ny-type">Hvem er kontoen til?</label><select id="ny-type"><option value="privat">Til mig selv (én voksen, der spiller)</option><option value="foraelder">Familie (voksen med børn)</option><option value="skole">Skole (klasser og elever)</option></select></div>
+        <div class="felt-raekke">
+          <div class="felt"><label for="ny-navn" id="ny-navn-label">Navn</label><input id="ny-navn" maxlength="120" autocomplete="off"></div>
+          <div class="felt" id="ny-kontakt-felt" hidden><label for="ny-kontakt">Kontaktperson</label><input id="ny-kontakt" maxlength="120" autocomplete="off"></div>
+          <div class="felt"><label for="ny-by">By <span>— valgfrit</span></label><input id="ny-by" maxlength="80" autocomplete="off"></div>
+        </div>
+        <div class="felt-raekke">
+          <div class="felt"><label for="ny-email">Mailadresse</label><input id="ny-email" type="email" maxlength="190" autocomplete="off"></div>
+          <div class="felt"><label for="ny-kode">Kodeord <span>— valgfrit, mindst 8 tegn</span></label><input id="ny-kode" type="text" autocomplete="off" spellcheck="false"></div>
+        </div>
+        <div class="felt" id="ny-boern-felt" hidden>
+          <label for="ny-boern">Børnenes navne <span>— ét pr. linje, valgfrit</span></label>
+          <textarea id="ny-boern" placeholder="Emma&#10;Oskar"></textarea>
+        </div>
+        <p class="lille" id="ny-mail-tekst" style="margin:0 0 14px;">Uden kodeord sendes en mail med et link, hvor personen selv vælger kodeord.</p>
+        <label class="samtykke" id="ny-velkomst-felt" hidden><input type="checkbox" id="ny-velkomst" checked><span>Send velkomstmailen (sådan kommer man i gang) — husk selv at give kodeordet videre</span></label>
+        <button class="btn btn-primary" type="submit">Opret konto</button>
+      </form>
     </div>
 
     <!-- Nyhedsbrevet -->
@@ -227,8 +257,59 @@
         <div class="knapper" id="d-knapper"></div>
       </div>
       <div class="tal-raekke" id="d-tal"></div>
+      <div class="panel admin-form" id="d-ret-panel">
+        <h2>Ret kontoen</h2>
+        <details class="foldud" id="d-ret-boks">
+          <summary>Navn, mail, type og status</summary>
+          <form id="d-ret" novalidate>
+            <p class="besked" id="d-ret-besked"></p>
+            <div class="felt-raekke">
+              <div class="felt"><label for="d-r-type">Type</label><select id="d-r-type"><option value="privat">Til mig selv (én voksen, der spiller)</option><option value="foraelder">Familie (voksen med børn)</option><option value="skole">Skole (klasser og elever)</option></select></div>
+              <div class="felt"><label for="d-r-status">Status</label><select id="d-r-status"><option value="ny">Ny</option><option value="godkendt">Godkendt</option><option value="spaerret">Spærret</option></select></div>
+            </div>
+            <div class="felt-raekke">
+              <div class="felt"><label for="d-r-navn" id="d-r-navn-label">Navn</label><input id="d-r-navn" maxlength="120" autocomplete="off"></div>
+              <div class="felt" id="d-r-kontakt-felt"><label for="d-r-kontakt">Kontaktperson</label><input id="d-r-kontakt" maxlength="120" autocomplete="off"></div>
+              <div class="felt"><label for="d-r-by">By</label><input id="d-r-by" maxlength="80" autocomplete="off"></div>
+            </div>
+            <div class="felt"><label for="d-r-email">Mailadresse</label><input id="d-r-email" type="email" maxlength="190" autocomplete="off"></div>
+            <p class="lille" style="margin:-4px 0 14px;">Familie får gruppen "Familien" af sig selv. En konto kan kun blive "til mig selv", når der ikke er børn på. Spærret logger alle på kontoen ud.</p>
+            <button class="btn btn-sm btn-primary" type="submit">Gem</button>
+          </form>
+        </details>
+        <details class="foldud">
+          <summary>Kodeord</summary>
+          <form id="d-kode" novalidate>
+            <p class="besked" id="d-kode-besked"></p>
+            <div class="felt"><label for="d-k-nyt">Nyt kodeord <span>— eller lad feltet stå tomt og send et link</span></label><input id="d-k-nyt" type="text" autocomplete="off" spellcheck="false"></div>
+            <div class="knapper">
+              <button class="btn btn-sm btn-primary" type="submit">Gem kodeordet</button>
+              <button class="btn btn-sm" type="button" id="d-k-link">Send link til at vælge et nyt</button>
+            </div>
+          </form>
+        </details>
+        <details class="foldud">
+          <summary>Slet kontoen</summary>
+          <form id="d-slet" novalidate>
+            <p>Kontoen, alle klasser og børn, al spilletid og alle gemte spil bliver slettet med det samme. Det kan ikke fortrydes.</p>
+            <p class="besked" id="d-slet-besked"></p>
+            <div class="felt"><label for="d-s-email">Skriv kontoens mailadresse for at bekræfte</label><input id="d-s-email" type="email" autocomplete="off"></div>
+            <button class="btn btn-sm" type="submit" style="border-color:var(--red);color:var(--red);box-shadow:0 3px 0 var(--red);">Slet alt</button>
+          </form>
+        </details>
+      </div>
       <div class="panel"><h2>Spilletid pr. dag, de sidste 30 dage</h2><div id="d-dage"></div></div>
       <div id="d-grupper"></div>
+      <form class="panel admin-form" id="d-ny-gruppe" hidden novalidate>
+        <h2>Ny klasse</h2>
+        <p class="besked" id="d-ny-gruppe-besked"></p>
+        <div class="felt-raekke">
+          <div class="felt"><label for="d-g-navn">Navn</label><input id="d-g-navn" maxlength="60" placeholder="4.B"></div>
+          <div class="felt"><label for="d-g-trin">Klassetrin</label><select id="d-g-trin"><option value="">Vælg …</option><option value="0">0. klasse</option><option value="1">1. klasse</option><option value="2">2. klasse</option><option value="3">3. klasse</option><option value="4">4. klasse</option><option value="5">5. klasse</option><option value="6">6. klasse</option><option value="7">7. klasse</option><option value="8">8. klasse</option><option value="9">9. klasse</option><option value="10">10. klasse</option></select></div>
+        </div>
+        <div class="felt"><label for="d-g-elever">Elever <span>— ét navn pr. linje, valgfrit</span></label><textarea id="d-g-elever" placeholder="Emma&#10;Oskar"></textarea></div>
+        <button class="btn btn-sm btn-primary" type="submit">Opret klasse</button>
+      </form>
     </div>
   </div>
 </main>
@@ -238,11 +319,12 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var STATUS = { ny: 'Ny', godkendt: 'Godkendt', spaerret: 'Spærret' };
-  var TYPE = { skole: 'Skole', foraelder: 'Familie' };
+  var TYPE = { privat: 'Til sig selv', foraelder: 'Familie', skole: 'Skole' };
+  var aktuel = null;          // kontoen, der er åben i detaljevisningen
   var alle = [], spilnavne = {};
 
   function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
-  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'skemaer'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'skemaer', 'opret'].forEach(function (x) { $(x).hidden = x !== id; }); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -275,6 +357,7 @@
     else if (location.hash === '#nyhedsbrev') visNyhed();
     else if (location.hash === '#velkomst') visVelkomst();
     else if (location.hash === '#spoergeskema') visSkemaer();
+    else if (location.hash === '#ny-konto') visOpret();
     else visOverblik();
   }
   window.addEventListener('hashchange', rute);
@@ -289,7 +372,7 @@
       vis('overblik');
       var t = d.tal;
       $('tal').innerHTML = [
-        [t.skoler, 'Skoler'], [t.familier, 'Familier'],
+        [t.private, 'Til sig selv'], [t.familier, 'Familier'], [t.skoler, 'Skoler'],
         [t.elever_spillet + ' af ' + t.elever, 'Elever, der har spillet'],
         [t.aktive_uge, 'Aktive spillere, 7 dage'],
         [t.nye, 'Nye konti at kigge på']
@@ -747,8 +830,9 @@
 
   // --- én konto -------------------------------------------------------------
   function visKonto(id) {
-    LF.hent('admin', 'konto', { id: id }).then(function (d) {
-      var k = d.konto, skole = k.type === 'skole';
+    return LF.hent('admin', 'konto', { id: id }).then(function (d) {
+      var k = d.konto, skole = k.type === 'skole', privat = k.type === 'privat';
+      aktuel = d;
       vis('detalje');
       window.scrollTo(0, 0);
       $('d-type').innerHTML = (TYPE[k.type] || 'Administrator') + ' ' + maerke(k.status);
@@ -757,7 +841,8 @@
         + (skole || k.bynavn ? ' · ' : '') + '<a href="mailto:' + LF.esc(k.email) + '">' + LF.esc(k.email) + '</a>'
         + '<br><span class="lille">Oprettet ' + LF.dato(k.oprettet) + ' · sidst logget ind ' + LF.dato(k.sidst_inde)
         + (k.type !== 'admin' ? ' · <a href="#velkomst">velkomstmail</a> ' + (k.velkomst_sendt ? 'sendt ' + LF.dato(k.velkomst_sendt) : 'ikke sendt') : '')
-        + (k.type !== 'admin' ? '<br>Prøvetid: ' + (k.fri_adgang ? 'fri adgang' : (k.graense_min + k.ekstra_min) + ' min pr. barn' + (k.ekstra_min ? ' (heraf ' + k.ekstra_min + ' ekstra)' : ''))
+        + (k.type !== 'admin' ? '<br>Prøvetid: ' + (k.fri_adgang ? 'fri adgang' : (k.graense_min + k.ekstra_min) + ' min ' + (privat ? '' : 'pr. barn') + (k.ekstra_min ? ' (heraf ' + k.ekstra_min + ' ekstra)' : ''))
+          + (privat ? ' (' + LF.tid(d.voksen_proeve.brugt_sek) + ' brugt)' : '')
           + ' · spørgeskema: ' + (d.skemaer.length ? d.skemaer.map(function (s) {
               return (s.besvaret ? 'besvaret ' + LF.dato(s.besvaret) : s.aabnet ? 'åbnet ' + LF.dato(s.aabnet) : 'sendt ' + LF.dato(s.sendt));
             }).join(', ') : 'ikke sendt') : '') + '</span>';
@@ -773,6 +858,16 @@
       $('d-knapper').innerHTML = knapper;
       $('d-knapper').dataset.id = k.id;
 
+      $('d-ret-panel').hidden = k.type === 'admin';
+      if (k.type !== 'admin') {
+        $('d-r-type').value = k.type; $('d-r-status').value = k.status;
+        $('d-r-navn').value = k.navn; $('d-r-kontakt').value = k.kontakt; $('d-r-by').value = k.bynavn; $('d-r-email').value = k.email;
+        tilpasRet();
+        ['d-ret-besked', 'd-kode-besked', 'd-slet-besked'].forEach(function (b) { LF.besked($(b), ''); });
+        $('d-k-nyt').value = ''; $('d-s-email').value = '';
+      }
+      $('d-ny-gruppe').hidden = !skole;
+
       var elever = 0, spillet = 0;
       d.grupper.forEach(function (g) { g.elever.forEach(function (e) { elever++; if (e.tid.i_alt) spillet++; }); });
       var tal = [[LF.tid(d.tid.i_alt), 'Spilletid i alt'], [LF.tid(d.tid.uge), 'De sidste 7 dage'],
@@ -782,20 +877,34 @@
 
       var spil = Object.keys(d.spil), html = '';
       d.grupper.forEach(function (g) {
-        html += '<section class="panel"><div class="gruppe-hoved"><h3>' + LF.esc(g.navn)
-          + (g.klassetrin !== null ? ' <span class="lille">(' + LF.klassetrin(g.klassetrin) + ')</span>' : '') + '</h3></div>';
-        if (!g.elever.length) { html += '<p class="tom">Ingen elever.</p></section>'; return; }
-        html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>Elev</th>';
-        spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });
-        html += '<th class="t">Gange</th><th class="t">7 dage</th><th class="t">I alt</th><th class="t">Prøvetid</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
-        g.elever.forEach(function (e) {
-          html += '<tr><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>';
-          spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + LF.gemt(e.gemt[s]) + '</td>'; });
-          html += '<td class="t">' + e.tid.gange + '</td><td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>'
-            + LF.tid(e.tid.i_alt) + '</strong></td><td class="t">' + proevetid(e.proeve.brugt_sek, e.proeve.graense_sek)
-            + '</td><td class="t">' + LF.dato(e.tid.sidst) + '</td></tr>';
-        });
-        html += '</tbody></table></div></section>';
+        html += '<section class="panel" data-gruppe="' + g.id + '"><div class="gruppe-hoved"><h3>' + (skole ? LF.esc(g.navn) : 'Børn')
+          + (g.klassetrin !== null ? ' <span class="lille">(' + LF.klassetrin(g.klassetrin) + ')</span>' : '') + '</h3>'
+          + '<p class="knapper lille" style="margin:0;gap:6px 18px;">'
+          + (skole ? '<button type="button" class="link-knap" data-ret-gruppe>Omdøb</button><button type="button" class="link-knap fare" data-slet-gruppe>Slet klassen</button>' : '')
+          + '</p></div>';
+        if (!g.elever.length) {
+          html += '<p class="tom">Ingen ' + (skole ? 'elever' : 'børn') + '.</p>';
+        } else {
+          html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>' + (skole ? 'Elev' : 'Barn') + '</th><th>Kode</th>';
+          spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });
+          html += '<th class="t">Gange</th><th class="t">7 dage</th><th class="t">I alt</th><th class="t">Prøvetid</th><th class="t">Sidst spillet</th><th></th></tr></thead><tbody>';
+          g.elever.forEach(function (e) {
+            html += '<tr data-elev="' + e.id + '"><td><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>' + LF.esc(e.kaldenavn) + '</td>'
+              + '<td class="elevkode">' + LF.esc(e.kode) + '</td>';
+            spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + LF.gemt(e.gemt[s]) + '</td>'; });
+            html += '<td class="t">' + e.tid.gange + '</td><td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>'
+              + LF.tid(e.tid.i_alt) + '</strong></td><td class="t">' + proevetid(e.proeve.brugt_sek, e.proeve.graense_sek)
+              + '</td><td class="t">' + LF.dato(e.tid.sidst) + '</td>'
+              + '<td class="handling"><button type="button" class="link-knap" data-ret-elev>Omdøb</button>'
+              + '<button type="button" class="link-knap" data-ny-elevkode>Ny kode</button>'
+              + '<button type="button" class="link-knap fare" data-slet-elev>Slet</button></td></tr>';
+          });
+          html += '</tbody></table></div>';
+        }
+        html += '<details class="foldud"' + (g.elever.length ? '' : ' open') + '><summary>Tilføj ' + (skole ? 'elever' : 'børn') + '</summary>'
+          + '<form data-tilfoej novalidate><p class="besked"></p><div class="felt"><label>Ét navn pr. linje</label>'
+          + '<textarea placeholder="Emma&#10;Oskar"></textarea></div>'
+          + '<button class="btn btn-sm btn-primary" type="submit">Tilføj</button></form></details></section>';
       });
       var ekstra = [];
       if (d.voksen_tid.i_alt) ekstra.push('Den voksne har selv spillet i ' + LF.tid(d.voksen_tid.i_alt) + '.');
@@ -805,7 +914,9 @@
       });
       if (d.slettede_tid.i_alt) ekstra.push('Elever, der er slettet igen, har spillet i ' + LF.tid(d.slettede_tid.i_alt) + '.');
       if (ekstra.length) html += '<div class="panel"><p style="margin:0;">' + ekstra.join(' ') + '</p></div>';
-      if (!d.grupper.length) html += '<div class="panel"><p class="tom" style="margin:0;">Kontoen har ingen klasser endnu.</p></div>';
+      if (!d.grupper.length) html += '<div class="panel"><p class="tom" style="margin:0;">' + (privat
+        ? 'Kontoen er til én voksen, der selv spiller. Skal der børn på, så skift typen til Familie under "Ret kontoen".'
+        : 'Kontoen har ingen klasser endnu.') + '</p></div>';
       $('d-grupper').innerHTML = html;
     }).catch(function (err) { alert(err.message); location.hash = ''; });
   }
@@ -821,6 +932,139 @@
     var s = b.dataset.status;
     if (s === 'spaerret' && !confirm('Spær kontoen? Den voksne og alle børnene bliver logget ud og kan ikke logge ind igen, før du åbner den.')) return;
     LF.send('admin', 'saet_status', { id: +this.dataset.id, status: s }).then(rute, function (err) { alert(err.message); });
+  });
+
+  // --- opret en konto ------------------------------------------------------------
+  function visOpret() {
+    vis('opret');
+    window.scrollTo(0, 0);
+    tilpasNy();
+    $('ny-navn').focus();
+  }
+  function tilpasNy() {
+    var t = $('ny-type').value;
+    $('ny-navn-label').textContent = t === 'skole' ? 'Skolens navn' : 'Navn';
+    $('ny-kontakt-felt').hidden = t !== 'skole';
+    $('ny-boern-felt').hidden = t !== 'foraelder';
+    var kode = $('ny-kode').value !== '';
+    $('ny-velkomst-felt').hidden = !kode;
+    $('ny-mail-tekst').hidden = kode;
+  }
+  $('ny-type').addEventListener('change', tilpasNy);
+  $('ny-kode').addEventListener('input', tilpasNy);
+  $('ny-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button[type=submit]');
+    LF.travl(knap, true);
+    LF.send('admin', 'ny_konto', {
+      type: $('ny-type').value, navn: $('ny-navn').value.trim(), kontakt: $('ny-kontakt').value.trim(),
+      bynavn: $('ny-by').value.trim(), email: $('ny-email').value.trim(), kodeord: $('ny-kode').value,
+      boern: $('ny-boern').value, velkomst: $('ny-velkomst').checked
+    }).then(function (d) {
+      if (d.mail === false) alert('Kontoen er oprettet, men mailen kunne ikke sendes: ' + d.fejl);
+      ['ny-navn', 'ny-kontakt', 'ny-by', 'ny-email', 'ny-kode', 'ny-boern'].forEach(function (x) { $(x).value = ''; });
+      LF.besked($('ny-besked'), '');
+      location.hash = 'konto=' + d.id;
+    }).catch(function (err) {
+      LF.besked($('ny-besked'), err.message, 'fejl');
+    }).then(function () { LF.travl(knap, false); });
+  });
+
+  // --- ret en konto ----------------------------------------------------------------
+  function tilpasRet() {
+    var skole = $('d-r-type').value === 'skole';
+    $('d-r-navn-label').textContent = skole ? 'Skolens navn' : 'Navn';
+    $('d-r-kontakt-felt').hidden = !skole;
+  }
+  $('d-r-type').addEventListener('change', tilpasRet);
+  $('d-ret').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button');
+    if ($('d-r-status').value === 'spaerret' && aktuel.konto.status !== 'spaerret'
+        && !confirm('Spær kontoen? Den voksne og alle børnene bliver logget ud og kan ikke logge ind igen, før du åbner den.')) return;
+    LF.travl(knap, true);
+    LF.send('admin', 'ret_konto', {
+      id: aktuel.konto.id, type: $('d-r-type').value, status: $('d-r-status').value,
+      navn: $('d-r-navn').value.trim(), kontakt: $('d-r-kontakt').value.trim(),
+      bynavn: $('d-r-by').value.trim(), email: $('d-r-email').value.trim()
+    }).then(function () { return visKonto(aktuel.konto.id); })
+      .then(function () { $('d-ret-boks').open = true; LF.besked($('d-ret-besked'), 'Gemt.', 'ok'); })
+      .catch(function (err) { LF.besked($('d-ret-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
+  });
+  function kodeord(nyt) {
+    var b = $('d-kode-besked');
+    LF.send('admin', 'kodeord', { id: aktuel.konto.id, kodeord: nyt })
+      .then(function (d) { LF.besked(b, d.besked, 'ok'); $('d-k-nyt').value = ''; })
+      .catch(function (err) { LF.besked(b, err.message, 'fejl'); });
+  }
+  $('d-kode').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!$('d-k-nyt').value) { LF.besked($('d-kode-besked'), 'Skriv det nye kodeord — eller send et link i stedet.', 'fejl'); return; }
+    kodeord($('d-k-nyt').value);
+  });
+  $('d-k-link').addEventListener('click', function () {
+    if (confirm('Send en mail til ' + aktuel.konto.email + ' med et link til at vælge et nyt kodeord?')) kodeord('');
+  });
+  $('d-slet').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!confirm('Slet ' + aktuel.konto.navn + ' og alt, der hører til? Det kan ikke fortrydes.')) return;
+    LF.send('admin', 'slet_konto', { id: aktuel.konto.id, email: $('d-s-email').value.trim() })
+      .then(function () { location.hash = ''; })
+      .catch(function (err) { LF.besked($('d-slet-besked'), err.message, 'fejl'); });
+  });
+
+  // --- klasser og børn på kontoen (api/klasse.php med "konto") --------------------
+  function klasse(handling, data) {
+    data.konto = aktuel.konto.id;
+    return LF.send('klasse', handling, data);
+  }
+  function igen() { return visKonto(aktuel.konto.id); }
+  $('d-grupper').addEventListener('click', function (e) {
+    var sek = e.target.closest('[data-gruppe]');
+    if (!sek) return;
+    var gid = +sek.dataset.gruppe;
+    var g = aktuel.grupper.filter(function (x) { return x.id === gid; })[0];
+    var raekke = e.target.closest('[data-elev]');
+    var eid = raekke ? +raekke.dataset.elev : 0;
+    var elev = raekke ? g.elever.filter(function (x) { return x.id === eid; })[0] : null;
+    var fejl = function (err) { alert(err.message); };
+    if (e.target.matches('[data-ny-elevkode]')) {
+      if (confirm('Lav en ny kode til ' + elev.kaldenavn + '? Den gamle holder op med at virke, og barnet bliver logget ud.'))
+        klasse('ny_elevkode', { id: eid }).then(igen, fejl);
+    } else if (e.target.matches('[data-ret-elev]')) {
+      var n = prompt('Nyt navn til ' + elev.kaldenavn + ':', elev.kaldenavn);
+      if (n && n.trim()) klasse('ret_elev', { id: eid, kaldenavn: n.trim(), ikon: elev.ikon }).then(igen, fejl);
+    } else if (e.target.matches('[data-slet-elev]')) {
+      if (confirm('Slet ' + elev.kaldenavn + '? Spilletiden bliver stående i tallene uden navn.'))
+        klasse('slet_elev', { id: eid }).then(igen, fejl);
+    } else if (e.target.matches('[data-ret-gruppe]')) {
+      var navn = prompt('Nyt navn til klassen:', g.navn);
+      if (navn && navn.trim()) klasse('ret_gruppe', { id: gid, navn: navn.trim(), klassetrin: g.klassetrin }).then(igen, fejl);
+    } else if (e.target.matches('[data-slet-gruppe]')) {
+      if (confirm('Slet ' + g.navn + ' og alle ' + g.elever.length + ' elever i klassen?'))
+        klasse('slet_gruppe', { id: gid }).then(igen, fejl);
+    }
+  });
+  $('d-grupper').addEventListener('submit', function (e) {
+    var f = e.target.closest('[data-tilfoej]');
+    if (!f) return;
+    e.preventDefault();
+    var knap = f.querySelector('button');
+    LF.travl(knap, true);
+    klasse('nye_elever', { id: +f.closest('[data-gruppe]').dataset.gruppe, navne: f.querySelector('textarea').value })
+      .then(igen)
+      .catch(function (err) { LF.besked(f.querySelector('.besked'), err.message, 'fejl'); LF.travl(knap, false); });
+  });
+  $('d-ny-gruppe').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button'), navne = $('d-g-elever').value;
+    LF.travl(knap, true);
+    klasse('ny_gruppe', { navn: $('d-g-navn').value.trim(), klassetrin: $('d-g-trin').value })
+      .then(function (d) { return navne.trim() ? klasse('nye_elever', { id: d.id, navne: navne }) : null; })
+      .then(function () { $('d-g-navn').value = ''; $('d-g-trin').value = ''; $('d-g-elever').value = ''; LF.besked($('d-ny-gruppe-besked'), ''); return igen(); })
+      .catch(function (err) { LF.besked($('d-ny-gruppe-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
   });
 
   start();

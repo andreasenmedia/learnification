@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Opret testkonto — Learnification</title>
-<meta name="description" content="Opret en gratis testkonto til din skole eller familie, og sæt dine elever eller børn på.">
+<title>Opret konto — Learnification</title>
+<meta name="description" content="Opret en gratis konto og prøv Runeborg og Regnehelten. Skal dine børn eller din klasse også spille, sætter du det op bagefter.">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#faf7f0">
 <link rel="canonical" href="https://learnification.dk/opret">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=4">
 </head>
 <body>
 
@@ -48,31 +48,20 @@
   <div class="wrap">
     <div class="smal">
       <p class="eyebrow midt">Gratis, mens spillene er til test</p>
-      <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Opret en testkonto</h1>
-      <p class="lead midt" style="font-size:1.05rem;">Kontoen er til dig som voksen. Bagefter sætter du dine elever eller børn på med et kaldenavn — de skal hverken have mail eller kodeord.</p>
+      <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Opret en konto</h1>
+      <p class="lead midt" style="font-size:1.05rem;">Kontoen er til dig, og du kan spille med det samme. Skal dine børn eller din klasse også spille, sætter du det op bagefter under Min konto — børnene skal hverken have mail eller kodeord.</p>
 
       <form class="panel" id="opret-form" novalidate style="margin-top:26px;">
         <p class="besked" id="besked"></p>
-
-        <div class="valg" role="radiogroup" aria-label="Hvem er I?">
-          <label><input type="radio" name="type" value="skole" checked>
-            <span><strong>Skole</strong><small>Lærere, der vil bruge spillene i en eller flere klasser</small></span></label>
-          <label><input type="radio" name="type" value="foraelder">
-            <span><strong>Familie</strong><small>Forældre, der vil lade deres egne børn spille</small></span></label>
-        </div>
 
         <div class="honey" aria-hidden="true">
           <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
         </div>
 
-        <div class="felt">
-          <label for="navn" id="navn-label">Skolens navn</label>
-          <input id="navn" name="navn" maxlength="120" autocomplete="organization" required>
-        </div>
         <div class="felt-raekke">
-          <div class="felt" id="kontakt-felt">
-            <label for="kontakt">Dit navn</label>
-            <input id="kontakt" name="kontakt" maxlength="120" autocomplete="name">
+          <div class="felt">
+            <label for="navn">Dit navn</label>
+            <input id="navn" name="navn" maxlength="120" autocomplete="name" required>
           </div>
           <div class="felt">
             <label for="bynavn">By <span>— valgfrit</span></label>
@@ -82,7 +71,7 @@
         <div class="felt">
           <label for="email">Mailadresse</label>
           <input id="email" name="email" type="email" maxlength="190" autocomplete="email" required>
-          <p class="hj" id="email-hj">Brug gerne din arbejdsmail.</p>
+          <p class="hj">Vi skriver kun om din konto og testen — nyhedsbrevet er dit eget valg herunder.</p>
         </div>
         <div class="felt">
           <label for="kodeord">Vælg et kodeord <span>— mindst 8 tegn</span></label>
@@ -91,7 +80,7 @@
 
         <label class="samtykke">
           <input type="checkbox" name="samtykke" id="samtykke" required>
-          <span>Jeg har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig og børnene, og at vi må skrive til mig om testen.</span>
+          <span>Jeg har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig (og eventuelle børn), og at vi må skrive til mig om testen.</span>
         </label>
 
         <label class="samtykke">
@@ -110,33 +99,23 @@
 <script>
 (function () {
   var f = document.getElementById('opret-form');
-  function type() { return f.querySelector('input[name=type]:checked').value; }
-  function tilpas() {
-    var skole = type() === 'skole';
-    document.getElementById('navn-label').textContent = skole ? 'Skolens navn' : 'Dit navn';
-    document.getElementById('navn').autocomplete = skole ? 'organization' : 'name';
-    document.getElementById('kontakt-felt').hidden = !skole;
-    document.getElementById('email-hj').textContent = skole ? 'Brug gerne din arbejdsmail.' : 'Vi skriver kun om testen.';
-  }
-  f.querySelectorAll('input[name=type]').forEach(function (r) { r.addEventListener('change', tilpas); });
-  var q = new URLSearchParams(location.search).get('type');
-  if (q === 'familie') { f.querySelector('input[value=foraelder]').checked = true; }
-  tilpas();
+  // Kom man fra "Opret en skolekonto" o.l., åbner Min konto bagefter det rigtige næste skridt
+  var naeste = { skole: 'skole', familie: 'familie' }[new URLSearchParams(location.search).get('type')] || '';
 
   f.addEventListener('submit', function (e) {
     e.preventDefault();
     var knap = f.querySelector('button[type=submit]');
     var besked = document.getElementById('besked');
     var d = {
-      type: type(),
-      navn: f.navn.value.trim(), kontakt: f.kontakt.value.trim(), bynavn: f.bynavn.value.trim(),
+      type: 'privat',
+      navn: f.navn.value.trim(), bynavn: f.bynavn.value.trim(),
       email: f.email.value.trim(), kodeord: f.kodeord.value,
       samtykke: f.samtykke.checked, nyhedsbrev: f.nyhedsbrev.checked, hjemmeside: f.hjemmeside.value
     };
     LF.travl(knap, true);
     LF.send('konto', 'opret', d).then(function () {
       if (window.LFMaal) LFMaal('opret_konto');
-      location.replace('/konto?ny=1');
+      location.replace('/konto?ny=1' + (naeste ? '&saet=' + naeste : ''));
     }).catch(function (err) {
       LF.besked(besked, err.message, 'fejl');
       besked.scrollIntoView({ block: 'center', behavior: 'smooth' });

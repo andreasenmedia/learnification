@@ -16,10 +16,12 @@ require_once __DIR__ . '/_nyhedsbrev.php';
 
 const VELKOMST_EMNE = 'Velkommen til Learnification — sådan kommer I i gang';
 
-/** Hvor langt kontoen er nået: elever i alt, og hvor mange der har spillet. */
+/** Hvor langt kontoen er nået: elever i alt, hvor mange der har spillet, og om den voksne selv har. */
 function velkomst_status(int $konto_id): array
 {
     return [
+        'selv' => (bool) vaerdi('SELECT 1 FROM sessioner WHERE konto_id = ? AND elev_id IS NULL
+                                 AND hvem = \'voksen\' AND sekunder > 0', [$konto_id]),
         'elever' => (int) vaerdi('SELECT COUNT(*) FROM elever e JOIN grupper g ON g.id = e.gruppe_id
                                   WHERE g.konto_id = ?', [$konto_id]),
         'spillet' => (int) vaerdi('SELECT COUNT(DISTINCT elev_id) FROM sessioner
@@ -38,25 +40,36 @@ function velkomst_mail(array $k): array
     }
     $side = adresse();
 
-    $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
-        . ($skole ? 'Tak, fordi ' . $k['navn'] . ' er med i testen af Learnification.'
-                  : 'Tak, fordi I er med i testen af Learnification.')
-        . " Kontoen er klar, og det tager kun et par minutter at komme i gang:\n\n"
-        . "1. Log ind på $side/login med " . $k['email'] . ".\n"
-        . ($skole ? "2. Opret en klasse under Min konto, og skriv elevernes fornavne — ét pr. linje.\n"
-                  : "2. Tilføj børnene under Min konto — fornavn eller kaldenavn er nok.\n")
-        . "3. Udskriv login-kortene. Hvert barn får sin egen kode, fx RAVN-4827.\n"
-        . "4. " . ($skole ? 'Eleverne' : 'Børnene') . " går ind på $side/login, skriver koden og vælger Runeborg eller Regnehelten.\n\n";
-
-    if ($st['elever'] === 0) {
-        $tekst .= ($skole ? 'Der er ingen elever på kontoen endnu, så trin 2 er det næste.'
-                          : 'Der er ingen børn på kontoen endnu, så trin 2 er det næste.') . "\n\n";
-    } elseif ($st['spillet'] === 0) {
-        $tekst .= 'I har ' . $st['elever'] . ($st['elever'] === 1 ? ($skole ? ' elev' : ' barn') : ($skole ? ' elever' : ' børn'))
-            . " på kontoen, men ingen har spillet endnu — så mangler kun trin 3 og 4.\n\n";
+    if ($k['type'] === 'privat') {
+        // En voksen, der selv vil spille — ingen børn, koder eller login-kort
+        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
+            . "Tak, fordi du er med i testen af Learnification. Kontoen er klar:\n\n"
+            . "1. Log ind på $side/login med " . $k['email'] . ".\n"
+            . "2. Vælg Runeborg eller Regnehelten under Min konto.\n"
+            . "3. Spillet gemmer af sig selv, så du kan fortsætte på en anden computer eller tablet.\n\n"
+            . ($st['selv'] ? "Du er allerede i gang — god fornøjelse med resten.\n\n" : '')
+            . "Skal dine børn også spille, eller vil du bruge spillene i en klasse? Det sætter du op under Min konto.\n\n";
     } else {
-        $tekst .= $st['spillet'] . ' af ' . $st['elever'] . ($skole ? ' elever' : ' børn')
-            . " har allerede spillet. Under Min konto kan I følge spilletiden og se, hvor langt de er nået.\n\n";
+        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
+            . ($skole ? 'Tak, fordi ' . $k['navn'] . ' er med i testen af Learnification.'
+                      : 'Tak, fordi I er med i testen af Learnification.')
+            . " Kontoen er klar, og det tager kun et par minutter at komme i gang:\n\n"
+            . "1. Log ind på $side/login med " . $k['email'] . ".\n"
+            . ($skole ? "2. Opret en klasse under Min konto, og skriv elevernes fornavne — ét pr. linje.\n"
+                      : "2. Tilføj børnene under Min konto — fornavn eller kaldenavn er nok.\n")
+            . "3. Udskriv login-kortene. Hvert barn får sin egen kode, fx RAVN-4827.\n"
+            . "4. " . ($skole ? 'Eleverne' : 'Børnene') . " går ind på $side/login, skriver koden og vælger Runeborg eller Regnehelten.\n\n";
+
+        if ($st['elever'] === 0) {
+            $tekst .= ($skole ? 'Der er ingen elever på kontoen endnu, så trin 2 er det næste.'
+                              : 'Der er ingen børn på kontoen endnu, så trin 2 er det næste.') . "\n\n";
+        } elseif ($st['spillet'] === 0) {
+            $tekst .= 'I har ' . $st['elever'] . ($st['elever'] === 1 ? ($skole ? ' elev' : ' barn') : ($skole ? ' elever' : ' børn'))
+                . " på kontoen, men ingen har spillet endnu — så mangler kun trin 3 og 4.\n\n";
+        } else {
+            $tekst .= $st['spillet'] . ' af ' . $st['elever'] . ($skole ? ' elever' : ' børn')
+                . " har allerede spillet. Under Min konto kan I følge spilletiden og se, hvor langt de er nået.\n\n";
+        }
     }
 
     $tekst .= "Har du glemt kodeordet, så tryk på \"Glemt kodeord\" på login-siden.\n"
@@ -118,9 +131,12 @@ const PAAMIND_EFTER = 3 * 86400;        // så længe efter oprettelsen
 const PAAMIND_HOEJST = 30 * 86400;      // ældre konti får ingen
 const PAAMIND_TIMER = [9, 19];          // kun mellem kl. 9 og 19
 
-/** SQL: intet barn på kontoen har spillet endnu (den voksnes egne spil tæller ikke). */
-const PAAMIND_IKKE_SPILLET = 'NOT EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id
-                              AND s.elev_id IS NOT NULL AND s.sekunder > 0)';
+/**
+ * SQL: intet barn på kontoen har spillet endnu (den voksnes egne spil tæller
+ * ikke) — på en konto "til mig selv" er det den voksne selv, der tæller.
+ */
+const PAAMIND_IKKE_SPILLET = "NOT EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id
+                              AND (s.elev_id IS NOT NULL OR k.type = 'privat') AND s.sekunder > 0)";
 
 /** De konti, der skal have den nu. */
 function paamind_hvor(): string
@@ -152,21 +168,30 @@ function paamind_mail(array $k): array
     $side = adresse();
     $boern = $skole ? 'elever' : 'børn';
 
-    $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
-        . 'For et par dage siden oprettede du en konto' . ($skole ? ' til ' . $k['navn'] : '')
-        . " på Learnification, men der er ingen $boern, der har spillet endnu.\n\n";
-    if ($st['elever'] === 0) {
-        $tekst .= ($skole ? 'Det næste skridt er at oprette en klasse under Min konto og skrive elevernes fornavne — ét pr. linje.'
-                          : 'Det næste skridt er at tilføje børnene under Min konto — fornavn eller kaldenavn er nok.')
-            . " Så får hvert barn sin egen kode, og I kan gå i gang. Det tager et par minutter.\n\n";
+    if ($k['type'] === 'privat') {
+        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
+            . "For et par dage siden oprettede du en konto på Learnification, men du har ikke prøvet spillene endnu.\n\n"
+            . "Log ind på $side/login, og vælg Runeborg eller Regnehelten under Min konto. "
+            . "Spillet gemmer af sig selv, så du kan stoppe, når du vil, og fortsætte en anden dag.\n\n"
+            . "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
+            . "Venlig hilsen\nLearnification";
     } else {
-        $tekst .= 'I har ' . $st['elever'] . ' ' . ($st['elever'] === 1 ? ($skole ? 'elev' : 'barn') : $boern)
-            . ' på kontoen, så I er næsten i mål. Udskriv login-kortene under Min konto, og lad '
-            . ($skole ? 'eleverne' : 'børnene') . " gå ind på $side/login og skrive deres kode. "
-            . "Så kan de vælge Runeborg eller Regnehelten.\n\n";
+        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
+            . 'For et par dage siden oprettede du en konto' . ($skole ? ' til ' . $k['navn'] : '')
+            . " på Learnification, men der er ingen $boern, der har spillet endnu.\n\n";
+        if ($st['elever'] === 0) {
+            $tekst .= ($skole ? 'Det næste skridt er at oprette en klasse under Min konto og skrive elevernes fornavne — ét pr. linje.'
+                              : 'Det næste skridt er at tilføje børnene under Min konto — fornavn eller kaldenavn er nok.')
+                . " Så får hvert barn sin egen kode, og I kan gå i gang. Det tager et par minutter.\n\n";
+        } else {
+            $tekst .= 'I har ' . $st['elever'] . ' ' . ($st['elever'] === 1 ? ($skole ? 'elev' : 'barn') : $boern)
+                . ' på kontoen, så I er næsten i mål. Udskriv login-kortene under Min konto, og lad '
+                . ($skole ? 'eleverne' : 'børnene') . " gå ind på $side/login og skrive deres kode. "
+                . "Så kan de vælge Runeborg eller Regnehelten.\n\n";
+        }
+        $tekst .= "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
+            . "Venlig hilsen\nLearnification";
     }
-    $tekst .= "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
-        . "Venlig hilsen\nLearnification";
 
     $hvorfor = 'Du får denne påmindelse én gang, fordi du har oprettet en konto på learnification.dk, '
         . 'og ingen har spillet endnu. Vi sender ikke flere.';

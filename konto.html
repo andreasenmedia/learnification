@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Min konto — Learnification</title>
-<meta name="description" content="Klasser, elever og spilletid.">
+<meta name="description" content="Din konto: spil selv, eller sæt børn og klasser på.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#faf7f0">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=4">
 </head>
 <body>
 
@@ -69,11 +69,49 @@
 
       <div class="panel guld" id="velkommen" hidden>
         <h2>Velkommen — kontoen er klar</h2>
-        <ol class="steps" style="margin-top:18px;">
+        <ol class="steps" id="trin" style="margin-top:18px;">
           <li><span class="n">1</span><h3 id="trin1-titel">Opret en klasse</h3><p id="trin1-tekst">Giv den et navn, fx 4.B, og skriv elevernes fornavne eller kaldenavne — ét pr. linje.</p></li>
           <li><span class="n">2</span><h3>Del koderne</h3><p>Hvert barn får sin egen kode som RAVN-4827, så ingen kan komme ind som en anden. Udskriv login-kortene — ét til hvert barn.</p></li>
           <li><span class="n">3</span><h3>Log ind og spil</h3><p>Børnene går ind på <strong>learnification.dk/login</strong> og skriver deres egen kode.</p></li>
         </ol>
+      </div>
+
+      <div class="panel" id="spil-selv" hidden>
+        <h2>Spil selv</h2>
+        <p id="selv-status" style="margin-top:-4px;"></p>
+        <div class="spilvalg">
+          <a href="/spil/runeborg/"><img src="/assets/billeder/runeborg-by.png" alt=""><span>Runeborg</span></a>
+          <a href="/spil/regnehelten/"><img src="/assets/billeder/regnehelten-by.png" alt=""><span>Regnehelten</span></a>
+        </div>
+      </div>
+
+      <div class="panel ingen-print" id="saet-op" hidden>
+        <h2>Skal andre også spille?</h2>
+        <p style="margin-top:-4px;">Kontoen er lige nu til dig alene. Skal dine børn eller en klasse også spille, kan du gøre den til en familie- eller skolekonto. Hvert barn får sin egen kode — ingen mail og intet kodeord.</p>
+        <div class="valg" role="radiogroup" aria-label="Hvad skal kontoen bruges til?">
+          <label><input type="radio" name="saet" value="familie">
+            <span><strong>Familie</strong><small>Mine egne børn skal spille</small></span></label>
+          <label><input type="radio" name="saet" value="skole">
+            <span><strong>Skole</strong><small>Jeg er lærer og vil bruge spillene i en klasse</small></span></label>
+        </div>
+        <form id="saet-familie" novalidate hidden>
+          <p class="besked"></p>
+          <div class="felt">
+            <label for="saet-boern">Børnenes navne <span>— ét pr. linje</span></label>
+            <textarea id="saet-boern" placeholder="Emma&#10;Oskar"></textarea>
+            <p class="hj">Fornavn eller kaldenavn er nok. Du kan altid sætte flere på bagefter.</p>
+          </div>
+          <button class="btn btn-primary" type="submit">Gør det til en familiekonto</button>
+        </form>
+        <form id="saet-skole" novalidate hidden>
+          <p class="besked"></p>
+          <div class="felt">
+            <label for="saet-skolenavn">Skolens navn</label>
+            <input id="saet-skolenavn" maxlength="120" autocomplete="organization">
+            <p class="hj">Du bliver kontaktperson. Bagefter opretter du en klasse og skriver elevernes fornavne.</p>
+          </div>
+          <button class="btn btn-primary" type="submit">Gør det til en skolekonto</button>
+        </form>
       </div>
 
       <div class="tal-raekke" id="tal"></div>
@@ -180,17 +218,40 @@
     var admin = d.konto.type === 'admin';
     $('indlaeser').hidden = true;
     $('side').hidden = false;
-    $('type-tekst').textContent = skole ? 'Skolekonto' : admin ? 'Administrator' : 'Familiekonto';
+    var privat = d.konto.type === 'privat';
+    $('type-tekst').textContent = skole ? 'Skolekonto' : admin ? 'Administrator' : privat ? 'Min konto' : 'Familiekonto';
     $('konto-navn').textContent = d.konto.navn;
     $('konto-info').innerHTML = LF.esc([skole ? d.konto.kontakt : '', d.konto.email, d.konto.bynavn].filter(Boolean).join(' · '));
     document.querySelectorAll('[data-gruppeord]').forEach(function (e) { e.textContent = skole ? 'klasse' : 'familie'; });
     document.querySelectorAll('[data-gruppeord-flertal]').forEach(function (e) { e.textContent = skole ? 'klasser' : 'grupper'; });
-    if (!skole) {
+    if (privat) {
+      $('trin').innerHTML = '<li><span class="n">1</span><h3>Vælg et spil</h3><p>Runeborg eller Regnehelten — begge ligger lige herunder.</p></li>'
+        + '<li><span class="n">2</span><h3>Spil i dit eget tempo</h3><p>Spillet gemmer af sig selv, så du kan fortsætte en anden dag eller på en anden computer.</p></li>'
+        + '<li><span class="n">3</span><h3>Børn eller en klasse?</h3><p>Skal andre også spille, sætter du kontoen op til en familie eller en skole længere nede.</p></li>';
+    } else if (!skole) {
       $('trin1-titel').textContent = 'Sæt dine børn på';
       $('trin1-tekst').textContent = 'Skriv deres fornavne eller kaldenavne under "Børn" herunder.';
     }
     $('velkommen').hidden = !/ny=1/.test(location.search);
     $('ny-gruppe').hidden = !(skole || admin);
+    $('spil-selv').hidden = !privat;
+    $('saet-op').hidden = !privat;
+    if (privat) {
+      var p = d.voksen_proeve, mine = Object.keys(d.spil).filter(function (s) { return d.voksen_gemt[s]; }).map(function (s) {
+        var g = d.voksen_gemt[s];
+        return '<strong>' + LF.esc(d.spil[s]) + ':</strong> ' + (g.faerdig ? '★ ' : '') + LF.esc(g.tekst);
+      });
+      $('selv-status').innerHTML = (p.graense_sek === null ? 'Du har fri adgang.'
+          : p.slut ? 'Du har brugt hele prøvetiden. Skriv til os, hvis du gerne vil spille videre.'
+          : 'Du har ' + LF.tid(p.tilbage_sek) + ' tilbage af prøvetiden.')
+        + (mine.length ? '<br>' + mine.join(' · ') : ' Spillet gemmer af sig selv, mens du spiller.');
+      var saet = (location.search.match(/saet=(familie|skole)/) || [])[1];
+      if (saet && !$('saet-op').dataset.aabnet) {
+        $('saet-op').dataset.aabnet = 1;
+        vaelgSaet(saet);
+        setTimeout(function () { $('saet-op').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
+      }
+    }
     $('slet-boks').hidden = admin;
 
     // Tal øverst
@@ -199,7 +260,8 @@
     $('tal').innerHTML = [
       [LF.tid(d.tid.i_alt), 'Spilletid i alt'],
       [LF.tid(d.tid.uge), 'De sidste 7 dage'],
-      [spillet + ' af ' + elever, skole ? 'Elever, der har spillet' : 'Børn, der har spillet'],
+      privat ? [d.voksen_proeve.graense_sek === null ? 'Fri' : LF.tid(d.voksen_proeve.tilbage_sek), 'Prøvetid tilbage']
+        : [spillet + ' af ' + elever, skole ? 'Elever, der har spillet' : 'Børn, der har spillet'],
       [LF.dato(d.tid.sidst), 'Sidst spillet']
     ].map(function (t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + t[1] + '</div></div>'; }).join('');
 
@@ -245,7 +307,7 @@
     if (!d.grupper.length && (skole || admin)) {
       html = '<div class="panel"><p class="tom" style="margin:0;">Ingen klasser endnu — opret den første herunder.</p></div>';
     }
-    if (d.voksen_tid.i_alt > 0) {
+    if (d.voksen_tid.i_alt > 0 && !privat) {
       html += '<div class="panel"><p style="margin:0;"><strong>Du har selv prøvet spillene i ' + LF.tid(d.voksen_tid.i_alt)
         + '.</strong> Den tid tæller med i tallene øverst.</p></div>';
     }
@@ -253,7 +315,7 @@
       var g = d.voksen_gemt[s];
       return LF.esc(d.spil[s]) + ': ' + (g.faerdig ? '★ ' : '') + LF.esc(g.tekst) + ' <span class="lille">(' + LF.esc(g.detalje) + ')</span>';
     });
-    if (egne.length) {
+    if (egne.length && !privat) {
       html += '<div class="panel"><p style="margin:0;"><strong>Dine egne gemte spil</strong> — ' + egne.join(' · ') + '</p></div>';
     }
     if (d.grupper.some(function (g) { return g.elever.length; })) {
@@ -324,6 +386,37 @@
         return hent();
       })
       .catch(function (err) { LF.besked($('ny-gruppe-besked'), err.message, 'fejl'); hent(); })
+      .then(function () { LF.travl(knap, false); });
+  });
+
+  // --- en konto "til mig selv" bliver familie eller skole ---------------------
+  function vaelgSaet(v) {
+    document.querySelectorAll('input[name=saet]').forEach(function (r) { r.checked = r.value === v; });
+    $('saet-familie').hidden = v !== 'familie';
+    $('saet-skole').hidden = v !== 'skole';
+    (v === 'familie' ? $('saet-boern') : $('saet-skolenavn')).focus({ preventScroll: true });
+  }
+  document.querySelectorAll('input[name=saet]').forEach(function (r) {
+    r.addEventListener('change', function () { vaelgSaet(r.value); });
+  });
+  $('saet-familie').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = this, knap = f.querySelector('button'), navne = $('saet-boern').value;
+    LF.travl(knap, true);
+    LF.send('konto', 'skift_type', { type: 'foraelder' })
+      .then(function (d) { return navne.trim() ? LF.send('klasse', 'nye_elever', { id: d.gruppe, navne: navne }) : null; })
+      .then(function () { history.replaceState(null, '', '/konto'); return hent(); })
+      .catch(function (err) { LF.besked(f.querySelector('.besked'), err.message, 'fejl'); return hent(); })
+      .then(function () { LF.travl(knap, false); });
+  });
+  $('saet-skole').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var f = this, knap = f.querySelector('button');
+    LF.travl(knap, true);
+    LF.send('konto', 'skift_type', { type: 'skole', skolenavn: $('saet-skolenavn').value.trim() })
+      .then(function () { history.replaceState(null, '', '/konto'); return hent(); })
+      .then(function () { $('ny-gruppe').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('gruppe-navn').focus({ preventScroll: true }); })
+      .catch(function (err) { LF.besked(f.querySelector('.besked'), err.message, 'fejl'); })
       .then(function () { LF.travl(knap, false); });
   });
 

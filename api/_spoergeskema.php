@@ -35,13 +35,19 @@ function skema_mail(array $k, array $s, string $kaldenavn): array
         $fornavn = '';
     }
     $spil = SPIL[$s['spil']] ?? 'Learnification';
+    // Den voksne selv (en konto "til mig selv", eller en voksen, der har spillet) — ellers et barn
+    $selv = $s['elev_id'] === null && ($k['type'] === 'privat' || $kaldenavn === '');
     $barn = $kaldenavn !== '' ? $kaldenavn : ($skole ? 'en af eleverne' : 'et af børnene');
     $link = adresse() . '/spoergeskema?n=' . $s['noegle'];
 
     $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
-        . ($s['aarsag'] === 'faerdig'
-            ? "$barn har klaret hele $spil. Tak, fordi I har prøvet det!"
-            : "$barn har brugt hele prøvetiden på en time i Learnification. Tak, fordi I har prøvet det!")
+        . ($selv
+            ? ($s['aarsag'] === 'faerdig'
+                ? "Du har klaret hele $spil. Tak, fordi du har prøvet det!"
+                : 'Du har brugt hele prøvetiden på en time i Learnification. Tak, fordi du har prøvet det!')
+            : ($s['aarsag'] === 'faerdig'
+                ? "$barn har klaret hele $spil. Tak, fordi I har prøvet det!"
+                : "$barn har brugt hele prøvetiden på en time i Learnification. Tak, fordi I har prøvet det!"))
         . "\n\nVi vil rigtig gerne vide, hvordan det gik. Spørgeskemaet tager to minutter, "
         . "og I får det kun denne ene gang. Jeres svar hjælper os med at gøre spillene bedre.\n\n"
         . ($s['aarsag'] === 'tid'

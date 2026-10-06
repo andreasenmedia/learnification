@@ -7,6 +7,11 @@
  *   GET  ?handling=overblik     tal, konti og spilletid pr. dag
  *   GET  ?handling=konto&id=    én konto med klasser og elever
  *   POST saet_status            godkend / spær / åbn igen
+ *   POST ny_konto               opret en konto (med kodeord, eller send et link, så de selv vælger)
+ *   POST ret_konto {id}         ret type, navn, mail, by og status
+ *   POST kodeord {id, kodeord?} sæt et nyt kodeord — eller send et link til at vælge et
+ *   POST slet_konto {id, email} slet kontoen og alt, der hører til
+ *   Børnene og klasserne på en konto rettes gennem api/klasse.php med "konto": <id>.
  *   GET  ?handling=eksport      alle konti som CSV til Excel
  *   GET  ?handling=besoeg&dage= besøgsstatistikken til /statistik
  *
@@ -359,6 +364,7 @@ case 'overblik':
           'tal' => [
               'skoler' => count(array_filter($konti, fn($k) => $k['type'] === 'skole')),
               'familier' => count(array_filter($konti, fn($k) => $k['type'] === 'foraelder')),
+              'private' => count(array_filter($konti, fn($k) => $k['type'] === 'privat')),
               'nye' => count(array_filter($konti, fn($k) => $k['status'] === 'ny')),
               'elever' => array_sum(array_column($konti, 'elever')),
               'elever_spillet' => array_sum(array_column($konti, 'elever_spillet')),
@@ -384,6 +390,7 @@ case 'konto':
         $elever = [];
         foreach (alle('SELECT * FROM elever WHERE gruppe_id = ? ORDER BY kaldenavn', [$g['id']]) as $e) {
             $elever[] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
+                         'kode' => $e['kode'],
                          'sidst_inde' => $e['sidst_inde'] !== null ? (int) $e['sidst_inde'] : null,
                          'tid' => spilletid('elev_id = ?', [$e['id']]),
                          'proeve' => tid_status(['konto' => $k, 'elev' => ['id' => $e['id']]]),
@@ -407,6 +414,7 @@ case 'konto':
           'tid' => spilletid('konto_id = ?', [$k['id']]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$k['id']]),
           'voksen_gemt' => $voksen_gemt,
+          'voksen_proeve' => tid_status(['konto' => $k, 'elev' => null]),
           'slettede_tid' => spilletid("konto_id = ? AND hvem = 'elev' AND elev_id IS NULL", [$k['id']]),
           'dage' => pr_dag('konto_id = ?', [$k['id']], 30),
           'spil' => SPIL]);
@@ -424,6 +432,113 @@ case 'saet_status':
     if ($status === 'spaerret') {
         kør('DELETE FROM logins WHERE konto_id = ?', [tal('id')]);
     }
+    svar(['ok' => true]);
+
+// ---- opret og ret konti ---------------------------------------------------
+
+case 'ny_konto':
+    kraev_egen_side();
+    $f = tjek_kontofelter(['type' => felt('type', 20), 'navn' => felt('navn', 120), 'kontakt' => felt('kontakt', 120),
+                           'bynavn' => felt('bynavn', 80), 'email' => felt('email', 190)]);
+    $kodeord = (string) (input()['kodeord'] ?? '');
+    if ($kodeord !== '' && (strlen($kodeord) < 8 || strlen($kodeord) > 200)) {
+        fejl('Kodeordet skal være mindst 8 tegn — eller lad feltet stå tomt, så vælger de selv.');
+    }
+    // Uden kodeord får kontoen et tilfældigt, ingen kender, og et link til at vælge sit eget
+    $id = opret_konto($f, password_hash($kodeord !== '' ? $kodeord : bin2hex(random_bytes(24)), PASSWORD_DEFAULT),
+                      'godkendt', $f['type'] === 'foraelder' ? (string) (input()['boern'] ?? '') : '');
+    $k = en('SELECT * FROM konti WHERE id = ?', [$id]);
+    $mail = null;
+    if ($kodeord === '') {
+        $mail = send_mail($k['email'], 'Din konto på Learnification',
+            "Hej {$k['kontakt']}\n\n"
+            . "Der er oprettet en konto til dig på Learnification, hvor man kan prøve vores danske læringsspil.\n\n"
+            . "Klik her for at vælge dit kodeord — linket virker i 7 dage:\n\n"
+            . nulstil_link($id, 7 * 86400) . "\n\n"
+            . 'Bagefter logger du ind på ' . adresse() . "/login med {$k['email']}.\n"
+            . "Er linket udløbet, så tryk på \"Glemt kodeord\" på login-siden.\n\n"
+            . "Venlig hilsen\nLearnification\n", null, ['Reply-To' => MODTAGER]);
+    } elseif (!empty(input()['velkomst'])) {
+        require_once __DIR__ . '/_velkomst.php';
+        $mail = velkomst_send($k);
+    }
+    svar(['ok' => true, 'id' => $id, 'mail' => $mail, 'fejl' => $mail === false ? post_fejl() : '']);
+
+case 'ret_konto':
+    kraev_egen_side();
+    $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('id')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    $f = tjek_kontofelter(['type' => felt('type', 20), 'navn' => felt('navn', 120), 'kontakt' => felt('kontakt', 120),
+                           'bynavn' => felt('bynavn', 80), 'email' => felt('email', 190)], (int) $k['id']);
+    $status = felt('status', 20);
+    if (!in_array($status, ['ny', 'godkendt', 'spaerret'], true)) {
+        fejl('Ukendt status.');
+    }
+    $boern = (int) vaerdi('SELECT COUNT(*) FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?', [$k['id']]);
+    if ($f['type'] === 'privat' && $boern) {
+        fejl('Der er ' . $boern . ' ' . ($boern === 1 ? 'barn' : 'børn') . ' på kontoen. Slet dem først, eller vælg Familie.');
+    }
+    db()->beginTransaction();
+    kør('UPDATE konti SET type = ?, navn = ?, kontakt = ?, bynavn = ?, email = ?, status = ? WHERE id = ?',
+        [$f['type'], $f['navn'], $f['kontakt'], $f['bynavn'], $f['email'], $status, $k['id']]);
+    // En familie skal have sin gruppe, så der er et sted at sætte børnene
+    if ($f['type'] === 'foraelder' && !vaerdi('SELECT 1 FROM grupper WHERE konto_id = ?', [$k['id']])) {
+        kør('INSERT INTO grupper (konto_id, navn, klassetrin, kode, oprettet) VALUES (?, ?, NULL, ?, ?)',
+            [$k['id'], 'Familien', ny_kode(), time()]);
+    }
+    // En tom "Familien" giver ingen mening på en konto til én voksen
+    if ($f['type'] === 'privat') {
+        kør('DELETE FROM grupper WHERE konto_id = ?', [$k['id']]);
+    }
+    db()->commit();
+    if ($status === 'spaerret') {
+        kør('DELETE FROM logins WHERE konto_id = ?', [$k['id']]);
+    }
+    svar(['ok' => true]);
+
+case 'kodeord':
+    kraev_egen_side();
+    $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('id')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    $kodeord = (string) (input()['kodeord'] ?? '');
+    if ($kodeord !== '') {
+        if (strlen($kodeord) < 8 || strlen($kodeord) > 200) {
+            fejl('Kodeordet skal være mindst 8 tegn.');
+        }
+        kør('UPDATE konti SET kodeord = ? WHERE id = ?', [password_hash($kodeord, PASSWORD_DEFAULT), $k['id']]);
+        // Den voksne bliver logget ud alle steder; børnene må gerne blive ved
+        kør('DELETE FROM logins WHERE konto_id = ? AND elev_id IS NULL', [$k['id']]);
+        kør('DELETE FROM nulstil WHERE konto_id = ?', [$k['id']]);
+        svar(['ok' => true, 'besked' => 'Det nye kodeord er gemt. Husk at give det videre.']);
+    }
+    $ok = send_mail($k['email'], 'Vælg et nyt kodeord til Learnification',
+        "Hej {$k['kontakt']}\n\n"
+        . "Her er et link, hvor du kan vælge et nyt kodeord til din konto på Learnification.\n"
+        . "Det virker i 24 timer:\n\n"
+        . nulstil_link((int) $k['id'], 86400) . "\n\n"
+        . "Har du ikke bedt om det, så skal du ikke gøre noget — dit gamle kodeord virker stadig.\n\n"
+        . "Venlig hilsen\nLearnification\n", null, ['Reply-To' => MODTAGER]);
+    if (!$ok) {
+        fejl('Mailen kunne ikke sendes: ' . post_fejl(), 502);
+    }
+    svar(['ok' => true, 'besked' => 'Linket er sendt til ' . $k['email'] . '.']);
+
+case 'slet_konto':
+    kraev_egen_side();
+    $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('id')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    // Som bekræftelse skal kontoens mailadresse skrives — så sletter man ikke den forkerte
+    if (lille(felt('email', 190)) !== $k['email']) {
+        fejl('Skriv kontoens mailadresse præcis for at bekræfte.');
+    }
+    // Grupper, elever, spilletid, gemte spil og logins går med i faldet (ON DELETE CASCADE)
+    kør('DELETE FROM konti WHERE id = ?', [$k['id']]);
     svar(['ok' => true]);
 
 // ---- prøvetiden og spørgeskemaet (se tid_status() og _spoergeskema.php) ----
@@ -640,7 +755,7 @@ case 'eksport':
     fputcsv($ud, $kol, ';');
     $dato = fn($t) => $t ? date('d-m-Y H:i', $t) : '';
     foreach ($konti as $k) {
-        $r = [$k['type'] === 'skole' ? 'Skole' : 'Familie', $k['navn'], $k['kontakt'], $k['bynavn'], $k['email'],
+        $r = [KONTOTYPER[$k['type']] ?? $k['type'], $k['navn'], $k['kontakt'], $k['bynavn'], $k['email'],
               $k['status'], $dato($k['oprettet']), $dato($k['sidst_inde']), $k['grupper'], $k['elever'],
               $k['elever_spillet'], round($k['i_alt'] / 60), round($k['uge'] / 60), $k['gange'],
               $dato($k['sidst_spillet'])];

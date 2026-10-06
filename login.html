@@ -11,7 +11,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=3">
+<link rel="stylesheet" href="/assets/konto.css?v=4">
 </head>
 <body>
 
@@ -68,27 +68,8 @@
         <p class="eyebrow midt">Learnification er til test</p>
         <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Log ind</h1>
 
-        <div class="faner" role="tablist" aria-label="Hvem logger ind?">
-          <button type="button" role="tab" id="fane-elev" aria-controls="elev" aria-selected="true">Jeg er elev</button>
-          <button type="button" role="tab" id="fane-voksen" aria-controls="voksen" aria-selected="false">Jeg er voksen</button>
-        </div>
-
-        <!-- Eleven: sin egen kode -->
-        <div class="panel" id="elev" role="tabpanel" aria-labelledby="fane-elev">
-          <form id="kode-form" novalidate>
-            <p class="besked" id="kode-besked"></p>
-            <div class="felt kode-felt">
-              <label for="kode">Skriv din kode</label>
-              <input id="kode" name="kode" autocomplete="off" autocapitalize="characters" spellcheck="false"
-                     maxlength="20" placeholder="RAVN-4827" required>
-              <p class="hj">Koden står på dit eget login-kort, som du har fået af din lærer eller en voksen.</p>
-            </div>
-            <button class="btn btn-primary btn-lg btn-fuld" type="submit">Log ind</button>
-          </form>
-        </div>
-
-        <!-- Den voksne: mail og kodeord -->
-        <div class="panel" id="voksen" role="tabpanel" aria-labelledby="fane-voksen" hidden>
+        <!-- Kontoen: mail og kodeord -->
+        <div class="panel" id="voksen">
           <form id="login-form" novalidate>
             <p class="besked" id="login-besked"></p>
             <div class="felt">
@@ -118,18 +99,35 @@
           </form>
 
           <form id="nulstil-form" novalidate hidden>
-            <h2>Vælg et nyt kodeord</h2>
+            <h2>Vælg et kodeord</h2>
             <p class="besked" id="nulstil-besked"></p>
             <div class="felt">
-              <label for="nyt-kodeord">Nyt kodeord <span>— mindst 8 tegn</span></label>
+              <label for="nyt-kodeord">Kodeord <span>— mindst 8 tegn</span></label>
               <input id="nyt-kodeord" type="password" autocomplete="new-password" minlength="8" required>
             </div>
             <button class="btn btn-primary btn-fuld" type="submit">Gem kodeord</button>
           </form>
 
           <hr style="border:0;border-top:2px solid var(--paper-edge);margin:24px 0 18px;">
-          <p style="margin:0;"><strong>Har I ikke en konto?</strong> Skoler og forældre kan oprette en testkonto gratis.</p>
-          <p style="margin:12px 0 0;"><a class="btn btn-sm" href="/opret">Opret testkonto</a></p>
+          <p style="margin:0;"><strong>Har du ikke en konto?</strong> Den er gratis, mens spillene er til test. Skal dine børn eller en klasse også spille, sætter du det op bagefter.</p>
+          <p style="margin:12px 0 0;"><a class="btn btn-sm" href="/opret">Opret en konto</a></p>
+        </div>
+
+        <!-- Børnene: deres egen kode fra login-kortet -->
+        <div class="panel kode-boks" id="elev">
+          <form id="kode-form" novalidate>
+            <h2>Har du et login-kort?</h2>
+            <p class="lille" style="margin-top:-4px;">Børn, der spiller med deres skole eller familie, logger ind med koden på deres eget kort.</p>
+            <p class="besked" id="kode-besked"></p>
+            <div class="kode-raekke">
+              <div class="felt kode-felt">
+                <label for="kode" class="skjult">Din kode</label>
+                <input id="kode" name="kode" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                       maxlength="20" placeholder="RAVN-4827" required>
+              </div>
+              <button class="btn btn-primary" type="submit">Log ind med kode</button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -143,16 +141,16 @@
   var $ = function (id) { return document.getElementById(id); };
   var til = LF.til('');
 
+  // Kontoen er det første, man ser; koden til børnene står lige under.
+  // /login#elev (og #kode) går direkte til kodefeltet.
   function visFane(hvilken) {
-    var elev = hvilken === 'elev';
-    $('fane-elev').setAttribute('aria-selected', elev);
-    $('fane-voksen').setAttribute('aria-selected', !elev);
-    $('elev').hidden = !elev;
-    $('voksen').hidden = elev;
-    (elev ? $('kode') : $('email')).focus();
+    if (hvilken === 'elev') {
+      $('elev').scrollIntoView({ block: 'center' });
+      $('kode').focus({ preventScroll: true });
+    } else {
+      $('email').focus();
+    }
   }
-  $('fane-elev').addEventListener('click', function () { visFane('elev'); });
-  $('fane-voksen').addEventListener('click', function () { visFane('voksen'); });
 
   function visInde(d) {
     $('ude').hidden = true;
@@ -237,7 +235,7 @@
     $('ude').hidden = false;
     $('login-form').hidden = true;
     $('nulstil-form').hidden = false;
-    visFane('voksen');
+    $('elev').hidden = true;
     $('nyt-kodeord').focus();
     return;
   }
@@ -247,10 +245,10 @@
     if (d.logget_ind && videre('')) return;
     if (d.logget_ind) { visInde(d); return; }
     $('ude').hidden = false;
-    visFane(/voksen/.test(location.hash) || /voksen/.test(location.search) ? 'voksen' : 'elev');
+    visFane(/elev|kode/.test(location.hash) ? 'elev' : 'voksen');
   }).catch(function () {
     $('ude').hidden = false;
-    visFane('elev');
+    visFane('voksen');
   });
 })();
 </script>

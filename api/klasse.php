@@ -8,7 +8,12 @@
  *   POST ret_elev, slet_elev, ny_elevkode
  *
  * En skole har klasser, en familie har én gruppe, "Familien". Hvert barn
- * har sin egen kode (fx RAVN-4827) og logger ind med den alene.
+ * har sin egen kode (fx RAVN-4827) og logger ind med den alene. En konto
+ * "til mig selv" har ingen børn — den bliver først familie eller skole med
+ * skift_type i api/konto.php.
+ *
+ * Administratoren kan gøre det samme på en hvilken som helst konto ved at
+ * sende "konto": <id> med (bruges af /admin).
  */
 
 declare(strict_types=1);
@@ -18,6 +23,12 @@ const MAKS_GRUPPER = 40;
 const MAKS_ELEVER = 40;
 
 $k = kraev_voksen();
+if ($k['type'] === 'admin' && tal('konto') > 0) {
+    $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('konto')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+}
 $kid = (int) $k['id'];
 
 /** Gruppen skal høre til den, der er logget ind — ellers er den der ikke. */
@@ -76,6 +87,8 @@ if ($h === 'oversigt') {
           'tid' => spilletid('konto_id = ?', [$kid]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$kid]),
           'voksen_gemt' => $voksen_gemt,
+          // Den voksnes egen prøvetid — det er den, der tæller på en konto "til mig selv"
+          'voksen_proeve' => tid_status(['konto' => $k, 'elev' => null]),
           'dage' => pr_dag('konto_id = ?', [$kid], 14),
           'spil' => SPIL]);
 }
@@ -85,6 +98,10 @@ kraev_egen_side();
 switch ($h) {
 
 case 'ny_gruppe':
+    // En konto "til mig selv" vælger først familie eller skole (konto.php, skift_type)
+    if ($k['type'] === 'privat') {
+        fejl('Vælg først, om kontoen skal være til en familie eller en skole.');
+    }
     $navn = felt('navn', 60);
     if (laengde($navn) < 1) {
         fejl('Giv klassen et navn, fx 4.B.');
@@ -113,35 +130,7 @@ case 'slet_gruppe':
 
 case 'nye_elever':
     $g = min_gruppe($kid, tal('id'));
-    $raa = (string) (input()['navne'] ?? '');
-    $navne = [];
-    foreach (preg_split('/[\r\n,;]+/', $raa) ?: [] as $n) {
-        $n = trim(preg_replace('/[\x00-\x1F\x7F]/u', '', $n) ?? '');
-        $n = function_exists('mb_substr') ? mb_substr($n, 0, 30, 'UTF-8') : substr($n, 0, 30);
-        if ($n !== '' && !in_array(lille($n), array_map('lille', $navne), true)) {
-            $navne[] = $n;
-        }
-    }
-    if (!$navne) {
-        fejl('Skriv mindst ét navn.');
-    }
-    $findes = array_map('lille', array_column(
-        alle('SELECT kaldenavn FROM elever WHERE gruppe_id = ?', [$g['id']]), 'kaldenavn'));
-    if (count($findes) + count($navne) > MAKS_ELEVER) {
-        fejl('Der kan højst være ' . MAKS_ELEVER . ' elever i en gruppe.');
-    }
-    $dubletter = array_values(array_filter($navne, fn($n) => in_array(lille($n), $findes, true)));
-    if ($dubletter) {
-        fejl('Der er allerede en, der hedder ' . implode(', ', $dubletter)
-             . '. Skriv fx et forbogstav bagefter, så børnene kan kende forskel.');
-    }
-    db()->beginTransaction();
-    foreach ($navne as $n) {
-        kør('INSERT INTO elever (gruppe_id, kaldenavn, ikon, kode, oprettet) VALUES (?, ?, ?, ?, ?)',
-            [$g['id'], $n, nyt_ikon((int) $g['id']), ny_elevkode(db()), time()]);
-    }
-    db()->commit();
-    svar(['ok' => true, 'antal' => count($navne)]);
+    svar(['ok' => true, 'antal' => nye_elever((int) $g['id'], (string) (input()['navne'] ?? ''), MAKS_ELEVER)]);
 
 case 'ret_elev':
     $e = min_elev($kid, tal('id'));
