@@ -235,7 +235,9 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   logger ind på `/login` (mail og kodeord er det første, man ser dér; børnenes
   kode-login står i en mindre boks under, og `/login#elev` går direkte til den).
 - **Alle konti starter som "til mig selv"** (`konti.type = 'privat'`): den
-  voksne spiller selv og har sin egen prøvetid. Skal der børn på, vælger man
+  voksne spiller selv og har sin egen prøvetid. Kontoen er til
+  folk, der er fyldt 15 år (det står på /opret og /login); yngre sættes på
+  af en voksen som barn med kode. Skal der børn på, vælger man
   det bagefter under `/konto` → "Skal andre også spille?" (`skift_type` i
   `api/konto.php`): **Familie** får én gruppe, "Familien", og børnenes navne;
   **Skole** får skolens navn (den voksne bliver kontaktperson) og laver så
