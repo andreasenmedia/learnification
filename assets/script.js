@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
    det ingenting for alle dem, der ikke er logget ind. */
 function loginIMenuen() {
   if (!/(?:^|;\s*)lf_in=(elev|voksen)/.test(document.cookie)) return;
+  // /spil/?tilbage=1 (LF_SKIFTER) skifter fra barnet til den voksne — et svar herfra
+  // midt i skiftet ville slette lf_in igen
+  if (window.LF_SKIFTER) return;
   fetch('/api/konto.php?handling=mig', { credentials: 'same-origin', cache: 'no-store' })
     .then(function (r) { return r.json(); })
     .then(function (d) {

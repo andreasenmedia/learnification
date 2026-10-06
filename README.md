@@ -257,6 +257,11 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   login bliver parkeret i den httponly cookie `lf_voksen` (`log_ind_som_barn`
   i `_kerne.php`), så "Tilbage til <navn>" på `/spil/` og `/login` henter det
   igen uden kodeord (`tilbage` i `api/konto.php`, `tilbage_til` i `mig`).
+  Spillenes Esc-menu (og "tiden er brugt") linker til `/spil/?tilbage=1`, så
+  spillet gemmer som barnet (pagehide), før skiftet sker; skiftet kører før
+  siden spørger `mig` (`LF_SKIFTER`), ellers sletter et sent svar `lf_in`.
+  `gem.js` sender `hvem` med, og `gem.php` afviser (401), hvis loginnet er
+  skiftet imens — så barnets spil aldrig lander hos den voksne.
   Knappen findes KUN, når den voksne selv gik ind som barnet — logger barnet
   ind med sin kode, er der ingen vej til den voksnes side. Logger barnet ud,
   eller logger nogen ind på en anden måde, bliver det parkerede login slettet.

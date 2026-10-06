@@ -127,9 +127,11 @@
   });
 
   // Kun når den voksne selv er gået ind som barnet (fra /konto)
+  function tilbage() {
+    return LF.send('konto', 'tilbage').then(function () { location.replace('/konto'); });
+  }
   $('tilbage').addEventListener('click', function () {
-    LF.send('konto', 'tilbage').then(function () { location.replace('/konto'); },
-      function (err) { alert(err.message); location.replace('/login'); });
+    tilbage().catch(function (err) { alert(err.message); location.replace('/login'); });
   });
 
   function tegn(d) {
@@ -174,7 +176,18 @@
     });
   }
 
-  LF.hent('konto', 'mig').then(function (d) {
+  // "Tilbage til …" i spillenes menu kommer hertil, så spillet har gemt som
+  // barnet først (pagehide). Skiftet sker, FØR siden spørger, hvem der er
+  // logget ind — ellers kan svaret komme bagefter og slette lf_in igen.
+  var foerst = Promise.resolve();
+  if (/[?&]tilbage=1/.test(location.search)) {
+    window.LF_SKIFTER = true;   // menuen (script.js) venter også
+    history.replaceState(null, '', location.pathname);
+    foerst = tilbage().then(function () { return new Promise(function () {}); },   // siden skifter
+                            function () { /* så viser siden bare barnets spil */ });
+  }
+
+  foerst.then(function () { return LF.hent('konto', 'mig'); }).then(function (d) {
     if (!d.logget_ind) { location.replace('/login?til=' + encodeURIComponent('/spil/')); return; }
     tegn(d);
   }).catch(function (err) {
@@ -208,7 +221,7 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=4" defer></script>
+<script src="/assets/script.js?v=5" defer></script>
 <script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>

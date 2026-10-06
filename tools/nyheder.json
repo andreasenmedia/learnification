@@ -8,7 +8,7 @@
       "titel": "Hurtigt tilbage til din egen konto",
       "kort": "Har du logget ind som dit barn fra Min konto, kan du nu komme tilbage til din egen side med ét klik — uden at taste kodeord.",
       "tekst": [
-        "Når du bruger <em>Log ind som</em> under <strong>Min konto</strong>, står der nu en knap med dit navn, fx <strong>Tilbage til Mette</strong>, på barnets spiloversigt. Et klik, og du er tilbage på din egen side — du behøver ikke længere at taste din mail og dit kodeord igen.",
+        "Når du bruger <em>Log ind som</em> under <strong>Min konto</strong>, står der nu en knap med dit navn, fx <strong>Tilbage til Mette</strong>, på barnets spiloversigt og i menuen inde i spillene (tryk Esc). Et klik, og du er tilbage på din egen side — det, barnet har nået, bliver gemt først — du behøver ikke længere at taste din mail og dit kodeord igen.",
         "Knappen er der kun, når det var dig, der loggede barnet ind. Logger barnet selv ind med sin kode, er der ingen vej til din side. Og trykker barnet på <strong>Log ud</strong>, bliver du også logget ud på den computer."
       ]
     },

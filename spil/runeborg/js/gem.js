@@ -73,7 +73,7 @@
     if (!server || konflikt || venter === null || (sender && !keepalive)) return;
     var data = venter, fejlede = false;
     venter = null; sender = true;
-    kald('POST', { handling: 'gem', spil: SPIL, data: data, udgave: udgave, enhed: enhed }, keepalive)
+    kald('POST', { handling: 'gem', spil: SPIL, data: data, udgave: udgave, enhed: enhed, hvem: inde }, keepalive)
       .then(function (x) {
         if (x.d.ok) {
           udgave = x.d.udgave;
@@ -111,7 +111,7 @@
       clearTimeout(timer); venter = null;
       try { localStorage.removeItem(META); } catch (e) { /* ingen sag */ }
       if (!server) return Promise.resolve();
-      return kald('POST', { handling: 'gem', spil: SPIL, data: '{"slettet":true}', udgave: udgave, enhed: enhed })
+      return kald('POST', { handling: 'gem', spil: SPIL, data: '{"slettet":true}', udgave: udgave, enhed: enhed, hvem: inde })
         .catch(function () { /* så må den lokale sletning være nok */ });
     },
     naarKonflikt: function (fn) { lyttere.push(fn); },

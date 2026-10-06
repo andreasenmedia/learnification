@@ -49,6 +49,12 @@ case 'hent':
 
 case 'gem':
     kraev_egen_side();
+    // Fanen husker, hvem den spillede som. Er der skiftet login imens (fx
+    // "Tilbage til mig" fra barnet), må barnets spil ikke lande hos den voksne
+    $fra = felt('hvem', 40);
+    if ($fra !== '' && $fra !== $hvem) {
+        fejl('Der er logget ind som en anden nu.', 401);
+    }
     $data = input()['data'] ?? '';
     if (!is_string($data) || $data === '' || strlen($data) > MAKS_DATA) {
         fejl('Det gemte spil er tomt eller for stort.', 413);

@@ -405,6 +405,12 @@
         if (window.LF_SPILLER && window.LFSpil) {
           // Tilbage til spiloversigten; pagehide gemmer, før siden skifter
           var andre = el('a', 'btn', 'Vælg et andet spil'); andre.href = '/spil/'; andre.style.textDecoration = 'none'; m.appendChild(andre);
+          // Gik den voksne ind som barnet fra /konto, kan den voksne komme tilbage.
+          // Skiftet sker på /spil/, så spillet når at gemme som barnet først (pagehide)
+          if (LF_SPILLER.tilbage_til) {
+            var tilbage = el('a', 'btn', 'Tilbage til ' + String(LF_SPILLER.tilbage_til).replace(/[<>&]/g, ''));
+            tilbage.href = '/spil/?tilbage=1'; tilbage.style.textDecoration = 'none'; m.appendChild(tilbage);
+          }
           var hvem = LF_SPILLER.hvem === 'elev' ? LF_SPILLER.elev.kaldenavn : 'voksen';
           var ud = el('button', 'btn', 'Log ud (' + hvem.replace(/[<>&]/g, '') + ')'); ud.type = 'button'; m.appendChild(ud);
           ud.addEventListener('click', function () { LFSpil.logUd('/login'); });   // pagehide gemmer eventyret
@@ -571,6 +577,10 @@
         var ud = el('button', 'btn', 'Log ud'); ud.type = 'button';
         ud.addEventListener('click', function () { LFSpil.logUd('/login'); });
         row.appendChild(ud);
+      }
+      if (window.LF_SPILLER && LF_SPILLER.tilbage_til) {
+        var tilbage = el('a', 'btn', 'Tilbage til ' + String(LF_SPILLER.tilbage_til).replace(/[<>&]/g, ''));
+        tilbage.href = '/spil/?tilbage=1'; tilbage.style.textDecoration = 'none'; row.appendChild(tilbage);
       }
       c.appendChild(row);
       push(s); home.focus();
