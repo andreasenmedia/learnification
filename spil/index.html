@@ -13,7 +13,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=5">
+<link rel="stylesheet" href="/assets/konto.css?v=6">
 </head>
 <body>
 
@@ -92,6 +92,20 @@
             <a class="btn btn-primary" href="/spil/regnehelten/" data-knap>Spil Regnehelten</a>
           </div>
         </article>
+        <!-- Kommende spil. Børn ser ingen tilmelding til nyhedsbrevet (ingen markedsføring på børnesider) -->
+        <article class="kommer">
+          <div class="billede" aria-hidden="true"><span>?</span></div>
+          <div class="indhold">
+            <p class="alder"><span class="maerke ny">Kommer snart</span></p>
+            <h2>Flere spil på vej</h2>
+            <p>Vi er i gang med det næste spil. Det kommer til at virke ligesom Runeborg og Regnehelten — samme styring, samme dagbog og samme måde at gemme på — så man kan gå direkte i gang.</p>
+            <p class="status" id="kommer-elev" hidden>Har du en idé til, hvad det næste spil skal handle om? Fortæl det til din lærer eller en voksen derhjemme.</p>
+            <div id="kommer-voksen" hidden>
+              <p class="status">Har du en idé til, hvad det skal handle om? <a href="mailto:kontakt@learnification.dk?subject=Id%C3%A9%20til%20et%20nyt%20spil">Skriv til os</a>.</p>
+              <a class="btn" href="/#nyhedsbrev">Få besked, når det kommer</a>
+            </div>
+          </div>
+        </article>
       </div>
 
       <p class="lille midt" style="margin-top:26px;">Vil du vide mere først? <a href="/runeborg">Om Runeborg</a> · <a href="/regnehelten">Om Regnehelten</a></p>
@@ -130,8 +144,11 @@
                        : 'Prøvetiden er brugt. Det, du nåede, er gemt. Skriv til os, hvis du vil spille videre.')
       : 'Du har ' + LF.tid(t.tilbage_sek) + ' tilbage af prøvetiden.';
 
+    $('kommer-elev').hidden = !elev;
+    $('kommer-voksen').hidden = elev;
+
     var trin = elev && d.elev.klassetrin;
-    document.querySelectorAll('[data-spil]').forEach(function (kort) {
+    document.querySelectorAll('article[data-spil]').forEach(function (kort) {
       var spil = kort.dataset.spil, g = (d.gemt || {})[spil];
       var status = kort.querySelector('[data-status]'), knap = kort.querySelector('[data-knap]');
       if (g) {

@@ -478,7 +478,9 @@ fra `/opret?type=familie|skole`, går det til `/konto` for at sætte det op.
 Et `?til=` vinder stadig — kommer man fra et bestemt spil, går det tilbage
 dertil. Oversigten viser, hvor langt spilleren er nået i hvert spil
 (`gemt` i `konto.php?handling=mig`), og menuen i begge spil har
-"Vælg et andet spil". Nye spil skal have et kort her.
+"Vælg et andet spil". Nye spil skal have et kort her, før kortet
+"Flere spil på vej" (`.kommer`, sidst i `.spilkort`). Det kort viser kun
+nyhedsbrev og "Skriv til os" for voksne — børn ser ingen markedsføring.
 
 **Retter du `style.css` eller `script.js`, så tæl `?v=` op.** Begge filer
 ligger en måned i de besøgendes browser, og uden et nyt tal i adressen får

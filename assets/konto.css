@@ -129,7 +129,21 @@
 .spilkort .alder { margin-bottom: 10px; }
 .spilkort .status { color: var(--ink-soft); font-size: .95rem; margin-top: auto; padding-top: 4px; }
 .spilkort .btn { align-self: flex-start; }
-@media (max-width: 720px) { .spilkort { grid-template-columns: 1fr; } }
+/* Kommende spil: hele bredden, stiplet kant, billedet til venstre */
+.spilkort .kommer {
+  grid-column: 1 / -1; flex-direction: row; border-style: dashed; box-shadow: none; background: var(--paper-2);
+}
+.spilkort .kommer .billede {
+  flex: 0 0 38%; display: flex; align-items: center; justify-content: center; min-height: 200px;
+  background: radial-gradient(circle at 30% 30%, #3a2f4a 0, var(--ink-deep) 70%);
+}
+.spilkort .kommer .billede span { font: 700 6rem/1 var(--display); color: var(--gold); text-shadow: 0 5px 0 var(--gold-dark); }
+.spilkort .kommer .status a { color: inherit; }
+@media (max-width: 720px) {
+  .spilkort { grid-template-columns: 1fr; }
+  .spilkort .kommer { flex-direction: column; }
+  .spilkort .kommer .billede { min-height: 140px; }
+}
 
 .hej { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .hej .ikon { font-size: 2.8rem; line-height: 1; }
