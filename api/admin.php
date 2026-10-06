@@ -481,6 +481,10 @@ case 'ret_konto':
         fejl('Ukendt status.');
     }
     $boern = (int) vaerdi('SELECT COUNT(*) FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?', [$k['id']]);
+    // Som når en konto oprettes: skiftes typen, skal det bekræftes, at personen er fyldt 15 år
+    if ($f['type'] !== $k['type'] && empty(input()['alder'])) {
+        fejl('Sæt flueben ved, at personen er fyldt 15 år, når typen skiftes.');
+    }
     if ($f['type'] === 'privat' && $boern) {
         fejl('Der er ' . $boern . ' ' . ($boern === 1 ? 'barn' : 'børn') . ' på kontoen. Slet dem først, eller vælg Familie.');
     }

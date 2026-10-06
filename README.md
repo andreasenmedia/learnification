@@ -261,7 +261,8 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   (`#ny-konto`) laver en godkendt konto af enhver type (med påkrævet flueben
   for, at personen er fyldt 15 år) — med et kodeord, eller
   uden, så får personen en mail med et link til selv at vælge et (7 dage).
-  Under en konto: ret navn, mail, by, type og status; sæt et nyt kodeord eller
+  Under en konto: ret navn, mail, by, type og status (skiftes typen, skal
+  15-års-fluebenet sættes igen); sæt et nyt kodeord eller
   send et link (24 timer); slet kontoen (mailadressen skal skrives som
   bekræftelse); og sæt børn og klasser på, omdøb, giv ny kode og slet — det
   går gennem `api/klasse.php` med `"konto": <id>`, som kun en administrator

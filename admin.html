@@ -274,6 +274,7 @@
               <div class="felt"><label for="d-r-by">By</label><input id="d-r-by" maxlength="80" autocomplete="off"></div>
             </div>
             <div class="felt"><label for="d-r-email">Mailadresse</label><input id="d-r-email" type="email" maxlength="190" autocomplete="off"></div>
+            <label class="samtykke" id="d-r-alder-felt" hidden><input type="checkbox" id="d-r-alder"><span><strong>Personen, kontoen er til, er fyldt 15 år.</strong> Skal bekræftes, når typen skiftes.</span></label>
             <p class="lille" style="margin:-4px 0 14px;">Familie får gruppen "Familien" af sig selv. En konto kan kun blive "til mig selv", når der ikke er børn på. Spærret logger alle på kontoen ud.</p>
             <button class="btn btn-sm btn-primary" type="submit">Gem</button>
           </form>
@@ -865,7 +866,7 @@
         $('d-r-navn').value = k.navn; $('d-r-kontakt').value = k.kontakt; $('d-r-by').value = k.bynavn; $('d-r-email').value = k.email;
         tilpasRet();
         ['d-ret-besked', 'd-kode-besked', 'd-slet-besked'].forEach(function (b) { LF.besked($(b), ''); });
-        $('d-k-nyt').value = ''; $('d-s-email').value = '';
+        $('d-k-nyt').value = ''; $('d-s-email').value = ''; $('d-r-alder').checked = false;
       }
       $('d-ny-gruppe').hidden = !skole;
 
@@ -977,6 +978,8 @@
     var skole = $('d-r-type').value === 'skole';
     $('d-r-navn-label').textContent = skole ? 'Skolens navn' : 'Navn';
     $('d-r-kontakt-felt').hidden = !skole;
+    // Skiftes typen, skal det bekræftes, at personen er fyldt 15 år (som når en konto oprettes)
+    $('d-r-alder-felt').hidden = !aktuel || $('d-r-type').value === aktuel.konto.type;
   }
   $('d-r-type').addEventListener('change', tilpasRet);
   $('d-ret').addEventListener('submit', function (e) {
@@ -988,7 +991,7 @@
     LF.send('admin', 'ret_konto', {
       id: aktuel.konto.id, type: $('d-r-type').value, status: $('d-r-status').value,
       navn: $('d-r-navn').value.trim(), kontakt: $('d-r-kontakt').value.trim(),
-      bynavn: $('d-r-by').value.trim(), email: $('d-r-email').value.trim()
+      bynavn: $('d-r-by').value.trim(), email: $('d-r-email').value.trim(), alder: $('d-r-alder').checked
     }).then(function () { return visKonto(aktuel.konto.id); })
       .then(function () { $('d-ret-boks').open = true; LF.besked($('d-ret-besked'), 'Gemt.', 'ok'); })
       .catch(function (err) { LF.besked($('d-ret-besked'), err.message, 'fejl'); })
