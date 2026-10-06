@@ -252,6 +252,11 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   og intet kodeord til børn. Små bogstaver, mellemrum og manglende bindestreg
   er ligegyldige. Koden står i tabellen under `/konto` og på login-kortene;
   "Ny kode" ud for barnet laver en ny og logger barnet ud.
+- **Den voksne kan gå ind som et barn** fra `/konto` ("Log ind som Emma",
+  `log_ind_som` i `api/klasse.php`): den voksnes login bliver erstattet af
+  barnets, og man lander på `/login` med spilvalget. Tilbage til kontoen kræver
+  mail og kodeord igen — med vilje, så barnet ikke kan klikke sig ind på den
+  voksnes side. Administratoren kan ikke gå ind som andres børn.
 - Grupperne har stadig en klassekode (`UGLE-472`) i databasen, men den
   bruges ikke til login længere. Skriver et barn en gammel klassekode, får
   det besked om at spørge efter sit nye login-kort.

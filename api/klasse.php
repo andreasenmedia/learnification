@@ -6,6 +6,8 @@
  *   POST ny_gruppe, ret_gruppe, slet_gruppe
  *   POST nye_elever             ét kaldenavn pr. linje
  *   POST ret_elev, slet_elev, ny_elevkode
+ *   POST log_ind_som {id}       den voksne går ind som barnet (fx på familiens
+ *                               tablet) — tilbage igen kræver mail og kodeord
  *
  * En skole har klasser, en familie har én gruppe, "Familien". Hvert barn
  * har sin egen kode (fx RAVN-4827) og logger ind med den alene. En konto
@@ -23,7 +25,9 @@ const MAKS_GRUPPER = 40;
 const MAKS_ELEVER = 40;
 
 $k = kraev_voksen();
+$som_admin = false;
 if ($k['type'] === 'admin' && tal('konto') > 0) {
+    $som_admin = true;
     $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('konto')]);
     if (!$k) {
         fejl('Kontoen findes ikke.', 404);
@@ -156,6 +160,18 @@ case 'ny_elevkode':
     kør('UPDATE elever SET kode = ? WHERE id = ?', [$kode, $e['id']]);
     kør('DELETE FROM logins WHERE elev_id = ?', [$e['id']]);
     svar(['ok' => true, 'kode' => $kode]);
+
+case 'log_ind_som':
+    // Kun kontoens egen voksne — administratoren skal ikke kunne gå ind som andres børn
+    if ($som_admin) {
+        fejl('Det kan kun den voksne på kontoen selv.', 403);
+    }
+    $e = min_elev($kid, tal('id'));
+    // Det gamle login (den voksnes) bliver erstattet, så barnet ikke kan
+    // komme tilbage til kontoen uden mail og kodeord
+    log_ind($kid, (int) $e['id'], $k['type'] === 'skole' ? SKOLEELEV_LEVETID : HJEMMEBARN_LEVETID);
+    kør('UPDATE elever SET sidst_inde = ? WHERE id = ?', [time(), $e['id']]);
+    svar(['ok' => true, 'kaldenavn' => $e['kaldenavn']]);
 
 case 'slet_elev':
     $e = min_elev($kid, tal('id'));

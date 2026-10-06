@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "log-ind-som-barnet",
+      "dato": "2026-10-06",
+      "maerke": "Til voksne",
+      "titel": "Log dit barn ind direkte fra din konto",
+      "kort": "Under Min konto kan du nu logge ind som dit barn med ét klik — så slipper I for at taste koden på familiens egen tablet.",
+      "tekst": [
+        "Står du med familiens tablet eller computer, behøver barnet ikke længere at taste sin kode. Under <strong>Min konto</strong> står der nu <em>Log ind som</em> ud for hvert barn, og så er barnet klar til at spille med sit eget gemte spil og sin egen prøvetid.",
+        "Du bliver logget ud af din egen konto imens. Vil du tilbage, logger du ind med din mail og dit kodeord igen — så kan barnet ikke komme ind på din side ved et uheld."
+      ]
+    },
+    {
       "id": "konto-til-dig-selv",
       "dato": "2026-10-06",
       "maerke": "Til voksne",

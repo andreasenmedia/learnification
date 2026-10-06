@@ -291,7 +291,8 @@
           spil.forEach(function (s) { html += '<td class="t">' + LF.tid(e.tid.spil[s] ? e.tid.spil[s].i_alt : 0) + LF.gemt(e.gemt[s]) + '</td>'; });
           html += '<td class="t">' + LF.tid(e.tid.uge) + '</td><td class="t"><strong>' + LF.tid(e.tid.i_alt) + '</strong></td>'
             + '<td class="t">' + LF.dato(e.tid.sidst) + '</td>'
-            + '<td class="handling ingen-print"><button type="button" class="link-knap" data-ret-elev>Omdøb</button>'
+            + '<td class="handling ingen-print"><button type="button" class="link-knap" data-som-elev>Log ind som ' + LF.esc(e.kaldenavn) + '</button>'
+            + '<button type="button" class="link-knap" data-ret-elev>Omdøb</button>'
             + '<button type="button" class="link-knap" data-ny-elevkode>Ny kode</button>'
             + '<button type="button" class="link-knap fare" data-slet-elev>Slet</button></td></tr>';
         });
@@ -343,7 +344,11 @@
     var elev = raekke ? g.elever.filter(function (x) { return x.id === eid; })[0] : null;
     var fejl = function (err) { alert(err.message); };
 
-    if (e.target.matches('[data-ny-elevkode]')) {
+    if (e.target.matches('[data-som-elev]')) {
+      if (confirm('Log ind som ' + elev.kaldenavn + '?\n\nDu bliver logget ud af din egen konto, og ' + elev.kaldenavn
+          + ' kan spille med sit eget gemte spil og sin egen prøvetid. For at komme tilbage logger du ind med din mail og dit kodeord igen.'))
+        LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/login'); }, fejl);
+    } else if (e.target.matches('[data-ny-elevkode]')) {
       if (confirm('Lav en ny kode til ' + elev.kaldenavn + '?\n\nDen gamle holder op med at virke, og ' + elev.kaldenavn + ' bliver logget ud. Husk at udskrive et nyt login-kort.'))
         LF.send('klasse', 'ny_elevkode', { id: eid }).then(hent, fejl);
     } else if (e.target.matches('[data-ret-gruppe]')) {
