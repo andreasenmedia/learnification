@@ -206,6 +206,10 @@ case 'skift_type':
         fejl('Kontoen er allerede sat op til ' . (KONTOTYPER[$k['type']] ?? $k['type']) . '.');
     }
     $type = felt('type', 20);
+    // Som på /opret: den voksne bekræfter igen at være fyldt 15 år
+    if (in_array($type, ['foraelder', 'skole'], true) && empty(input()['alder'])) {
+        fejl('Sæt flueben ved, at du er fyldt 15 år.');
+    }
     if ($type === 'foraelder') {
         db()->beginTransaction();
         kør("UPDATE konti SET type = 'foraelder' WHERE id = ?", [$k['id']]);

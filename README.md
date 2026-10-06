@@ -244,7 +244,8 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
   **Skole** får skolens navn (den voksne bliver kontaktperson) og laver så
   klasser (fx 4.B) med elevernes fornavne. `/opret?type=skole` (eller
   `familie`) åbner det rigtige valg på `/konto` lige efter oprettelsen.
-  Det går kun den vej — vil man tilbage, gør administratoren det.
+  Det går kun den vej — vil man tilbage, gør administratoren det. Begge
+  valg kræver fluebenet "Jeg er fyldt 15 år" (tjekkes også i PHP).
 - **Hvert barn** får sin egen **kode** som `RAVN-4827` (dyr + fire cifre),
   går ind på `/login` og skriver den — så er det inde. Der er ingen navne at
   trykke på, så et barn kan ikke komme ind som en klassekammerat. Ingen mail

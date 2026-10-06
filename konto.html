@@ -101,6 +101,7 @@
             <textarea id="saet-boern" placeholder="Emma&#10;Oskar"></textarea>
             <p class="hj">Fornavn eller kaldenavn er nok. Du kan altid sætte flere på bagefter.</p>
           </div>
+          <label class="samtykke"><input type="checkbox" data-alder><span>Jeg er fyldt 15 år.</span></label>
           <button class="btn btn-primary" type="submit">Gør det til en familiekonto</button>
         </form>
         <form id="saet-skole" novalidate hidden>
@@ -110,6 +111,7 @@
             <input id="saet-skolenavn" maxlength="120" autocomplete="organization">
             <p class="hj">Du bliver kontaktperson. Bagefter opretter du en klasse og skriver elevernes fornavne.</p>
           </div>
+          <label class="samtykke"><input type="checkbox" data-alder><span>Jeg er fyldt 15 år.</span></label>
           <button class="btn btn-primary" type="submit">Gør det til en skolekonto</button>
         </form>
       </div>
@@ -403,7 +405,7 @@
     e.preventDefault();
     var f = this, knap = f.querySelector('button'), navne = $('saet-boern').value;
     LF.travl(knap, true);
-    LF.send('konto', 'skift_type', { type: 'foraelder' })
+    LF.send('konto', 'skift_type', { type: 'foraelder', alder: f.querySelector('[data-alder]').checked })
       .then(function (d) { return navne.trim() ? LF.send('klasse', 'nye_elever', { id: d.gruppe, navne: navne }) : null; })
       .then(function () { history.replaceState(null, '', '/konto'); return hent(); })
       .catch(function (err) { LF.besked(f.querySelector('.besked'), err.message, 'fejl'); return hent(); })
@@ -413,7 +415,7 @@
     e.preventDefault();
     var f = this, knap = f.querySelector('button');
     LF.travl(knap, true);
-    LF.send('konto', 'skift_type', { type: 'skole', skolenavn: $('saet-skolenavn').value.trim() })
+    LF.send('konto', 'skift_type', { type: 'skole', skolenavn: $('saet-skolenavn').value.trim(), alder: f.querySelector('[data-alder]').checked })
       .then(function () { history.replaceState(null, '', '/konto'); return hent(); })
       .then(function () { $('ny-gruppe').scrollIntoView({ behavior: 'smooth', block: 'center' }); $('gruppe-navn').focus({ preventScroll: true }); })
       .catch(function (err) { LF.besked(f.querySelector('.besked'), err.message, 'fejl'); })
