@@ -66,6 +66,7 @@
         </div>
         <div class="knapper">
           <a class="btn btn-sm" id="til-konto" href="/konto" hidden>Min konto</a>
+          <button type="button" class="btn btn-sm" id="tilbage" hidden>Tilbage til mig</button>
           <button type="button" class="btn btn-sm" id="log-ud">Log ud</button>
         </div>
       </div>
@@ -125,6 +126,12 @@
     LF.send('konto', 'logud').then(function () { location.replace('/login'); });
   });
 
+  // Kun når den voksne selv er gået ind som barnet (fra /konto)
+  $('tilbage').addEventListener('click', function () {
+    LF.send('konto', 'tilbage').then(function () { location.replace('/konto'); },
+      function (err) { alert(err.message); location.replace('/login'); });
+  });
+
   function tegn(d) {
     var elev = d.hvem === 'elev';
     $('indlaeser').hidden = true;
@@ -133,6 +140,10 @@
 
     $('ikon').textContent = elev ? d.elev.ikon : '👋';
     $('hej').textContent = 'Hej ' + (elev ? d.elev.kaldenavn : (d.konto.kontakt || d.konto.navn).split(' ')[0]) + '!';
+    if (d.tilbage_til) {
+      $('tilbage').hidden = false;
+      $('tilbage').textContent = 'Tilbage til ' + d.tilbage_til;
+    }
     if (!elev) {
       $('til-konto').hidden = false;
       if (d.konto.type === 'admin') { $('til-konto').href = '/admin'; $('til-konto').textContent = 'Overblik'; }

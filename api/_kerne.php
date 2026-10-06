@@ -582,6 +582,49 @@ function log_ud(): void
     }
     saet_cookie('lf_session', '', time() - 3600, true);
     saet_cookie('lf_in', '', time() - 3600, false);
+    // Logger barnet ud, går den parkerede voksne med — ellers ville den
+    // næste ved computeren kunne trykke sig ind på kontoen
+    $parkeret = (string) ($_COOKIE['lf_voksen'] ?? '');
+    if ($parkeret !== '') {
+        kør('DELETE FROM logins WHERE token = ?', [hash('sha256', $parkeret)]);
+        saet_cookie('lf_voksen', '', time() - 3600, true);
+    }
+}
+
+/**
+ * Den voksne går ind som et af sine børn (/konto). Den voksnes eget login
+ * bliver ikke slettet, men parkeret i cookien lf_voksen, så "Tilbage til
+ * mig" kan hente det igen uden mail og kodeord. Logger nogen ind på en anden
+ * måde, eller logger barnet ud, er det parkerede login væk.
+ */
+function log_ind_som_barn(int $konto_id, int $elev_id, int $levetid): void
+{
+    $token = (string) ($_COOKIE['lf_session'] ?? '');
+    $udloeber = (int) vaerdi('SELECT udloeber FROM logins WHERE token = ? AND konto_id = ? AND elev_id IS NULL',
+                             [hash('sha256', $token), $konto_id]);
+    // log_ind() rydder op efter det gamle login — det her skal blive stående
+    unset($_COOKIE['lf_session'], $_COOKIE['lf_voksen']);
+    log_ind($konto_id, $elev_id, $levetid);
+    if ($udloeber > time()) {
+        saet_cookie('lf_voksen', $token, $udloeber, true);
+    }
+}
+
+/**
+ * Er det her et barn, som den voksne selv har logget ind som? Så svarer den
+ * med det parkerede login (og kontoen), ellers null. Det parkerede login
+ * skal høre til den samme konto som barnet.
+ */
+function parkeret_voksen(): ?array
+{
+    $h = hvem();
+    $token = (string) ($_COOKIE['lf_voksen'] ?? '');
+    if (!$h || !$h['elev'] || $token === '' || strlen($token) > 128) {
+        return null;
+    }
+    $l = en('SELECT * FROM logins WHERE token = ? AND elev_id IS NULL AND konto_id = ? AND udloeber > ?',
+            [hash('sha256', $token), $h['konto']['id'], time()]);
+    return $l ? ['token' => $token, 'login' => $l, 'konto' => $h['konto']] : null;
 }
 
 /**

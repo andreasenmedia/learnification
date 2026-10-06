@@ -345,8 +345,8 @@
     var fejl = function (err) { alert(err.message); };
 
     if (e.target.matches('[data-som-elev]')) {
-      if (confirm('Log ind som ' + elev.kaldenavn + '?\n\nDu bliver logget ud af din egen konto, og ' + elev.kaldenavn
-          + ' kan spille med sit eget gemte spil og sin egen prøvetid. For at komme tilbage logger du ind med din mail og dit kodeord igen.'))
+      if (confirm('Log ind som ' + elev.kaldenavn + '?\n\n' + elev.kaldenavn
+          + ' kan spille med sit eget gemte spil og sin egen prøvetid. Du kommer tilbage til din konto med knappen "Tilbage til mig" på spilsiden.'))
         LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/spil/'); }, fejl);
     } else if (e.target.matches('[data-ny-elevkode]')) {
       if (confirm('Lav en ny kode til ' + elev.kaldenavn + '?\n\nDen gamle holder op med at virke, og ' + elev.kaldenavn + ' bliver logget ud. Husk at udskrive et nyt login-kort.'))

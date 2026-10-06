@@ -5,6 +5,7 @@
  *   GET  ?handling=mig          hvem er logget ind (også elever)
  *   POST opret                  ny konto: til mig selv, familie eller skole
  *   POST login / logud
+ *   POST tilbage                fra barnet tilbage til den voksne, der gik ind som det
  *   POST glemt                  send et link til et nyt kodeord
  *   POST nulstil                sæt nyt kodeord med linket
  *   POST skift_kodeord, ret, slet_konto
@@ -53,6 +54,10 @@ if ($h === 'mig') {
                        'gruppe' => $e['gruppe'], 'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin'] : null];
         // Barnet skal ikke se de voksnes mailadresse
         unset($ud['konto']['email'], $ud['konto']['kontakt']);
+        // Gik den voksne selv ind som barnet, kan den voksne komme tilbage
+        if (parkeret_voksen()) {
+            $ud['tilbage_til'] = explode(' ', trim($x['konto']['kontakt'] ?: $x['konto']['navn']))[0];
+        }
     } else {
         $ud['hvem'] = 'voksen';
     }
@@ -141,6 +146,19 @@ case 'login':
 
 case 'logud':
     log_ud();
+    svar(['ok' => true]);
+
+case 'tilbage':
+    $p = parkeret_voksen();
+    if (!$p) {
+        fejl('Log ind med din mail og dit kodeord.', 401);
+    }
+    // Barnets login slutter, og den voksnes eget login kommer tilbage
+    kør('DELETE FROM logins WHERE token = ?', [hash('sha256', (string) $_COOKIE['lf_session'])]);
+    $udloeber = (int) $p['login']['udloeber'];
+    saet_cookie('lf_session', $p['token'], $udloeber, true);
+    saet_cookie('lf_in', 'voksen.' . (int) $p['konto']['id'], $udloeber, false);
+    saet_cookie('lf_voksen', '', time() - 3600, true);
     svar(['ok' => true]);
 
 case 'glemt':

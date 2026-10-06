@@ -1,7 +1,7 @@
 /* Cookie-samtykke — banneret og det, der styres af det.
 
    KATEGORIER
-     Nødvendige     login (lf_session, lf_in) og selve valget (lf_samtykke).
+     Nødvendige     login (lf_session, lf_in, lf_voksen) og selve valget (lf_samtykke).
                     Altid tændt — de er undtaget fra kravet om samtykke.
      Statistik      cookien lf_bes med et tilfældigt id, så besøgsstatistikken
                     kan se, om man kommer igen, og hvilken kilde eller kampagne

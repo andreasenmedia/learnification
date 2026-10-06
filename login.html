@@ -61,6 +61,7 @@
         <div id="inde-voksen" hidden>
           <p class="knapper"><a class="btn btn-primary" id="inde-konto" href="/konto">Gå til min konto</a></p>
         </div>
+        <p class="knapper" id="inde-tilbage" hidden><button type="button" class="btn" id="tilbage">Tilbage til mig</button></p>
         <p class="lille" style="margin:18px 0 0;">Er det ikke dig? <button type="button" class="link-knap" id="log-ud">Log ud</button></p>
       </div>
 
@@ -159,6 +160,10 @@
       $('inde-ikon').textContent = d.elev.ikon;
       $('inde-titel').textContent = 'Hej ' + d.elev.kaldenavn + '!';
       $('inde-elev').hidden = false;
+      if (d.tilbage_til) {
+        $('inde-tilbage').hidden = false;
+        $('tilbage').textContent = 'Tilbage til ' + d.tilbage_til;
+      }
     } else {
       $('inde-ikon').textContent = '👋';
       $('inde-titel').textContent = 'Du er logget ind som ' + (d.konto.kontakt || d.konto.navn);
@@ -228,6 +233,11 @@
 
   $('log-ud').addEventListener('click', function () {
     LF.send('konto', 'logud').then(function () { location.reload(); });
+  });
+
+  $('tilbage').addEventListener('click', function () {
+    LF.send('konto', 'tilbage').then(function () { location.replace('/konto'); },
+      function (err) { alert(err.message); location.reload(); });
   });
 
   // --- start ----------------------------------------------------------------
