@@ -21,7 +21,7 @@
   --paper: #f3e3bf;
   --paper-ink: #3a2616;
   /* Brødtekst i en skrift lavet til at være let at læse — også for
-     læsesvage. Pixelskriften bruges kun til overskrifter og navne. */
+     læsesvage. Pixelskriften bruges kun til spillets logo. */
   --font: "Atkinson Hyperlegible", "Verdana", "Segoe UI", sans-serif;
   --pixel: "Pixelify Sans", "Courier New", monospace;
   --fs: clamp(16px, 1.2vw + .6vh, 22px);
@@ -39,8 +39,11 @@ body {
   touch-action: manipulation;
 }
 body.big { --fs: clamp(19px, 1.45vw + .75vh, 26px); }
-.title-card h1, .title-card h2, .hud-label, .task-area, .dialog .who, .book-head h2, .menu h2, .end h2,
-.act-h, .chart-title, .cls b, .toast b, #hud-quest-title, .key, .vk, #t-act, #t-book, .doc h4 { font-family: var(--pixel); }
+/* Pixelskriften kun til spillets store logo. Overskrifter, knapper og tal
+   står i fed læseskrift — i pixelskriften lignede fx "5" et "S". */
+.title-card h1 { font-family: var(--pixel); }
+.title-card h2, .hud-label, .task-area, .dialog .who, .book-head h2, .menu h2, .end h2,
+.act-h, .chart-title, .cls b, .toast b, #hud-quest-title, .key, .vk, #t-act, #t-book, .doc h4 { font-weight: 700; }
 
 #app, #stage { position: fixed; inset: 0; }
 #screen {
@@ -240,14 +243,14 @@ a.btn.primary { color: var(--ink); }
 .title-card h1 { margin: 0; font-size: 2.6em; line-height: 1; color: var(--gold); text-shadow: 4px 4px 0 #6a3a8e, 7px 7px 0 var(--ink); letter-spacing: .04em; }
 .title-card .sub { color: var(--txt-soft); margin: 0; }
 .title-card .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.title-card .tiny { font-size: .75em; color: var(--txt-soft); margin: 0; }
+.title-card .tiny { font-size: .85em; color: var(--txt-soft); margin: 0; }
 .title-card a { color: var(--gold); }
 
 .classes { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); gap: 10px; }
 .cls { background: var(--panel-2); border: 3px solid var(--edge-2); padding: 10px 8px; display: grid; justify-items: center; align-content: start; gap: 4px; }
 .cls canvas { width: 64px; height: 64px; image-rendering: pixelated; }
 .cls.sel { border-color: var(--gold); background: #3a2d52; }
-.cls small { color: var(--txt-soft); font-size: .72em; line-height: 1.25; }
+.cls small { color: var(--txt-soft); font-size: .8em; line-height: 1.25; }
 .name-in { font: inherit; font-size: 1.1em; padding: 6px 10px; background: var(--ink); color: var(--txt); border: 3px solid var(--edge); width: min(100%, 320px); text-align: center; }
 .name-in:focus { outline: none; border-color: var(--gold); }
 
