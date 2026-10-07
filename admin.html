@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=1">
 <link rel="stylesheet" href="/assets/style.css?v=5">
-<link rel="stylesheet" href="/assets/konto.css?v=6">
+<link rel="stylesheet" href="/assets/konto.css?v=7">
 </head>
 <body>
 
@@ -87,6 +87,11 @@
       <div class="panel">
         <h2>Spilletid pr. dag, de sidste 30 dage</h2>
         <div id="dage"></div>
+      </div>
+      <div class="panel">
+        <h2>Hvor langt er konti nået?</h2>
+        <p class="lille" style="margin-top:0;">Prøvetiden er den voksnes egen på "til sig selv", ellers den spiller på kontoen, der har brugt mest. Procent af alle oprettede konti.</p>
+        <div id="tragt"></div>
       </div>
       <div class="panel">
         <h2>Konti</h2>
@@ -301,6 +306,11 @@
         </details>
       </div>
       <div class="panel"><h2>Spilletid pr. dag, de sidste 30 dage</h2><div id="d-dage"></div></div>
+      <div class="panel">
+        <h2>Hvornår blev der spillet?</h2>
+        <p class="lille" style="margin-top:0;">Én linje pr. spiller. Hver bjælke er en omgang fra første til sidste tegn på liv; den mørke del er den tid, der blev talt med (tomgang over 2 minutter tæller ikke). Hold musen over en bjælke for detaljer.</p>
+        <div id="d-tidslinje"><p class="lille">Henter …</p></div>
+      </div>
       <div id="d-grupper"></div>
       <form class="panel admin-form" id="d-ny-gruppe" hidden novalidate>
         <h2>Ny klasse</h2>
@@ -316,7 +326,7 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=3"></script>
+<script src="/assets/konto.js?v=4"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -379,7 +389,7 @@
         [t.aktive_uge, 'Aktive spillere, 7 dage'],
         [t.nye, 'Nye konti at kigge på']
       ].map(kort).join('');
-      var spk = [[LF.tid(d.tid.i_alt), 'Spilletid i alt'], [LF.tid(d.tid.uge), 'Spilletid, 7 dage']];
+      var spk = [[LF.tid(d.tid.i_alt), 'Spilletid i alt', LF.fordeling(d.tid.spil, d.spil)], [LF.tid(d.tid.uge), 'Spilletid, 7 dage']];
       Object.keys(d.spil).forEach(function (s) {
         var x = d.tid.spil[s] || { i_alt: 0, gange: 0 };
         spk.push([LF.tid(x.i_alt), d.spil[s] + ' · ' + x.gange + ' gange']);
@@ -389,19 +399,19 @@
         spk.push([String(g.i_alt), 'Gemte i ' + d.spil[s] + ' · ' + g.faerdige + ' gennemført']);
       });
       $('tal-spil').innerHTML = spk.map(kort).join('');
-      LF.soejler($('dage'), d.dage);
+      LF.stabel($('dage'), d.dage_spil, d.spil);
+      var tr = d.tragt;
+      LF.tragt($('tragt'), [['Oprettet', tr.oprettet], ['Har spillet', tr.spillet], ['Brugt halvdelen af prøvetiden', tr.halvdelen],
+                            ['Brugt hele prøvetiden', tr.hele], ['Fået spørgeskemaet', tr.skema], ['Svaret på det', tr.besvaret]]);
       tabel();
     }).catch(function (err) { vis('indlaeser'); $('indlaeser').textContent = err.message; });
   }
 
-  // "42 min / 60 min", "Slut" når den er brugt, "Fri" uden grænse
-  function proevetid(brugt, graense) {
-    if (graense === null) return '<span class="lille">Fri adgang</span>';
-    var t = LF.tid(brugt) + ' / ' + LF.tid(graense);
-    return brugt >= graense ? '<strong>' + t + ' · slut</strong>' : t;
-  }
+  // Prøvetiden som bjælke ("42 min / 1 t"), med ✓ når den er brugt og ⚠ hvis der er talt mere end grænsen
+  var proevetid = LF.bjaelke;
 
-  function kort(t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + LF.esc(t[1]) + '</div></div>'; }
+  // [værdi, etiket, evt. ekstra HTML under (fx fordelingen mellem spillene)]
+  function kort(t) { return '<div class="tal-kort"><div class="v">' + LF.esc(t[0]) + '</div><div class="l">' + LF.esc(t[1]) + '</div>' + (t[2] || '') + '</div>'; }
 
   function tabel() {
     var q = $('soeg').value.trim().toLowerCase(), ft = $('f-type').value, fs = $('f-status').value;
@@ -410,7 +420,7 @@
         && (!q || (k.navn + ' ' + k.kontakt + ' ' + k.email + ' ' + k.bynavn).toLowerCase().indexOf(q) >= 0);
     });
     var html = '<thead><tr><th>Konto</th><th>Type</th><th>Status</th><th class="t">Oprettet</th><th class="t">Elever</th>'
-      + '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Prøvetid (mest brugte barn)</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
+      + '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Prøvetid</th><th class="t">Sidst spillet</th></tr></thead><tbody>';
     r.forEach(function (k) {
       html += '<tr class="klik" data-id="' + k.id + '" tabindex="0"><td><strong>' + LF.esc(k.navn) + '</strong><br><span class="lille">'
         + LF.esc([k.type === 'skole' ? k.kontakt : '', k.email, k.bynavn].filter(Boolean).join(' · ')) + '</span></td>'
@@ -418,7 +428,7 @@
         + '<td class="t">' + LF.dato(k.oprettet) + '</td>'
         + '<td class="t">' + k.elever_spillet + ' / ' + k.elever + '</td>'
         + '<td class="t">' + LF.tid(k.uge) + '</td><td class="t"><strong>' + LF.tid(k.i_alt) + '</strong></td>'
-        + '<td class="t">' + proevetid(k.maks_barn_sek, k.graense_sek) + '</td>'
+        + '<td class="t">' + proevetid(k.proeve_sek, k.graense_sek) + '</td>'
         + '<td class="t">' + LF.dato(k.sidst_spillet) + '</td></tr>';
     });
     if (!r.length) html += '<tr><td colspan="9" class="tom">' + (alle.length ? 'Ingen konti passer til søgningen.' : 'Ingen testkonti endnu.') + '</td></tr>';
@@ -872,10 +882,14 @@
 
       var elever = 0, spillet = 0;
       d.grupper.forEach(function (g) { g.elever.forEach(function (e) { elever++; if (e.tid.i_alt) spillet++; }); });
-      var tal = [[LF.tid(d.tid.i_alt), 'Spilletid i alt'], [LF.tid(d.tid.uge), 'De sidste 7 dage'],
+      var tal = [[LF.tid(d.tid.i_alt), 'Spilletid i alt', LF.fordeling(d.tid.spil, d.spil)], [LF.tid(d.tid.uge), 'De sidste 7 dage'],
                  [spillet + ' af ' + elever, 'Elever, der har spillet'], [d.tid.gange, 'Gange spillet'], [LF.dato(d.tid.sidst), 'Sidst spillet']];
       $('d-tal').innerHTML = tal.map(kort).join('');
-      LF.soejler($('d-dage'), d.dage);
+      LF.stabel($('d-dage'), d.dage_spil, d.spil);
+      $('d-tidslinje').innerHTML = '<p class="lille">Henter …</p>';
+      LF.hent('admin', 'omgange', { id: k.id, dage: 30 }).then(function (o) {
+        if (aktuel === d) LF.tidslinje($('d-tidslinje'), o.omgange, o.spil, k.oprettet);
+      }).catch(function (err) { $('d-tidslinje').textContent = err.message; });
 
       var spil = Object.keys(d.spil), html = '';
       d.grupper.forEach(function (g) {
@@ -909,7 +923,8 @@
           + '<button class="btn btn-sm btn-primary" type="submit">Tilføj</button></form></details></section>';
       });
       var ekstra = [];
-      if (d.voksen_tid.i_alt) ekstra.push('Den voksne har selv spillet i ' + LF.tid(d.voksen_tid.i_alt) + '.');
+      if (d.voksen_tid.i_alt || privat) ekstra.push('<span style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;">Den voksnes egen prøvetid: '
+        + proevetid(d.voksen_proeve.brugt_sek, d.voksen_proeve.graense_sek) + '</span>');
       spil.forEach(function (s) {
         var g = d.voksen_gemt[s];
         if (g) ekstra.push('Den voksnes eget gemte ' + LF.esc(d.spil[s]) + ': ' + LF.esc(g.tekst) + ' (' + LF.esc(g.detalje) + ', gemt ' + LF.dato(g.opdateret) + ').');

@@ -124,6 +124,12 @@ function konti_med_tal(): array
                    WHERE elev_id IS NOT NULL GROUP BY konto_id, elev_id) x GROUP BY konto_id') as $r) {
         $mest[(int) $r['konto_id']] = (int) $r['s'];
     }
+    // Den voksnes egen tid (det, prøvetiden måles på for "til mig selv")
+    $voksen = [];
+    foreach (alle("SELECT konto_id, SUM(sekunder) AS s FROM sessioner
+                   WHERE elev_id IS NULL AND hvem = 'voksen' GROUP BY konto_id") as $r) {
+        $voksen[(int) $r['konto_id']] = (int) $r['s'];
+    }
 
     $ud = [];
     foreach (alle("SELECT * FROM konti WHERE type != 'admin' ORDER BY oprettet DESC") as $k) {
@@ -131,6 +137,9 @@ function konti_med_tal(): array
         $t = $tid[$id] ?? null;
         $ud[] = [
             'maks_barn_sek' => $mest[$id] ?? 0,
+            'voksen_sek' => $voksen[$id] ?? 0,
+            // Prøvetiden for kontoen: den voksne selv på "til mig selv", ellers det barn, der har brugt mest
+            'proeve_sek' => $k['type'] === 'privat' ? ($voksen[$id] ?? 0) : max($mest[$id] ?? 0, $voksen[$id] ?? 0),
             'graense_sek' => !empty($k['fri_adgang']) ? null : (tidsgraense_min() + (int) $k['ekstra_min']) * 60,
             'ekstra_min' => (int) $k['ekstra_min'], 'fri_adgang' => (int) $k['fri_adgang'],
             'skema_sendt' => $k['skema_sendt'] !== null ? (int) $k['skema_sendt'] : null,
@@ -149,6 +158,29 @@ function konti_med_tal(): array
         ];
     }
     return $ud;
+}
+
+/**
+ * Spillertragten: hvor langt er konti nået? Hvert trin tæller konti (ikke
+ * spillere), og prøvetiden er kontoens proeve_sek (se konti_med_tal()).
+ */
+function tragt(array $konti): array
+{
+    $besvaret = [];
+    foreach (alle('SELECT DISTINCT konto_id FROM spoergeskemaer WHERE besvaret IS NOT NULL') as $r) {
+        $besvaret[(int) $r['konto_id']] = true;
+    }
+    $n = ['oprettet' => 0, 'spillet' => 0, 'halvdelen' => 0, 'hele' => 0, 'skema' => 0, 'besvaret' => 0];
+    foreach ($konti as $k) {
+        $n['oprettet']++;
+        $n['spillet'] += $k['i_alt'] > 0 ? 1 : 0;
+        $g = $k['graense_sek'];
+        $n['halvdelen'] += $g !== null && $k['proeve_sek'] >= $g / 2 ? 1 : 0;
+        $n['hele'] += $g !== null && $k['proeve_sek'] >= $g ? 1 : 0;
+        $n['skema'] += $k['skema_sendt'] !== null ? 1 : 0;
+        $n['besvaret'] += isset($besvaret[$k['id']]) ? 1 : 0;
+    }
+    return $n;
 }
 
 /** Et værtsnavn eller en ?ref=-kode som et navn, man kan læse. */
@@ -376,6 +408,8 @@ case 'overblik':
           ],
           'tid' => spilletid("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", []),
           'dage' => pr_dag("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", [], 30),
+          'dage_spil' => pr_dag_spil("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", [], 30),
+          'tragt' => tragt($konti),
           'gemte' => $gemte,
           'spil' => SPIL]);
 
@@ -417,7 +451,29 @@ case 'konto':
           'voksen_proeve' => tid_status(['konto' => $k, 'elev' => null]),
           'slettede_tid' => spilletid("konto_id = ? AND hvem = 'elev' AND elev_id IS NULL", [$k['id']]),
           'dage' => pr_dag('konto_id = ?', [$k['id']], 30),
+          'dage_spil' => pr_dag_spil('konto_id = ?', [$k['id']], 30),
           'spil' => SPIL]);
+
+// Kontoens omgange til tidslinjen: hvornår der blev spillet, af hvem, og hvor
+// meget af tiden der blev talt med (tomgang tæller ikke).
+case 'omgange':
+    $k = en('SELECT id FROM konti WHERE id = ?', [tal('id')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    $dage = min(30, max(1, tal('dage') ?: 30));
+    $fra = strtotime('today') - ($dage - 1) * 86400;
+    $omgange = [];
+    foreach (alle('SELECT s.id, s.spil, s.hvem, s.elev_id, s.start, s.sidst, s.sekunder, e.kaldenavn, e.ikon
+                   FROM sessioner s LEFT JOIN elever e ON e.id = s.elev_id
+                   WHERE s.konto_id = ? AND s.sidst >= ? AND s.sekunder > 0 ORDER BY s.start', [$k['id'], $fra]) as $o) {
+        $omgange[] = ['id' => (int) $o['id'], 'spil' => $o['spil'], 'hvem' => $o['hvem'],
+                      'elev_id' => $o['elev_id'] !== null ? (int) $o['elev_id'] : null,
+                      'navn' => $o['kaldenavn'] ?? ($o['hvem'] === 'voksen' ? 'Den voksne' : 'Slettet elev'),
+                      'ikon' => $o['ikon'] ?? '',
+                      'start' => (int) $o['start'], 'sidst' => (int) $o['sidst'], 'sekunder' => (int) $o['sekunder']];
+    }
+    svar(['ok' => true, 'omgange' => $omgange, 'spil' => SPIL]);
 
 case 'saet_status':
     kraev_egen_side();

@@ -225,6 +225,88 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .soejler .s:nth-last-child(-n+4) .tip { left: auto; right: 0; transform: none; }
 .soejler-akse { display: flex; justify-content: space-between; font-size: .8rem; color: var(--ink-soft); margin-top: 6px; }
 
+/* ---------- spilletid i admin ------------------------------------------------
+   Hvert spil har sin faste farve (følger spillet, aldrig rækkefølgen).
+   Navnet står altid også i tekst ved siden af. */
+.spil-runeborg { --c: var(--blue); }
+.spil-regnehelten { --c: var(--gold); }
+
+.forklaring { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .85rem; color: var(--ink-soft); margin-bottom: 8px; }
+.forklaring span { display: inline-flex; align-items: center; gap: 6px; }
+.forklaring i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+
+/* Stablede søjler: segmenterne står med 2 px luft imellem, kun toppen er rundet */
+.soejler.stabel .s { outline: none; }
+.soejler.stabel .stak { display: flex; flex-direction: column-reverse; gap: 2px; width: 100%; }
+.soejler.stabel .stak i { display: block; background: var(--c); min-height: 2px; flex-basis: 0; }
+.soejler.stabel .stak i:last-child { border-radius: 4px 4px 0 0; }
+.soejler.stabel .s:hover .stak, .soejler.stabel .s:focus-visible .stak { filter: brightness(.85); }
+.soejler.stabel .s:focus-visible .tip { display: block; }
+.soejler .tip b { font-weight: 700; }
+
+/* Delt bjælke under "Spilletid i alt" */
+.fordeling { margin-top: 10px; }
+.fordeling .delt { display: flex; gap: 2px; height: 8px; border-radius: 4px; overflow: hidden; background: var(--paper-2); }
+.fordeling .delt i { background: var(--c); flex-basis: 0; }
+.fordeling .forklaring { margin: 6px 0 0; font-size: .78rem; }
+
+/* Prøvetid som bjælke. Neutral blæk-farve: det er mængde, ikke et spil. */
+.proeve { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 118px; max-width: 100%; font-size: .84rem; }
+.proeve .tal { white-space: normal; text-align: right; line-height: 1.3; }
+.proeve .spor { display: block; width: 100%; height: 8px; border-radius: 4px; background: var(--paper-2); border: 1px solid var(--paper-edge); overflow: hidden; }
+.proeve .spor i { display: block; height: 100%; background: var(--ink-soft); border-radius: 4px; }
+.proeve.slut .spor i { background: var(--ink); }
+.proeve.slut .tal { font-weight: 700; }
+.proeve.over .spor { border-color: var(--red); }
+.proeve.over .spor i { background: var(--red); }
+.proeve.over .tal, .advar { color: #8f2a23; font-weight: 700; }
+.proeve.fri { color: var(--ink-soft); font-size: .85rem; }
+
+/* Spillertragt */
+.tragt { display: grid; gap: 8px; }
+.tragt .trin { display: grid; grid-template-columns: minmax(120px, 15em) 1fr 6.5em; gap: 12px; align-items: center; }
+.tragt .navn { font-size: .92rem; }
+.tragt .spor { height: 18px; background: var(--paper-2); border-radius: 4px; overflow: hidden; }
+.tragt .spor i { display: block; height: 100%; background: var(--ink-soft); border-radius: 0 4px 4px 0; }
+.tragt .tal { text-align: right; font-size: .9rem; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink-soft); }
+.tragt .tal strong { color: var(--ink); }
+@media (max-width: 560px) {
+  .tragt .trin { grid-template-columns: 1fr auto; gap: 4px 10px; }
+  .tragt .spor { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Tidslinje: én bane pr. spiller, én bjælke pr. omgang */
+.tl-hoved { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.tl-hoved strong { text-transform: capitalize; }
+.tl { display: grid; gap: 10px; }
+.tl-bane { display: grid; grid-template-columns: minmax(110px, 12em) 1fr; gap: 12px; align-items: center; }
+.tl-navn { font-weight: 650; font-size: .92rem; line-height: 1.3; }
+.tl-navn .lille { display: block; font-weight: 400; }
+.tl-spor { position: relative; height: 26px; background: var(--paper-2); border-radius: 6px; }
+.tl-bane.akse .tl-spor { height: 18px; background: none; }
+.tl-bar {
+  position: absolute; top: 4px; height: 20px; min-width: 4px; border-radius: 4px;
+  background: color-mix(in srgb, var(--c) 28%, var(--paper)); outline: none;
+}
+.tl-bar > i { display: block; height: 100%; background: var(--c); border-radius: 4px; }
+.tl-bar.overlap { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--red); z-index: 1; }
+.tl-bar .ad { position: absolute; right: 2px; top: -1px; font-size: .8rem; color: #8f2a23; }
+.tl-bar .tip {
+  position: absolute; bottom: calc(100% + 6px); left: 0; background: var(--ink); color: var(--paper);
+  font-size: .8rem; white-space: nowrap; padding: 5px 9px; border-radius: 6px; pointer-events: none; display: none; z-index: 3;
+}
+.tl-bar:hover .tip, .tl-bar:focus-visible .tip { display: block; }
+.tl-akse { position: absolute; inset: 0; border-top: 1.5px solid var(--paper-edge); }
+.tl-akse span { position: absolute; top: 2px; transform: translateX(-50%); font-size: .75rem; color: var(--ink-soft); }
+.tl-akse span:first-child { transform: none; }
+.tl-akse span:last-child { transform: translateX(-100%); }
+.tl-opr { position: absolute; top: -6px; bottom: -6px; border-left: 2px dashed var(--ink-soft); pointer-events: none; z-index: 2; }
+.tl-bane.akse .tl-opr { top: -6px; bottom: auto; height: 6px; }
+.tl-opr-tekst { font-size: .78rem; color: var(--ink-soft); margin: 6px 0 0; }
+@media (max-width: 560px) {
+  .tl-bane { grid-template-columns: 1fr; gap: 4px; }
+}
+
 .filter { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
 .filter input, .filter select {
   font: 1rem var(--sans); padding: 9px 12px; border: 2px solid var(--paper-edge);

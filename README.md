@@ -288,7 +288,19 @@ sekund tæller, når spillet er fremme på skærmen, og nogen har rørt tastatur
 eller skærm inden for to minutter. Tiden sendes til `api/spilletid.php` hvert
 halve minut og med `sendBeacon`, når fanen lukkes. Serveren lægger aldrig
 mere tid til, end der faktisk er gået siden sidste puls (højst 90 sek. ad
-gangen), og en pause på over en halv time starter en ny "omgang".
+gangen), og en pause på over en halv time starter en ny "omgang". Det gælder
+på tværs af faner: hver fane er sin egen omgang, men har en anden omgang for
+samme spiller sendt en puls inden for 90 sek., tæller kun tiden siden den —
+ellers løb tiden dobbelt så hurtigt med spillet åbent to steder (rettet
+2026-10-07).
+
+**Spilletid i /admin**: overblikket viser stablede søjler pr. dag pr. spil
+(Runeborg blå, Regnehelten guld — klasserne `spil-<id>` i `konto.css`), en
+spillertragt (oprettet → spillet → halv/hel prøvetid → skema sendt/besvaret)
+og prøvetiden som bjælke pr. konto (`proeve_sek`: den voksne selv på "til sig
+selv", ellers den spiller, der har brugt mest; ⚠ når der er talt mere end
+grænsen). Én konto har en tidslinje over omgangene (`admin.php?handling=omgange`):
+én bane pr. spiller, overlappende omgange i hver sin række med ⚠.
 
 **Sådan slukkes login-kravet**, når testen er slut: sæt
 `var KRAEV_LOGIN = true;` til `false` i både `spil/regnehelten/index.html`
@@ -356,7 +368,7 @@ adresse (rigtige tæller ikke, så en hel klasse bag én IP kan logge ind), logi
 | `api/klasse.php` | `oversigt`, `ny_gruppe`, `ret_gruppe`, `slet_gruppe`, `nye_elever`, `ret_elev`, `ny_elevkode`, `slet_elev` |
 | `api/elev.php` | `login` |
 | `api/spilletid.php` | `puls` |
-| `api/admin.php` | `status`, `opsaet`, `overblik`, `konto`, `saet_status`, `ny_konto`, `ret_konto`, `kodeord`, `slet_konto`, `eksport` (CSV til Excel) |
+| `api/admin.php` | `status`, `opsaet`, `overblik`, `konto`, `omgange`, `saet_status`, `ny_konto`, `ret_konto`, `kodeord`, `slet_konto`, `eksport` (CSV til Excel) |
 
 ### Test lokalt med PHP
 

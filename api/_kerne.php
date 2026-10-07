@@ -1070,7 +1070,7 @@ function tid_status(array $h): array
     $elev_id = $h['elev'] ? (int) $h['elev']['id'] : null;
     $brugt = (int) ($elev_id
         ? vaerdi('SELECT COALESCE(SUM(sekunder), 0) FROM sessioner WHERE elev_id = ?', [$elev_id])
-        : vaerdi('SELECT COALESCE(SUM(sekunder), 0) FROM sessioner WHERE konto_id = ? AND elev_id IS NULL', [$k['id']]));
+        : vaerdi("SELECT COALESCE(SUM(sekunder), 0) FROM sessioner WHERE konto_id = ? AND elev_id IS NULL AND hvem = 'voksen'", [$k['id']]));
     if ($k['type'] === 'admin' || !empty($k['fri_adgang'])) {
         return ['graense_sek' => null, 'brugt_sek' => $brugt, 'tilbage_sek' => null, 'slut' => false];
     }
@@ -1092,6 +1092,25 @@ function pr_dag(string $hvor, array $p, int $dage = 30): array
         $d = date('Y-m-d', (int) $s['start']);
         if (isset($ud[$d])) {
             $ud[$d] += (int) $s['sekunder'];
+        }
+    }
+    return $ud;
+}
+
+/** Som pr_dag(), men delt på spil: ['2026-09-25' => ['runeborg' => sek, 'regnehelten' => sek]]. */
+function pr_dag_spil(string $hvor, array $p, int $dage = 30): array
+{
+    $fra = strtotime('today') - ($dage - 1) * 86400;
+    $tom = array_fill_keys(array_keys(SPIL), 0);
+    $ud = [];
+    for ($i = 0; $i < $dage; $i++) {
+        $ud[date('Y-m-d', $fra + $i * 86400 + 7200)] = $tom;
+    }
+    foreach (alle("SELECT start, spil, sekunder FROM sessioner WHERE $hvor AND start >= ? AND sekunder > 0",
+                  array_merge($p, [$fra])) as $s) {
+        $d = date('Y-m-d', (int) $s['start']);
+        if (isset($ud[$d][$s['spil']])) {
+            $ud[$d][$s['spil']] += (int) $s['sekunder'];
         }
     }
     return $ud;
