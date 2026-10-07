@@ -326,7 +326,7 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=4"></script>
+<script src="/assets/konto.js?v=5"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -888,7 +888,7 @@
       LF.stabel($('d-dage'), d.dage_spil, d.spil);
       $('d-tidslinje').innerHTML = '<p class="lille">Henter …</p>';
       LF.hent('admin', 'omgange', { id: k.id, dage: 30 }).then(function (o) {
-        if (aktuel === d) LF.tidslinje($('d-tidslinje'), o.omgange, o.spil, k.oprettet);
+        if (aktuel === d) LF.tidslinje($('d-tidslinje'), o.omgange, o.spil, k.oprettet, retOverlap);
       }).catch(function (err) { $('d-tidslinje').textContent = err.message; });
 
       var spil = Object.keys(d.spil), html = '';
@@ -936,6 +936,16 @@
         : 'Kontoen har ingen klasser endnu.') + '</p></div>';
       $('d-grupper').innerHTML = html;
     }).catch(function (err) { alert(err.message); location.hash = ''; });
+  }
+
+  // Gammel dobbelttælling (spillet åbent i flere faner før 2026-10-07): skalér ned til tiden på uret
+  function retOverlap(knap) {
+    if (!confirm('Ret spilletiden på ' + aktuel.konto.navn + ', så omgange, der lå samtidig, kun tæller den tid, der gik på uret? Det kan ikke fortrydes.')) return;
+    LF.travl(knap, true);
+    LF.send('admin', 'ret_overlap', { id: aktuel.konto.id }).then(function (r) {
+      alert('Rettet: ' + LF.tid(r.foer) + ' → ' + LF.tid(r.efter) + ' (' + r.rettet + ' omgange).');
+      return visKonto(aktuel.konto.id);
+    }, function (err) { alert(err.message); LF.travl(knap, false); });
   }
 
   $('d-knapper').addEventListener('click', function (e) {

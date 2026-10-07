@@ -605,6 +605,63 @@ case 'slet_konto':
     kør('DELETE FROM konti WHERE id = ?', [$k['id']]);
     svar(['ok' => true]);
 
+// Før 2026-10-07 talte spillet åbent i flere faner dobbelt (hver fane er sin
+// egen omgang). Det her retter de gamle tal: for hver spiller findes klynger
+// af omgange, der overlapper i tid, og er der talt mere end der gik på uret,
+// skaleres omgangene ned i samme forhold, så summen passer med uret.
+case 'ret_overlap':
+    kraev_egen_side();
+    $id = tal('id');
+    if (!vaerdi("SELECT 1 FROM konti WHERE id = ? AND type != 'admin'", [$id])) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    $spillere = [];
+    foreach (alle('SELECT id, elev_id, hvem, start, sidst, sekunder FROM sessioner
+                   WHERE konto_id = ? AND sekunder > 0 ORDER BY start, id', [$id]) as $s) {
+        $spillere[$s['elev_id'] !== null ? 'e' . $s['elev_id'] : $s['hvem']][] = $s;
+    }
+    $foer = 0;
+    $efter = 0;
+    $rettet = 0;
+    $klynger = [];
+    foreach ($spillere as $os) {
+        $klynge = [];
+        $slut = PHP_INT_MIN;
+        $uret = 0;
+        foreach ($os as $o) {
+            // Første puls kan have op til et halvt minut med fra før omgangen startede
+            $fra = (int) $o['start'] - min(30, (int) $o['sekunder']);
+            if ($klynge && $fra > $slut) {
+                $klynger[] = [$klynge, $uret];
+                $klynge = [];
+                $uret = 0;
+            }
+            $uret += max(0, (int) $o['sidst'] - max($fra, $slut));
+            $slut = max($slut, (int) $o['sidst']);
+            $klynge[] = $o;
+        }
+        if ($klynge) {
+            $klynger[] = [$klynge, $uret];
+        }
+    }
+    db()->beginTransaction();
+    foreach ($klynger as [$klynge, $uret]) {
+        $sum = array_sum(array_map(fn($o) => (int) $o['sekunder'], $klynge));
+        $foer += $sum;
+        if (count($klynge) < 2 || $sum <= $uret + 60) {
+            $efter += $sum;
+            continue;
+        }
+        foreach ($klynge as $o) {
+            $ny = (int) floor((int) $o['sekunder'] * $uret / $sum);
+            kør('UPDATE sessioner SET sekunder = ? WHERE id = ?', [$ny, $o['id']]);
+            $efter += $ny;
+            $rettet++;
+        }
+    }
+    db()->commit();
+    svar(['ok' => true, 'foer' => $foer, 'efter' => $efter, 'rettet' => $rettet]);
+
 // ---- prøvetiden og spørgeskemaet (se tid_status() og _spoergeskema.php) ----
 
 case 'tid':

@@ -206,7 +206,7 @@ window.LF = LF;
    * samme spiller, var spillet åbent i flere faner på én gang — det bliver
    * markeret, og banen viser både talt tid og tid på uret.
    */
-  LF.tidslinje = function (el, omgange, spil, oprettet) {
+  LF.tidslinje = function (el, omgange, spil, oprettet, ret) {
     var dage = {};
     omgange.forEach(function (o) {
       var d = new Date(o.start * 1000).toDateString();
@@ -274,7 +274,8 @@ window.LF = LF;
       });
       html += '<div class="tl-bane akse"><div class="tl-navn"></div><div class="tl-spor">' + opr + '<div class="tl-akse">' + akse + '</div></div></div></div>';
       if (opr) html += '<p class="tl-opr-tekst">┆ Stiplet streg: kontoen blev oprettet kl. ' + kl(oprettet) + '.</p>';
-      if (advarsler) html += '<p class="lille advar">⚠ Der er talt mere tid, end der gik på uret. Spillet har været åbent flere steder på én gang.</p>';
+      if (advarsler) html += '<p class="lille advar">⚠ Der er talt mere tid, end der gik på uret. Spillet har været åbent flere steder på én gang.'
+        + (ret ? ' <button type="button" class="btn btn-sm" data-ret-overlap>Ret den dobbelttalte tid</button>' : '') + '</p>';
       html += '<details class="foldud"><summary>Vis som tabel</summary><div class="tabel-rul"><table class="liste"><thead><tr><th>Spiller</th><th>Spil</th>'
         + '<th class="t">Fra</th><th class="t">Til</th><th class="t">Talt</th></tr></thead><tbody>'
         + os.map(function (o) {
@@ -284,6 +285,7 @@ window.LF = LF;
       el.innerHTML = html;
     }
     el.onclick = function (e) {
+      if (ret && e.target.closest('[data-ret-overlap]')) { ret(e.target.closest('[data-ret-overlap]')); return; }
       var b = e.target.closest('[data-tl]');
       if (!b) return;
       valgt = Math.max(0, Math.min(liste.length - 1, valgt + +b.dataset.tl));
