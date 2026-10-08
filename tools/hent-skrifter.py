@@ -23,8 +23,9 @@ MAPPE = ROD / "assets" / "skrifter"
 
 # Samme adresser, som siderne brugte før
 SAET = {
-    "site": "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700"
-            "&family=Inter:wght@400;500;600;700&display=swap",
+    # Siden bruger samme skrifter som spillene (fra 8. okt. 2026)
+    "site": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400"
+            "&family=Pixelify+Sans:wght@500;600;700&display=swap",
     "runeborg": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400"
                 "&family=Pixelify+Sans:wght@500;600;700&display=swap",
 }

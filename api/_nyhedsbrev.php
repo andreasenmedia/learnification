@@ -135,7 +135,7 @@ function nyhedsbrev_html_afsnit(string $tekst, string $kampagne, string $kilde =
             $url = rtrim($m[0], '.,;:!?)');
             $rest = substr($m[0], strlen($url));
             $href = htmlspecialchars(nyhedsbrev_maerk_links(htmlspecialchars_decode($url), $kampagne, $kilde), ENT_QUOTES, 'UTF-8');
-            return '<a href="' . $href . '" style="color:#8f5b18;">' . $url . '</a>' . $rest;
+            return '<a href="' . $href . '" style="color:#4b3a78;">' . $url . '</a>' . $rest;
         }, $h) ?? $h;
         $ud .= '<p style="margin:0 0 16px;">' . nl2br($h, false) . "</p>\n";
     }
@@ -155,7 +155,7 @@ function mail_ramme(string $titel, string $indhold, string $fod): string
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#faf7f0;"><tr><td align="center" style="padding:28px 14px;">'
         . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">'
         . '<tr><td style="padding:0 6px 16px;font:700 20px Georgia,serif;color:#2a2118;">'
-        . '<span style="display:inline-block;width:14px;height:14px;background:#ce8a2e;border-radius:4px;margin-right:8px;"></span>Learnification</td></tr>'
+        . '<span style="display:inline-block;width:14px;height:14px;background:#ffcc4d;border-radius:0;margin-right:8px;"></span>Learnification</td></tr>'
         . '<tr><td style="background:#ffffff;border:2px solid #eadfca;border-radius:14px;padding:28px 26px;'
         . 'font:16px/1.6 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#2a2118;">'
         . $indhold

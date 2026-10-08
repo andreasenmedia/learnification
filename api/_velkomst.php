@@ -84,7 +84,7 @@ function velkomst_mail(array $k): array
     $html = mail_ramme(VELKOMST_EMNE,
         nyhedsbrev_html_afsnit($tekst, 'velkomst', 'velkomstmail')
         . '<p style="margin:8px 0 0;"><a href="' . $e(nyhedsbrev_maerk_links($side . '/login', 'velkomst', 'velkomstmail'))
-        . '" style="display:inline-block;background:#ce8a2e;color:#ffffff;font-weight:700;text-decoration:none;'
+        . '" style="display:inline-block;background:#ffcc4d;color:#140f1c;font-weight:700;text-decoration:none;'
         . 'padding:12px 22px;border-radius:999px;">Log ind</a></p>',
         $e($hvorfor) . '<br>' . $e(NYHEDSBREV_AFSENDER));
 
@@ -202,7 +202,7 @@ function paamind_mail(array $k): array
     $html = mail_ramme(PAAMIND_EMNE,
         nyhedsbrev_html_afsnit($tekst, 'paamindelse', 'velkomstmail')
         . '<p style="margin:8px 0 0;"><a href="' . $e(nyhedsbrev_maerk_links($side . '/login', 'paamindelse', 'velkomstmail'))
-        . '" style="display:inline-block;background:#ce8a2e;color:#ffffff;font-weight:700;text-decoration:none;'
+        . '" style="display:inline-block;background:#ffcc4d;color:#140f1c;font-weight:700;text-decoration:none;'
         . 'padding:12px 22px;border-radius:999px;">Log ind</a></p>',
         $e($hvorfor) . '<br>' . $e(NYHEDSBREV_AFSENDER));
 

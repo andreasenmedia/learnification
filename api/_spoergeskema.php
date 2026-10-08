@@ -64,7 +64,7 @@ function skema_mail(array $k, array $s, string $kaldenavn): array
     $html = mail_ramme(SKEMA_EMNE,
         nyhedsbrev_html_afsnit($tekst, 'spoergeskema', 'servicemail')
         . '<p style="margin:8px 0 0;"><a href="' . $e(nyhedsbrev_maerk_links($link, 'spoergeskema', 'servicemail'))
-        . '" style="display:inline-block;background:#ce8a2e;color:#ffffff;font-weight:700;text-decoration:none;'
+        . '" style="display:inline-block;background:#ffcc4d;color:#140f1c;font-weight:700;text-decoration:none;'
         . 'padding:12px 22px;border-radius:999px;">Besvar spørgeskemaet</a></p>',
         $e($hvorfor) . '<br>' . $e(NYHEDSBREV_AFSENDER));
 

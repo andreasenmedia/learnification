@@ -1,10 +1,10 @@
 /* Tilmeldingsboksen til nyhedsbrevet (forsiden, /for-voksne, /nyhedsbrev).
-   Bygger på style.css — samme papir, blæk og guld. */
+   Bygger på style.css — Dagbogens pergament og spillenes paneler. */
 
 .nb-boks {
   max-width: 640px; margin: 0 auto; text-align: left;
-  background: var(--paper); border: 2px solid var(--paper-edge);
-  border-radius: var(--r); box-shadow: var(--shadow); padding: 28px 26px;
+  background: var(--paper-card); border: 3px solid var(--ink);
+  border-radius: 0; box-shadow: var(--shadow); padding: 28px 26px;
 }
 .nb-boks h2 { margin-bottom: .3em; }
 .nb-boks > p { color: var(--ink-soft); }
@@ -15,22 +15,22 @@
 .nb-raekke label { display: block; font-size: .92rem; font-weight: 600; margin-bottom: 6px; }
 .nb-raekke label span { font-weight: 400; color: var(--ink-soft); }
 .nb-raekke input {
-  width: 100%; font: 1.02rem var(--sans); color: var(--ink); background: var(--paper);
-  border: 2px solid var(--ink); border-bottom-width: 3px; border-radius: var(--r-sm); padding: 12px 14px;
+  width: 100%; font: 1.02rem var(--sans); color: var(--ink); background: #fffaf0;
+  border: 3px solid var(--ink); border-radius: 0; padding: 12px 14px;
 }
-.nb-raekke input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.nb-raekke input:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
 
 .nb-roller { border: 0; padding: 0; margin: 0 0 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; }
 .nb-roller legend { font-size: .92rem; font-weight: 600; margin-bottom: 6px; padding: 0; }
 .nb-roller legend span { font-weight: 400; color: var(--ink-soft); }
 .nb-roller label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-size: .96rem; }
-.nb-roller input { accent-color: var(--gold); width: 17px; height: 17px; }
+.nb-roller input { accent-color: var(--gold-dark); width: 17px; height: 17px; }
 
 .nb-samtykke {
   display: flex; gap: 11px; align-items: flex-start; margin: 4px 0 18px;
   font-size: .94rem; color: var(--ink-soft); cursor: pointer;
 }
-.nb-samtykke input { margin-top: .28em; width: 19px; height: 19px; accent-color: var(--gold); flex: none; }
+.nb-samtykke input { margin-top: .28em; width: 19px; height: 19px; accent-color: var(--gold-dark); flex: none; }
 
 .nb-faelde { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 

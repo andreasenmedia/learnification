@@ -6,7 +6,15 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Wed, 07 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 08 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Siden ligner nu spillene</title>
+      <link>https://learnification.dk/nyheder#siden-som-spillene</link>
+      <guid isPermaLink="false">learnification-nyhed-siden-som-spillene</guid>
+      <pubDate>Thu, 08 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Siden</category>
+      <description><![CDATA[<p>Før lignede hjemmesiden ikke helt det, børnene mødte, når de trykkede på <strong>Spil</strong>. Nu er det samme verden hele vejen: menuen ligner spillets knapper, forsiden starter i Runeborgs by med en replik fra laugsmester Brynja, og teksterne står på pergament ligesom i Dagbogen.</p><p>Al tekst står i den samme skrift som i spillene. Den er lavet til at være let at læse, også for børn, der har svært ved bogstaverne, og tal som 5 og S kan ikke forveksles.</p><p>Alt virker som før: login, Min konto, login-kort og nyhedsbrevet ligger samme sted.</p>]]></description>
+    </item>
     <item>
       <title>Lettere at læse i begge spil</title>
       <link>https://learnification.dk/nyheder#laesevenlig-skrift</link>

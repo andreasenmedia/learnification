@@ -169,17 +169,17 @@ border-radius:var(--r,18px);box-shadow:0 6px 0 var(--ink,#26222c),0 18px 50px rg
 padding:22px 22px 18px;font:400 .97rem/1.5 var(--sans,system-ui,sans-serif);max-height:calc(100vh - 32px);overflow:auto}\
 .lfs h2{font:600 1.3rem/1.2 var(--display,Georgia,serif);margin:0 0 .4em}\
 .lfs p{margin:0 0 12px;color:var(--ink-soft,#5d566a)}\
-.lfs a{color:var(--gold-dark,#8f5b18)}\
+.lfs a{color:var(--gold-dark,#4b3a78)}\
 .lfs .lfs-knapper{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}\
-.lfs button{font:650 1rem var(--sans,system-ui,sans-serif);border-radius:999px;padding:13px 16px;cursor:pointer;\
+.lfs button{font:650 1rem var(--sans,system-ui,sans-serif);border-radius:var(--r,0);padding:13px 16px;cursor:pointer;\
 border:2.5px solid var(--ink,#26222c);background:var(--ink,#26222c);color:var(--paper,#faf7f0)}\
-.lfs button:focus-visible{outline:3px solid var(--gold,#ce8a2e);outline-offset:2px}\
+.lfs button:focus-visible{outline:3px solid var(--gold-dark,#4b3a78);outline-offset:2px}\
 .lfs .lfs-link{grid-column:1/-1;background:none;border:0;color:var(--ink,#26222c);text-decoration:underline;padding:6px}\
-.lfs .lfs-gem{grid-column:1/-1;background:var(--gold,#ce8a2e);border-color:var(--gold-dark,#8f5b18);color:#fff}\
-.lfs-kat{border:2px solid var(--paper-edge,#e6dcc8);border-radius:12px;padding:12px 14px;margin:0 0 10px;display:flex;gap:12px;align-items:flex-start}\
+.lfs .lfs-gem{grid-column:1/-1;background:var(--gold,#ffcc4d);border-color:var(--gold-edge,#b8862a);color:var(--ink-deep,#140f1c)}\
+.lfs-kat{border:2px solid var(--paper-edge,#e6dcc8);border-radius:var(--r,0);padding:12px 14px;margin:0 0 10px;display:flex;gap:12px;align-items:flex-start}\
 .lfs-kat strong{display:block;color:var(--ink,#26222c)}\
 .lfs-kat small{display:block;color:var(--ink-soft,#5d566a);font-size:.88rem;line-height:1.45}\
-.lfs-kat input{width:20px;height:20px;margin-top:3px;accent-color:var(--gold,#ce8a2e);flex:none}\
+.lfs-kat input{width:20px;height:20px;margin-top:3px;accent-color:var(--gold-dark,#4b3a78);flex:none}\
 .lfs-lille{font-size:.85rem}\
 @media (max-width:520px){.lfs{left:10px;right:10px;bottom:10px;padding:18px 16px 14px}}\
 .lfs-fod{background:none;border:0;padding:0;font:inherit;color:inherit;opacity:.85;text-decoration:underline;cursor:pointer;text-align:left}';
