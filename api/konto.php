@@ -6,7 +6,7 @@
  *   POST opret                  ny konto: til mig selv, familie eller skole
  *   POST login / logud
  *   POST tilbage                fra barnet tilbage til den voksne, der gik ind som det
- *   POST glemt                  send et link til et nyt kodeord
+ *   POST glemt                  send et link til en ny adgangskode
  *   POST nulstil                sæt nyt kodeord med linket
  *   POST skift_kodeord, ret, slet_konto
  *   POST skift_type {type, skolenavn?}  en konto "til mig selv" bliver familie eller skole
@@ -28,10 +28,10 @@ function konto_ud(array $k): array
 function tjek_kodeord(string $k): void
 {
     if (strlen($k) < 8) {
-        fejl('Kodeordet skal være mindst 8 tegn.');
+        fejl('Adgangskoden skal være mindst 8 tegn.');
     }
     if (strlen($k) > 200) {
-        fejl('Kodeordet er for langt.');
+        fejl('Adgangskoden er for lang.');
     }
 }
 
@@ -47,6 +47,9 @@ if ($h === 'mig') {
         svar(['ok' => true, 'logget_ind' => false]);
     }
     $ud = ['ok' => true, 'logget_ind' => true, 'konto' => konto_ud($x['konto']), 'tid' => tid_status($x)];
+    if (!empty($x['konto']['test'])) {
+        $ud['test'] = true;   // en testrunde (api/test.php)
+    }
     if ($x['elev']) {
         $e = $x['elev'];
         $ud['hvem'] = 'elev';
@@ -132,7 +135,7 @@ case 'login':
     $k = en('SELECT * FROM konti WHERE email = ?', [$email]);
     // Samme svar, uanset om det er mailen eller kodeordet, der er forkert
     if (!$k || !password_verify($kodeord, $k['kodeord'])) {
-        fejl('Mailadressen eller kodeordet passer ikke.', 401);
+        fejl('Mailadressen eller adgangskoden passer ikke.', 401);
     }
     if ($k['status'] === 'spaerret') {
         fejl('Kontoen er lukket. Skriv til ' . MODTAGER . ', hvis det er en fejl.', 403);
@@ -151,7 +154,7 @@ case 'logud':
 case 'tilbage':
     $p = parkeret_voksen();
     if (!$p) {
-        fejl('Log ind med din mail og dit kodeord.', 401);
+        fejl('Log ind med din mail og din adgangskode.', 401);
     }
     // Barnets login slutter, og den voksnes eget login kommer tilbage
     kør('DELETE FROM logins WHERE token = ?', [hash('sha256', (string) $_COOKIE['lf_session'])]);
@@ -167,13 +170,34 @@ case 'glemt':
     bremse('glemt-mail', $email, 3, 3600);
     $k = en('SELECT * FROM konti WHERE email = ? AND status != ?', [$email, 'spaerret']);
     if ($k) {
-        send_mail($k['email'], 'Nyt kodeord til Learnification',
-            "Hej {$k['kontakt']}\n\n"
-            . "Nogen (forhåbentlig dig) har bedt om et nyt kodeord til Learnification.\n"
-            . "Klik her inden for en time for at vælge et nyt:\n\n"
-            . nulstil_link((int) $k['id'], 3600) . "\n\n"
-            . "Var det ikke dig, så skal du ikke gøre noget — dit gamle kodeord virker stadig.\n\n"
-            . "Venlig hilsen\nLearnification\n");
+        require_once __DIR__ . '/_nyhedsbrev.php';
+        $link = nulstil_link((int) $k['id'], 3600);
+        $hej = trim((string) $k['kontakt']) !== '' ? 'Hej ' . $k['kontakt'] : 'Hej';
+        $tekst = "$hej
+
+"
+            . "Nogen (forhåbentlig dig) har bedt om en ny adgangskode til Learnification.
+"
+            . "Klik her inden for en time for at vælge en ny:
+
+$link
+
+"
+            . "Var det ikke dig, så skal du ikke gøre noget — din gamle adgangskode virker stadig.
+
+"
+            . "Venlig hilsen
+Learnification
+";
+        $e = fn(string $x) => htmlspecialchars($x, ENT_QUOTES, 'UTF-8');
+        $html = mail_ramme('Ny adgangskode til Learnification',
+            '<p style="margin:0 0 16px;">' . $e($hej) . ',</p>'
+            . '<p style="margin:0 0 16px;">Nogen (forhåbentlig dig) har bedt om en ny adgangskode til Learnification. Linket virker i en time.</p>'
+            . '<p style="margin:0 0 20px;"><a href="' . $e($link) . '" style="display:inline-block;background:#ffcc4d;color:#140f1c;'
+            . 'font-weight:700;text-decoration:none;padding:12px 22px;border:3px solid #b8862a;border-radius:0;">Vælg ny adgangskode</a></p>'
+            . '<p style="margin:0;color:#6b5d4d;">Var det ikke dig, så skal du ikke gøre noget — din gamle adgangskode virker stadig.</p>',
+            'Du får denne mail, fordi nogen har trykket "Glemt adgangskode" på learnification.dk med din mailadresse.');
+        send_mail($k['email'], 'Ny adgangskode til Learnification', $tekst, $html);
     }
     // Samme svar uanset hvad, så man ikke kan bruge siden til at finde ud
     // af, hvem der har en konto
@@ -193,7 +217,7 @@ case 'nulstil':
     // Alle andre steder, kontoen var logget ind, bliver logget ud
     kør('DELETE FROM logins WHERE konto_id = ? AND elev_id IS NULL', [$n['konto_id']]);
     log_ind((int) $n['konto_id'], null, VOKSEN_LEVETID);
-    svar(['ok' => true, 'besked' => 'Dit nye kodeord er gemt.']);
+    svar(['ok' => true, 'besked' => 'Din nye adgangskode er gemt.']);
 }
 
 // ------------------------------------------------------ resten kræver login
@@ -205,12 +229,12 @@ switch ($h) {
 case 'skift_kodeord':
     bremse('skift', (string) $k['id'], 10, 900);
     if (!password_verify((string) (input()['gammelt'] ?? ''), $k['kodeord'])) {
-        fejl('Det nuværende kodeord passer ikke.', 401);
+        fejl('Den nuværende adgangskode passer ikke.', 401);
     }
     $nyt = (string) (input()['nyt'] ?? '');
     tjek_kodeord($nyt);
     kør('UPDATE konti SET kodeord = ? WHERE id = ?', [password_hash($nyt, PASSWORD_DEFAULT), $k['id']]);
-    svar(['ok' => true, 'besked' => 'Kodeordet er skiftet.']);
+    svar(['ok' => true, 'besked' => 'Adgangskoden er skiftet.']);
 
 case 'ret':
     $navn = felt('navn', 120);
@@ -263,7 +287,7 @@ case 'slet_konto':
     }
     bremse('slet', (string) $k['id'], 5, 900);
     if (!password_verify((string) (input()['kodeord'] ?? ''), $k['kodeord'])) {
-        fejl('Kodeordet passer ikke.', 401);
+        fejl('Adgangskoden passer ikke.', 401);
     }
     // Grupper, elever, spilletid og logins går med i faldet (ON DELETE CASCADE)
     log_ud();

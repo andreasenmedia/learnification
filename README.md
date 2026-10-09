@@ -382,6 +382,27 @@ php -S 127.0.0.1:8792 tools/lokal-router.php
 fra projektets rodmappe. Routeren opfører sig som `.htaccess` og lægger
 databasen i systemets midlertidige mappe, så testdata aldrig havner i repoet.
 
+## Skoletest (testrunder)
+
+Når spillene skal testes på en skole: **/admin#skoletest** (`#test`) → "Ny testrunde", skriv
+antal spillere. Der oprettes en almindelig skolekonto med `konti.test = 1` og fri adgang
+(ingen tidsgrænse) og elever, der hedder Spiller 1, 2, 3 … med hver sin kode (RAVN-4827).
+"Udskriv koder" åbner `/login-kort?konto=<id>&g=<gruppe>` (samme side som lærernes login-kort).
+
+- **Live overblik** (`api/test.php?handling=status`, opdateres hvert 10. sek.): prik pr. spiller
+  (grøn = puls/gem inden for 80 sek., gul < 5 min), hvilket spil, kapitel, hovedmissioner i kapitlet,
+  **sted** og **mission**. Sted og mission står i det gemte spil som `S.hud` (`hudInfo()` i
+  `spil/*/js/game.js`, læses af `gemt_status()`), så de opdateres ved hver gemning.
+- **Spørgeskema til eleverne:** knappen "Vis spørgeskemaet nu" opretter en række i `testskema`.
+  Børn på en testrunde har cookien `lf_test` (sat i `log_ind()`), og `assets/elevskema.js` (indlæst af
+  /spil/ og begge spil) spørger hvert 8. sek. `api/test.php?handling=skema_aktuel`. Vinduet har seks
+  spørgsmål med store knapper (`ELEV_SKEMA` i `api/test.php` — ret dem dér), tastaturgenveje 1-9, og
+  blokerer tastetryk til spillet, mens det er åbent. Svar: tabel `testsvar` (ét pr. barn pr. skema).
+  Resultater tælles op i admin og kan hentes som CSV (`handling=csv`, semikolon + BOM).
+- Testrunder holdes ude af /admins almindelige tal, velkomstmail, påmindelse og skema-mail (`test = 0`
+  i forespørgslerne). Slet runden, når testen er slut (sletter også svarene).
+- DB-version 10 (`test`, `testskema`, `testsvar`).
+
 ## Resultater fra testomgangene
 
 Mens spillet er til test, sender det hjem, hvad spilleren nåede at løse.

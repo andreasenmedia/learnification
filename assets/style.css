@@ -302,7 +302,7 @@ figure.shot-fig figcaption {
 .game-card p { color: var(--txt-soft); }
 .game-card .eyebrow { color: var(--gold); }
 .game-card .pic { background: var(--ink-deep); border-right: 3px solid var(--edge-2); }
-.game-card .pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.game-card .pic img, .game-card .pic video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .game-card .body { padding: 34px 32px; }
 /* fakta-mærker som svarmulighederne i opgavevinduet */
 .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 18px; padding: 0; list-style: none; }

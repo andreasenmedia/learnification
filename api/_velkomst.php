@@ -110,7 +110,7 @@ const VELKOMST_GRUPPER = [
 
 function velkomst_hvor(string $gruppe): string
 {
-    $hvor = "k.type != 'admin' AND k.status != 'spaerret' AND k.velkomst_sendt IS NULL";
+    $hvor = "k.type != 'admin' AND k.test = 0 AND k.status != 'spaerret' AND k.velkomst_sendt IS NULL";
     if ($gruppe === 'ikke_spillet') {
         $hvor .= ' AND NOT EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id AND s.sekunder > 0)';
     }
@@ -142,7 +142,7 @@ const PAAMIND_IKKE_SPILLET = "NOT EXISTS (SELECT 1 FROM sessioner s WHERE s.kont
 function paamind_hvor(): string
 {
     $nu = time();
-    return "k.type != 'admin' AND k.status != 'spaerret' AND k.paamindelse_sendt IS NULL
+    return "k.type != 'admin' AND k.test = 0 AND k.status != 'spaerret' AND k.paamindelse_sendt IS NULL
             AND k.paamindelse_fejl < 3
             AND k.oprettet <= " . ($nu - PAAMIND_EFTER) . ' AND k.oprettet > ' . ($nu - PAAMIND_HOEJST)
         . ' AND ' . PAAMIND_IKKE_SPILLET;
@@ -151,7 +151,7 @@ function paamind_hvor(): string
 /** Konti, der får den senere, hvis ingen spiller inden da. */
 function paamind_venter(): int
 {
-    return (int) vaerdi("SELECT COUNT(*) FROM konti k WHERE k.type != 'admin' AND k.status != 'spaerret'
+    return (int) vaerdi("SELECT COUNT(*) FROM konti k WHERE k.type != 'admin' AND k.test = 0 AND k.status != 'spaerret'
                          AND k.paamindelse_sendt IS NULL AND k.oprettet > ? AND " . PAAMIND_IKKE_SPILLET,
                         [time() - PAAMIND_EFTER]);
 }

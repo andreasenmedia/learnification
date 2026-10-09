@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#faf7f0">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
-<link rel="stylesheet" href="/assets/style.css?v=6">
-<link rel="stylesheet" href="/assets/konto.css?v=8">
+<link rel="stylesheet" href="/assets/style.css?v=7">
+<link rel="stylesheet" href="/assets/konto.css?v=12">
 </head>
 <body>
 
@@ -59,13 +59,16 @@
 <script src="/assets/konto.js?v=4"></script>
 <script>
 (function () {
-  var gid = +(new URLSearchParams(location.search).get('g') || 0);
-  LF.hent('klasse', 'oversigt').then(function (d) {
+  var q = new URLSearchParams(location.search);
+  var gid = +(q.get('g') || 0), konto = +(q.get('konto') || 0);   // konto: administratoren udskriver for en testrunde
+  if (konto) document.querySelector('.tilbage').setAttribute('href', '/admin#test=' + konto);
+  LF.hent('klasse', 'oversigt', konto ? { konto: konto } : {}).then(function (d) {
     var g = d.grupper.filter(function (x) { return x.id === gid; })[0];
     if (!g) { document.getElementById('besked').textContent = 'Den gruppe findes ikke på din konto.'; return; }
     var navn = g.navn === 'Familien' && d.konto.type === 'foraelder' ? 'Børnene' : g.navn;
     document.getElementById('titel').textContent = 'Login-kort · ' + navn;
     if (!g.elever.length) { document.getElementById('besked').textContent = 'Der er ingen elever i gruppen endnu.'; return; }
+    g.elever.sort(function (a, b) { return a.kaldenavn.localeCompare(b.kaldenavn, 'da', { numeric: true }); });
     document.getElementById('kort').innerHTML = g.elever.map(function (e) {
       return '<div class="login-kort"><div class="top"><span class="ikon" aria-hidden="true">' + LF.esc(e.ikon) + '</span>'
         + '<span class="navn">' + LF.esc(e.kaldenavn) + '</span></div>'

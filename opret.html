@@ -10,8 +10,8 @@
 <link rel="canonical" href="https://learnification.dk/opret">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
-<link rel="stylesheet" href="/assets/style.css?v=6">
-<link rel="stylesheet" href="/assets/konto.css?v=8">
+<link rel="stylesheet" href="/assets/style.css?v=7">
+<link rel="stylesheet" href="/assets/konto.css?v=12">
 </head>
 <body>
 
@@ -49,7 +49,7 @@
     <div class="smal">
       <p class="eyebrow midt">Gratis, mens spillene er til test</p>
       <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Opret en konto</h1>
-      <p class="lead midt" style="font-size:1.05rem;">Kontoen er til dig, der er fyldt 15 år, og du kan spille med det samme. Er du under 15, skal en voksen oprette kontoen og sætte dig på. Skal dine børn eller din klasse også spille, sætter du det op bagefter under Min konto — børnene skal hverken have mail eller kodeord.</p>
+      <p class="lead midt" style="font-size:1.05rem;">Kontoen er til dig, der er fyldt 15 år, og du kan spille med det samme. Er du under 15, skal en voksen oprette kontoen og sætte dig på. Skal dine børn eller din klasse også spille, sætter du det op bagefter under Min konto — børnene skal hverken have mail eller adgangskode.</p>
 
       <form class="panel" id="opret-form" novalidate style="margin-top:26px;">
         <p class="besked" id="besked"></p>
@@ -74,7 +74,7 @@
           <p class="hj">Vi skriver kun om din konto og testen — nyhedsbrevet er dit eget valg herunder.</p>
         </div>
         <div class="felt">
-          <label for="kodeord">Vælg et kodeord <span>— mindst 8 tegn</span></label>
+          <label for="kodeord">Vælg en adgangskode <span>— mindst 8 tegn</span></label>
           <input id="kodeord" name="kodeord" type="password" minlength="8" autocomplete="new-password" required>
         </div>
 
@@ -83,9 +83,9 @@
           <span>Jeg er fyldt 15 år og har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig (og eventuelle børn), og at vi må skrive til mig om testen.</span>
         </label>
 
-        <label class="samtykke">
+        <label class="samtykke nyhedsvalg">
           <input type="checkbox" name="nyhedsbrev" id="nyhedsbrev">
-          <span><strong>Frivilligt:</strong> Send mig også nyt fra Learnification på mail — nye spil, opdateringer og tilbud. Højst et par gange om måneden, og jeg kan altid afmelde igen. <a href="/privatliv#nyhedsbrev" target="_blank">Læs mere</a></span>
+          <span><strong>Ja tak, send mig nyhedsbrevet</strong> — nye spil, nye kapitler og tilbud fra Learnification, højst et par gange om måneden. Frivilligt: du kan oprette kontoen uden, og du kan afmelde med ét klik. Vi sender et link, du skal bekræfte. <a href="/privatliv#nyhedsbrev" target="_blank">Læs mere</a></span>
         </label>
 
         <button class="btn btn-primary btn-lg btn-fuld" type="submit">Opret konto</button>

@@ -132,7 +132,7 @@ function konti_med_tal(): array
     }
 
     $ud = [];
-    foreach (alle("SELECT * FROM konti WHERE type != 'admin' ORDER BY oprettet DESC") as $k) {
+    foreach (alle("SELECT * FROM konti WHERE type != 'admin' AND test = 0 ORDER BY oprettet DESC") as $k) {
         $id = (int) $k['id'];
         $t = $tid[$id] ?? null;
         $ud[] = [
@@ -384,7 +384,7 @@ case 'overblik':
         $gemte[$s] = ['i_alt' => 0, 'faerdige' => 0];
     }
     foreach (alle("SELECT g.spil, g.data, g.opdateret FROM gemte_spil g JOIN konti k ON k.id = g.konto_id
-                   WHERE k.type != 'admin'") as $g) {
+                   WHERE k.type != 'admin' AND k.test = 0") as $g) {
         $st = isset($gemte[$g['spil']]) ? gemt_status($g['spil'], $g['data'], (int) $g['opdateret']) : null;
         if ($st) {
             $gemte[$g['spil']]['i_alt']++;
@@ -406,9 +406,9 @@ case 'overblik':
                             + (int) vaerdi("SELECT COUNT(DISTINCT konto_id) FROM sessioner
                                             WHERE start > ? AND sekunder > 0 AND hvem = 'voksen'", [$uge]),
           ],
-          'tid' => spilletid("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", []),
-          'dage' => pr_dag("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", [], 30),
-          'dage_spil' => pr_dag_spil("konto_id IN (SELECT id FROM konti WHERE type != 'admin')", [], 30),
+          'tid' => spilletid("konto_id IN (SELECT id FROM konti WHERE type != 'admin' AND test = 0)", []),
+          'dage' => pr_dag("konto_id IN (SELECT id FROM konti WHERE type != 'admin' AND test = 0)", [], 30),
+          'dage_spil' => pr_dag_spil("konto_id IN (SELECT id FROM konti WHERE type != 'admin' AND test = 0)", [], 30),
           'tragt' => tragt($konti),
           'gemte' => $gemte,
           'spil' => SPIL]);
@@ -743,7 +743,7 @@ case 'velkomst':
     $konti = [];
     foreach (alle("SELECT k.id, k.type, k.navn, k.email, k.status, k.oprettet, k.velkomst_sendt, k.paamindelse_sendt,
                           EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id AND s.sekunder > 0) AS spillet
-                   FROM konti k WHERE k.type != 'admin' ORDER BY k.oprettet DESC") as $k) {
+                   FROM konti k WHERE k.type != 'admin' AND k.test = 0 ORDER BY k.oprettet DESC") as $k) {
         $konti[] = ['id' => (int) $k['id'], 'type' => $k['type'], 'navn' => $k['navn'], 'email' => $k['email'],
                     'status' => $k['status'], 'oprettet' => (int) $k['oprettet'], 'spillet' => (bool) $k['spillet'],
                     'velkomst_sendt' => $k['velkomst_sendt'] !== null ? (int) $k['velkomst_sendt'] : null,

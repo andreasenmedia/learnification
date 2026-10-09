@@ -47,8 +47,21 @@
   // overskrive det, man har gemt. `laast` bliver sat, når en anden skærm har
   // gemt noget nyere: så må den her fane ikke gemme mere.
   var laast = false;
+  // Hvor spilleren er lige nu (sted, mission og hvor langt i kapitlet). Ligger i det gemte spil,
+  // så /admin kan vise det — se gemt_status() i api/_kerne.php. Rører ikke selve spillet.
+  function hudInfo() {
+    try {
+      var m = world && world[S.map], mt = K.mainTarget(S), kap = S.kap || 1, lavet = 0, ialt = 0;
+      K.questList().forEach(function (q) {
+        if (q.side || (q.kap || 1) !== kap) return;
+        ialt++; if (S.q[q.id] === 'done') lavet++;
+      });
+      return { sted: m ? m.name : '', mission: mt ? mt.q.title : '', maal: mt ? K.goal(mt.q.id) : '', lavet: lavet, ialt: ialt };
+    } catch (e) { return null; }
+  }
   function save(nu) {
     if (!S || FOTO || !started || laast) return;
+    S.hud = hudInfo();
     var d = JSON.stringify(S);
     try { localStorage.setItem(SAVE, d); } catch (e) { /* privat vindue */ }
     RH.gem.gem(d, nu === true);

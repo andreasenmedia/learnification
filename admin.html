@@ -9,8 +9,8 @@
 <meta name="theme-color" content="#faf7f0">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
-<link rel="stylesheet" href="/assets/style.css?v=6">
-<link rel="stylesheet" href="/assets/konto.css?v=8">
+<link rel="stylesheet" href="/assets/style.css?v=7">
+<link rel="stylesheet" href="/assets/konto.css?v=12">
 </head>
 <body>
 
@@ -77,6 +77,7 @@
           <a class="btn btn-sm" href="#nyhedsbrev">Nyhedsbrev</a>
           <a class="btn btn-sm" href="#velkomst">Velkomstmail</a>
           <a class="btn btn-sm" href="#spoergeskema">Spørgeskema</a>
+          <a class="btn btn-sm btn-primary" href="#test">Skoletest</a>
           <a class="btn btn-sm" href="/api/admin.php?handling=eksport">Hent som Excel (CSV)</a>
           <a class="btn btn-sm" href="/konto">Min egen konto</a>
           <button type="button" class="btn btn-sm" data-logud>Log ud</button>
@@ -255,6 +256,67 @@
       <div class="panel" id="sk-svar" hidden></div>
     </div>
 
+    <!-- Skoletest: testrunder med Spiller 1, 2, 3 … -->
+    <div id="test" hidden>
+      <a href="#" class="tilbage">&larr; Alle konti</a>
+
+      <div id="t-start">
+        <div class="topbar">
+          <div><p class="eyebrow" style="margin-bottom:6px;">Når I tester på en skole</p><h1>Skoletest</h1>
+            <p>Skriv, hvor mange spillere der er. Hver får en kode (Spiller 1, 2, 3 …) på et kort, så ingen skal oprette noget. Under testen kan du se, hvor hver enkelt er i spillene, og vise et lille spørgeskema på deres skærme.</p></div>
+        </div>
+        <form class="panel admin-form" id="t-ny" novalidate>
+          <h2>Ny testrunde</h2>
+          <p class="besked" id="t-ny-besked"></p>
+          <div class="felt-raekke">
+            <div class="felt"><label for="t-navn">Skole eller klasse <span>— valgfrit</span></label><input id="t-navn" maxlength="60" placeholder="fx Vestre Skole 5.B"></div>
+            <div class="felt"><label for="t-antal">Antal spillere</label><input id="t-antal" type="number" min="1" max="60" value="24" required></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Opret runden</button>
+        </form>
+        <div class="panel">
+          <h2>Testrunder</h2>
+          <div class="tabel-rul"><table class="liste" id="t-liste"></table></div>
+        </div>
+      </div>
+
+      <div id="t-runde" hidden>
+        <div class="topbar">
+          <div><p class="eyebrow" style="margin-bottom:6px;">Testrunde · <a href="#test">alle runder</a></p><h1 id="t-titel"></h1><p class="lille" id="t-opdateret"></p></div>
+          <div class="knapper">
+            <a class="btn btn-sm" id="t-kort" target="_blank" rel="noopener">Udskriv koder</a>
+            <button type="button" class="btn btn-sm" id="t-flere">+ Flere spillere</button>
+            <a class="btn btn-sm" id="t-csv">Hent svar (CSV)</a>
+            <button type="button" class="btn btn-sm" id="t-slet">Slet runden</button>
+          </div>
+        </div>
+
+        <div class="panel skema-styring" id="t-skema">
+          <div>
+            <h2>Spørgeskema til eleverne</h2>
+            <p class="lille" id="t-skema-tekst" style="margin:0;"></p>
+          </div>
+          <div class="knapper">
+            <button type="button" class="btn btn-primary" id="t-skema-aaben">Vis spørgeskemaet nu</button>
+            <button type="button" class="btn" id="t-skema-luk" hidden>Luk skemaet</button>
+          </div>
+        </div>
+
+        <div class="tal-raekke" id="t-tal"></div>
+
+        <div class="panel">
+          <h2>Hvor er spillerne?</h2>
+          <p class="lille" style="margin-top:-6px;">Opdateres hvert 10. sekund. <span class="prik groen"></span> spiller nu · <span class="prik gul"></span> for lidt siden · <span class="prik ude"></span> ikke inde. Sted og mission opdateres, når spillet gemmer (et par sekunder efter, man går ind et nyt sted).</p>
+          <div class="sp-gitter" id="t-spillere"></div>
+        </div>
+
+        <div class="panel" id="t-svar-boks">
+          <h2>Svar fra eleverne</h2>
+          <div id="t-svar"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Én konto -->
     <div id="detalje" hidden>
       <a href="#" class="tilbage" id="tilbage">&larr; Alle konti</a>
@@ -336,7 +398,7 @@
   var alle = [], spilnavne = {};
 
   function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
-  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'skemaer', 'opret'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'skemaer', 'opret', 'test'].forEach(function (x) { $(x).hidden = x !== id; }); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -369,10 +431,11 @@
     else if (location.hash === '#nyhedsbrev') visNyhed();
     else if (location.hash === '#velkomst') visVelkomst();
     else if (location.hash === '#spoergeskema') visSkemaer();
+    else if (/^#test/.test(location.hash)) visTest((location.hash.match(/^#test=(\d+)/) || [])[1]);
     else if (location.hash === '#ny-konto') visOpret();
     else visOverblik();
   }
-  window.addEventListener('hashchange', rute);
+  window.addEventListener('hashchange', function () { if (!/^#test=/.test(location.hash)) stopTestTimer(); rute(); });
   document.querySelectorAll('.tilbage').forEach(function (a) {
     a.addEventListener('click', function (e) { e.preventDefault(); location.hash = ''; });
   });
@@ -838,6 +901,148 @@
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     a.download = 'spoergeskema-svar.csv';
     a.click();
+  });
+
+
+  // --- skoletest ------------------------------------------------------------
+  var testId = 0, testTimer = null;
+  var TEST_SPIL = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
+
+  function stopTestTimer() { if (testTimer) { clearInterval(testTimer); testTimer = null; } }
+
+  function visTest(id) {
+    stopTestTimer();
+    vis('test');
+    testId = +id || 0;
+    $('t-start').hidden = !!testId;
+    $('t-runde').hidden = !testId;
+    if (!testId) return visTestListe();
+    hentTest();
+    testTimer = setInterval(function () { if (document.visibilityState === 'visible') hentTest(); }, 10000);
+  }
+
+  function visTestListe() {
+    LF.hent('test', 'liste').then(function (d) {
+      var h = '<thead><tr><th>Runde</th><th class="t">Spillere</th><th class="t">Oprettet</th><th class="t">Svar</th><th></th></tr></thead><tbody>';
+      d.runder.forEach(function (r) {
+        h += '<tr><td><a href="#test=' + r.id + '"><strong>' + LF.esc(r.navn) + '</strong></a></td><td class="t">' + r.spillere + '</td>'
+          + '<td class="t">' + LF.dato(r.oprettet) + '</td><td class="t">' + r.svar + '</td>'
+          + '<td class="t"><a class="btn btn-sm" href="#test=' + r.id + '">Åbn</a></td></tr>';
+      });
+      if (!d.runder.length) h += '<tr><td colspan="5" class="tom">Ingen testrunder endnu. Opret den første herover.</td></tr>';
+      $('t-liste').innerHTML = h + '</tbody>';
+    }).catch(function (err) { $('t-liste').innerHTML = '<tbody><tr><td class="tom">' + LF.esc(err.message) + '</td></tr></tbody>'; });
+  }
+
+  $('t-ny').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button[type=submit]');
+    LF.travl(knap, true);
+    LF.send('test', 'opret', { navn: $('t-navn').value.trim(), antal: +$('t-antal').value })
+      .then(function (d) { LF.travl(knap, false); location.hash = '#test=' + d.id; })
+      .catch(function (err) { LF.besked($('t-ny-besked'), err.message, 'fejl'); LF.travl(knap, false); });
+  });
+
+  function hentTest() {
+    var id = testId;
+    LF.hent('test', 'status', { id: id }).then(function (d) {
+      if (id !== testId) return;
+      tegnTest(d);
+      if (d.runde.svar) hentSvar(id);
+      else $('t-svar').innerHTML = '<p class="tom" style="margin:0;">Ingen svar endnu. Tryk på <strong>Vis spørgeskemaet nu</strong>, når eleverne er færdige med at spille.</p>';
+    }).catch(function (err) {
+      if (id !== testId) return;
+      $('t-opdateret').textContent = err.message;
+    });
+  }
+
+  function minutter(sek) { return sek >= 30 ? Math.round(sek / 60) + ' min' : (sek > 0 ? '< 1 min' : '–'); }
+
+  function tegnTest(d) {
+    var r = d.runde, s = d.sum;
+    $('t-titel').textContent = r.navn;
+    $('t-opdateret').textContent = 'Opdateret ' + new Date(d.nu * 1000).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    $('t-kort').href = '/login-kort?konto=' + r.id + '&g=' + r.gruppe;
+    $('t-csv').href = '/api/test.php?handling=csv&id=' + r.id;
+
+    var svaret = d.spillere.filter(function (p) { return p.svaret; }).length;
+    var aaben = !!r.skema_aaben;
+    $('t-skema-aaben').hidden = aaben;
+    $('t-skema-luk').hidden = !aaben;
+    $('t-skema-aaben').textContent = r.skemaer ? 'Vis spørgeskemaet igen' : 'Vis spørgeskemaet nu';
+    $('t-skema-tekst').innerHTML = aaben
+      ? '<strong>Skemaet er åbent.</strong> ' + svaret + ' af ' + s.spillere + ' spillere har svaret (' + s.inde + ' er inde nu). Det dukker op på skærmen hos dem, der er logget ind, inden for ca. 10 sekunder.'
+      : (r.skemaer ? 'Skemaet er lukket. Der er ' + r.svar + ' svar i alt.' : 'Seks hurtige spørgsmål med store knapper. Når du trykker, kommer de som et vindue oven på spillet hos alle, der er logget ind.');
+    $('t-skema').classList.toggle('aaben', aaben);
+
+    var spilTal = Object.keys(d.spil).map(function (k) { return d.spil[k] + ': ' + s.pr_spil[k]; }).join(' · ');
+    var harSpillet = d.spillere.filter(function (p) { return p.sek > 0; });
+    var snit = harSpillet.length ? harSpillet.reduce(function (a, p) { return a + p.sek; }, 0) / harSpillet.length : 0;
+    $('t-tal').innerHTML = [
+      [s.inde + ' / ' + s.spillere, 'Er inde nu', '<div class="lille" style="margin-top:4px;">' + LF.esc(spilTal) + '</div>'],
+      [harSpillet.length, 'Har spillet'],
+      [minutter(snit), 'Gns. spilletid'],
+      [svaret, 'Har svaret på skemaet']
+    ].map(kort).join('');
+
+    // Dem, der er inde, øverst — så ser man hurtigt, hvem der sidder fast
+    var rang = { groen: 0, gul: 1, ude: 2 };
+    var sorteret = d.spillere.slice().sort(function (a, b) { return rang[a.status] - rang[b.status] || a.nr - b.nr; });
+    $('t-spillere').innerHTML = sorteret.map(function (p) { return spillerKort(p, d); }).join('');
+  }
+
+  function spillerKort(p, d) {
+    var nu = p.spil_nu ? '<span class="sp-nu spil-' + p.spil_nu + '">' + LF.esc(TEST_SPIL[p.spil_nu]) + '</span>' : '';
+    var titel = p.status === 'groen' ? 'Spiller nu' : p.status === 'gul' ? 'Var inde for lidt siden' : 'Ikke inde';
+    var h = '<div class="spiller ' + p.status + '"><div class="sp-top"><span class="prik ' + p.status + '" title="' + titel + '"></span>'
+      + '<strong>' + LF.esc(p.navn) + '</strong><span class="sp-ikon" aria-hidden="true">' + LF.esc(p.ikon) + '</span>' + nu + '</div>';
+    var nogen = false;
+    Object.keys(d.spil).forEach(function (sp) {
+      var g = p.spil[sp];
+      if (!g) return;
+      nogen = true;
+      var pct = g.faerdig ? 100 : (g.ialt ? Math.round(g.lavet / g.ialt * 100) : 0);
+      h += '<div class="sp-spil spil-' + sp + (p.spil_nu === sp ? ' nu' : '') + '"><div class="sp-linje"><b>' + LF.esc(d.spil[sp]) + '</b><span>' + (g.faerdig ? '★ Gennemført' : 'Kapitel ' + g.kapitel + ' af ' + d.kapitler) + '</span></div>'
+        + '<div class="sp-spor" title="' + g.lavet + ' af ' + g.ialt + ' hovedmissioner i kapitlet"><i style="width:' + pct + '%"></i></div>'
+        + (g.sted ? '<div class="sp-sted">📍 ' + LF.esc(g.sted) + '</div>' : '')
+        + (g.mission && !g.faerdig ? '<div class="sp-mission">🎯 ' + LF.esc(g.mission) + (g.maal ? '<span>' + LF.esc(g.maal) + '</span>' : '') + '</div>' : '')
+        + '<div class="sp-lille">' + minutter(g.sek) + ' · ' + g.ekstra + ' ekstra · gemt ' + LF.dato(g.opdateret) + '</div></div>';
+    });
+    if (!nogen) h += '<p class="sp-tom">' + (p.status !== 'ude' ? 'Er logget ind — har ikke gemt noget endnu.' : 'Har ikke været inde endnu.') + '<br><span class="sp-kode">' + LF.esc(p.kode) + '</span></p>';
+    h += '<div class="sp-fod"><span>' + (p.sidst ? 'Sidst ' + LF.dato(p.sidst) : '') + '</span>' + (p.svaret ? '<span class="sp-svaret">✓ har svaret</span>' : '') + '</div></div>';
+    return h;
+  }
+
+  function hentSvar(id) {
+    LF.hent('test', 'resultater', { id: id }).then(function (d) {
+      if (id !== testId) return;
+      $('t-svar').innerHTML = '<p class="lille" style="margin-top:-6px;">' + d.svar + ' svar</p>' + d.spoergsmaal.map(function (q) {
+        var maks = Math.max.apply(null, q.valg.map(function (v) { return v.antal; }).concat([1]));
+        return '<div class="sv-sp"><h3>' + LF.esc(q.tekst) + '</h3>' + q.valg.map(function (v) {
+          return '<div class="sv-raekke"><span class="sv-navn">' + LF.esc(v.emoji) + ' ' + LF.esc(v.tekst) + '</span><span class="sv-spor"><i style="width:' + Math.round(v.antal / maks * 100) + '%"></i></span><span class="sv-tal">' + v.antal + '</span></div>';
+        }).join('') + '</div>';
+      }).join('');
+    }).catch(function () { /* næste opdatering prøver igen */ });
+  }
+
+  $('t-skema-aaben').addEventListener('click', function () {
+    var knap = this;
+    if (!confirm('Vise spørgeskemaet på skærmen hos alle spillere, der er logget ind nu?')) return;
+    LF.travl(knap, true);
+    LF.send('test', 'skema_aaben', { id: testId }).then(function () { LF.travl(knap, false); hentTest(); },
+      function (err) { alert(err.message); LF.travl(knap, false); });
+  });
+  $('t-skema-luk').addEventListener('click', function () {
+    LF.send('test', 'skema_luk', { id: testId }).then(hentTest, function (err) { alert(err.message); });
+  });
+  $('t-flere').addEventListener('click', function () {
+    var n = parseInt(prompt('Hvor mange spillere skal der lægges til?', '5'), 10);
+    if (!n) return;
+    LF.send('test', 'flere', { id: testId, antal: n }).then(hentTest, function (err) { alert(err.message); });
+  });
+  $('t-slet').addEventListener('click', function () {
+    if (!confirm('Slet hele testrunden, alle spillerne, deres gemte spil og svarene?\n\nHent svarene som CSV først, hvis du vil beholde dem.')) return;
+    LF.send('test', 'slet', { id: testId }).then(function () { location.hash = '#test'; }, function (err) { alert(err.message); });
   });
 
   // --- én konto -------------------------------------------------------------

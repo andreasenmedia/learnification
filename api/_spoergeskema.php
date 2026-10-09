@@ -22,7 +22,7 @@ const SKEMA_MAKS_FEJL = 3;
 /** Hvem der kan få skemaet: aldrig administratoren eller spærrede konti. */
 function skema_kan_sendes(array $k): bool
 {
-    return $k['type'] !== 'admin' && $k['status'] !== 'spaerret'
+    return $k['type'] !== 'admin' && empty($k['test']) && $k['status'] !== 'spaerret'
         && $k['skema_sendt'] === null && (int) $k['skema_fejl'] < SKEMA_MAKS_FEJL;
 }
 
@@ -118,7 +118,7 @@ function skema_genforsoeg(): int
 {
     $sendt = 0;
     foreach (alle("SELECT * FROM konti WHERE skema_sendt IS NULL AND skema_fejl > 0 AND skema_fejl < ?
-                   AND type != 'admin' AND status != 'spaerret'", [SKEMA_MAKS_FEJL]) as $k) {
+                   AND type != 'admin' AND test = 0 AND status != 'spaerret'", [SKEMA_MAKS_FEJL]) as $k) {
         // Find et barn (eller den voksne), der er færdig, så vi kender årsagen
         $elev = alle('SELECT e.id FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?', [$k['id']]);
         foreach ($elev as $e) {

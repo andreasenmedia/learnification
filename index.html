@@ -18,7 +18,7 @@
 <link rel="alternate" type="application/rss+xml" title="Nyt fra Learnification" href="/nyheder.xml">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
-<link rel="stylesheet" href="/assets/style.css?v=6">
+<link rel="stylesheet" href="/assets/style.css?v=7">
 <link rel="stylesheet" href="/assets/nyhedsbrev.css?v=2">
 <script type="application/ld+json">
 [
@@ -92,7 +92,7 @@
 
 <!-- ============ HERO ============ -->
 <header class="hero-scene">
-  <img class="scene" src="assets/billeder/runeborg-by-bred.png" width="792" height="198" alt="Runeborg: torvet i en hyggelig 8-bit fantasyby med huse, markedsboder og byens folk." fetchpriority="high">
+  <video class="scene" poster="assets/billeder/runeborg-by-bred.png" width="1280" height="720" muted playsinline preload="metadata" aria-label="Optagelse fra Runeborg: man går rundt i byen, læser opslag og tolker data." data-klip="assets/video/runeborg-2-by.mp4 assets/video/runeborg-3-laesning.mp4 assets/video/runeborg-4-data.mp4"></video>
   <div class="shade"></div>
   <div class="mission" aria-hidden="true">
     <p class="eyebrow">Mission</p>
@@ -151,7 +151,7 @@
 <section class="dark">
   <div class="wrap">
     <div class="game-card">
-      <div class="pic"><img src="assets/billeder/runeborg-opgave.png" width="1280" height="800" alt="Skærmbillede: en opgave med et søjlediagram over grønhed i tre vandprøver og spørgsmålet 'Hvor var vandet mest grønt?'" loading="lazy"></div>
+      <div class="pic"><video poster="assets/billeder/runeborg-opgave.png" width="1280" height="720" muted playsinline preload="none" aria-label="Optagelse fra Runeborg: man går rundt i byen og løser opgaver." data-klip="assets/video/runeborg-2-by.mp4 assets/video/runeborg-4-data.mp4"></video></div>
       <div class="body">
         <p class="eyebrow">Læsning, naturfag og matematik for 5.-9. klasse</p>
         <h2>Runeborg</h2>
@@ -172,7 +172,7 @@
 <section class="dark" style="padding-top:0;">
   <div class="wrap">
     <div class="game-card">
-      <div class="pic"><img src="assets/billeder/regnehelten-opgave.png" width="1024" height="640" alt="Skærmbillede fra Regnehelten: Far har skrevet prisskilte i supermarkedet og spørger, hvilke af dem der giver 24." loading="lazy"></div>
+      <div class="pic"><video poster="assets/billeder/regnehelten-opgave.png" width="1280" height="720" muted playsinline preload="none" aria-label="Optagelse fra Regnehelten: en skoledag med regneopgaver undervejs." data-klip="assets/video/regnehelten-2-skolegaard.mp4 assets/video/regnehelten-3-opgave.mp4"></video></div>
       <div class="body">
         <p class="eyebrow">Matematik for 1.-6. klasse</p>
         <h2>Regnehelten</h2>
@@ -271,19 +271,19 @@
     <div class="cards">
 <!-- SENESTE-NYT:START -->
 <article class="card nyhed-kort">
+  <p class="nyhed-meta"><time datetime="2026-10-09">9. oktober 2026</time><span class="maerke maerke-voksne">Til voksne</span></p>
+  <h3><a href="/nyheder#skoletest">Test med en hel klasse — uden at oprette noget</a></h3>
+  <p>Når vi tester spillene sammen med en klasse, kan hver elev være Spiller 1, 2, 3 … og logge ind med en kode. Til sidst kommer et kort spørgeskema med store knapper.</p>
+</article>
+<article class="card nyhed-kort">
+  <p class="nyhed-meta"><time datetime="2026-10-09">9. oktober 2026</time><span class="maerke maerke-siden">Siden</span></p>
+  <h3><a href="/nyheder#gameplay-og-adgangskode">Gameplay på forsiden og nemmere at få en ny adgangskode</a></h3>
+  <p>Forsiden og spiloversigten viser nu optagelser fra spillene i bevægelse. Har du glemt din adgangskode, er det blevet lettere at få en ny.</p>
+</article>
+<article class="card nyhed-kort">
   <p class="nyhed-meta"><time datetime="2026-10-08">8. oktober 2026</time><span class="maerke maerke-siden">Siden</span></p>
   <h3><a href="/nyheder#siden-som-spillene">Siden ligner nu spillene</a></h3>
   <p>learnification.dk har fået samme udseende som Runeborg og Regnehelten — med spillenes gule farve, pixelkanter og den samme letlæselige skrift.</p>
-</article>
-<article class="card nyhed-kort">
-  <p class="nyhed-meta"><time datetime="2026-10-07">7. oktober 2026</time><span class="maerke maerke-spil">Spil</span></p>
-  <h3><a href="/nyheder#laesevenlig-skrift">Lettere at læse i begge spil</a></h3>
-  <p>Overskrifter, knapper og tal i Runeborg og Regnehelten står nu i samme letlæselige skrift som resten af teksten — så et 5-tal ikke længere ligner et S.</p>
-</article>
-<article class="card nyhed-kort">
-  <p class="nyhed-meta"><time datetime="2026-10-06">6. oktober 2026</time><span class="maerke maerke-spil">Spil</span></p>
-  <h3><a href="/nyheder#tryk-paa-skaermen">Nemmere at spille på tablet og mobil</a></h3>
-  <p>I Runeborg og Regnehelten kan man nu trykke hvor som helst på skærmen for at gå videre i en samtale — og trykke direkte på den person eller ting, man vil tale med.</p>
 </article>
 <!-- SENESTE-NYT:SLUT -->
     </div>
@@ -357,6 +357,7 @@
 </footer>
 
 <script src="assets/script.js?v=4" defer></script>
+<script src="assets/gameplay.js?v=1" defer></script>
 <script src="/assets/nyhedsbrev.js?v=2" defer></script>
 <script src="/assets/samtykke.js?v=2" defer></script>
 <script src="/assets/besoeg.js?v=2" defer></script>

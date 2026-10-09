@@ -36,6 +36,7 @@ DirectoryIndex index.html
   AddType image/svg+xml .svg
   AddType application/javascript .js .mjs
   AddType font/woff2 .woff2
+  AddType video/mp4 .mp4
 </IfModule>
 
 # Spilmapperne /spil/runeborg/ og /spil/regnehelten/ er almindelige filer:
@@ -103,6 +104,7 @@ ErrorDocument 404 /404.html
   ExpiresByType text/css                "access plus 30 days"
   ExpiresByType application/javascript  "access plus 30 days"
   ExpiresByType image/png               "access plus 30 days"
+  ExpiresByType video/mp4               "access plus 30 days"
   ExpiresByType image/svg+xml           "access plus 30 days"
   # Skrifterne i assets/skrifter bliver aldrig rettet, kun skiftet ud
   ExpiresByType font/woff2              "access plus 1 year"

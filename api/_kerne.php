@@ -444,6 +444,31 @@ function opret_tabeller(PDO $pdo): void
             )$slut",
             'CREATE INDEX spoergeskemaer_konto ON spoergeskemaer (konto_id)',
         ],
+        // Testrunder (api/test.php): en testkonto til en skole, hvor eleverne hedder
+        // Spiller 1, 2, 3 …. test = 1 holder dem ude af mails og de almindelige tal.
+        // testskema = et skema, admin har vist på elevernes skærme; testsvar = et barns svar
+        10 => [
+            'ALTER TABLE konti ADD COLUMN test INTEGER NOT NULL DEFAULT 0',
+            "CREATE TABLE testskema (
+                id $id,
+                konto_id INTEGER NOT NULL,
+                aabnet INTEGER NOT NULL,
+                lukket INTEGER,
+                FOREIGN KEY (konto_id) REFERENCES konti(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE INDEX testskema_konto ON testskema (konto_id)',
+            "CREATE TABLE testsvar (
+                id $id,
+                testskema_id INTEGER NOT NULL,
+                elev_id INTEGER NOT NULL,
+                spil $tekst NOT NULL,
+                svar TEXT NOT NULL,
+                tid INTEGER NOT NULL,
+                FOREIGN KEY (testskema_id) REFERENCES testskema(id) ON DELETE CASCADE,
+                FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE UNIQUE INDEX testsvar_en ON testsvar (testskema_id, elev_id)',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
@@ -569,6 +594,13 @@ function log_ind(int $konto_id, ?int $elev_id, int $levetid): void
     // så Runeborg kan gemme hvert barns eventyr for sig på en delt computer.
     // Den giver ikke adgang til noget — det gør kun lf_session.
     saet_cookie('lf_in', $elev_id ? 'elev.' . $elev_id : 'voksen.' . $konto_id, $udloeber, false);
+    // Børn på en testrunde (api/test.php) får spørgeskemaet på skærmen — assets/elevskema.js
+    // kigger kun efter det, når den her cookie står. Giver heller ikke adgang til noget.
+    if ($elev_id && vaerdi('SELECT test FROM konti WHERE id = ?', [$konto_id])) {
+        saet_cookie('lf_test', '1', $udloeber, false);
+    } else {
+        saet_cookie('lf_test', '', time() - 3600, false);
+    }
     if (random_int(1, 10) === 1) {
         kør('DELETE FROM logins WHERE udloeber < ?', [time()]);
     }
@@ -582,6 +614,7 @@ function log_ud(): void
     }
     saet_cookie('lf_session', '', time() - 3600, true);
     saet_cookie('lf_in', '', time() - 3600, false);
+    saet_cookie('lf_test', '', time() - 3600, false);
     // Logger barnet ud, går den parkerede voksne med — ellers ville den
     // næste ved computeren kunne trykke sig ind på kontoen
     $parkeret = (string) ($_COOKIE['lf_voksen'] ?? '');
@@ -947,9 +980,16 @@ function gemt_status(string $spil, string $data, int $opdateret): ?array
             ? 'Regnekraft ' . (int) ($d['kraft'] ?? 0) . ' % · ' . count($klaret) . ' af ' . KAPITLER . ' kapitler klaret · ' . $ekstra . ' ekstramissioner'
             : count($klaret) . ' af ' . KAPITLER . ' kapitler klaret · ' . $ekstra . ' ekstramissioner · '
                 . count((array) ($d['runes'] ?? [])) . ' runestykker · ' . (int) ($d['gold'] ?? 0) . ' guld';
+        // Hvor spilleren er lige nu — spillet lægger det i det gemte (hudInfo() i game.js)
+        $hud = is_array($d['hud'] ?? null) ? $d['hud'] : [];
+        $kort = fn($x, int $n) => function_exists('mb_substr') ? mb_substr((string) $x, 0, $n, 'UTF-8') : substr((string) $x, 0, $n);
         return ['faerdig' => $faerdig, 'kapitel' => $kap, 'opdateret' => $opdateret,
                 'tekst' => $faerdig ? 'Gennemført' : 'Kapitel ' . $kap . ' af ' . KAPITLER,
-                'detalje' => $detalje];
+                'detalje' => $detalje,
+                'sted' => $kort($hud['sted'] ?? '', 40), 'mission' => $kort($hud['mission'] ?? '', 80),
+                'maal' => $kort($hud['maal'] ?? '', 120),
+                'lavet' => (int) ($hud['lavet'] ?? 0), 'ialt' => (int) ($hud['ialt'] ?? 0),
+                'klaret' => count($klaret), 'ekstra' => $ekstra];
     }
     if ($spil === 'regnehelten' && (int) ($d['v'] ?? 0) === 2) {
         // Udgaven bygget som Runeborg (spil/regnehelten/js/game.js, fresh())

@@ -6,7 +6,23 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Thu, 08 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 09 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Test med en hel klasse — uden at oprette noget</title>
+      <link>https://learnification.dk/nyheder#skoletest</link>
+      <guid isPermaLink="false">learnification-nyhed-skoletest</guid>
+      <pubDate>Fri, 09 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Til test på skoler kan eleverne nu få et nummer i stedet for et navn og logge ind med en kode fra et kort — ingen mail, ingen konto og ingen navne. Vi kan under testen se, hvor langt hver enkelt er, så vi kan hjælpe dem, der sidder fast.</p><p>Når klassen er færdig med at spille, kan vi vise seks korte spørgsmål oven på spillet: hvor sjovt det var, om opgaverne var tilpas, om man forstod dem, og om man vil spille igen. Man svarer med ét tryk pr. spørgsmål, og det er helt uden fritekst. Svarene gemmes kun under nummeret. Læs mere under <a href="https://learnification.dk/for-voksne#data">data og privatliv</a>.</p>]]></description>
+    </item>
+    <item>
+      <title>Gameplay på forsiden og nemmere at få en ny adgangskode</title>
+      <link>https://learnification.dk/nyheder#gameplay-og-adgangskode</link>
+      <guid isPermaLink="false">learnification-nyhed-gameplay-og-adgangskode</guid>
+      <pubDate>Fri, 09 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Siden</category>
+      <description><![CDATA[<p>På forsiden og på siden, hvor man vælger spil, kører der nu små optagelser fra Runeborg og Regnehelten, så man kan se, hvordan det er at spille, før man går i gang. De har ingen lyd, og de standser, når man scroller forbi. Har du slået <em>reducer bevægelse</em> til på din enhed, står der et almindeligt billede i stedet.</p><p>Har du glemt din adgangskode, står der nu en tydelig knap på login-siden, og mailen med linket er blevet pænere. Og når du opretter en konto, kan du sætte kryds i, at du gerne vil have nyhedsbrevet — det er stadig frivilligt, og du bekræfter på mail.</p>]]></description>
+    </item>
     <item>
       <title>Siden ligner nu spillene</title>
       <link>https://learnification.dk/nyheder#siden-som-spillene</link>
