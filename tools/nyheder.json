@@ -2,6 +2,16 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "skarpere-video",
+      "dato": "2026-10-09",
+      "maerke": "Siden",
+      "titel": "Skarpere optagelser på forsiden",
+      "kort": "Optagelserne fra Runeborg og Regnehelten på forsiden og i spiloversigten er nu i fuld HD, så pixelkunsten står knivskarpt.",
+      "tekst": [
+        "Videoerne på forsiden var før lidt slørede, især på store skærme. De er nu optaget i fuld HD og vises i samme skarphed, som spillet har, når man spiller det. Det betyder lidt mere at hente første gang, men stadig uden lyd, og de standser, når man scroller forbi."
+      ]
+    },
+    {
       "id": "klassetrin-og-navne",
       "dato": "2026-10-09",
       "maerke": "Spil",
