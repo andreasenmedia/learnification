@@ -54,7 +54,10 @@ if ($h === 'mig') {
         $e = $x['elev'];
         $ud['hvem'] = 'elev';
         $ud['elev'] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
-                       'gruppe' => $e['gruppe'], 'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin'] : null];
+                       'gruppe' => $e['gruppe'],
+                       // Barnets eget svar, ellers klassens. null = ingen ved det endnu, så spillene spørger.
+                       'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin']
+                           : ($e['gruppe_klassetrin'] !== null ? (int) $e['gruppe_klassetrin'] : null)];
         // Barnet skal ikke se de voksnes mailadresse
         unset($ud['konto']['email'], $ud['konto']['kontakt']);
         // Gik den voksne selv ind som barnet, kan den voksne komme tilbage
@@ -150,6 +153,19 @@ case 'login':
 case 'logud':
     log_ud();
     svar(['ok' => true]);
+
+case 'saet_klassetrin':
+    kraev_egen_side();
+    $x = hvem();
+    if (!$x || !$x['elev']) {
+        fejl('Det er kun for børn, der er logget ind.', 401);
+    }
+    $t = input()['klassetrin'] ?? null;
+    if (!is_numeric($t) || (int) $t < 0 || (int) $t > 9) {
+        fejl('Vælg et klassetrin.');
+    }
+    kør('UPDATE elever SET klassetrin = ? WHERE id = ?', [(int) $t, $x['elev']['id']]);
+    svar(['ok' => true, 'klassetrin' => (int) $t]);
 
 case 'tilbage':
     $p = parkeret_voksen();

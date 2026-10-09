@@ -5,6 +5,12 @@
 .konto-side { padding: 48px 0 84px; }
 .konto-side .wrap { max-width: 1040px; }
 .smal { max-width: 560px; margin: 0 auto; }
+/* /login: kontoen til venstre, børnenes kode til højre (under hinanden på smalle skærme) */
+.smal.login-ramme { max-width: 1000px; }
+.login-kolonner { display: grid; gap: 22px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+.login-kolonner > .panel { margin-top: 0; }
+.login-kolonner:has(#elev[hidden]) { grid-template-columns: minmax(0, 560px); justify-content: center; }
+@media (max-width: 860px) { .login-kolonner, .login-kolonner:has(#elev[hidden]) { grid-template-columns: minmax(0, 560px); justify-content: center; } }
 
 .panel {
   background: var(--paper-card);
@@ -351,6 +357,8 @@ details.foldud[open] summary { margin-bottom: 12px; }
 
 .kode-raekke .kode-felt input { font-size: 1.3rem; padding: 12px; }
 .kode-raekke .btn { min-height: 54px; }
+.navn-ind { font: inherit; padding: 4px 8px; width: 11em; max-width: 100%; border: 2px solid var(--ink); background: #fff; }
+.navne-bar { margin: 12px 0 0; align-items: center; }
 .admin-form { margin-top: 0; }
 .admin-form .felt-raekke { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 

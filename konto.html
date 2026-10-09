@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=7">
-<link rel="stylesheet" href="/assets/konto.css?v=12">
+<link rel="stylesheet" href="/assets/konto.css?v=13">
 </head>
 <body>
 
@@ -278,6 +278,7 @@
         + '<div class="gruppe-hoved"><h3>' + titel + '</h3></div>'
         + '<p class="knapper lille ingen-print" style="margin:-4px 0 16px;gap:6px 18px;">'
         + '<a href="/login-kort?g=' + g.id + '">Udskriv login-kort</a>'
+        + (g.elever.length ? '<button type="button" class="link-knap" data-ret-navne>Ret alle navne</button>' : '')
         + (skole || admin ? '<button type="button" class="link-knap" data-ret-gruppe>Omdøb</button>'
           + '<button type="button" class="link-knap fare" data-slet-gruppe>Slet klassen</button>' : '')
         + '</p>';
@@ -296,7 +297,9 @@
             + '<button type="button" class="link-knap" data-ny-elevkode>Ny kode</button>'
             + '<button type="button" class="link-knap fare" data-slet-elev>Slet</button></td></tr>';
         });
-        html += '</tbody></table></div>';
+        html += '</tbody></table></div>'
+          + '<p class="knapper ingen-print navne-bar" hidden><button type="button" class="btn btn-sm btn-primary" data-gem-navne>Gem navnene</button>'
+          + '<button type="button" class="link-knap" data-fortryd-navne>Fortryd</button> <span class="lille besked-navne"></span></p>';
       } else {
         html += '<p class="tom">Ingen ' + (skole ? 'elever' : 'børn') + ' endnu.</p>';
       }
@@ -357,6 +360,23 @@
     } else if (e.target.matches('[data-slet-gruppe]')) {
       if (confirm('Slet ' + g.navn + ' og alle ' + g.elever.length + ' elever i klassen?\n\nSpilletiden bliver stående i tallene, men uden navne.'))
         LF.send('klasse', 'slet_gruppe', { id: gid }).then(hent, fejl);
+    } else if (e.target.matches('[data-ret-navne]')) {
+      // Navnene bliver til felter, så hele klassen kan rettes i ét hug — Tab går videre til den næste
+      sek.querySelectorAll('tr[data-elev]').forEach(function (tr) {
+        var el = g.elever.filter(function (x) { return x.id === +tr.dataset.elev; })[0];
+        tr.firstChild.innerHTML = '<span class="ikon" aria-hidden="true">' + LF.esc(el.ikon) + '</span>'
+          + '<input class="navn-ind" maxlength="30" aria-label="Navn til ' + LF.esc(el.kaldenavn) + '" value="' + LF.esc(el.kaldenavn) + '">';
+      });
+      sek.querySelector('.navne-bar').hidden = false;
+      var foerste = sek.querySelector('.navn-ind'); if (foerste) { foerste.focus(); foerste.select(); }
+    } else if (e.target.matches('[data-fortryd-navne]')) {
+      hent();
+    } else if (e.target.matches('[data-gem-navne]')) {
+      var navne = [].map.call(sek.querySelectorAll('tr[data-elev]'), function (tr) {
+        return { id: +tr.dataset.elev, kaldenavn: tr.querySelector('.navn-ind').value.trim() };
+      });
+      LF.travl(e.target, true);
+      LF.send('klasse', 'ret_navne', { gruppe: gid, navne: navne }).then(hent, function (err) { LF.travl(e.target, false); alert(err.message); });
     } else if (e.target.matches('[data-ret-elev]')) {
       var n = prompt('Nyt navn til ' + elev.kaldenavn + ':', elev.kaldenavn);
       if (n && n.trim()) LF.send('klasse', 'ret_elev', { id: eid, kaldenavn: n.trim(), ikon: elev.ikon }).then(hent, fejl);

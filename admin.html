@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=7">
-<link rel="stylesheet" href="/assets/konto.css?v=12">
+<link rel="stylesheet" href="/assets/konto.css?v=13">
 </head>
 <body>
 
@@ -285,11 +285,28 @@
           <div><p class="eyebrow" style="margin-bottom:6px;">Testrunde · <a href="#test">alle runder</a></p><h1 id="t-titel"></h1><p class="lille" id="t-opdateret"></p></div>
           <div class="knapper">
             <a class="btn btn-sm" id="t-kort" target="_blank" rel="noopener">Udskriv koder</a>
+            <button type="button" class="btn btn-sm btn-primary" id="t-rigtig-knap">Gør til rigtig konto</button>
             <button type="button" class="btn btn-sm" id="t-flere">+ Flere spillere</button>
             <a class="btn btn-sm" id="t-csv">Hent svar (CSV)</a>
             <button type="button" class="btn btn-sm" id="t-slet">Slet runden</button>
           </div>
         </div>
+
+        <form class="panel admin-form" id="t-rigtig" hidden novalidate>
+          <h2>Gør testen til en rigtig skolekonto</h2>
+          <p class="lille" style="margin-top:-6px;">Spillerne, deres koder og det, de har nået, bliver stående. Den ansvarlige får en mail med et link til at vælge sin adgangskode og kan bagefter rette navnene (Spiller 1, 2 …) under Min konto. Kontoen får den almindelige prøvetid.</p>
+          <p class="besked" id="t-rigtig-besked"></p>
+          <div class="felt-raekke">
+            <div class="felt"><label for="t-r-skole">Skolens navn</label><input id="t-r-skole" maxlength="120" required></div>
+            <div class="felt"><label for="t-r-kontakt">Den ansvarlige <span>— navn</span></label><input id="t-r-kontakt" maxlength="120" autocomplete="off" required></div>
+          </div>
+          <div class="felt-raekke">
+            <div class="felt"><label for="t-r-email">Mailadresse</label><input id="t-r-email" type="email" maxlength="190" autocomplete="off" required></div>
+            <div class="felt"><label for="t-r-klasse">Klassens navn <span>— valgfrit, fx 5.B</span></label><input id="t-r-klasse" maxlength="60"></div>
+          </div>
+          <div class="knapper"><button class="btn btn-primary" type="submit">Gør til rigtig konto og send invitation</button>
+            <button type="button" class="link-knap" id="t-r-fortryd">Fortryd</button></div>
+        </form>
 
         <div class="panel skema-styring" id="t-skema">
           <div>
@@ -905,7 +922,7 @@
 
 
   // --- skoletest ------------------------------------------------------------
-  var testId = 0, testTimer = null;
+  var testId = 0, testTimer = null, testNavn = '';
   var TEST_SPIL = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
 
   function stopTestTimer() { if (testTimer) { clearInterval(testTimer); testTimer = null; } }
@@ -960,6 +977,7 @@
 
   function tegnTest(d) {
     var r = d.runde, s = d.sum;
+    testNavn = r.navn;
     $('t-titel').textContent = r.navn;
     $('t-opdateret').textContent = 'Opdateret ' + new Date(d.nu * 1000).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     $('t-kort').href = '/login-kort?konto=' + r.id + '&g=' + r.gruppe;
@@ -995,7 +1013,8 @@
     var nu = p.spil_nu ? '<span class="sp-nu spil-' + p.spil_nu + '">' + LF.esc(TEST_SPIL[p.spil_nu]) + '</span>' : '';
     var titel = p.status === 'groen' ? 'Spiller nu' : p.status === 'gul' ? 'Var inde for lidt siden' : 'Ikke inde';
     var h = '<div class="spiller ' + p.status + '"><div class="sp-top"><span class="prik ' + p.status + '" title="' + titel + '"></span>'
-      + '<strong>' + LF.esc(p.navn) + '</strong><span class="sp-ikon" aria-hidden="true">' + LF.esc(p.ikon) + '</span>' + nu + '</div>';
+      + '<strong>' + LF.esc(p.navn) + '</strong><span class="sp-ikon" aria-hidden="true">' + LF.esc(p.ikon) + '</span>'
+      + (p.klassetrin !== null ? '<span class="lille" title="Klassetrin, barnet selv har valgt">' + p.klassetrin + '. kl.</span>' : '') + nu + '</div>';
     var nogen = false;
     Object.keys(d.spil).forEach(function (sp) {
       var g = p.spil[sp];
@@ -1034,6 +1053,27 @@
   });
   $('t-skema-luk').addEventListener('click', function () {
     LF.send('test', 'skema_luk', { id: testId }).then(hentTest, function (err) { alert(err.message); });
+  });
+  $('t-rigtig-knap').addEventListener('click', function () {
+    $('t-rigtig').hidden = false;
+    if (!$('t-r-skole').value) $('t-r-skole').value = (testNavn || '').replace(/^Test:\s*/, '').replace(/\s+\d+\/\d+$/, '');
+    $('t-r-skole').focus();
+    $('t-rigtig').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+  $('t-r-fortryd').addEventListener('click', function () { $('t-rigtig').hidden = true; });
+  $('t-rigtig').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var knap = this.querySelector('button[type=submit]');
+    LF.travl(knap, true);
+    LF.send('test', 'goer_rigtig', { id: testId, navn: $('t-r-skole').value.trim(), kontakt: $('t-r-kontakt').value.trim(),
+      email: $('t-r-email').value.trim(), klasse: $('t-r-klasse').value.trim() })
+      .then(function (d) {
+        stopTestTimer();
+        alert(d.mail ? 'Kontoen er oprettet, og invitationen er sendt til ' + $('t-r-email').value.trim() + '.'
+          : 'Kontoen er oprettet, men mailen kunne ikke sendes (' + (d.fejl || 'ukendt fejl') + ').\n\nSend dem dette link selv (virker i 7 dage):\n' + d.link);
+        location.hash = '#konto=' + d.id;
+      })
+      .catch(function (err) { LF.besked($('t-rigtig-besked'), err.message, 'fejl'); LF.travl(knap, false); });
   });
   $('t-flere').addEventListener('click', function () {
     var n = parseInt(prompt('Hvor mange spillere skal der lægges til?', '5'), 10);

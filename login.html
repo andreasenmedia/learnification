@@ -11,7 +11,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=7">
-<link rel="stylesheet" href="/assets/konto.css?v=12">
+<link rel="stylesheet" href="/assets/konto.css?v=13">
 </head>
 <body>
 
@@ -46,10 +46,10 @@
 
 <main class="konto-side">
   <div class="wrap">
-    <div class="smal">
+    <div class="smal login-ramme">
 
       <!-- Allerede logget ind -->
-      <div class="panel guld" id="inde" hidden>
+      <div class="panel guld smal" id="inde" hidden>
         <div class="hej"><span class="ikon" id="inde-ikon" aria-hidden="true"></span><h2 id="inde-titel"></h2></div>
         <div id="inde-elev" hidden>
           <p>Hvad vil du spille?</p>
@@ -69,6 +69,7 @@
         <p class="eyebrow midt">Learnification er til test</p>
         <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Log ind</h1>
 
+        <div class="login-kolonner">
         <!-- Kontoen: mail og adgangskode -->
         <div class="panel" id="voksen">
           <form id="login-form" novalidate>
@@ -129,6 +130,7 @@
               <button class="btn btn-primary" type="submit">Log ind med kode</button>
             </div>
           </form>
+        </div>
         </div>
       </div>
 

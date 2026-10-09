@@ -154,6 +154,42 @@ case 'ret_elev':
     kør('UPDATE elever SET kaldenavn = ?, ikon = ? WHERE id = ?', [$navn, $ikon, $e['id']]);
     svar(['ok' => true]);
 
+case 'ret_navne':
+    // Alle navnene i en klasse på én gang: {gruppe, navne: [{id, kaldenavn}]}
+    $g = min_gruppe($kid, tal('gruppe'));
+    $nye = [];
+    foreach ((array) (input()['navne'] ?? []) as $x) {
+        $x = (array) $x;
+        $n = trim(preg_replace('/[\x00-\x1F\x7F]/u', '', (string) ($x['kaldenavn'] ?? '')) ?? '');
+        $n = function_exists('mb_substr') ? mb_substr($n, 0, 30, 'UTF-8') : substr($n, 0, 30);
+        $e = min_elev($kid, (int) ($x['id'] ?? 0));
+        if ((int) $e['gruppe_id'] !== (int) $g['id']) {
+            fejl('Den elev hører ikke til klassen.');
+        }
+        if ($n === '') {
+            fejl('Et navn må ikke være tomt.');
+        }
+        $nye[(int) $e['id']] = $n;
+    }
+    // Navnene skal være forskellige — også mod dem, der ikke bliver rettet
+    $alle_navne = $nye;
+    foreach (alle('SELECT id, kaldenavn FROM elever WHERE gruppe_id = ?', [$g['id']]) as $e) {
+        if (!isset($alle_navne[(int) $e['id']])) {
+            $alle_navne[(int) $e['id']] = $e['kaldenavn'];
+        }
+    }
+    $set = array_map('lille', $alle_navne);
+    if (count(array_unique($set)) < count($set)) {
+        $dub = array_keys(array_filter(array_count_values($set), fn($c) => $c > 1));
+        fejl('Der er to, der hedder det samme (' . implode(', ', array_map(fn($d) => ucfirst($d), $dub)) . '). Skriv fx et forbogstav bagefter.');
+    }
+    db()->beginTransaction();
+    foreach ($nye as $id => $n) {
+        kør('UPDATE elever SET kaldenavn = ? WHERE id = ?', [$n, $id]);
+    }
+    db()->commit();
+    svar(['ok' => true, 'rettet' => count($nye)]);
+
 case 'ny_elevkode':
     // Er barnets kode sluppet ud, får det en ny, og det bliver logget ud
     $e = min_elev($kid, tal('id'));

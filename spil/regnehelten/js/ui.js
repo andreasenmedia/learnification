@@ -12,6 +12,12 @@
   var RH = window.RH = window.RH || {};
   var layer, open = 0;
 
+  // Barnets eget klassetrin (assets/klassetrin.js), holdt inden for Regneheltens 1.-6. klasse
+  function startKlasse() {
+    var k = window.LF_KLASSETRIN;
+    if (k === undefined || k === null) k = window.LF_SPILLER && LF_SPILLER.elev ? LF_SPILLER.elev.klassetrin : null;
+    return k === undefined || k === null ? 0 : Math.max(1, Math.min(6, k | 0));
+  }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function btn(cls, html) { var b = el('button', cls, html); b.type = 'button'; return b; }
@@ -329,7 +335,7 @@
         c.appendChild(name);
         c.appendChild(el('p', 'tiny', 'Dit fornavn eller et kælenavn. Det bliver kun i spillet.'));
         c.appendChild(el('h3', null, 'Hvilken klasse går du i?'));
-        var kl = el('div', 'klasser'), klasse = (pre && pre.klasse) || O.STANDARD_KLASSE;
+        var kl = el('div', 'klasser'), klasse = (pre && pre.klasse) || startKlasse() || O.STANDARD_KLASSE;
         var maal = el('p', 'tiny maal');
         O.KLASSER.forEach(function (k) {
           var b = btn('kl', k + '.');

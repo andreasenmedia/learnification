@@ -160,7 +160,7 @@
   }
 
   function tjek() {
-    if (aabent || document.hidden || Date.now() < udsat) return;
+    if (aabent || window.LF_MODAL || document.hidden || Date.now() < udsat) return;
     fetch('/api/test.php?handling=skema_aktuel', { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (d) { if (d && d.ok && d.skema && !aabent) vis(d.skema); })

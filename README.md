@@ -402,6 +402,16 @@ antal spillere. Der oprettes en almindelig skolekonto med `konti.test = 1` og fr
 - Testrunder holdes ude af /admins almindelige tal, velkomstmail, påmindelse og skema-mail (`test = 0`
   i forespørgslerne). Slet runden, når testen er slut (sletter også svarene).
 - DB-version 10 (`test`, `testskema`, `testsvar`).
+- **Testrunde → rigtig konto:** "Gør til rigtig konto" (`goer_rigtig` i `api/test.php`) sætter skole, ansvarlig og mail,
+  slår `test`/fri adgang fra og sender et link til at vælge adgangskode (7 dage). Eleverne, koderne og de gemte spil bliver stående.
+  Den ansvarlige kan bagefter rette navnene under /konto → "Ret alle navne" (`ret_navne` i `api/klasse.php`).
+
+## Klassetrin
+
+`assets/klassetrin.js` (på /spil/ og i begge spil) spørger børn uden klassetrin "Hvilket klassetrin går du i?" (0.-9.) én gang.
+Gemmes i `elever.klassetrin` (DB v11) via `konto.php?handling=saet_klassetrin`; har klassen et klassetrin, bruges det og der spørges ikke.
+`mig` giver `elev.klassetrin` (null = spørg). Regnehelten bruger det som startklasse (1-6) i oprettelsesskærmen, /spil/ som "Passer til din klasse",
+og passer det ikke til spillet (Runeborg 5-9, Regnehelten 1-6) får barnet en venlig besked. Runeborg har ingen niveauer — det er stadig ét sæt opgaver.
 
 ## Resultater fra testomgangene
 

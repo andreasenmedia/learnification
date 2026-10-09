@@ -469,6 +469,10 @@ function opret_tabeller(PDO $pdo): void
             )$slut",
             'CREATE UNIQUE INDEX testsvar_en ON testsvar (testskema_id, elev_id)',
         ],
+        // Barnets eget klassetrin (0-9), spurgt inden første spil (assets/klassetrin.js). Har klassen et, bruges det.
+        11 => [
+            'ALTER TABLE elever ADD COLUMN klassetrin INTEGER',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
@@ -685,7 +689,7 @@ function hvem(): ?array
     }
     $elev = null;
     if ($l['elev_id'] !== null) {
-        $elev = en('SELECT e.*, g.navn AS gruppe, g.kode, g.klassetrin FROM elever e
+        $elev = en('SELECT e.*, g.navn AS gruppe, g.kode, g.klassetrin AS gruppe_klassetrin FROM elever e
                     JOIN grupper g ON g.id = e.gruppe_id WHERE e.id = ?', [$l['elev_id']]);
         if (!$elev) {
             return null;

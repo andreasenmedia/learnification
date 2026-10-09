@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "klassetrin-og-navne",
+      "dato": "2026-10-09",
+      "maerke": "Spil",
+      "titel": "Spillet spørger, hvilket klassetrin man går i",
+      "kort": "Første gang et barn logger ind, spørger spillet om klassetrin, så Regnehelten starter på det rigtige niveau. Læreren kan nu også rette alle elevernes navne på én gang.",
+      "tekst": [
+        "Inden barnet kommer ind, spørger spillet nu: <strong>Hvilket klassetrin går du i?</strong> Det spørger kun én gang. Svaret bruges til at vælge det rigtige startniveau i Regnehelten og til at vise, hvilket spil der passer bedst. Passer klassetrinnet ikke til spillet (Runeborg er til 5.-9. klasse, Regnehelten til 1.-6.), får barnet besked og kan selv vælge, om det vil prøve alligevel.",
+        "Som lærer eller forælder kan du under <em>Min konto</em> trykke <strong>Ret alle navne</strong> og skrive hele klassens navne i ét hug. Det er især praktisk, hvis klassen har startet som Spiller 1, 2, 3 … til en test. På login-siden står koden til børnene nu til højre for den almindelige login, så de ikke skal lede efter den."
+      ]
+    },
+    {
       "id": "skoletest",
       "dato": "2026-10-09",
       "maerke": "Til voksne",

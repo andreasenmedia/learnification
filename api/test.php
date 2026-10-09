@@ -11,6 +11,8 @@
  *   POST skema_luk {id}                luk det igen
  *   GET  ?handling=resultater&id=      svarene talt op pr. spørgsmål
  *   GET  ?handling=csv&id=             svarene som CSV til Excel
+ *   POST goer_rigtig {id, navn, kontakt, email, bynavn?, klasse?}
+ *                                      gør runden til en rigtig skolekonto og send invitation
  *   POST slet {id}                     slet runden og alt, der hører til
  *
  * Barnet (assets/elevskema.js, kun på en testrunde):
@@ -250,7 +252,7 @@ case 'status':
             $sum['pr_spil'][$spil_nu]++;
         }
         $ud[] = ['id' => $id, 'nr' => spiller_nr($e['kaldenavn']), 'navn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
-                 'kode' => $e['kode'], 'status' => $stat, 'sidst' => $sidst ?: null, 'spil_nu' => $spil_nu,
+                 'kode' => $e['kode'], 'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin'] : null, 'status' => $stat, 'sidst' => $sidst ?: null, 'spil_nu' => $spil_nu,
                  'sek' => array_sum($sek[$id] ?? []), 'spil' => $spil, 'svaret' => isset($svaret[$id])];
     }
     svar(['ok' => true, 'runde' => runde_ud($k), 'spillere' => $ud, 'sum' => $sum,
@@ -275,9 +277,10 @@ case 'csv':
     $k = runde(tal('id'));
     $rader = alle('SELECT t.*, s.aabnet FROM testsvar t JOIN testskema s ON s.id = t.testskema_id
                    WHERE s.konto_id = ? ORDER BY t.tid', [$k['id']]);
-    $navne = [];
+    $navne = $trin = [];
     foreach (spillere((int) $k['id']) as $e) {
         $navne[(int) $e['id']] = $e['kaldenavn'];
+        $trin[(int) $e['id']] = $e['klassetrin'];
     }
     if ($h === 'resultater') {
         $tael = [];
@@ -307,13 +310,13 @@ case 'csv':
     foreach (alle('SELECT elev_id, spil, SUM(sekunder) AS s FROM sessioner WHERE konto_id = ? AND elev_id IS NOT NULL GROUP BY elev_id, spil', [$k['id']]) as $r) {
         $sek[(int) $r['elev_id']][$r['spil']] = (int) $r['s'];
     }
-    $linjer = [array_merge(['Spiller', 'Spil da de svarede', 'Kapitel i det spil', 'Minutter i det spil', 'Svaret kl.'],
+    $linjer = [array_merge(['Spiller', 'Klassetrin', 'Spil da de svarede', 'Kapitel i det spil', 'Minutter i det spil', 'Svaret kl.'],
                            array_map(fn($q) => $q[0], array_values(ELEV_SKEMA)))];
     foreach ($rader as $r) {
         $svar_ = (array) json_decode($r['svar'], true);
         $eid = (int) $r['elev_id'];
         $g = $gemt[$eid][$r['spil']] ?? null;
-        $l = [$navne[$eid] ?? '?', SPIL[$r['spil']] ?? 'Spiloversigten', $g ? ($g['kapitel'] ?? '') : '',
+        $l = [$navne[$eid] ?? '?', ($trin[$eid] ?? '') === '' || $trin[$eid] === null ? '' : $trin[$eid] . '.', SPIL[$r['spil']] ?? 'Spiloversigten', $g ? ($g['kapitel'] ?? '') : '',
               isset($sek[$eid][$r['spil']]) ? round($sek[$eid][$r['spil']] / 60) : '', date('H:i', (int) $r['tid'])];
         foreach (ELEV_SKEMA as $noegle => [$tekst, $valg]) {
             $l[] = isset($svar_[$noegle], $valg[$svar_[$noegle]]) ? $valg[$svar_[$noegle]][1] : '';
@@ -335,6 +338,49 @@ case 'csv':
         }, $l)), "\r\n";
     }
     exit;
+
+case 'goer_rigtig':
+    kraev_egen_side();
+    $k = runde(tal('id'));
+    $f = tjek_kontofelter(['type' => 'skole', 'navn' => felt('navn', 120), 'kontakt' => felt('kontakt', 120),
+                           'bynavn' => felt('bynavn', 80), 'email' => felt('email', 190)], (int) $k['id']);
+    $klasse = felt('klasse', 60);
+    $nu = time();
+    db()->beginTransaction();
+    try {
+        // Eleverne, deres koder og gemte spil bliver stående. Kontoen får den almindelige
+        // prøvetid, og velkomst og påmindelse springes over — invitationen er velkomsten.
+        kør("UPDATE konti SET type = 'skole', navn = ?, kontakt = ?, bynavn = ?, email = ?, status = 'godkendt',
+             test = 0, fri_adgang = 0, velkomst_sendt = ?, paamindelse_sendt = ? WHERE id = ?",
+            [$f['navn'], $f['kontakt'], $f['bynavn'], $f['email'], $nu, $nu, $k['id']]);
+        if ($klasse !== '') {
+            kør('UPDATE grupper SET navn = ? WHERE konto_id = ?', [$klasse, $k['id']]);
+        }
+        kør('UPDATE testskema SET lukket = ? WHERE konto_id = ? AND lukket IS NULL', [$nu, $k['id']]);
+        db()->commit();
+    } catch (Throwable $e) {
+        db()->rollBack();
+        throw $e;
+    }
+    require_once __DIR__ . '/_nyhedsbrev.php';
+    $link = nulstil_link((int) $k['id'], 7 * 86400);
+    $hej = 'Hej ' . $f['kontakt'];
+    $tekst = "$hej\n\n"
+        . "Jeres test på Learnification er nu en rigtig konto til {$f['navn']}. Eleverne beholder deres koder og det, de har nået i spillene.\n\n"
+        . "Klik her for at vælge din adgangskode — linket virker i 7 dage:\n\n$link\n\n"
+        . 'Bagefter logger du ind på ' . adresse() . "/login med {$f['email']}. Under Min konto kan du rette elevernes navne, udskrive login-kort og se, hvor langt de er nået.\n"
+        . "Er linket udløbet, så tryk på \"Glemt adgangskode\" på login-siden.\n\n"
+        . "Venlig hilsen\nLearnification\n";
+    $e = fn(string $x) => htmlspecialchars($x, ENT_QUOTES, 'UTF-8');
+    $html = mail_ramme('Din konto på Learnification',
+        '<p style="margin:0 0 16px;">' . $e($hej) . ',</p>'
+        . '<p style="margin:0 0 16px;">Jeres test på Learnification er nu en rigtig konto til <strong>' . $e($f['navn']) . '</strong>. Eleverne beholder deres koder og det, de har nået i spillene.</p>'
+        . '<p style="margin:0 0 20px;"><a href="' . $e($link) . '" style="display:inline-block;background:#ffcc4d;color:#140f1c;font-weight:700;text-decoration:none;'
+        . 'padding:12px 22px;border:3px solid #b8862a;border-radius:0;">Vælg din adgangskode</a></p>'
+        . '<p style="margin:0 0 16px;color:#6b5d4d;">Linket virker i 7 dage. Bagefter logger du ind med ' . $e($f['email']) . '. Under <em>Min konto</em> kan du rette elevernes navne, udskrive login-kort og se, hvor langt de er nået.</p>',
+        'Du får denne mail, fordi Learnification har oprettet en konto til dig og din skole.');
+    $sendt = send_mail($f['email'], 'Din konto på Learnification', $tekst, $html, ['Reply-To' => MODTAGER]);
+    svar(['ok' => true, 'id' => (int) $k['id'], 'mail' => $sendt, 'fejl' => $sendt ? '' : post_fejl(), 'link' => $sendt ? '' : $link]);
 
 case 'slet':
     kraev_egen_side();
