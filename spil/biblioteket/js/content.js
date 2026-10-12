@@ -25,6 +25,7 @@
   var npcs = {
     brynja: { name: 'Brynja Jernskæg, bibliotekar', look: { hair: '#c8502a', beard: true, beardColor: '#c8502a', hat: 'helmet', hatColor: '#c0a040', accent: '#ffe070', cloth: '#3a5aa8', skin: '#f0b890' }, pos: at('hal', 19, 7, 'down') },
     mira: { name: 'Mira, lærling', look: { hair: '#2a1a1a', cloth: '#5a8a4a', skin: '#8a5a3a' }, pos: at('hal', 14, 13, 'right') },
+    mis: { name: 'Mis, kat', cat: true, pos: function (S) { return S.seen && S.seen.mis ? { map: 'hal', x: 21, y: 8, dir: 'down' } : null; } },
     bygge: { name: 'Sigrid, byggeleder', look: { hair: '#e8d8a8', cloth: '#d8a028', hat: 'helmet', hatColor: '#e8c030', accent: '#fff3a0', skin: '#e0a878' }, pos: at('hal', 21, 5, 'left') }
   };
 
@@ -58,6 +59,10 @@
           return;
         case 'mira':
           await g.say('mira', g.seen('mira') ? 'Jeg har aldrig set Runeborgs port stå åben, men den lukker alle ind, der vil læse og tænke sig om!' : 'Hej! Jeg læser om Runeborg, før jeg går ind. Runeporten er den lysende mod nord.');
+          return;
+        case 'mis':
+          if (!g.seen('misHilst')) { await g.say(null, 'Mis løfter hovedet og kigger på dig med sine grønne øjne.'); await g.say('brynja', 'Hun dukkede op ved min skranke, lige efter du havde fundet hende i Runeborg. Hun kan åbenbart godt lide at læse med.'); }
+          await g.say(null, ['«Mjav.»', 'Mis maver sig sammen og begynder at spinde.', 'Mis slikker sin pote og kigger på de store bøger.'][(Math.random() * 3) | 0]);
           return;
         case 'bygge':
           await g.say('bygge', 'Pas på bræddedøren! Vi bygger nye spil derinde. Kom tilbage en anden dag, så er der måske en ny port.');

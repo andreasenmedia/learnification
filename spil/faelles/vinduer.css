@@ -131,7 +131,8 @@
 .kort-pin.venstre b, .kort-her.venstre b { left: auto; right: 100%; margin: 0 5px 0 0; }
 .kort-pin:hover i, .kort-pin:focus-visible i { background: #fff3c4; outline: none; }
 .kort-pin:hover, .kort-pin:focus-visible { z-index: 3; }
-.kort-pin.mission i { width: 28px; height: 28px; font-size: 17px; background: #ff9a4a; box-shadow: 0 0 0 3px #ffcc4d; animation: kort-puls 1s steps(2) infinite; }
+.kort-pin.mission i { width: 28px; height: 28px; font-size: 17px; background: #ffcc4d; box-shadow: 0 0 0 3px #fff3c4; animation: kort-puls 1s steps(2) infinite; }
+.kort-pin.mission.ekstra i { background: #9ad0ff; box-shadow: 0 0 0 3px #e3f3ff; }
 .kort-pin.valgt i { background: #9ad0ff; box-shadow: 0 0 0 3px #fff; }
 .kort-her { z-index: 2; pointer-events: none; }
 .kort-her i { background: var(--blue); box-shadow: 0 0 0 2px #fff; animation: kort-puls 1s steps(2) infinite; }

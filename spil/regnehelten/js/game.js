@@ -376,14 +376,13 @@
   // ---------------------------------------------------------------- kamera og tegning
   function snapCam() {
     var m = mapNow();
-    cam.x = clampCam(player.px + 8 - VW / 2, m.w * T - VW);
-    cam.y = clampCam(player.py + 8 - VH / 2, m.h * T - VH);
+    cam.x = player.px + 8 - VW / 2;
+    cam.y = player.py + 8 - VH / 2;
   }
-  function clampCam(v, max) { return max < 0 ? max / 2 : Math.max(0, Math.min(max, v)); }
 
   function render() {
     var m = mapNow(), fr = frames();
-    var tx = clampCam(player.px + 8 - VW / 2, m.w * T - VW), ty = clampCam(player.py + 8 - VH / 2, m.h * T - VH);
+    var tx = player.px + 8 - VW / 2, ty = player.py + 8 - VH / 2;
     cam.x += (tx - cam.x) * 0.25; cam.y += (ty - cam.y) * 0.25;
     var cx = Math.round(cam.x), cy = Math.round(cam.y);
     ctx.fillStyle = '#140f1c'; ctx.fillRect(0, 0, VW, VH);

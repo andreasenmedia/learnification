@@ -35,11 +35,11 @@ const ELEV_SKEMA = [
     'svaerhed' => ['Hvordan var opgaverne?', [
         'for_svaere' => ['😵', 'For svære'], 'tilpas' => ['👍', 'Lige tilpas'], 'for_lette' => ['😴', 'For lette']]],
     'forstod' => ['Forstod du, hvad du skulle?', [
-        'ja' => ['✅', 'Ja'], 'lidt' => ['🤔', 'Lidt'], 'nej' => ['❌', 'Nej']]],
+        'nej' => ['❌', 'Nej'], 'lidt' => ['🤔', 'Lidt'], 'ja' => ['✅', 'Ja']]],
     'laerte' => ['Lærte du noget nyt?', [
-        'ja' => ['💡', 'Ja'], 'maaske' => ['🤷', 'Måske'], 'nej' => ['🙅', 'Nej']]],
+        'nej' => ['🙅', 'Nej'], 'maaske' => ['🤷', 'Måske'], 'ja' => ['💡', 'Ja']]],
     'igen' => ['Vil du gerne spille igen?', [
-        'ja' => ['🎮', 'Ja'], 'maaske' => ['🤷', 'Måske'], 'nej' => ['🚪', 'Nej']]],
+        'nej' => ['🚪', 'Nej'], 'maaske' => ['🤷', 'Måske'], 'ja' => ['🎮', 'Ja']]],
     'bedst' => ['Hvilket spil kan du bedst lide?', [
         'runeborg' => ['🏰', 'Runeborg'], 'regnehelten' => ['🧮', 'Regnehelten'],
         'begge' => ['⭐', 'Begge lige meget'], 'et' => ['1️⃣', 'Har kun prøvet ét']]],

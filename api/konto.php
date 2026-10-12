@@ -49,6 +49,8 @@ if ($h === 'mig') {
     $ud = ['ok' => true, 'logget_ind' => true, 'konto' => konto_ud($x['konto']), 'tid' => tid_status($x)];
     if (!empty($x['konto']['test'])) {
         $ud['test'] = true;   // en testrunde (api/test.php)
+        $ts = (string) ($x['konto']['test_start'] ?? '');
+        $ud['test_start'] = in_array($ts, ['runeborg', 'regnehelten', 'biblioteket'], true) ? $ts : 'biblioteket';
     }
     if ($x['elev']) {
         $e = $x['elev'];

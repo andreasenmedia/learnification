@@ -349,7 +349,7 @@
               if (q.act !== lastAct) { body.appendChild(el('p', 'act-h', esc(q.act))); lastAct = q.act; }
               var st = S.q[q.id] || (K.available(q) ? 'ready' : 'locked');
               if (q.side && st === 'locked') return;
-              var it = el('div', 'qitem ' + (st === 'done' ? 'done' : st === 'active' ? 'active' : st === 'locked' ? 'locked' : ''));
+              var it = el('div', 'qitem' + (q.side ? ' ekstra ' : ' ') + (st === 'done' ? 'done' : st === 'active' ? 'active' : st === 'locked' ? 'locked' : ''));
               it.appendChild(el('span', 'st', st === 'done' ? '✓' : st === 'active' ? '►' : st === 'locked' ? '·' : '!'));
               var inner = el('div');
               inner.appendChild(el('div', null, '<b>' + esc(st === 'locked' ? '???' : q.title) + '</b>' + (q.side ? ' <span class="meta">(ekstramission)</span>' : '')));

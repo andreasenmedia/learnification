@@ -2,6 +2,18 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "runeborg-rettelser",
+      "dato": "2026-10-12",
+      "maerke": "Spil",
+      "titel": "Runeborg: minikort, farvede missioner og Mis i biblioteket",
+      "kort": "Oppe i venstre hjørne ligger nu et lille kort, som åbner det store kort med et tryk. Hovedmissioner er gule, ekstramissioner blå, og pilen ændrer farve med dem.",
+      "tekst": [
+        "Et <strong>minikort</strong> i hjørnet viser, hvor man er, og hvor missionen er. Trykker man på det, åbner det store kort. Figuren står nu altid midt på skærmen, både ude og inde i husene, og det gælder i alle tre spil.",
+        "<strong>Gul betyder hovedmission, blå betyder ekstramission.</strong> Farven går igen i pilen, i udråbstegnene over folk, på kortet og i Dagbogen. Pilen bliver stående over døren, til man er gået ind.",
+        "Når man finder Mis, flytter hun ind i <strong>Eventyrbiblioteket</strong> og sidder ved Brynjas skranke. Knappen <em>Læs spørgsmålet op</em> virker igen, og i brøndens historie er dybden skrevet i meter, og der står, at syv personer er blevet syge. Børnenes spørgeskema står nu fra mindst til mest tilfreds."
+      ]
+    },
+    {
       "id": "kort-og-guide",
       "dato": "2026-10-12",
       "maerke": "Spil",

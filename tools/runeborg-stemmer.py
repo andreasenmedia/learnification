@@ -169,7 +169,7 @@ def lines():
             found.add(('fortaeller', 'Runestykke: ' + unesc(title) + '. ' + unesc(t)))
         for look in re.findall(r"takeSample\(g, '\w+', '[^']*', " + STR + r"\)", content):
             found.add(('fortaeller', 'Du fylder måleglasset. ' + unesc(look)))
-        for q in re.findall(r"q: " + STR, content):
+        for q in re.findall(r"\bq: " + STR, content):
             found.add(('fortaeller', unesc(q)))
     # personer uden egen klang (fx Glød) bliver læst af fortælleren
     return sorted((w if w in PROFIL else 'fortaeller', t) for w, t in found)

@@ -28,7 +28,7 @@
 
   var S = null, world = null, cache = {}, sheets = {}, profil = null;
   var player = { px: 0, py: 0, moving: false, fromX: 0, fromY: 0, t: 0, alt: false };
-  var busy = false, started = false, tick = 0, heldOrder = [];
+  var busy = false, started = false, tick = 0, heldOrder = [], misPop = 0;
   var cam = { x: 0, y: 0 }, particles = [], leaves = [], flies = [], tidSlutFlag = false;
 
   // Skoletest: når en voksen ser med, sender siden skærmbilledet + denne tekst (assets/elevskema.js)
@@ -68,7 +68,7 @@
 
   function sheetFor(id) {
     if (sheets[id]) return sheets[id];
-    sheets[id] = BB.makeSheet(K.npcs[id].look);
+    sheets[id] = K.npcs[id].cat ? BB.makeCat() : BB.makeSheet(K.npcs[id].look);
     return sheets[id];
   }
   function who(id) {
@@ -191,7 +191,7 @@
   }
 
   function update() {
-    tick++;
+    tick++; if (misPop > 0) misPop--;
     if (!started) return;
     var blockedInput = busy || UI.isOpen();
     if (blockedInput) heldOrder = [];
@@ -223,14 +223,13 @@
   // ---------------------------------------------------------------- kamera og tegning
   function snapCam() {
     var m = mapNow();
-    cam.x = clampCam(player.px + 8 - VW / 2, m.w * T - VW);
-    cam.y = clampCam(player.py + 8 - VH / 2, m.h * T - VH);
+    cam.x = player.px + 8 - VW / 2;
+    cam.y = player.py + 8 - VH / 2;
   }
-  function clampCam(v, max) { return max < 0 ? max / 2 : Math.max(0, Math.min(max, v)); }
 
   function render() {
     var m = mapNow(), fr = frames();
-    var tx = clampCam(player.px + 8 - VW / 2, m.w * T - VW), ty = clampCam(player.py + 8 - VH / 2, m.h * T - VH);
+    var tx = player.px + 8 - VW / 2, ty = player.py + 8 - VH / 2;
     cam.x += (tx - cam.x) * 0.25; cam.y += (ty - cam.y) * 0.25;
     var cx = Math.round(cam.x), cy = Math.round(cam.y);
     ctx.fillStyle = '#140f1c'; ctx.fillRect(0, 0, VW, VH);
@@ -240,7 +239,18 @@
 
     // figurer, sorteret efter dybde
     var draw = [];
-    entities().forEach(function (e) { draw.push({ y: e.y * T, fn: function () { drawChar(sheetFor(e.id), e.x * T - cx, e.y * T - cy, e.dir || 'down', 0); } }); });
+    entities().forEach(function (e) {
+      if (K.npcs[e.id].cat) {
+        // Mis dukker op med et lille glimt, første gang man kommer ind efter at have fundet hende
+        draw.push({ y: e.y * T, fn: function () {
+          var x = Math.round(e.x * T - cx), y = Math.round(e.y * T - cy);
+          BB.drawShadow(ctx, x, y); ctx.drawImage(sheetFor(e.id), x, y + 1);
+          if (misPop > 0) { BB.drawSparkle(ctx, x, y - 4, tick, '#ffe070'); BB.drawSparkle(ctx, x + 6, y + 2, tick + 20, '#9ad0ff'); }
+        } });
+        return;
+      }
+      draw.push({ y: e.y * T, fn: function () { drawChar(sheetFor(e.id), e.x * T - cx, e.y * T - cy, e.dir || 'down', 0); } });
+    });
     if (started) draw.push({ y: player.py, fn: function () { drawChar(sheets.player, player.px - cx, player.py - cy, S.dir, player.moving ? (player.t < 0.5 ? (player.alt ? 1 : 2) : 0) : 0); } });
     draw.sort(function (a, b) { return a.y - b.y; });
     draw.forEach(function (d) { d.fn(); });
@@ -661,6 +671,10 @@
     document.getElementById('hud').hidden = false; hud();
     if (document.body.classList.contains('touching')) wake();
     BB.audio.music(mapNow().music);
+    if (S.seen.mis && !S.seen.misPop && !FOTO) {
+      misPop = 240; S.seen.misPop = true; gemProfil();
+      UI.toast('<b>Mis er flyttet ind i biblioteket!</b><br>Hun sidder ved Brynjas skranke.');
+    }
     if (!FOTO) LFPraes.tjek('bib', S);
   }
 

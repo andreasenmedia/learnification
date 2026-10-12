@@ -179,7 +179,7 @@
   var DOC_A = { kind: 'notice', title: 'BEKENDTGØRELSE', lines: [
     'Månebrønden er lukket fra og med den 5. dag i Høstmåneden.',
     'Vandet er blevet grønt og lugter af rådne æg.',
-    'Syv borgere har fået ondt i maven efter at have drukket det.',
+    'Syv borgere er blevet syge efter at have drukket det.',
     'Indtil videre skal drikkevand hentes hos vandsælgeren ved Østporten for 2 kobber pr. spand.'
   ], by: '— Borgmester Aldrik Stenhjelm' };
   var DOC_B = { kind: 'notice', title: 'BELØNNING', lines: ['60 guldstykker til den, der finder ud af, hvorfor vandet i Månebrønden er grønt. Henvend dig i Eventyrerlauget.'] };
@@ -301,16 +301,16 @@
         await g.say('gorm', 'Velkommen på Den Gyldne Drage! Varm suppe og kolde historier. Brønden, siger du? Alle har en mening om brønden. Lyt selv.');
         await g.say('karl', 'Vandet blev grønt i samme uge, som det nye farveri øst for byen åbnede. Det har jeg selv set.');
         await g.say('agnete', 'Heksen Hilde er ond, det kan enhver se. Hun går med sort hat!');
-        await g.say('troels', 'Brønden er 40 alen dyb. Det har min oldefar målt.');
+        await g.say('troels', 'Brønden er 25 meter dyb. Det har min oldefar målt.');
         await g.say('laerke', 'Det er det værste, der nogensinde er sket i Runeborg! Og Baron Grimmark er den flotteste mand i kongeriget.');
-        await g.say('gorm', 'Syv personer har fået ondt i maven. Jeg har selv serveret kamillete for dem alle sammen.');
+        await g.say('gorm', 'Syv personer er blevet syge. Jeg har selv serveret kamillete for dem alle sammen.');
         await g.say('gorm', 'Så. Hvad er sandt, og hvad er bare snak? Det må du selv sortere.');
       }
       if (!await g.task('q2a', { type: 'sort', area: AREA.fakta, q: 'Sortér det, folk sagde på kroen.', help: 'Et fakta-udsagn kan tjekkes: man kan måle, tælle eller se efter. En holdning er en mening — den kan man være enig eller uenig i.',
         cats: ['Fakta — kan tjekkes', 'Holdning — en mening'], items: [
           { t: 'Vandet blev grønt i samme uge, som farveriet åbnede.', c: 0 }, { t: 'Heksen Hilde er ond.', c: 1 },
-          { t: 'Syv personer har fået ondt i maven.', c: 0 }, { t: 'Baron Grimmark er den flotteste mand i kongeriget.', c: 1 },
-          { t: 'Brønden er 40 alen dyb.', c: 0 }, { t: 'Det er det værste, der nogensinde er sket.', c: 1 }
+          { t: 'Syv personer er blevet syge.', c: 0 }, { t: 'Baron Grimmark er den flotteste mand i kongeriget.', c: 1 },
+          { t: 'Brønden er 25 meter dyb.', c: 0 }, { t: 'Det er det værste, der nogensinde er sket.', c: 1 }
         ], explain: 'Læg mærke til: et fakta-udsagn er ikke automatisk sandt. Det betyder bare, at man kan undersøge det.' })) return;
       if (!await g.task('q2b', { type: 'choice', area: AREA.fakta, q: 'Borgmesteren siger: «Det er helt sikkert heksens skyld.» Hvad er det?', opts: [
         { t: 'En påstand, som ingen har bevist', ok: true },
@@ -320,7 +320,7 @@
       if (!await g.task('q2c', { type: 'choice', area: AREA.fakta, q: 'Hvilket udsagn fra kroen er det vigtigste at undersøge nærmere?', opts: [
         { t: 'Vandet blev grønt i samme uge, som farveriet åbnede.', ok: true },
         { t: 'Heksen Hilde er ond.', why: 'Det er en holdning. Den kan man ikke undersøge med beviser.' },
-        { t: 'Brønden er 40 alen dyb.', why: 'Det kan godt tjekkes, men dybden fortæller ikke, hvorfor vandet er blevet grønt.' }
+        { t: 'Brønden er 25 meter dyb.', why: 'Det kan godt tjekkes, men dybden fortæller ikke, hvorfor vandet er blevet grønt.' }
       ], explain: 'Det kan tjekkes — og hvis det passer, er det et spor, der peger mod farveriet.' })) return;
       g.clue('c_farveri'); g.clue('c_rygte'); g.clue('c_hat');
       await g.skill('sandhed');
@@ -822,9 +822,13 @@
     // Hvem skal have et "!" (har en ekstramission til dig) og hvem et "?" (din mission fortsætter her)
     markers: function (S) {
       var m = {};
+      // Gul = hovedmission, blå = ekstramission. '?' gul, 's' blå (?), '!' blå
       quests.forEach(function (q) {
-        if (S.q[q.id] === 'active') { var t = q.target(S); if (t && !m[t]) m[t] = '?'; }
-        else if (!S.q[q.id] && q.side && available(q)) m[q.giver] = '!';
+        if (S.q[q.id] === 'active') { var t = q.target(S); if (t && (!q.side)) m[t] = '?'; }
+      });
+      quests.forEach(function (q) {
+        if (S.q[q.id] === 'active') { var t = q.target(S); if (t && q.side && !m[t]) m[t] = 's'; }
+        else if (!S.q[q.id] && q.side && available(q) && !m[q.giver]) m[q.giver] = '!';
       });
       return m;
     },

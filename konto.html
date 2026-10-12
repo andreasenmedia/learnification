@@ -224,6 +224,8 @@
     var privat = d.konto.type === 'privat';
     $('type-tekst').textContent = skole ? 'Skolekonto' : admin ? 'Administrator' : privat ? 'Min konto' : 'Familiekonto';
     $('konto-navn').textContent = d.konto.navn;
+    // På en testrunde fører "Prøv"-knapperne til det spil, runden er sat til at starte i
+    if (d.test && d.test_start) document.querySelectorAll('a[href="/spil/runeborg/"].btn-sm, a[href="/spil/regnehelten/"].btn-sm').forEach(function (a) { a.href = '/spil/' + d.test_start + '/'; });
     $('konto-info').innerHTML = LF.esc([skole ? d.konto.kontakt : '', d.konto.email, d.konto.bynavn].filter(Boolean).join(' · '));
     document.querySelectorAll('[data-gruppeord]').forEach(function (e) { e.textContent = skole ? 'klasse' : 'familie'; });
     document.querySelectorAll('[data-gruppeord-flertal]').forEach(function (e) { e.textContent = skole ? 'klasser' : 'grupper'; });

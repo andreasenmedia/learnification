@@ -608,7 +608,7 @@
   // ---------------------------------------------------------------- effekter
   RB.drawMarker = function (c, x, y, kind, t) {
     var bob = Math.floor(t / 16) % 2;
-    var col = kind === '!' ? C.y2 : kind === '?' ? '#9ad0ff' : C.wh;
+    var col = kind === '?' ? C.y2 : '#9ad0ff';   // gul = hovedmission, blå = ekstramission
     y -= bob;
     R(c, x + 5, y, 6, 9, C.k);
     R(c, x + 6, y + 1, 4, 7, col);
