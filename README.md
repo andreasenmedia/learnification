@@ -545,6 +545,25 @@ forsiden (mellem `<!-- SENESTE-NYT:START/SLUT -->`), RSS-feedet
 ændringen. Skriv til en voksen, der ikke kender koden: hvad er nyt, og hvad
 betyder det for barnet eller klassen — ikke filnavne eller tekniske detaljer.
 
+## Google og søgemaskiner
+
+- `sitemap.xml` lister de sider, der skal findes. `robots.txt` peger på den
+  og holder `/api/`, `/konto`, `/admin` og `/login-kort` ude.
+- Spilsiderne `/spil/runeborg/` og `/spil/regnehelten/` kræver login, så
+  Google ville kun se låsen. De har `noindex, follow` og står ikke i
+  sitemap'en — det er `/runeborg` og `/regnehelten`, der skal i
+  søgeresultaterne. Det samme gælder `/spil/`, biblioteket, konto- og
+  adminsiderne. Et nyt spil får en offentlig side (som `runeborg.html`) med
+  VideoGame-data, og den side kommer i sitemap'en.
+- Hver offentlig side har `<title>`, `description`, `canonical` og
+  `og:`-tags (billedet bruges, når siden deles på Facebook, LinkedIn og i
+  beskeder). Forsiden har Organization- og WebSite-data med logoet.
+- Ikonerne (`favicon.ico`, `apple-touch-icon.png`, `assets/ikon-192.png`,
+  `assets/logo-512.png`) laves ud fra favicon'et med `python tools/ikoner.py`.
+- Google Search Console: tilmeld siden som domæne-ejendom (TXT-post i DNS
+  hos Simply.com) og send `https://learnification.dk/sitemap.xml` ind dér.
+  Bing Webmaster Tools kan hente det hele fra Search Console.
+
 ## Sådan bliver spillene opdateret
 
 Begge spil ligger direkte i repoet: ret filerne, tæl `?v=` op i spillets
