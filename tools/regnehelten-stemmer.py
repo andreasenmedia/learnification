@@ -6,8 +6,11 @@ Piper-stemme og lægger dem som spil/regnehelten/lyd/<nøgle>.mp3. Hver person
 får sin egen klang: samme stemme, men med lidt forskellig tonehøjde og tempo.
 
 Selve opgaverne bliver lavet på stedet med nye tal hver gang, så dem kan der
-ikke ligge filer til — de læses op af enhedens egen danske stemme, hvis den
-har en.
+ikke ligge hele filer til. I stedet indtaler værktøjet stykkerne: sætningsdelene
+mellem tallene (fundet ved at lave tusindvis af opgaver i en skjult Chrome, se
+tools/regnehelten-ordforraad.html), de enkelte ord og alle tal fra 0 til 99. Spillet
+sætter dem sammen på stedet (js/voice.js), hvis enheden ikke selv har en dansk stemme.
+Stykkerne ligger som lyd/<nøgle>.mp3 og er listet i lyd/brikker.json.
 
 Kun nye eller ændrede replikker bliver indtalt; filer til replikker, der ikke
 findes længere, bliver slettet. Kør den igen efter hver ændring i teksterne:
@@ -34,7 +37,7 @@ STEMME = os.environ.get('RUNEBORG_STEMME') or os.path.join(
 
 # Hver persons klang: (halvtoner op/ned, tempo — over 1 er langsommere)
 PROFIL = {
-    'fortaeller': (0, 1.05), 'player': (4, 1.0),
+    'fortaeller': (0, 1.05), 'player': (4, 1.0), 'brik': (0, 1.05),
     'mor': (3, 1.0), 'ida': (5, 0.95), 'far': (-3, 1.05), 'oskar': (4, 0.95), 'emma': (5, 1.0), 'sofie': (5, 0.95),
     'poulsen': (-2, 1.1), 'kioskmand': (-1, 1.0), 'bibliotekar': (2, 1.1), 'viggo': (5, 0.95), 'hundelufter': (-1, 1.05),
     'pedel': (-4, 1.1), 'sportslaerer': (-2, 0.95), 'nabo': (-3, 1.15), 'ekspedient': (3, 1.0), 'bogorm': (4, 1.05),
@@ -173,6 +176,25 @@ def lines():
     return sorted((w if w in PROFIL else 'fortaeller', t) for w, t in found if clean(t))
 
 
+def ordforraad():
+    """Sætningsstykker og ord, som opgaverne er bygget af (kører tools/regnehelten-ordforraad.html i Chrome)."""
+    import html
+    chrome = os.environ.get('CHROME') or next((p for p in (
+        r'C:\Program Files\Google\Chrome\Application\chrome.exe',
+        r'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe') if os.path.exists(p)), None)
+    if not chrome:
+        sys.exit('Fandt ikke Chrome — sæt CHROME til stien')
+    side = os.path.join(ROD, 'tools', 'regnehelten-ordforraad.html')
+    ud = subprocess.run([chrome, '--headless=new', '--disable-gpu', '--allow-file-access-from-files', '--dump-dom',
+                         'file:///' + side.replace(os.sep, '/')], capture_output=True, timeout=180).stdout.decode('utf-8')
+    m = re.search(r'<pre id="ud">(.*?)</pre>', ud, re.S)
+    if not m:
+        sys.exit('Chrome gav ikke noget ordforråd')
+    j = json.loads(html.unescape(m.group(1)))
+    print(f"{j['spoergsmaal']} forskellige spørgsmål -> {len(j['s'])} stykker og {len(j['o'])} ord")
+    return j
+
+
 def main():
     if not os.path.exists(STEMME):
         sys.exit('Fandt ikke stemmen: ' + STEMME)
@@ -183,6 +205,16 @@ def main():
         c = clean(text)
         if c:
             wanted[fnv(who + '|' + c)] = (who, c)
+    # stykkerne, opgaverne samles af
+    vf = ordforraad()
+    brik = {}
+    stykker = {'s': {}, 'o': {}}
+    for slags, liste in (('s', vf['s']), ('o', vf['o'])):
+        for t in liste:
+            k = fnv('brik|' + clean(t))
+            wanted[k] = ('brik', clean(t))
+            brik[k] = True
+            stykker[slags][t] = k
     have = {f[:-4] for f in os.listdir(UD) if f.endswith('.mp3')}
     todo = [k for k in wanted if k not in have]
     print(f'{len(wanted)} replikker, {len(todo)} skal indtales')
@@ -196,12 +228,22 @@ def main():
             wav = os.path.join(tmp, 'r.wav')
             with wave.open(wav, 'wb') as w:
                 voice.synthesize_wav(text, w, syn_config=SynthesisConfig(length_scale=speed))
-            af = f'asetrate={int(rate * f)},aresample={rate},atempo={1 / f:.4f},loudnorm=I=-17:TP=-2:LRA=9' if semi else 'loudnorm=I=-17:TP=-2:LRA=9'
+            if k in brik:
+                # klip stilheden af begge ender, og læg en lille pause til, så stykkerne glider sammen
+                pause = 0.35 if text[-1:] in '.?!' else 0.15 if text[-1:] in ',:;' else 0.03
+                trim = 'silenceremove=start_periods=1:start_silence=0.02:start_threshold=-45dB'
+                af = f'{trim},areverse,{trim},areverse,loudnorm=I=-17:TP=-2:LRA=9,apad=pad_dur={pause}'
+            elif semi:
+                af = f'asetrate={int(rate * f)},aresample={rate},atempo={1 / f:.4f},loudnorm=I=-17:TP=-2:LRA=9'
+            else:
+                af = 'loudnorm=I=-17:TP=-2:LRA=9'
             subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', wav, '-af', af, '-ac', '1', '-ar', '22050',
                             '-c:a', 'libmp3lame', '-b:a', '40k', os.path.join(UD, k + '.mp3')], check=True)
         print(f'  {n}/{len(todo)} {who}: {text[:60]}', flush=True)
     for k in have - set(wanted):
         os.remove(os.path.join(UD, k + '.mp3'))
+    with open(os.path.join(UD, 'brikker.json'), 'w', encoding='utf-8') as fh:
+        json.dump(stykker, fh, ensure_ascii=False, sort_keys=True)
     with open(os.path.join(UD, 'stemmer.json'), 'w', encoding='utf-8') as fh:
         json.dump({'stemme': 'Piper da_DK-talesyntese-medium', 'keys': sorted(wanted)}, fh)
     print('Færdig:', len(wanted), 'filer i', os.path.relpath(UD, ROD))

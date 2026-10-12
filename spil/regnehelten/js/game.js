@@ -403,6 +403,7 @@
     lighting(m, cx, cy);
     if (m.outdoor) weather();
     if (started && !S.cut) arrow(cx, cy);
+    if (started && !S.cut && tick % 6 === 0) minikort();
   }
 
   function drawChar(sheet, x, y, dir, frame) {
@@ -531,16 +532,22 @@
     }
     return null;
   }
+  // Farven følger missionen: gul = hovedmission, blå = ekstramission (og blå, når man har valgt et sted på kortet)
+  var QCOL = { main: '#ffcc4d', side: '#9ad0ff' };
+  function pilFarve() {
+    if (valgt) return QCOL.side;
+    var mt = K.mainTarget(S);
+    return mt && mt.q && mt.q.side ? QCOL.side : QCOL.main;
+  }
   function arrow(cx, cy) {
     var tp = targetPos(); if (!tp) return;
+    var col = pilFarve();
     var x = tp[0] * T + 8 - cx, y = tp[1] * T + 8 - cy;
     if (x > 8 && x < VW - 8 && y > 8 && y < VH - 8) {
-      // Det valgte sted er i billedet: en lille pil, der hopper over det
-      if (valgt) {
-        var hop = Math.floor(tick / 15) % 2, rx = Math.round(x), ry = Math.round(y);
-        ctx.fillStyle = '#1a1420'; ctx.beginPath(); ctx.moveTo(rx, ry - 6 + hop); ctx.lineTo(rx - 6, ry - 15 + hop); ctx.lineTo(rx + 6, ry - 15 + hop); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = '#9ad0ff'; ctx.beginPath(); ctx.moveTo(rx, ry - 8 + hop); ctx.lineTo(rx - 4, ry - 14 + hop); ctx.lineTo(rx + 4, ry - 14 + hop); ctx.closePath(); ctx.fill();
-      }
+      // Målet er i billedet: en pil, der hopper over det og bliver stående, til man er nået frem
+      var hop = Math.floor(tick / 15) % 2, rx = Math.round(x), ry = Math.round(y);
+      ctx.fillStyle = '#1a1420'; ctx.beginPath(); ctx.moveTo(rx, ry - 6 + hop); ctx.lineTo(rx - 6, ry - 15 + hop); ctx.lineTo(rx + 6, ry - 15 + hop); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(rx, ry - 8 + hop); ctx.lineTo(rx - 4, ry - 14 + hop); ctx.lineTo(rx + 4, ry - 14 + hop); ctx.closePath(); ctx.fill();
       return;
     }
     var ang = Math.atan2(y - VH / 2, x - VW / 2);
@@ -549,16 +556,42 @@
     var pulse = 1 + (Math.floor(tick / 15) % 2);
     ctx.save(); ctx.translate(Math.round(ex), Math.round(ey)); ctx.rotate(ang);
     ctx.fillStyle = '#1a1420'; ctx.beginPath(); ctx.moveTo(7 + pulse, 0); ctx.lineTo(-5, -6); ctx.lineTo(-5, 6); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#9ad0ff'; ctx.beginPath(); ctx.moveTo(5 + pulse, 0); ctx.lineTo(-3, -4); ctx.lineTo(-3, 4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(5 + pulse, 0); ctx.lineTo(-3, -4); ctx.lineTo(-3, 4); ctx.closePath(); ctx.fill();
     ctx.restore();
   }
+
+  // ---------------------------------------------------------------- minikortet (oppe i venstre hjørne)
+  // Området set ovenfra omkring spilleren; et tryk åbner det store kort. Prikkerne: hvid = dig, gul/blå = missionen.
+  var miniEl = document.getElementById('minikort'), miniCtx = miniEl.querySelector('canvas').getContext('2d');
+  miniCtx.imageSmoothingEnabled = false;
+  function minikort() {
+    var R = regionKort(); if (!cache[R.id]) prerender(R);
+    var img = cache[R.id][0], W = 104, tiles = 26, span = tiles * T, c = miniCtx, k = W / span;
+    var her = S.map === R.id ? [S.x, S.y] : doorToward(R.id, S.map) || [S.x, S.y];
+    var cx0 = her[0] * T + 8 - span / 2, cy0 = her[1] * T + 8 - span / 2;
+    c.fillStyle = '#140f1c'; c.fillRect(0, 0, W, W);
+    var sx = Math.max(0, cx0), sy = Math.max(0, cy0), ex = Math.min(img.width, cx0 + span), ey = Math.min(img.height, cy0 + span);
+    if (ex > sx && ey > sy) c.drawImage(img, sx, sy, ex - sx, ey - sy, (sx - cx0) * k, (sy - cy0) * k, (ex - sx) * k, (ey - sy) * k);
+    function prik(tx, ty, col, r) {
+      var x = (tx * T + 8 - cx0) * k, y = (ty * T + 8 - cy0) * k;
+      x = Math.max(r + 1, Math.min(W - r - 1, x)); y = Math.max(r + 1, Math.min(W - r - 1, y));
+      c.fillStyle = '#1a1420'; c.fillRect(Math.round(x - r - 1), Math.round(y - r - 1), 2 * r + 2, 2 * r + 2);
+      c.fillStyle = col; c.fillRect(Math.round(x - r), Math.round(y - r), 2 * r, 2 * r);
+    }
+    var p = valgtPos() || (function () { var mt = K.mainTarget(S); return mt && mt.t ? posOf(mt.t) : null; })();
+    if (p) { var xy = p[0] === R.id ? [p[1], p[2]] : doorToward(R.id, p[0]); if (xy) prik(xy[0], xy[1], pilFarve(), 3); }
+    prik(her[0], her[1], '#ffffff', 3);
+  }
+  miniEl.addEventListener('click', function () { openMap(); });
 
   // ---------------------------------------------------------------- HUD
   function hud() {
     if (!S) return;
     var mt = K.mainTarget(S), kp = K.kapNu(), slut = (S.klaret || []).indexOf(S.kap || 1) >= 0;
     document.getElementById('hud').classList.toggle('cut', !!S.cut);
-    document.querySelector('#hud-quest .hud-label').textContent = valgt ? 'Vej til' : 'Mission';
+    var hq = document.getElementById('hud-quest');
+    hq.classList.toggle('ekstra', !!valgt || !!(mt && mt.q && mt.q.side));
+    document.querySelector('#hud-quest .hud-label').textContent = valgt ? 'Vej til' : mt && mt.q && mt.q.side ? 'Ekstramission' : 'Mission';
     document.getElementById('hud-quest-title').textContent = valgt ? valgt.navn : mt ? mt.q.title : (slut ? kp.efterTitel : '');
     document.getElementById('hud-quest-goal').textContent = valgt ? 'Tryk M for kortet' : mt ? K.goal(mt.q.id) : (slut ? kp.efterMaal : '');
     document.getElementById('hud-kraft').textContent = S.kraft + ' %';
@@ -737,7 +770,7 @@
     var mt = K.mainTarget(S), mp = mt && mt.t ? posOf(mt.t) : null;
     if (mp && set[mp[0]]) {
       var xy = mp[0] === R.id ? [mp[1], mp[2]] : doorToward(R.id, mp[0]);
-      if (xy) pins.push({ navn: mt.q.title, x: xy[0] * T + 8, y: xy[1] * T + 8, art: 'mission', maal: { mission: true } });
+      if (xy) pins.push({ navn: mt.q.title, x: xy[0] * T + 8, y: xy[1] * T + 8, art: 'mission' + (mt.q.side ? ' ekstra' : ''), maal: { mission: true } });
     }
     var her = S.map === R.id ? [S.x, S.y] : doorToward(R.id, S.map);
     if (her) pins.push({ navn: 'Her er du', x: her[0] * T + 8, y: her[1] * T + 8, art: 'her' });

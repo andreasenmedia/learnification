@@ -2,6 +2,18 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "spil-ens-rettelser",
+      "dato": "2026-10-12",
+      "maerke": "Spil",
+      "titel": "Regnehelten og biblioteket får minikort, farvede missioner og oplæsning",
+      "kort": "Minikortet i hjørnet, gule og blå missioner og en pil i missionens farve findes nu i alle spil. Regnehelten kan læse opgaverne op på alle computere.",
+      "tekst": [
+        "Det, der kom i Runeborg, gælder nu i <strong>alle spillene</strong>: et lille minikort i venstre hjørne, som åbner det store kort med et tryk, <strong>gule hovedmissioner</strong>, <strong>blå ekstramissioner</strong> og en pil, der har samme farve som den mission, man er i gang med.",
+        "I Regnehelten kan man nu trykke på <strong>Læs op</strong> ved opgaverne, også på computere uden dansk stemme. Opgaverne er nye hver gang, så de bliver sat sammen af små, indtalte stykker.",
+        "På en testrunde fører alle knapper med spillenes navne nu til det spil, runden er sat til at starte i."
+      ]
+    },
+    {
       "id": "biblioteket-foerst",
       "dato": "2026-10-12",
       "maerke": "Siden",

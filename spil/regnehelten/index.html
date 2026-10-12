@@ -14,7 +14,7 @@
 <link rel="canonical" href="https://learnification.dk/spil/regnehelten/">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/runeborg.css?v=1">
-<link rel="stylesheet" href="regnehelten.css?v=5">
+<link rel="stylesheet" href="regnehelten.css?v=6">
 <link rel="stylesheet" href="/spil/faelles/figur.css?v=1">
 <link rel="stylesheet" href="/spil/faelles/vinduer.css?v=19">
 </head>
@@ -26,6 +26,7 @@
 
     <!-- HUD: missionen øverst til venstre, Regnekraft og tasken øverst til højre -->
     <div id="hud" hidden>
+      <button id="minikort" type="button" title="Åbn kortet (M)" aria-label="Åbn kortet"><canvas width="104" height="104" aria-hidden="true"></canvas></button>
       <div id="hud-quest"><span class="hud-label">Mission</span><span id="hud-quest-title"></span><span id="hud-quest-goal"></span></div>
       <div id="hud-right">
         <span class="hud-chip" title="Regnekraft — vokser, når du regner"><i class="ico ico-kraft"></i><span class="kraft-meter"><i id="hud-kraft-bar"></i></span><b id="hud-kraft">10 %</b></span>
@@ -82,20 +83,20 @@ LFSpil.start({ spil: 'regnehelten', kraevLogin: KRAEV_LOGIN, aktiv: false,
 <script src="/spil/faelles/editor.js?v=2"></script>
 <script src="/spil/faelles/kort.js?v=3"></script>
 <script src="/spil/faelles/guide.js?v=1"></script>
-<script src="js/art.js?v=3"></script>
+<script src="js/art.js?v=4"></script>
 <script src="js/audio.js?v=3"></script>
 <script src="js/world.js?v=3"></script>
-<script src="js/voice.js?v=2"></script>
+<script src="js/voice.js?v=3"></script>
 <script src="js/opgaver.js?v=3"></script>
 <script src="js/opgaver-kapitler.js?v=2"></script>
-<script src="js/ui.js?v=11"></script>
+<script src="js/ui.js?v=12"></script>
 <script src="js/praes.js?v=1"></script>
-<script src="js/content.js?v=3"></script>
+<script src="js/content.js?v=4"></script>
 <script src="js/kapitel2.js?v=2"></script>
 <script src="js/kapitel3.js?v=2"></script>
 <script src="js/gem.js?v=3"></script>
 <script src="js/resultat.js?v=3"></script>
-<script src="js/game.js?v=9"></script>
+<script src="js/game.js?v=10"></script>
 <script src="/assets/besoeg.js?v=2" defer></script>
 <script>
 // Første tryk eller tast i spillet tæller som "startet Regnehelten" i statistikken

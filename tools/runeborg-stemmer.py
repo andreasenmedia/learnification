@@ -158,8 +158,10 @@ def lines():
         for m in re.finditer(r"(?:rumor|hypo)\('\w+', '(\w+)', " + STR + r"\)", content):
             found.add((m.group(1), unesc(m.group(2))))
         # stationerne i kapitel 2: station(g, 'flag', 'nøgle', 'navn', 'indledning', ...)
-        for m in re.finditer(r"station\(g, '\w+', '\w+', '[^']*', " + STR, content):
-            found.add(('fortaeller', unesc(m.group(1))))
+        for m in re.finditer(r"station\(g, '\w+', '\w+', '([^']*)', " + STR, content):
+            found.add(('fortaeller', unesc(m.group(2))))
+            # opgavens spørgsmål samles af stationens navn (kapitel2.js, station())
+            found.add(('fortaeller', 'Du skriver i feltbogen ved ' + unesc(m.group(1)) + '. Hvad er en iagttagelse (det, du ser eller tæller) — og hvad er en forklaring (det, du tror)?'))
         if 'var lockedDoors' in content:
             block = content[content.index('var lockedDoors'):]
             block = block[:block.index('};')]

@@ -262,6 +262,7 @@
     lighting(m, cx, cy);
     if (m.outdoor) weather(cx, cy);
     arrow(cx, cy);
+    if (started && tick % 6 === 0) minikort();
   }
 
   // Pil i kanten af skærmen, der viser vej til det sted, man har trykket på på kortet (M)
@@ -472,6 +473,28 @@
     });
     return { titel: 'Kort: Eventyrbiblioteket', flade: flade, pins: pins, steder: steder, personer: personer, mission: null, valgt: valgt ? valgt.navn : '' };
   }
+  // Minikortet oppe i venstre hjørne: hallen set ovenfra omkring spilleren; et tryk åbner det store kort
+  var miniEl = document.getElementById('minikort'), miniCtx = miniEl.querySelector('canvas').getContext('2d');
+  miniCtx.imageSmoothingEnabled = false;
+  function minikort() {
+    var R = world.hal; if (!cache[R.id]) prerender(R);
+    var img = cache[R.id][0], W = 104, span = 26 * T, c = miniCtx, k = W / span;
+    var her = S.map === R.id ? [S.x, S.y] : doorToward(R.id, S.map) || [S.x, S.y];
+    var cx0 = her[0] * T + 8 - span / 2, cy0 = her[1] * T + 8 - span / 2;
+    c.fillStyle = '#140f1c'; c.fillRect(0, 0, W, W);
+    var sx = Math.max(0, cx0), sy = Math.max(0, cy0), ex = Math.min(img.width, cx0 + span), ey = Math.min(img.height, cy0 + span);
+    if (ex > sx && ey > sy) c.drawImage(img, sx, sy, ex - sx, ey - sy, (sx - cx0) * k, (sy - cy0) * k, (ex - sx) * k, (ey - sy) * k);
+    function prik(tx, ty, col, r) {
+      var x = (tx * T + 8 - cx0) * k, y = (ty * T + 8 - cy0) * k;
+      x = Math.max(r + 1, Math.min(W - r - 1, x)); y = Math.max(r + 1, Math.min(W - r - 1, y));
+      c.fillStyle = '#1a1420'; c.fillRect(Math.round(x - r - 1), Math.round(y - r - 1), 2 * r + 2, 2 * r + 2);
+      c.fillStyle = col; c.fillRect(Math.round(x - r), Math.round(y - r), 2 * r, 2 * r);
+    }
+    var p = valgtPos();
+    if (p) { var xy = p[0] === R.id ? [p[1], p[2]] : doorToward(R.id, p[0]); if (xy) prik(xy[0], xy[1], '#9ad0ff', 3); }
+    prik(her[0], her[1], '#ffffff', 3);
+  }
+  miniEl.addEventListener('click', function () { openMap(); });
   async function visKort() {
     var v = await UI.kort(kortData());
     if (!v || !v.maal) return;

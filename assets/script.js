@@ -40,6 +40,11 @@ function loginIMenuen() {
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (!d.logget_ind) return;
+      // På en testrunde fører alle knapper til spillene til det spil, runden er sat til at starte i
+      if (d.test && d.test_start) {
+        var spilknapper = document.querySelectorAll('a[href="/spil/runeborg/"], a[href="/spil/regnehelten/"]');
+        for (var s = 0; s < spilknapper.length; s++) spilknapper[s].href = '/spil/' + d.test_start + '/';
+      }
       var links = document.querySelectorAll('a.nav-login');
       for (var i = 0; i < links.length; i++) {
         if (d.hvem === 'elev') {

@@ -165,6 +165,11 @@
       if (d.konto.type === 'admin') { $('til-konto').href = '/admin'; $('til-konto').textContent = 'Overblik'; }
     }
 
+    // På en testrunde fører spilknapperne til det spil, runden er sat til at starte i
+    if (d.test && d.test_start) {
+      [].forEach.call(document.querySelectorAll('a[href="/spil/runeborg/"], a[href="/spil/regnehelten/"]'), function (a) { a.href = '/spil/' + d.test_start + '/'; });
+    }
+
     var t = d.tid || {};
     $('tid').textContent = t.graense_sek == null ? 'Hvad har du lyst til at spille?'
       : t.slut ? (elev ? 'Din spilletid er brugt. Det, du nåede, er gemt — spørg en voksen, hvis du vil spille videre.'
@@ -250,7 +255,7 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=5" defer></script>
+<script src="/assets/script.js?v=6" defer></script>
 <script src="/assets/elevskema.js?v=5" defer></script>
 <script src="/assets/klassetrin.js?v=2" defer></script>
 <script src="/assets/besoeg.js?v=2" defer></script>

@@ -1,0 +1,30 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Regnehelten — ordforråd til oplæsning</title>
+<!-- Køres af tools/regnehelten-stemmer.py i en skjult Chrome: laver tusindvis af opgaver, deler spørgsmålene
+     i stykker mellem tallene (RH.voice.dele) og lægger resultatet som JSON i #ud. -->
+<pre id="ud">…</pre>
+<script src="../spil/regnehelten/js/voice.js"></script>
+<script src="../spil/regnehelten/js/opgaver.js"></script>
+<script src="../spil/regnehelten/js/opgaver-kapitler.js"></script>
+<script>
+(function () {
+  var O = RH.opgaver, V = RH.voice, spoergsmaal = {}, fejl = 0;
+  Object.keys(O.SAET).forEach(function (noegle) {
+    for (var klasse = 1; klasse <= 6; klasse++) for (var i = 0; i < 150; i++) {
+      try { O.lav(noegle, klasse).forEach(function (x) { if (x && x.q) spoergsmaal[x.q] = 1; }); } catch (e) { fejl++; }
+    }
+  });
+  var s = {}, o = {};
+  Object.keys(spoergsmaal).forEach(function (q) {
+    V.dele(q).forEach(function (d) {
+      if (d.t) { s[d.t] = 1; V.ordene(d.t).forEach(function (w) { o[w] = 1; }); }
+    });
+  });
+  // alle tal fra 0 til 99 (og delene af de store tal) som ord
+  for (var n = 0; n < 100; n++) V.ordene(V.talTekst(String(n))).forEach(function (w) { o[w] = 1; });
+  ['hundrede', 'tusind', 'og', 'komma', 'minus', 'plus', 'gange', 'er', 'lig', 'med', 'procent'].forEach(function (w) { o[w] = 1; });
+  for (var h = 1; h < 10; h++) V.ordene(V.talTekst(String(h * 100))).forEach(function (w) { o[w] = 1; });
+  document.getElementById('ud').textContent = JSON.stringify({ spoergsmaal: Object.keys(spoergsmaal).length, fejl: fejl, s: Object.keys(s).sort(), o: Object.keys(o).sort() });
+})();
+</script>

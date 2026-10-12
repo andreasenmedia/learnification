@@ -393,9 +393,13 @@
     markers: function (S) {
       var m = {};
       if (S.cut) return m;
+      // Gul = hovedmission, blå = ekstramission. '?' gul, 's' blå (?), '!' blå
       quests.forEach(function (q) {
-        if (S.q[q.id] === 'active') { var t = q.target(S); if (t && !m[t]) m[t] = '?'; }
-        else if (!S.q[q.id] && q.side && available(q)) m[q.giver] = '!';
+        if (S.q[q.id] === 'active') { var t = q.target(S); if (t && !q.side) m[t] = '?'; }
+      });
+      quests.forEach(function (q) {
+        if (S.q[q.id] === 'active') { var t = q.target(S); if (t && q.side && !m[t]) m[t] = 's'; }
+        else if (!S.q[q.id] && q.side && available(q) && !m[q.giver]) m[q.giver] = '!';
       });
       return m;
     },
