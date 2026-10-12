@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "biblioteket-foerst",
+      "dato": "2026-10-12",
+      "maerke": "Siden",
+      "titel": "Eventyrbiblioteket står først på forsiden",
+      "kort": "Forsiden starter nu med Eventyrbiblioteket, hvor man vælger spil og laver sin figur. Figuren laver man første gang, uanset hvilket spil man går ind i.",
+      "tekst": [
+        "Eventyrbiblioteket er nu det første, man møder på forsiden, og hovedknappen fører derind. Herfra går man gennem en port ind i Runeborg eller Regnehelten.",
+        "Går man direkte ind i et af spillene, laver man sin figur dér første gang. Det er den samme figur i alle spil og i biblioteket."
+      ]
+    },
+    {
       "id": "runeborg-rettelser",
       "dato": "2026-10-12",
       "maerke": "Spil",
