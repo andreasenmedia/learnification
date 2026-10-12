@@ -986,6 +986,8 @@
                naeste: saved.klaret.indexOf(saved.kap) >= 0 && K.kapitler[nk] ? K.kapitler[nk].navn : '' };
     }
     profil = await profilP;
+    // Nye spillere (ingen fælles figur, intet gemt spil) sendes gennem Eventyrbiblioteket først: dér laver man sin figur
+    if (!profil && !saved && !FOTO) { location.replace('/spil/biblioteket/'); return; }
     // Har man spillet før uden en fælles figur, bliver den figur, man har her, til den fælles
     if (!profil && saved && saved.look) { profil = LFProfil.ny(saved.name, saved.look); LFProfil.gem(profil, true); }
     var choice = await UI.title(saved ? (profil && profil.navn) || saved.name : '', info);

@@ -6,10 +6,10 @@
       "dato": "2026-10-12",
       "maerke": "Siden",
       "titel": "Eventyrbiblioteket står først på forsiden",
-      "kort": "Forsiden starter nu med Eventyrbiblioteket, hvor man vælger spil og laver sin figur. Figuren laver man første gang, uanset hvilket spil man går ind i.",
+      "kort": "Forsiden starter nu med Eventyrbiblioteket, hvor man vælger spil og laver sin figur. Nye spillere sendes gennem biblioteket først, uanset hvilket spil de klikker på.",
       "tekst": [
         "Eventyrbiblioteket er nu det første, man møder på forsiden, og hovedknappen fører derind. Herfra går man gennem en port ind i Runeborg eller Regnehelten.",
-        "Går man direkte ind i et af spillene, laver man sin figur dér første gang. Det er den samme figur i alle spil og i biblioteket."
+        "Er man ny og går direkte ind i et af spillene, sendes man først gennem biblioteket, hvor man laver sin figur og møder Brynja. Det er den samme figur i alle spil. Har man spillet før, går man bare videre, hvor man slap."
       ]
     },
     {

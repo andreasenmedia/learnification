@@ -980,6 +980,8 @@
                naeste: saved.klaret.indexOf(saved.kap) >= 0 && K.kapitler[nk] ? K.kapitler[nk].navn : '' };
     }
     profil = await profilP;
+    // Nye spillere (ingen fælles figur, intet gemt spil) sendes gennem Eventyrbiblioteket først: dér laver man sin figur
+    if (!profil && !saved && !FOTO) { location.replace('/spil/biblioteket/'); return; }
     var choice = await UI.title(saved ? (profil && profil.navn) || saved.name || 'Lærling' : '', info);
     if (!profil) {
       // Første gang i et spil: lav din figur. Den bruges i alle spil.
