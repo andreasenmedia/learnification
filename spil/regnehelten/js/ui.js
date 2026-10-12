@@ -223,7 +223,7 @@
         });
         function show(which, arg) {
           names.forEach(function (n) { n[2].classList.toggle('on', n[0] === which); });
-          body.innerHTML = '';
+          body.innerHTML = ''; body.className = which === 'missioner' ? 'dag-krop' : '';
           if (which === 'missioner') missioner(body, S, K);
           else if (which === 'regnebogen') regnebogen(body, arg || side || 'plus');
           else tasken(body, S, K, iOpgave ? null : function (spil) { pop(bg); resolve({ spil: spil }); });
@@ -239,17 +239,19 @@
     // ---------------------------------------------------------------- menu
     menu: function () {
       return new Promise(function (resolve) {
-        var bg = el('div', 'modal-bg'), m = el('div', 'menu px'); bg.appendChild(m);
+        var bg = el('div', 'modal-bg'), m = el('div', 'menu pause px'); bg.appendChild(m);
         m.appendChild(el('h2', null, 'Pause'));
         function toggle(label, get, set) {
           var b = btn('btn toggle');
           var paint = function () { b.innerHTML = '<span>' + label + '</span><span>' + (get() ? 'Til' : 'Fra') + '</span>'; };
           b.addEventListener('click', function () { set(!get()); paint(); RH.saveSettings(); }); paint(); m.appendChild(b); return b;
         }
-        var first = btn('btn', 'Fortsæt'); m.appendChild(first);
-        toggle('Musik', function () { return RH.audio.musicOn; }, function (v) { RH.audio.setMusic(v); });
+        var first = btn('btn primary', 'Fortsæt'); m.appendChild(first);
+        var guideB = btn('btn', 'Sådan spiller du'); m.appendChild(guideB);
+        guideB.addEventListener('click', function () { pop(bg); resolve('guide'); });
+        toggle('Musik (L)', function () { return RH.audio.musicOn; }, function (v) { RH.audio.setMusic(v); });
         toggle('Lydeffekter', function () { return RH.audio.sfxOn; }, function (v) { RH.audio.setSfx(v); });
-        toggle('Oplæsning af dialog', function () { return RH.voice.on; }, function (v) { RH.voice.on = v; });
+        toggle('Oplæsning', function () { return RH.voice.on; }, function (v) { RH.voice.on = v; });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
         if (RH.canFullscreen) toggle('Fuld skærm', function () { return RH.isFullscreen(); }, function () { RH.toggleFullscreen(); });
         var kapB = btn('btn', 'Kapitler'); m.appendChild(kapB);
@@ -270,7 +272,6 @@
           var ud = btn('btn', 'Log ud (' + esc(hvem) + ')'); m.appendChild(ud);
           ud.addEventListener('click', function () { LFSpil.logUd('/login'); });   // pagehide gemmer spillet
         }
-        m.appendChild(el('div', 'keys', '<span class="key">&#8592;&#8593;&#8594;&#8595;</span><span>Gå (eller WASD)</span><span class="key">E</span><span>Tal, undersøg, gå videre</span><span class="key">B</span><span>Dagbogen med Regnebogen og tasken</span><span class="key">F</span><span>Fuld skærm</span><span class="key">M</span><span>Musik til/fra</span><span class="key">Esc</span><span>Denne menu</span>'));
         function done() { pop(bg); resolve(); }
         first.addEventListener('click', done);
         restart.addEventListener('click', function () {
@@ -278,6 +279,20 @@
         });
         bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); done(); } });
         push(bg); first.focus();
+      });
+    },
+
+    // Kortet (M) og den hurtige guide — vinduerne bygges i /spil/faelles/kort.js og guide.js
+    kort: function (o) {
+      return new Promise(function (resolve) {
+        var bg; function done(v) { pop(bg); resolve(v); }
+        bg = LFKort.bygg(o, done); push(bg); bg._fokus.focus();
+      });
+    },
+    guide: function (o) {
+      return new Promise(function (resolve) {
+        var bg; function done() { pop(bg); resolve(); }
+        bg = LFGuide.bygg(o, done); push(bg); bg._fokus.focus();
       });
     },
 

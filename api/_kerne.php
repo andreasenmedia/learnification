@@ -487,6 +487,19 @@ function opret_tabeller(PDO $pdo): void
             )$slut",
             'CREATE UNIQUE INDEX profiler_hvem ON profiler(hvem)',
         ],
+        // Skoletest: hvor børnene starter (tom = Eventyrbiblioteket), hvor et barn er lige nu, og live-skærmbillede
+        13 => [
+            "ALTER TABLE konti ADD COLUMN test_start $tekst NOT NULL DEFAULT ''",
+            "ALTER TABLE elever ADD COLUMN sidst_sted $tekst NOT NULL DEFAULT ''",
+            "CREATE TABLE testlive (
+                elev_id INTEGER NOT NULL PRIMARY KEY,
+                billede TEXT NOT NULL,
+                tekst TEXT NOT NULL,
+                tid INTEGER NOT NULL,
+                set_af INTEGER NOT NULL DEFAULT 0,
+                FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
+            )$slut",
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

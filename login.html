@@ -188,9 +188,10 @@
     var v = $('kode').value.trim();
     if (!v) { LF.besked($('kode-besked'), 'Skriv din kode først.', 'fejl'); return; }
     LF.travl(knap, true);
-    LF.send('elev', 'login', { kode: v }).then(function () {
+    LF.send('elev', 'login', { kode: v }).then(function (d) {
       LF.besked($('kode-besked'), '');
-      videre('/spil/biblioteket/');          // børn lander i Eventyrbiblioteket
+      // Børn lander i Eventyrbiblioteket, med mindre en skoletest har valgt et andet sted
+      videre(d && d.til ? d.til : '/spil/biblioteket/');
     }).catch(function (err) {
       LF.besked($('kode-besked'), err.message, 'fejl');
       $('kode').select();

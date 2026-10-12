@@ -2,6 +2,18 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "kort-og-guide",
+      "dato": "2026-10-12",
+      "maerke": "Spil",
+      "titel": "Kort, en hurtig guide og vinduer, der passer på skærmen",
+      "kort": "Alle tre spil har fået et kort (tast M eller knappen Kort), der viser vej til et sted med en pil, og en lille guide til knapperne. Vinduerne er gjort mindre, så man ikke skal scrolle.",
+      "tekst": [
+        "Det kan være svært at finde rundt, især i en stor by eller i Eventyrbiblioteket. Nu kan man trykke på <strong>M</strong> eller på knappen <strong>Kort</strong> i alle tre spil. Kortet viser området ovenfra med husene, hvor man selv står, og hvor missionen er. Man trykker på et sted eller en person, og så viser en <strong>pil</strong> i kanten af skærmen vej derhen. Barnet går selv, så man stadig oplever verden undervejs.",
+        "Første gang i hvert spil kommer en <strong>hurtig guide</strong> med fire små kort om, hvordan man går, taler med folk, åbner Dagbogen og kortet og finder menuen. Den ser ud efter, om man spiller med tastatur eller med fingrene, og man kan åbne den igen fra menuen under <em>Sådan spiller du</em>. Musikken er flyttet fra M til <strong>L</strong>.",
+        "Vi har også gået vinduerne igennem på en bærbar og en telefon, både stående og på langs. Menuen, Dagbogen, opgaverne og kortet fylder nu kun så meget, som der er plads til, og knapperne står altid synlige i stedet for at forsvinde nederst. Meget lange lister som Regnebogen kan stadig rulle, men overskriften og Luk-knappen bliver stående."
+      ]
+    },
+    {
       "id": "eventyrbiblioteket",
       "dato": "2026-10-12",
       "maerke": "Nyt spil",

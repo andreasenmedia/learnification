@@ -106,8 +106,9 @@
     // Tøj, der endnu ikke er fortjent: vises som en hængelås med, hvor man får det
     var laast = P.tilgaengelige({ oplaast: oplaast }).filter(function (g) { return g.laast; });
     if (laast.length) {
-      var box = el('div', 'fig-laast');
-      box.appendChild(el('b', null, 'Mere tøj på vej'));
+      // Lukket som standard, så editoren ikke bliver så høj, at man skal scrolle
+      var box = el('details', 'fig-laast');
+      box.appendChild(el('summary', null, '<b>Mere tøj på vej</b> (' + laast.length + ')'));
       var ul = el('ul'); laast.forEach(function (g) { ul.appendChild(el('li', null, '&#128274; ' + esc(g.navn) + ' <small>' + esc(g.kilde) + '</small>')); });
       box.appendChild(ul); node.appendChild(box);
     }

@@ -413,12 +413,35 @@ antal spillere. Der oprettes en almindelig skolekonto med `konti.test = 1` og fr
   spørgsmål med store knapper (`ELEV_SKEMA` i `api/test.php` — ret dem dér), tastaturgenveje 1-9, og
   blokerer tastetryk til spillet, mens det er åbent. Svar: tabel `testsvar` (ét pr. barn pr. skema).
   Resultater tælles op i admin og kan hentes som CSV (`handling=csv`, semikolon + BOM).
+- **Hvor starter børnene?** "Børnene starter i" (Eventyrbiblioteket / Runeborg / Regnehelten) ved oprettelsen og som
+  vælger i runden (`konti.test_start`, `indstil` i `api/test.php`). `api/elev.php login` giver `til`, og `login.html` sender barnet
+  dertil (et `?til=` vinder stadig). Tom = Eventyrbiblioteket.
+- **Se live** (DB-version 13: `elever.sidst_sted`, tabel `testlive`): knappen "👁 Se live" på et spillerkort åbner et vindue i
+  /admin#test. Vinduet kalder `live_hent` hvert 1,5 sek., og det sætter `testlive.set_af`. Barnets `assets/elevskema.js` spørger
+  hvert 5. sek. `skema_aktuel&spil=…` (det er også pulsen, der gør, at børn i Eventyrbiblioteket kan ses), får `se: true` tilbage og
+  sender så hvert 1,5 sek. et JPEG af `#screen` + teksten fra `#layer` (`handling=live`). Intet sendes, når ingen ser med; billedet
+  slettes, når vinduet lukkes (`live_stop`). Hvert spil sætter `window.LFLive.info()` som tekst-reserve.
 - Testrunder holdes ude af /admins almindelige tal, velkomstmail, påmindelse og skema-mail (`test = 0`
   i forespørgslerne). Slet runden, når testen er slut (sletter også svarene).
 - DB-version 10 (`test`, `testskema`, `testsvar`).
 - **Testrunde → rigtig konto:** "Gør til rigtig konto" (`goer_rigtig` i `api/test.php`) sætter skole, ansvarlig og mail,
   slår `test`/fri adgang fra og sender et link til at vælge adgangskode (7 dage). Eleverne, koderne og de gemte spil bliver stående.
   Den ansvarlige kan bagefter rette navnene under /konto → "Ret alle navne" (`ret_navne` i `api/klasse.php`).
+
+## Kort (M), hurtig guide og vinduer uden scroll
+
+Fælles for de tre spil, i `spil/faelles/`: `kort.js` (kortvinduet), `guide.js` ("Sådan spiller du", 4 kort, vises første gang i hvert spil
+via `S.seen.guide` og kan åbnes fra pausemenuen) og `vinduer.css` (indlæses sidst i hvert spil).
+
+- **M** åbner kortet (musik er flyttet til **L**), også knapperne "Kort" i HUD'en og på berøringsskærmen. Kortet er områdets
+  forudtegnede bane (`cache[...]`) med nåle ved husenes døre, missionen og "Her er du", og en liste over steder og personer.
+  Man trykker på et sted: kortet flytter ikke barnet, men `valgt` i `game.js` får pilen i kanten af skærmen (`arrow()`) til at vise vej
+  dér i stedet for til missionen (HUD'en skriver "Vej til …"). Pilen forsvinder, når man er fremme. Hvert spil har sin egen
+  `kortData()`; Eventyrbiblioteket fik `doorToward()` og `arrow()` fra Runeborg.
+- **Vinduerne følger pladsen:** `max-height: 100%` i stedet for `calc(100vh - 32px)`, overskrift (`.book-head`) sticky, Dagbogens
+  missioner i flere spalter, pausemenuen i to rækker, kompakte regler under 720/560/420/380 px højde og for 560 px bredde. Rigtigt
+  lange lister (Regnebogen, personlisten på en telefon på langs, alle præstationer) ruller stadig, men overskrift og Luk står fast.
+  Test af alle opgavetyper: se `Object.keys(RH.opgaver.SAET)` i konsollen og mål `.task`s `scrollHeight` mod `clientHeight`.
 
 ## Klassetrin
 

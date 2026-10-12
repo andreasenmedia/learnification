@@ -399,6 +399,22 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .sp-fod { display: flex; justify-content: space-between; gap: 8px; font-size: .78rem; color: var(--ink-soft); margin-top: auto; }
 .sp-svaret { color: #1f5a36; font-weight: 700; }
 
+.sp-nu.spil-biblioteket { --c: #cdbbf0; }
+.sp-knap { margin-top: 2px; }
+.sp-sted-nu { font-size: .88rem; }
+
+/* Live-visning af ét barns skærm */
+.live-bg { position: fixed; inset: 0; z-index: 50; background: rgba(20, 15, 28, .78); display: grid; place-items: center; padding: 14px; }
+.live-bg[hidden] { display: none; }
+.live-boks { background: var(--paper-card); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); width: min(100%, 980px); max-height: 100%; overflow: auto; padding: 14px 16px; display: grid; gap: 10px; }
+.live-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.live-top strong { font-size: 1.15rem; }
+.live-top .live-ryk { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.live-skaerm { background: #140f1c; border: 3px solid var(--ink); display: grid; place-items: center; min-height: 160px; }
+.live-skaerm img { display: block; width: 100%; max-height: 62vh; object-fit: contain; image-rendering: pixelated; }
+.live-skaerm p { color: #cfc6e0; padding: 40px 16px; margin: 0; text-align: center; }
+.live-tekst { margin: 0; font-size: .95rem; line-height: 1.35; min-height: 2.6em; overflow-wrap: anywhere; }
+
 .sv-sp { margin: 0 0 18px; }
 .sv-sp h3 { font-size: 1rem; margin: 0 0 6px; }
 .sv-raekke { display: grid; grid-template-columns: minmax(110px, 14em) 1fr 2.5em; gap: 10px; align-items: center; font-size: .92rem; margin-bottom: 4px; }

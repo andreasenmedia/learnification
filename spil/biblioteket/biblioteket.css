@@ -1,8 +1,8 @@
 /* Eventyrbiblioteket — det lille, der ikke er i Runeborgs stilark */
 .ico-tid { background: var(--blue); border-radius: 50%; box-shadow: inset -3px -3px 0 #3a7ab8; }
-.fig-vindue { width: min(100%, 640px); max-height: calc(100vh - 32px); overflow: auto; }
+.fig-vindue { width: min(100%, 640px); }
 .menu .tiny { margin: 0; font-size: .85em; color: var(--txt-soft); }
-.praes-vindue { width: min(100%, 760px); max-height: calc(100vh - 32px); overflow: auto; }
+.praes-vindue { width: min(100%, 760px); }
 .praes-vindue h3 { margin: 6px 0 0; color: var(--gold); }
 .praes-vindue h3 small { color: var(--txt-soft); font-weight: 400; }
 .praes-sum { margin: 0; color: var(--txt-soft); }

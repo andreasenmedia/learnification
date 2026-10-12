@@ -20,9 +20,9 @@
   var css = document.createElement('style');
   css.textContent =
     '#lf-klasse{position:fixed;inset:0;z-index:2147482000;display:grid;place-items:center;padding:14px;background:rgba(10,7,16,.88);' +
-    'font:20px/1.35 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color:#f4ecdc;overflow:auto}' +
+    'font:clamp(14px,3.1vh,20px)/1.35 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color:#f4ecdc;overflow:auto}' +
     '#lf-klasse .vindue{width:min(100%,600px);background:#1f1830;border:3px solid #f4ecdc;padding:24px 22px 20px;' +
-    'box-shadow:0 0 0 3px #140f1c,6px 6px 0 3px rgba(0,0,0,.45);text-align:center}' +
+    'box-shadow:0 0 0 3px #140f1c,6px 6px 0 3px rgba(0,0,0,.45);text-align:center;max-height:100%;overflow:auto}' +
     '#lf-klasse .lille{font-size:.78em;letter-spacing:.12em;text-transform:uppercase;color:#ffcc4d;margin:0 0 6px}' +
     '#lf-klasse h2{margin:0 0 6px;font-size:1.5em;line-height:1.2}' +
     '#lf-klasse p{margin:0 0 14px;color:#c9bfdc}' +
@@ -34,7 +34,8 @@
     '#lf-klasse .knapper{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}' +
     '#lf-klasse .knapper a,#lf-klasse .knapper button{padding:10px 20px;font:inherit;font-weight:700;color:#f4ecdc;background:#2a2140;border:3px solid #f4ecdc;box-shadow:0 4px 0 #140f1c;cursor:pointer;text-decoration:none}' +
     '#lf-klasse .knapper .gul{color:#140f1c;background:#ffcc4d;border-color:#fff3c4}' +
-    '@media (max-width:420px){#lf-klasse .trin{grid-template-columns:repeat(4,1fr)}}';
+    '@media (max-width:420px){#lf-klasse .trin{grid-template-columns:repeat(5,1fr);gap:6px}}' +
+    '@media (max-height:520px){#lf-klasse .vindue{padding:12px 16px}#lf-klasse .trin button{min-height:44px}#lf-klasse p{margin-bottom:8px}}';
   document.head.appendChild(css);
 
   function el(tag, klasse, tekst) {

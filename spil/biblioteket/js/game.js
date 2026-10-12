@@ -31,6 +31,9 @@
   var busy = false, started = false, tick = 0, heldOrder = [];
   var cam = { x: 0, y: 0 }, particles = [], leaves = [], flies = [], tidSlutFlag = false;
 
+  // Skoletest: når en voksen ser med, sender siden skærmbilledet + denne tekst (assets/elevskema.js)
+  window.LFLive = { info: function () { return S && started ? 'Eventyrbiblioteket — ' + (mapNow() ? mapNow().name : '') : ''; } };
+
   // ---------------------------------------------------------------- profil og indstillinger
   // Profilen er barnets figur. Pladsen husker kun, hvilket spil man kom fra, og hvad man har set.
   function gemProfil(nu) {
@@ -248,6 +251,54 @@
 
     lighting(m, cx, cy);
     if (m.outdoor) weather(cx, cy);
+    arrow(cx, cy);
+  }
+
+  // Pil i kanten af skærmen, der viser vej til det sted, man har trykket på på kortet (M)
+  var valgt = null;   // {navn, npc?, map, x, y}
+  function valgtPos() {
+    if (!valgt) return null;
+    var p = null;
+    if (valgt.npc) { var np = K.npcs[valgt.npc].pos(S); if (np) p = [np.map, np.x, np.y]; }
+    else p = [valgt.map, valgt.x, valgt.y];
+    if (!p) { valgt = null; hud(); return null; }
+    if (p[0] === S.map && Math.abs(p[1] - S.x) + Math.abs(p[2] - S.y) <= 1) {
+      UI.toast('Du er fremme: <b>' + BB.esc(valgt.navn) + '</b>'); valgt = null; hud(); return null;
+    }
+    return p;
+  }
+  // Første dør på kortet, man står på, der fører mod kortet `til` (bredde-først over alle døre)
+  function doorToward(fra, til) {
+    var seen = {}, queue = [];
+    seen[fra] = true;
+    world[fra].doors.forEach(function (d) { queue.push({ map: d.to, first: [d.x, d.y] }); });
+    while (queue.length) {
+      var it = queue.shift();
+      if (it.map === til) return it.first;
+      if (seen[it.map] || !world[it.map]) continue;
+      seen[it.map] = true;
+      world[it.map].doors.forEach(function (d) { queue.push({ map: d.to, first: it.first }); });
+    }
+    return null;
+  }
+  function arrow(cx, cy) {
+    var p = valgtPos(); if (!p) return;
+    var tp = p[0] === S.map ? [p[1], p[2]] : doorToward(S.map, p[0]); if (!tp) return;
+    var x = tp[0] * T + 8 - cx, y = tp[1] * T + 8 - cy;
+    if (x > 8 && x < VW - 8 && y > 8 && y < VH - 8) {
+      var hop = Math.floor(tick / 15) % 2, rx = Math.round(x), ry = Math.round(y);
+      ctx.fillStyle = '#1a1420'; ctx.beginPath(); ctx.moveTo(rx, ry - 6 + hop); ctx.lineTo(rx - 6, ry - 15 + hop); ctx.lineTo(rx + 6, ry - 15 + hop); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#9ad0ff'; ctx.beginPath(); ctx.moveTo(rx, ry - 8 + hop); ctx.lineTo(rx - 4, ry - 14 + hop); ctx.lineTo(rx + 4, ry - 14 + hop); ctx.closePath(); ctx.fill();
+      return;
+    }
+    var ang = Math.atan2(y - VH / 2, x - VW / 2);
+    var ex = VW / 2 + Math.cos(ang) * (VW / 2 - 12), ey = VH / 2 + Math.sin(ang) * (VH / 2 - 12);
+    ex = Math.max(10, Math.min(VW - 10, ex)); ey = Math.max(22, Math.min(VH - 10, ey));
+    var pulse = 1 + (Math.floor(tick / 15) % 2);
+    ctx.save(); ctx.translate(Math.round(ex), Math.round(ey)); ctx.rotate(ang);
+    ctx.fillStyle = '#1a1420'; ctx.beginPath(); ctx.moveTo(7 + pulse, 0); ctx.lineTo(-5, -6); ctx.lineTo(-5, 6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#9ad0ff'; ctx.beginPath(); ctx.moveTo(5 + pulse, 0); ctx.lineTo(-3, -4); ctx.lineTo(-3, 4); ctx.closePath(); ctx.fill();
+    ctx.restore();
   }
 
   function drawChar(sheet, x, y, dir, frame) {
@@ -329,8 +380,9 @@
   // ---------------------------------------------------------------- HUD
   function hud() {
     if (!S) return;
-    document.getElementById('hud-quest-title').textContent = 'Eventyrbiblioteket';
-    document.getElementById('hud-quest-goal').textContent = 'Gå hen til en port og tryk E';
+    document.querySelector('#hud-quest .hud-label').textContent = valgt ? 'Vej til' : 'Her er du';
+    document.getElementById('hud-quest-title').textContent = valgt ? valgt.navn : 'Eventyrbiblioteket';
+    document.getElementById('hud-quest-goal').textContent = valgt ? 'Tryk M for kortet' : 'Gå hen til en port og tryk E';
     var pa = LFPraes.antal(profil, null);
     document.getElementById('hud-praes-tekst').textContent = pa.faerdig + '/' + pa.ialt;
     var chip = document.getElementById('hud-tid'), t = window.LFSpil ? LFSpil.tilbage() : null;
@@ -368,14 +420,61 @@
     if (e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); interact(); }
     else if (e.key === 'Escape') { e.preventDefault(); openMenu(); }
     else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); BB.toggleFullscreen(); }
-    else if (e.key === 'm' || e.key === 'M') { BB.audio.setMusic(!BB.audio.musicOn); BB.saveSettings(); UI.toast('Musik ' + (BB.audio.musicOn ? 'til' : 'fra')); }
+    else if (e.key === 'm' || e.key === 'M') { e.preventDefault(); openMap(); }
+    else if (e.key === 'l' || e.key === 'L') { BB.audio.setMusic(!BB.audio.musicOn); BB.saveSettings(); UI.toast('Musik ' + (BB.audio.musicOn ? 'til' : 'fra')); }
   });
   document.addEventListener('keyup', function (e) { if (KEYS[e.key]) release(KEYS[e.key]); });
   window.addEventListener('blur', function () { heldOrder = []; });
   document.addEventListener('visibilitychange', function () { heldOrder = []; });
   function openMenu() {
     if (busy || UI.isOpen()) return; heldOrder = [];
-    run(async function () { if ((await UI.menu()) === 'udseende') await spejl(); });
+    run(async function () {
+      var v = await UI.menu();
+      if (v === 'udseende') await spejl();
+      else if (v === 'guide') await visGuide(true);
+    });
+  }
+
+  // ---------------------------------------------------------------- kortet (M)
+  // Hele biblioteket set ovenfra: portene, Klædeskabet, Trofærummet og de tre, der går rundt.
+  function kortData() {
+    var R = world.hal, pins = [], steder = [], personer = [];
+    if (!cache[R.id]) prerender(R);
+    var flade = cache[R.id][0];
+    function sted(navn, x, y, maal) {
+      pins.push({ navn: navn, x: x * T + 8, y: y * T + 8, art: 'sted', maal: maal });
+      steder.push({ navn: navn, maal: maal, valgt: !!valgt && !valgt.npc && valgt.navn === navn });
+    }
+    Object.keys(K.SPIL).forEach(function (id) {
+      var pp = K.placePos['port_' + id];
+      if (pp) sted(K.SPIL[id].navn, pp[1], pp[2], { map: pp[0], x: pp[1], y: pp[2] });
+    });
+    R.doors.forEach(function (d) {
+      var inde = world[d.to];
+      if (inde) sted(inde.name, d.x, d.y, { map: d.to, x: d.tx, y: d.ty });
+    });
+    var her = S.map === R.id ? [S.x, S.y] : doorToward(R.id, S.map);
+    if (her) pins.push({ navn: 'Her er du', x: her[0] * T + 8, y: her[1] * T + 8, art: 'her' });
+    Object.keys(K.npcs).forEach(function (id) {
+      var n = K.npcs[id], p = n.pos(S);
+      if (!p) return;
+      personer.push({ navn: n.name.split(',')[0], sted: p.map === R.id ? 'i hallen' : world[p.map].name, maal: { npc: id, map: p.map, x: p.x, y: p.y }, valgt: !!valgt && valgt.npc === id });
+    });
+    return { titel: 'Kort: Eventyrbiblioteket', flade: flade, pins: pins, steder: steder, personer: personer, mission: null, valgt: valgt ? valgt.navn : '' };
+  }
+  async function visKort() {
+    var v = await UI.kort(kortData());
+    if (!v || !v.maal) return;
+    valgt = { navn: v.navn, npc: v.maal.npc, map: v.maal.map, x: v.maal.x, y: v.maal.y };
+    UI.toast('Pilen viser vej til <b>' + BB.esc(v.navn) + '</b>.');
+  }
+  function openMap() { if (busy || UI.isOpen()) return; heldOrder = []; run(visKort); }
+
+  // Den hurtige guide: første gang i biblioteket, og igen fra menuen
+  async function visGuide(igen) {
+    if (!igen && S.seen.guide) return;
+    await UI.guide({ bog: false });
+    S.seen.guide = true; gemProfil();
   }
   // Fuld skærm. Knappen skjules, hvor browseren ikke kan (fx iPhone-Safari).
   var root = document.documentElement;
@@ -395,6 +494,7 @@
     document.addEventListener(ev, function () { fullBtn.title = isFull() ? 'Forlad fuld skærm (F)' : 'Fuld skærm (F)'; setTimeout(resize, 50); });
   });
   document.getElementById('btn-menu').addEventListener('click', openMenu);
+  document.getElementById('btn-map').addEventListener('click', openMap);
 
   // Berøring: joystick og knapper dukker op første gang, nogen rører
   // skærmen — og gemmer sig igen efter 5 sekunder uden berøring.
@@ -445,6 +545,7 @@
   });
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { zone.addEventListener(ev, function (e) { if (e.pointerId === stickId) endStick(); }); });
   document.getElementById('t-act').addEventListener('pointerdown', function (e) { e.preventDefault(); BB.audio.unlock(); if (!UI.advance()) interact(); });
+  document.getElementById('t-map').addEventListener('pointerdown', function (e) { e.preventDefault(); openMap(); });
 
   // ---------------------------------------------------------------- tryk på verden
   // Tryk på en person eller ting: står man lige ved den, vender man sig og
@@ -604,7 +705,8 @@
     if (window.LFSpil && LFSpil.tidSlut()) tidSlutFlag = true;
     var fra = profil.bib.fra, sp = fra && world.hal.spots[fra] ? world.hal.spots[fra] : null;
     begin(sp);
-    if (foerste) await run(function () { return K.talk(g, 'brynja'); });
+    if (foerste) await run(async function () { await visGuide(); await K.talk(g, 'brynja'); });
+    else if (!S.seen.guide) await run(visGuide);
     else UI.toast('Velkommen tilbage, <b>' + BB.esc(S.name) + '</b>!');
   }
 

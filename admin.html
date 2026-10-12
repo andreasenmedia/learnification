@@ -271,6 +271,8 @@
           <div class="felt-raekke">
             <div class="felt"><label for="t-navn">Skole eller klasse <span>— valgfrit</span></label><input id="t-navn" maxlength="60" placeholder="fx Vestre Skole 5.B"></div>
             <div class="felt"><label for="t-antal">Antal spillere</label><input id="t-antal" type="number" min="1" max="60" value="24" required></div>
+            <div class="felt"><label for="t-start-ny">Børnene starter i</label>
+              <select id="t-start-ny"><option value="biblioteket">Eventyrbiblioteket</option><option value="runeborg">Runeborg</option><option value="regnehelten">Regnehelten</option></select></div>
           </div>
           <button class="btn btn-primary" type="submit">Opret runden</button>
         </form>
@@ -284,6 +286,8 @@
         <div class="topbar">
           <div><p class="eyebrow" style="margin-bottom:6px;">Testrunde · <a href="#test">alle runder</a></p><h1 id="t-titel"></h1><p class="lille" id="t-opdateret"></p></div>
           <div class="knapper">
+            <label class="lille" for="t-start" style="display:flex;align-items:center;gap:6px;">Starter i
+              <select id="t-start"><option value="biblioteket">Eventyrbiblioteket</option><option value="runeborg">Runeborg</option><option value="regnehelten">Regnehelten</option></select></label>
             <a class="btn btn-sm" id="t-kort" target="_blank" rel="noopener">Udskriv koder</a>
             <button type="button" class="btn btn-sm btn-primary" id="t-rigtig-knap">Gør til rigtig konto</button>
             <button type="button" class="btn btn-sm" id="t-flere">+ Flere spillere</button>
@@ -330,6 +334,22 @@
         <div class="panel" id="t-svar-boks">
           <h2>Svar fra eleverne</h2>
           <div id="t-svar"></div>
+        </div>
+
+        <div class="live-bg" id="live" hidden role="dialog" aria-modal="true" aria-labelledby="live-navn">
+          <div class="live-boks">
+            <div class="live-top">
+              <strong id="live-navn"></strong><span class="lille" id="live-alder"></span>
+              <div class="live-ryk">
+                <button type="button" class="btn btn-sm" id="live-forrige">&larr; Forrige</button>
+                <button type="button" class="btn btn-sm" id="live-naeste">Næste &rarr;</button>
+                <button type="button" class="btn btn-sm btn-primary" id="live-luk">Luk</button>
+              </div>
+            </div>
+            <div class="live-skaerm" id="live-skaerm"><p>Venter på barnets skærm …</p></div>
+            <p class="live-tekst" id="live-tekst"></p>
+            <p class="lille" style="margin:0;">Barnets side sender kun et lille billede, mens dette vindue er åbent (ca. hvert 1,5 sek.). Intet gemmes bagefter.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -923,9 +943,9 @@
 
   // --- skoletest ------------------------------------------------------------
   var testId = 0, testTimer = null, testNavn = '';
-  var TEST_SPIL = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
+  var TEST_SPIL = { runeborg: 'Runeborg', regnehelten: 'Regnehelten', biblioteket: 'Eventyrbiblioteket' };
 
-  function stopTestTimer() { if (testTimer) { clearInterval(testTimer); testTimer = null; } }
+  function stopTestTimer() { if (testTimer) { clearInterval(testTimer); testTimer = null; } lukLive(); }
 
   function visTest(id) {
     stopTestTimer();
@@ -955,7 +975,7 @@
     e.preventDefault();
     var knap = this.querySelector('button[type=submit]');
     LF.travl(knap, true);
-    LF.send('test', 'opret', { navn: $('t-navn').value.trim(), antal: +$('t-antal').value })
+    LF.send('test', 'opret', { navn: $('t-navn').value.trim(), antal: +$('t-antal').value, start: $('t-start-ny').value })
       .then(function (d) { LF.travl(knap, false); location.hash = '#test=' + d.id; })
       .catch(function (err) { LF.besked($('t-ny-besked'), err.message, 'fejl'); LF.travl(knap, false); });
   });
@@ -982,6 +1002,8 @@
     $('t-opdateret').textContent = 'Opdateret ' + new Date(d.nu * 1000).toLocaleTimeString('da-DK', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     $('t-kort').href = '/login-kort?konto=' + r.id + '&g=' + r.gruppe;
     $('t-csv').href = '/api/test.php?handling=csv&id=' + r.id;
+    if (document.activeElement !== $('t-start')) $('t-start').value = r.start || 'biblioteket';
+    testSpillere = d.spillere;
 
     var svaret = d.spillere.filter(function (p) { return p.svaret; }).length;
     var aaben = !!r.skema_aaben;
@@ -993,7 +1015,7 @@
       : (r.skemaer ? 'Skemaet er lukket. Der er ' + r.svar + ' svar i alt.' : 'Seks hurtige spørgsmål med store knapper. Når du trykker, kommer de som et vindue oven på spillet hos alle, der er logget ind.');
     $('t-skema').classList.toggle('aaben', aaben);
 
-    var spilTal = Object.keys(d.spil).map(function (k) { return d.spil[k] + ': ' + s.pr_spil[k]; }).join(' · ');
+    var spilTal = Object.keys(d.spil).concat(['biblioteket']).map(function (k) { return (d.spil[k] || TEST_SPIL[k]) + ': ' + (s.pr_spil[k] || 0); }).join(' · ');
     var harSpillet = d.spillere.filter(function (p) { return p.sek > 0; });
     var snit = harSpillet.length ? harSpillet.reduce(function (a, p) { return a + p.sek; }, 0) / harSpillet.length : 0;
     $('t-tal').innerHTML = [
@@ -1027,7 +1049,9 @@
         + (g.mission && !g.faerdig ? '<div class="sp-mission">🎯 ' + LF.esc(g.mission) + (g.maal ? '<span>' + LF.esc(g.maal) + '</span>' : '') + '</div>' : '')
         + '<div class="sp-lille">' + minutter(g.sek) + ' · ' + g.ekstra + ' ekstra · gemt ' + LF.dato(g.opdateret) + '</div></div>';
     });
-    if (!nogen) h += '<p class="sp-tom">' + (p.status !== 'ude' ? 'Er logget ind — har ikke gemt noget endnu.' : 'Har ikke været inde endnu.') + '<br><span class="sp-kode">' + LF.esc(p.kode) + '</span></p>';
+    if (p.spil_nu === 'biblioteket') h += '<div class="sp-sted-nu">📍 I Eventyrbiblioteket</div>';
+    if (!nogen && p.spil_nu !== 'biblioteket') h += '<p class="sp-tom">' + (p.status !== 'ude' ? 'Er logget ind — har ikke gemt noget endnu.' : 'Har ikke været inde endnu.') + '<br><span class="sp-kode">' + LF.esc(p.kode) + '</span></p>';
+    if (p.status !== 'ude') h += '<button type="button" class="btn btn-sm sp-knap" data-live="' + p.id + '">👁 Se live</button>';
     h += '<div class="sp-fod"><span>' + (p.sidst ? 'Sidst ' + LF.dato(p.sidst) : '') + '</span>' + (p.svaret ? '<span class="sp-svaret">✓ har svaret</span>' : '') + '</div></div>';
     return h;
   }
@@ -1043,6 +1067,73 @@
       }).join('');
     }).catch(function () { /* næste opdatering prøver igen */ });
   }
+
+  $('t-start').addEventListener('change', function () {
+    var v = this.value;
+    LF.send('test', 'indstil', { id: testId, start: v }).then(hentTest, function (err) { alert(err.message); });
+  });
+
+  // --- live-visning af ét barns skærm ---------------------------------------
+  var testSpillere = [], liveElev = 0, liveTimer = null, liveTid = 0, liveNu = 0;
+
+  function lukLive() {
+    if (liveTimer) { clearInterval(liveTimer); liveTimer = null; }
+    // Billedet slettes, når vinduet lukkes — der gemmes intet
+    if (liveElev && testId) LF.send('test', 'live_stop', { id: testId }).catch(function () {});
+    liveElev = 0;
+    var v = $('live');
+    if (v) v.hidden = true;
+  }
+
+  function aabenLive(elev) {
+    var p = testSpillere.filter(function (x) { return x.id === elev; })[0];
+    if (!p) return;
+    liveElev = elev;
+    liveTid = 0;
+    $('live').hidden = false;
+    $('live-navn').textContent = p.navn + ' ' + p.ikon;
+    $('live-skaerm').innerHTML = '<p>Venter på barnets skærm …</p>';
+    $('live-tekst').textContent = '';
+    $('live-alder').textContent = '';
+    if (liveTimer) clearInterval(liveTimer);
+    hentLive();
+    liveTimer = setInterval(function () { if (document.visibilityState === 'visible') hentLive(); }, 1500);
+  }
+
+  function hentLive() {
+    var elev = liveElev;
+    if (!elev) return;
+    LF.hent('test', 'live_hent', { id: testId, elev: elev }).then(function (d) {
+      if (elev !== liveElev) return;
+      if (d.billede) {
+        var img = $('live-skaerm').querySelector('img');
+        if (!img) { $('live-skaerm').innerHTML = '<img alt="Barnets skærm">'; img = $('live-skaerm').querySelector('img'); }
+        if (d.tid !== liveTid) img.src = d.billede;
+        $('live-tekst').textContent = d.tekst || '';
+        var alder = d.nu - d.tid;
+        $('live-alder').textContent = alder < 4 ? '● live' : 'sidst opdateret for ' + alder + ' sek. siden';
+      } else {
+        $('live-alder').textContent = 'venter …';
+      }
+      liveTid = d.tid;
+    }).catch(function (err) { $('live-alder').textContent = err.message; });
+  }
+
+  function liveNabo(retning) {
+    var ind = testSpillere.filter(function (x) { return x.status !== 'ude'; }).sort(function (a, b) { return a.nr - b.nr; });
+    if (!ind.length) return;
+    var i = ind.findIndex(function (x) { return x.id === liveElev; });
+    aabenLive(ind[(i + retning + ind.length) % ind.length].id);
+  }
+
+  $('t-spillere').addEventListener('click', function (e) {
+    var k = e.target.closest('[data-live]');
+    if (k) aabenLive(+k.getAttribute('data-live'));
+  });
+  $('live-luk').addEventListener('click', lukLive);
+  $('live-forrige').addEventListener('click', function () { liveNabo(-1); });
+  $('live-naeste').addEventListener('click', function () { liveNabo(1); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && liveElev) lukLive(); });
 
   $('t-skema-aaben').addEventListener('click', function () {
     var knap = this;

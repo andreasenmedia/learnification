@@ -58,6 +58,8 @@
       return { sted: m ? m.name : '', mission: mt ? mt.q.title : '', maal: mt ? K.goal(mt.q.id) : '', lavet: lavet, ialt: ialt };
     } catch (e) { return null; }
   }
+  // Skoletest: når en voksen ser med, sender siden skærmbilledet + denne tekst (assets/elevskema.js)
+  window.LFLive = { info: function () { var h = S && started ? hudInfo() : null; return h ? h.sted + (h.mission ? ' — ' + h.mission : '') : ''; } };
   function save(nu) {
     if (!S || FOTO || !started || laast) return;
     S.hud = hudInfo();
@@ -439,13 +441,29 @@
     });
   }
 
-  // Pil i kanten af skærmen, der viser vej til missionen
-  function targetPos() {
-    var mt = K.mainTarget(S); if (!mt || !mt.t) return null;
-    var t = mt.t, p = null;
+  // Pil i kanten af skærmen, der viser vej til missionen — eller til det sted, man har trykket på på kortet (M)
+  var valgt = null;   // {navn, npc?, map, x, y}
+  function posOf(t) {
+    var p = null;
     if (K.npcs[t]) { var np = K.npcs[t].pos(S); if (np) p = [np.map, np.x, np.y]; }
     if (!p) K.things.forEach(function (th) { if (th.id === t) p = [th.map, th.x, th.y]; });
     if (!p && K.placePos[t]) p = K.placePos[t];
+    return p;
+  }
+  function valgtPos() {
+    if (!valgt) return null;
+    var p = null;
+    if (valgt.npc) { var np = K.npcs[valgt.npc].pos(S); if (np) p = [np.map, np.x, np.y]; }
+    else p = [valgt.map, valgt.x, valgt.y];
+    if (!p) { valgt = null; hud(); return null; }   // personen er gået væk
+    if (p[0] === S.map && Math.abs(p[1] - S.x) + Math.abs(p[2] - S.y) <= 1) {
+      UI.toast('Du er fremme: <b>' + RB.esc(valgt.navn) + '</b>'); valgt = null; hud(); return null;
+    }
+    return p;
+  }
+  function targetPos() {
+    var p = valgtPos();
+    if (!p) { var mt = K.mainTarget(S); if (!mt || !mt.t) return null; p = posOf(mt.t); }
     if (!p) return null;
     if (p[0] === S.map) return [p[1], p[2]];
     return doorToward(S.map, p[0]);
@@ -467,7 +485,15 @@
   function arrow(cx, cy) {
     var tp = targetPos(); if (!tp) return;
     var x = tp[0] * T + 8 - cx, y = tp[1] * T + 8 - cy;
-    if (x > 8 && x < VW - 8 && y > 8 && y < VH - 8) return;
+    if (x > 8 && x < VW - 8 && y > 8 && y < VH - 8) {
+      // Det valgte sted er i billedet: en lille pil, der hopper over det
+      if (valgt) {
+        var hop = Math.floor(tick / 15) % 2;
+        ctx.fillStyle = '#1a1420'; ctx.beginPath(); ctx.moveTo(Math.round(x), Math.round(y) - 6 + hop); ctx.lineTo(Math.round(x) - 6, Math.round(y) - 15 + hop); ctx.lineTo(Math.round(x) + 6, Math.round(y) - 15 + hop); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#9ad0ff'; ctx.beginPath(); ctx.moveTo(Math.round(x), Math.round(y) - 8 + hop); ctx.lineTo(Math.round(x) - 4, Math.round(y) - 14 + hop); ctx.lineTo(Math.round(x) + 4, Math.round(y) - 14 + hop); ctx.closePath(); ctx.fill();
+      }
+      return;
+    }
     var ang = Math.atan2(y - VH / 2, x - VW / 2);
     var ex = VW / 2 + Math.cos(ang) * (VW / 2 - 12), ey = VH / 2 + Math.sin(ang) * (VH / 2 - 12);
     ex = Math.max(10, Math.min(VW - 10, ex)); ey = Math.max(22, Math.min(VH - 10, ey));
@@ -483,8 +509,9 @@
     if (!S) return;
     var mt = K.mainTarget(S);
     var kp = K.kapNu(), klaret = (S.klaret || []).indexOf(S.kap || 1) >= 0;
-    document.getElementById('hud-quest-title').textContent = mt ? mt.q.title : (klaret ? kp.efterTitel : '');
-    document.getElementById('hud-quest-goal').textContent = mt ? K.goal(mt.q.id) : (klaret ? kp.efterMaal : '');
+    document.querySelector('#hud-quest .hud-label').textContent = valgt ? 'Vej til' : 'Mission';
+    document.getElementById('hud-quest-title').textContent = valgt ? valgt.navn : mt ? mt.q.title : (klaret ? kp.efterTitel : '');
+    document.getElementById('hud-quest-goal').textContent = valgt ? 'Tryk M for kortet' : mt ? K.goal(mt.q.id) : (klaret ? kp.efterMaal : '');
     document.getElementById('hud-gold').textContent = S.gold;
     document.getElementById('hud-runes').textContent = S.runes.length + '/' + K.runesNu().length;
   }
@@ -598,7 +625,8 @@
     else if (e.key === 'b' || e.key === 'B' || e.key === 'Tab') { e.preventDefault(); openBook(); }
     else if (e.key === 'Escape') { e.preventDefault(); openMenu(); }
     else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); RB.toggleFullscreen(); }
-    else if (e.key === 'm' || e.key === 'M') { RB.audio.setMusic(!RB.audio.musicOn); RB.saveSettings(); UI.toast('Musik ' + (RB.audio.musicOn ? 'til' : 'fra')); }
+    else if (e.key === 'm' || e.key === 'M') { e.preventDefault(); openMap(); }
+    else if (e.key === 'l' || e.key === 'L') { RB.audio.setMusic(!RB.audio.musicOn); RB.saveSettings(); UI.toast('Musik ' + (RB.audio.musicOn ? 'til' : 'fra')); }
   });
   document.addEventListener('keyup', function (e) { if (KEYS[e.key]) release(KEYS[e.key]); });
   window.addEventListener('blur', function () { heldOrder = []; });
@@ -606,7 +634,75 @@
   function openBook() { if (busy || UI.isOpen()) return; heldOrder = []; run(function () { return UI.book(); }); }
   function openMenu() {
     if (busy || UI.isOpen()) return; heldOrder = [];
-    run(async function () { if ((await UI.menu()) === 'kapitler') await kapitelMenu(); });
+    run(async function () {
+      var v = await UI.menu();
+      if (v === 'kapitler') await kapitelMenu();
+      else if (v === 'guide') await visGuide(true);
+      else if (v === 'kort') await visKort();
+    });
+  }
+
+  // ---------------------------------------------------------------- kortet (M)
+  // Området set ovenfra, med de steder og personer, man kan få pilen til at vise vej til.
+  function regionKort() {
+    var m = mapNow();
+    if (m.outdoor) return m;
+    var seen = {}, q = [m.id]; seen[m.id] = true;
+    while (q.length) {
+      var mm = world[q.shift()];
+      if (mm.outdoor) return mm;
+      mm.doors.forEach(function (d) { if (!seen[d.to] && world[d.to]) { seen[d.to] = true; q.push(d.to); } });
+    }
+    return m;
+  }
+  function kortData() {
+    var R = regionKort(), pins = [], steder = [], personer = [], set = {};
+    // alle kort, der hører til området (byen og husene i den)
+    var q = [R.id]; set[R.id] = true;
+    while (q.length) world[q.shift()].doors.forEach(function (d) { if (!set[d.to] && world[d.to]) { set[d.to] = true; q.push(d.to); } });
+    if (!cache[R.id]) prerender(R);
+    var flade = cache[R.id][0], taget = {};
+    R.doors.forEach(function (d) {
+      var inde = world[d.to];
+      if (!inde || inde.outdoor || taget[d.to]) return;
+      taget[d.to] = true;
+      var maal = { map: d.to, x: d.tx, y: d.ty };
+      pins.push({ navn: inde.name, x: d.x * T + 8, y: d.y * T + 8, art: 'sted', maal: maal });
+      steder.push({ navn: inde.name, maal: maal, valgt: !!valgt && !valgt.npc && valgt.map === d.to });
+    });
+    // missionen
+    var mt = K.mainTarget(S), mp = mt && mt.t ? posOf(mt.t) : null;
+    if (mp && set[mp[0]]) {
+      var xy = mp[0] === R.id ? [mp[1], mp[2]] : doorToward(R.id, mp[0]);
+      if (xy) pins.push({ navn: mt.q.title, x: xy[0] * T + 8, y: xy[1] * T + 8, art: 'mission', maal: { mission: true } });
+    }
+    // dig selv (er du indenfor, står du ved husets dør)
+    var her = S.map === R.id ? [S.x, S.y] : doorToward(R.id, S.map);
+    if (her) pins.push({ navn: 'Her er du', x: her[0] * T + 8, y: her[1] * T + 8, art: 'her' });
+    // personer, der står i området lige nu
+    Object.keys(K.npcs).forEach(function (id) {
+      var n = K.npcs[id], p = n.pos && n.pos(S);
+      if (!p || !set[p.map] || !n.name) return;
+      var navn = n.name.split(',')[0];
+      personer.push({ navn: navn, sted: p.map === R.id ? 'ude' : world[p.map].name, maal: { npc: id, map: p.map, x: p.x, y: p.y },
+                      valgt: !!valgt && valgt.npc === id });
+    });
+    return { titel: 'Kort: ' + R.name, flade: flade, pins: pins, steder: steder, personer: personer,
+             mission: mt && mt.q ? { navn: mt.q.title } : null, valgt: valgt ? valgt.navn : '' };
+  }
+  async function visKort() {
+    var v = await UI.kort(kortData());
+    if (!v) return;
+    if (v.mission) { valgt = null; UI.toast('Pilen viser vej til missionen igen.'); }
+    else if (v.maal) { valgt = { navn: v.navn, npc: v.maal.npc, map: v.maal.map, x: v.maal.x, y: v.maal.y }; UI.toast('Pilen viser vej til <b>' + RB.esc(v.navn) + '</b>.'); }
+  }
+  function openMap() { if (busy || UI.isOpen()) return; heldOrder = []; run(visKort); }
+
+  // Den hurtige guide: første gang i spillet, og igen fra menuen
+  async function visGuide(igen) {
+    if (!igen && S.seen.guide) return;
+    await UI.guide({});
+    S.seen.guide = true;
   }
   // Fuld skærm. Knappen skjules, hvor browseren ikke kan (fx iPhone-Safari).
   var root = document.documentElement;
@@ -627,6 +723,7 @@
   });
   document.getElementById('btn-book').addEventListener('click', openBook);
   document.getElementById('btn-menu').addEventListener('click', openMenu);
+  document.getElementById('btn-map').addEventListener('click', openMap);
 
   // Berøring: joystick og knapper dukker op første gang, nogen rører
   // skærmen — og gemmer sig igen efter 5 sekunder uden berøring.
@@ -678,6 +775,7 @@
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { zone.addEventListener(ev, function (e) { if (e.pointerId === stickId) endStick(); }); });
   document.getElementById('t-act').addEventListener('pointerdown', function (e) { e.preventDefault(); RB.audio.unlock(); if (!UI.advance()) interact(); });
   document.getElementById('t-book').addEventListener('pointerdown', function (e) { e.preventDefault(); openBook(); });
+  document.getElementById('t-map').addEventListener('pointerdown', function (e) { e.preventDefault(); openMap(); });
 
   // ---------------------------------------------------------------- tryk på verden
   // Tryk på en person eller ting: står man lige ved den, vender man sig og
@@ -846,6 +944,7 @@
     }
     if ((choice === 'continue' || choice === 'naeste') && saved) {
       S = saved; RB.state = S; if (!S.q.q0) S.q.q0 = 'active'; begin();
+      if (!S.seen.guide) await run(visGuide);
       if (choice === 'naeste') { await run(naesteKapitel); return; }
       UI.toast('Velkommen tilbage, <b>' + RB.esc(S.name) + '</b>!');
       return;
@@ -854,7 +953,7 @@
     var who0 = await UI.create(K.classes, profil.look);
     S = fresh(profil.navn, who0.cls); RB.state = S;
     begin(); save();
-    await run(function () { return K.script.intro(g); });
+    await run(async function () { await visGuide(); await K.script.intro(g); });
   }
 
   // Fototilstand: stiller en scene op til hjemmesidens skærmbilleder

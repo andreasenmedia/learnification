@@ -35,7 +35,7 @@ switch (handling()) {
 case 'login':
     bremse('elevlogin', ip(), 30, 900, false);
     $kode = ren_kode(felt('kode', 30));
-    $e = $kode === '' ? null : en('SELECT e.*, g.konto_id, k.status, k.type FROM elever e
+    $e = $kode === '' ? null : en('SELECT e.*, g.konto_id, k.status, k.type, k.test, k.test_start FROM elever e
                                    JOIN grupper g ON g.id = e.gruppe_id
                                    JOIN konti k ON k.id = g.konto_id
                                    WHERE e.kode = ?', [$kode]);
@@ -50,7 +50,12 @@ case 'login':
     log_ind((int) $e['konto_id'], (int) $e['id'],
             $e['type'] === 'skole' ? SKOLEELEV_LEVETID : HJEMMEBARN_LEVETID);
     kør('UPDATE elever SET sidst_inde = ? WHERE id = ?', [time(), $e['id']]);
-    svar(['ok' => true, 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon']]);
+    $ud = ['ok' => true, 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon']];
+    // Skoletest: læreren har valgt, hvor børnene starter
+    if (!empty($e['test']) && in_array($e['test_start'], ['runeborg', 'regnehelten', 'biblioteket'], true)) {
+        $ud['til'] = '/spil/' . $e['test_start'] . '/';
+    }
+    svar($ud);
 }
 
 fejl('Ukendt handling.', 404);

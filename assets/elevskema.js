@@ -10,15 +10,15 @@
 (function () {
   if (!/(?:^|;\s*)lf_test=1/.test(document.cookie) || !/(?:^|;\s*)lf_in=elev\./.test(document.cookie)) return;
 
-  var spil = (location.pathname.match(/\/spil\/(runeborg|regnehelten)\//) || [])[1] || 'oversigt';
+  var spil = (location.pathname.match(/\/spil\/(runeborg|regnehelten|biblioteket)\//) || [])[1] || 'oversigt';
   var aabent = false, udsat = 0, bg = null, tast = null;
 
   var css = document.createElement('style');
   css.textContent =
     '#lf-skema{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:14px;background:rgba(10,7,16,.8);' +
-    'font:20px/1.35 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color:#f4ecdc;overflow:auto}' +
+    'font:clamp(14px,3.1vh,20px)/1.35 "Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;color:#f4ecdc;overflow:auto}' +
     '#lf-skema .vindue{width:min(100%,640px);background:#1f1830;border:3px solid #f4ecdc;padding:22px 22px 18px;' +
-    'box-shadow:0 0 0 3px #140f1c,6px 6px 0 3px rgba(0,0,0,.45);text-align:center}' +
+    'box-shadow:0 0 0 3px #140f1c,6px 6px 0 3px rgba(0,0,0,.45);text-align:center;max-height:100%;overflow:auto}' +
     '#lf-skema .lille{font-size:.78em;letter-spacing:.12em;text-transform:uppercase;color:#ffcc4d;margin:0 0 6px}' +
     '#lf-skema h2{margin:0 0 16px;font-size:1.5em;line-height:1.2;color:#f4ecdc}' +
     '#lf-skema .valg{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}' +
@@ -34,7 +34,8 @@
     '#lf-skema .senere{margin-top:12px;background:none;border:0;color:#b9aed6;font:inherit;font-size:.8em;text-decoration:underline;cursor:pointer}' +
     '#lf-skema .tak .e{font-size:3em}' +
     '#lf-skema .fortsaet{margin-top:14px;padding:10px 26px;font:inherit;font-weight:700;color:#140f1c;background:#ffcc4d;border:3px solid #fff3c4;box-shadow:0 4px 0 #140f1c;cursor:pointer}' +
-    '@media (max-height:520px){#lf-skema .valg button{min-height:68px}#lf-skema h2{margin-bottom:10px}}';
+    '@media (max-height:700px){#lf-skema .vindue{padding:14px 16px 12px}#lf-skema .valg button{min-height:clamp(54px,12vh,92px);padding:6px}#lf-skema h2{margin-bottom:10px}#lf-skema .prik{margin-top:10px}}' +
+    '@media (max-height:420px){#lf-skema .valg .e{font-size:1.6em}#lf-skema .valg button{min-height:48px;flex-basis:110px}#lf-skema h2{font-size:1.2em;margin-bottom:6px}}';
   document.head.appendChild(css);
 
   function el(tag, klasse, tekst) {
@@ -159,14 +160,48 @@
     spoerg();
   }
 
+  /* Live-visning: ser en voksen med fra /admin#test, svarer pulsen se:true, og siden sender
+     så et lille skærmbillede af spillet hvert 1,5. sekund (+ den tekst, der står på skærmen).
+     Ser ingen med, sendes der ingenting. Serveren gemmer højst ét billede og sletter det igen. */
+  var liveTimer = null, liveSender = false;
+
+  function sendLive() {
+    var c = document.getElementById('screen');
+    if (!c || document.hidden || liveSender) return;
+    var url;
+    try {
+      url = c.toDataURL('image/jpeg', 0.7);
+      if (url.length > 55000) url = c.toDataURL('image/jpeg', 0.4);   // serveren tager højst 60 kB
+      if (url.length > 55000) return;
+    } catch (e) { return; }
+    var lag = document.getElementById('layer');
+    var tekst = lag ? (lag.innerText || '') : '';
+    if (!tekst.trim() && window.LFLive && LFLive.info) { try { tekst = LFLive.info() || ''; } catch (e) { /* ingen tekst */ } }
+    liveSender = true;
+    fetch('/api/test.php', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-LF': '1' },
+      body: JSON.stringify({ handling: 'live', billede: url, tekst: tekst.replace(/\s+/g, ' ').trim().slice(0, 500) })
+    }).then(function (r) { return r.json(); })
+      .then(function (d) { if (!d || !d.se) stopLive(); })
+      .catch(function () { /* næste billede prøver igen */ })
+      .then(function () { liveSender = false; });
+  }
+  function startLive() { if (!liveTimer) { liveTimer = setInterval(sendLive, 1500); sendLive(); } }
+  function stopLive() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } }
+
   function tjek() {
-    if (aabent || window.LF_MODAL || document.hidden || Date.now() < udsat) return;
-    fetch('/api/test.php?handling=skema_aktuel', { credentials: 'same-origin', cache: 'no-store' })
+    if (document.hidden) return;
+    fetch('/api/test.php?handling=skema_aktuel&spil=' + spil, { credentials: 'same-origin', cache: 'no-store' })
       .then(function (r) { return r.json(); })
-      .then(function (d) { if (d && d.ok && d.skema && !aabent) vis(d.skema); })
+      .then(function (d) {
+        if (!d || !d.ok) return;
+        if (d.se) startLive(); else stopLive();
+        if (d.skema && !aabent && !window.LF_MODAL && Date.now() >= udsat) vis(d.skema);
+      })
       .catch(function () { /* ingen forbindelse lige nu — vi prøver igen om lidt */ });
   }
 
   setTimeout(tjek, 1500);
-  setInterval(tjek, 8000);
+  setInterval(tjek, 5000);
 })();

@@ -10,7 +10,8 @@
 <link rel="stylesheet" href="/assets/skrifter/runeborg.css?v=3">
 <link rel="stylesheet" href="/spil/runeborg/runeborg.css?v=6">
 <link rel="stylesheet" href="/spil/faelles/figur.css?v=1">
-<link rel="stylesheet" href="biblioteket.css?v=1">
+<link rel="stylesheet" href="biblioteket.css?v=2">
+<link rel="stylesheet" href="/spil/faelles/vinduer.css?v=19">
 </head>
 <body>
 
@@ -23,6 +24,7 @@
       <div id="hud-right">
         <span class="hud-chip" title="Præstationer"><i class="ico ico-star"></i><b id="hud-praes-tekst">0/0</b></span>
         <span class="hud-chip" id="hud-tid" title="Spilletid tilbage" hidden><i class="ico ico-tid"></i><b id="hud-tid-tekst"></b></span>
+        <button class="hud-btn" id="btn-map" type="button" title="Kortet (M)">Kort</button>
         <button class="hud-btn" id="btn-full" type="button" title="Fuld skærm (F)" aria-label="Fuld skærm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></button>
         <button class="hud-btn" id="btn-menu" type="button" title="Menu (Esc)">Menu</button>
       </div>
@@ -39,6 +41,7 @@
       </div>
       <div id="tbtns">
         <button id="t-act" type="button">E</button>
+        <button id="t-map" type="button">Kort</button>
       </div>
     </div>
     <div id="vkbd" hidden aria-hidden="true"></div>
@@ -59,13 +62,16 @@ LFSpil.start({ spil: 'runeborg', kraevLogin: true, aktiv: false,
 <script src="/spil/faelles/figur.js?v=2"></script>
 <script src="/spil/faelles/praestationer.js?v=1"></script>
 <script src="/spil/faelles/profil.js?v=2"></script>
-<script src="/spil/faelles/editor.js?v=1"></script>
+<script src="/spil/faelles/editor.js?v=2"></script>
+<script src="/spil/faelles/kort.js?v=3"></script>
+<script src="/spil/faelles/guide.js?v=1"></script>
 <script src="js/art.js?v=1"></script>
 <script src="js/audio.js?v=1"></script>
 <script src="js/world.js?v=1"></script>
 <script src="js/voice.js?v=1"></script>
-<script src="js/ui.js?v=1"></script>
+<script src="js/ui.js?v=4"></script>
 <script src="js/content.js?v=1"></script>
-<script src="js/game.js?v=1"></script>
+<script src="js/game.js?v=2"></script>
+<script src="/assets/elevskema.js?v=5" defer></script>
 </body>
 </html>

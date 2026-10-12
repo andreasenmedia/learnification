@@ -109,6 +109,20 @@
     // ---------------------------------------------------------------- port
     // Vinduet ved en port: hvad er spillet, hvor langt er man, og vil man ind?
     // info: {navn, tekst, status, passer, tidSlut}. Giver true (gå ind) eller false.
+    // Kortet (M) og den hurtige guide — vinduerne bygges i /spil/faelles/kort.js og guide.js
+    kort: function (o) {
+      return new Promise(function (resolve) {
+        var bg; function done(v) { pop(bg); resolve(v); }
+        bg = LFKort.bygg(o, done); push(bg); bg._fokus.focus();
+      });
+    },
+    guide: function (o) {
+      return new Promise(function (resolve) {
+        var bg; function done() { pop(bg); resolve(); }
+        bg = LFGuide.bygg(o, done); push(bg); bg._fokus.focus();
+      });
+    },
+
     port: function (info) {
       return new Promise(function (resolve) {
         var bg = el('div', 'modal-bg'), m = el('div', 'menu px'); bg.appendChild(m);
@@ -169,8 +183,11 @@
         var bg = el('div', 'modal-bg'), m = el('div', 'menu praes-vindue px'); bg.appendChild(m);
         m.setAttribute('role', 'dialog');
         var har = (profil && profil.praes) || {}, a = LFPraes.antal(profil, spil);
-        m.appendChild(el('h2', null, spil ? esc(LFPraes.SPIL[spil]) : 'Alle præstationer'));
-        m.appendChild(el('p', 'praes-sum', '<b>' + a.faerdig + '</b> af ' + a.ialt + ' præstationer'));
+        // Overskrift og Luk bliver stående øverst, mens listen ruller under dem
+        var top = el('div', 'praes-top'), luk = el('button', 'btn small primary', 'Luk'); luk.type = 'button';
+        top.appendChild(el('h2', null, spil ? esc(LFPraes.SPIL[spil]) : 'Alle præstationer'));
+        top.appendChild(el('p', 'praes-sum', '<b>' + a.faerdig + '</b> af ' + a.ialt + ' præstationer'));
+        top.appendChild(luk); m.appendChild(top);
         function dato(d) { var t = ('000000' + d).slice(-6); return t.slice(4, 6) + '.' + t.slice(2, 4) + '.20' + t.slice(0, 2); }
         (spil ? [spil] : ['runeborg', 'regnehelten', 'bib']).forEach(function (sp) {
           if (!spil) { var n = LFPraes.antal(profil, sp); m.appendChild(el('h3', null, esc(LFPraes.SPIL[sp]) + ' <small>' + n.faerdig + '/' + n.ialt + '</small>')); }
@@ -188,7 +205,6 @@
           });
           m.appendChild(liste);
         });
-        var luk = el('button', 'btn primary', 'Luk'); luk.type = 'button'; m.appendChild(luk);
         function ud() { pop(bg); resolve(); }
         luk.addEventListener('click', ud);
         bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); ud(); } });
@@ -200,19 +216,21 @@
     // Giver 'udseende', hvis man vil skifte tøj
     menu: function () {
       return new Promise(function (resolve) {
-        var bg = el('div', 'modal-bg'), m = el('div', 'menu px'); bg.appendChild(m);
+        var bg = el('div', 'modal-bg'), m = el('div', 'menu pause px'); bg.appendChild(m);
         m.appendChild(el('h2', null, 'Pause'));
         function toggle(label, get, set) {
           var b = el('button', 'btn toggle'); b.type = 'button';
           var paint = function () { b.innerHTML = '<span>' + label + '</span><span>' + (get() ? 'Til' : 'Fra') + '</span>'; };
           b.addEventListener('click', function () { set(!get()); paint(); BB.saveSettings(); }); paint(); m.appendChild(b); return b;
         }
-        var first = el('button', 'btn', 'Fortsæt'); first.type = 'button'; m.appendChild(first);
+        var first = el('button', 'btn primary', 'Fortsæt'); first.type = 'button'; m.appendChild(first);
+        var guideB = el('button', 'btn', 'Sådan spiller du'); guideB.type = 'button'; m.appendChild(guideB);
+        guideB.addEventListener('click', function () { pop(bg); resolve('guide'); });
         var skift = el('button', 'btn', 'Skift udseende'); skift.type = 'button'; m.appendChild(skift);
         skift.addEventListener('click', function () { pop(bg); resolve('udseende'); });
-        toggle('Musik', function () { return BB.audio.musicOn; }, function (v) { BB.audio.setMusic(v); });
+        toggle('Musik (L)', function () { return BB.audio.musicOn; }, function (v) { BB.audio.setMusic(v); });
         toggle('Lydeffekter', function () { return BB.audio.sfxOn; }, function (v) { BB.audio.setSfx(v); });
-        toggle('Oplæsning af dialog', function () { return BB.voice.on; }, function (v) { BB.voice.on = v; });
+        toggle('Oplæsning', function () { return BB.voice.on; }, function (v) { BB.voice.on = v; });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
         if (BB.canFullscreen) toggle('Fuld skærm', function () { return BB.isFullscreen(); }, function () { BB.toggleFullscreen(); });
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/'; home.style.textDecoration = 'none'; m.appendChild(home);
@@ -226,7 +244,6 @@
           var ud = el('button', 'btn', 'Log ud (' + hvem.replace(/[<>&]/g, '') + ')'); ud.type = 'button'; m.appendChild(ud);
           ud.addEventListener('click', function () { LFSpil.logUd('/login'); });
         }
-        m.appendChild(el('div', 'keys', '<span class="key">&#8592;&#8593;&#8594;&#8595;</span><span>Gå (eller WASD)</span><span class="key">E</span><span>Tal, undersøg, gå ind</span><span class="key">F</span><span>Fuld skærm</span><span class="key">M</span><span>Musik til/fra</span><span class="key">Esc</span><span>Denne menu</span>'));
         function done() { pop(bg); resolve(); }
         first.addEventListener('click', done);
         bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); done(); } });

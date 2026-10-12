@@ -86,7 +86,7 @@ $h = handling();
 
 // ------------------------------------------------------------ barnet
 
-if ($h === 'skema_aktuel' || $h === 'skema_svar') {
+if ($h === 'skema_aktuel' || $h === 'skema_svar' || $h === 'live') {
     $x = hvem();
     if (!$x || !$x['elev'] || empty($x['konto']['test'])) {
         // Ikke en testrunde: der er aldrig noget skema, og det er ikke en fejl
@@ -99,11 +99,35 @@ if ($h === 'skema_aktuel' || $h === 'skema_svar') {
     $elev_id = (int) $x['elev']['id'];
 
     if ($h === 'skema_aktuel') {
+        // Pulsen: barnet siger, hvor det er (også i Eventyrbiblioteket, der ikke har spilletid)
+        $sted = preg_replace('/[^a-z]/', '', strtolower((string) ($_GET['spil'] ?? '')));
+        if (in_array($sted, ['runeborg', 'regnehelten', 'biblioteket'], true)) {
+            kør('UPDATE elever SET sidst_inde = ?, sidst_sted = ? WHERE id = ?', [time(), $sted, $elev_id]);
+        }
+        // Ser en voksen med lige nu? Så sender barnet skærmbilleder (api/test.php?handling=live)
+        $se = (int) vaerdi('SELECT set_af FROM testlive WHERE elev_id = ?', [$elev_id]) > time() - 10;
         $s = en('SELECT id FROM testskema WHERE konto_id = ? AND lukket IS NULL ORDER BY id DESC LIMIT 1', [$konto_id]);
         if ($s && !vaerdi('SELECT 1 FROM testsvar WHERE testskema_id = ? AND elev_id = ?', [$s['id'], $elev_id])) {
-            svar(['ok' => true, 'skema' => ['id' => (int) $s['id'], 'spoergsmaal' => skema_for_barn()]]);
+            svar(['ok' => true, 'se' => $se, 'skema' => ['id' => (int) $s['id'], 'spoergsmaal' => skema_for_barn()]]);
         }
-        svar(['ok' => true, 'skema' => null]);
+        svar(['ok' => true, 'se' => $se, 'skema' => null]);
+    }
+
+    if ($h === 'live') {
+        kraev_egen_side();
+        $billede = (string) (input()['billede'] ?? '');
+        // Et lille JPEG som data-URL (det vi selv sender fra spillets lærred). Ingen regex på hele billedet.
+        $for = 'data:image/jpeg;base64,';
+        $b64 = substr($billede, strlen($for));
+        if (strncmp($billede, $for, strlen($for)) !== 0 || strlen($b64) < 20 || strlen($b64) > 60000
+            || strspn($b64, 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=') !== strlen($b64)) {
+            fejl('Skærmbilledet kunne ikke bruges.');
+        }
+        $tekst = mb_substr(preg_replace('/\s+/u', ' ', (string) (input()['tekst'] ?? '')) ?? '', 0, 500);
+        // Kun hvis en voksen faktisk ser med — ellers gemmes intet
+        $rk = kør('UPDATE testlive SET billede = ?, tekst = ?, tid = ? WHERE elev_id = ? AND set_af > ?',
+                  [$billede, $tekst, time(), $elev_id, time() - 10]);
+        svar(['ok' => true, 'se' => $rk > 0]);
     }
 
     kraev_egen_side();
@@ -140,12 +164,19 @@ if ($h === 'skema_aktuel' || $h === 'skema_svar') {
 
 kraev_admin();
 
+/** Hvor børnene starter: kun de tre steder, ellers Eventyrbiblioteket (tom) */
+function start_spil(string $v): string
+{
+    return in_array($v, ['runeborg', 'regnehelten'], true) ? $v : '';
+}
+
 /** En testrunde som admin ser den i listen */
 function runde_ud(array $k): array
 {
     $s = en('SELECT id, aabnet FROM testskema WHERE konto_id = ? AND lukket IS NULL ORDER BY id DESC LIMIT 1', [$k['id']]);
     $n = (int) vaerdi('SELECT COUNT(*) FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?', [$k['id']]);
     return ['id' => (int) $k['id'], 'navn' => $k['navn'], 'oprettet' => (int) $k['oprettet'], 'spillere' => $n,
+            'start' => (string) ($k['test_start'] ?? ''),
             'gruppe' => (int) vaerdi('SELECT id FROM grupper WHERE konto_id = ? ORDER BY id LIMIT 1', [$k['id']]),
             'skema_aaben' => $s ? (int) $s['id'] : null,
             'skemaer' => (int) vaerdi('SELECT COUNT(*) FROM testskema WHERE konto_id = ?', [$k['id']]),
@@ -169,15 +200,16 @@ case 'opret':
         fejl('Skriv, hvor mange spillere der er (1-' . TEST_MAKS_SPILLERE . ').');
     }
     $nu = time();
+    $start = start_spil(felt('start', 20));
     db()->beginTransaction();
     try {
         $dato = date('j/n');
-        kør("INSERT INTO konti (type, navn, kontakt, bynavn, email, kodeord, status, oprettet, test, fri_adgang)
-             VALUES ('skole', ?, ?, '', ?, ?, 'godkendt', ?, 1, 1)",
+        kør("INSERT INTO konti (type, navn, kontakt, bynavn, email, kodeord, status, oprettet, test, fri_adgang, test_start)
+             VALUES ('skole', ?, ?, '', ?, ?, 'godkendt', ?, 1, 1, ?)",
             ['Test: ' . ($navn !== '' ? $navn : 'skole') . ' ' . $dato, $navn !== '' ? $navn : 'Testrunde',
              'test-' . bin2hex(random_bytes(6)) . '@test.invalid',
              // Ingen kender kodeordet, så kontoen kan kun bruges af børnenes koder og af admin
-             password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), $nu]);
+             password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), $nu, $start]);
         $id = (int) db()->lastInsertId();
         kør('INSERT INTO grupper (konto_id, navn, klassetrin, kode, oprettet) VALUES (?, ?, NULL, ?, ?)',
             [$id, 'Testklassen', ny_kode(), $nu]);
@@ -189,6 +221,32 @@ case 'opret':
         throw $e;
     }
     svar(['ok' => true, 'id' => $id]);
+
+case 'indstil':
+    kraev_egen_side();
+    $k = runde(tal('id'));
+    kør('UPDATE konti SET test_start = ? WHERE id = ?', [start_spil(felt('start', 20)), $k['id']]);
+    svar(['ok' => true]);
+
+case 'live_hent':
+    // Den voksne ser med: barnets side begynder at sende skærmbilleder (mellem 1 og 10 sek.)
+    $k = runde(tal('id'));
+    $elev = tal('elev');
+    if (!vaerdi('SELECT 1 FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE e.id = ? AND g.konto_id = ?', [$elev, $k['id']])) {
+        fejl('Spilleren findes ikke i runden.', 404);
+    }
+    $nu = time();
+    if (!kør('UPDATE testlive SET set_af = ? WHERE elev_id = ?', [$nu, $elev])) {
+        kør("INSERT INTO testlive (elev_id, billede, tekst, tid, set_af) VALUES (?, '', '', 0, ?)", [$elev, $nu]);
+    }
+    $r = en('SELECT billede, tekst, tid FROM testlive WHERE elev_id = ?', [$elev]);
+    svar(['ok' => true, 'billede' => $r['billede'], 'tekst' => $r['tekst'], 'tid' => (int) $r['tid'], 'nu' => $nu]);
+
+case 'live_stop':
+    kraev_egen_side();
+    $k = runde(tal('id'));
+    kør('DELETE FROM testlive WHERE elev_id IN (SELECT e.id FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?)', [$k['id']]);
+    svar(['ok' => true]);
 
 case 'flere':
     kraev_egen_side();
@@ -223,7 +281,7 @@ case 'status':
             $svaret[(int) $r['elev_id']] = true;
         }
     }
-    $sum = ['inde' => 0, 'spillere' => 0, 'lavet' => 0, 'ialt' => 0, 'pr_spil' => array_fill_keys(array_keys(SPIL), 0)];
+    $sum = ['inde' => 0, 'spillere' => 0, 'lavet' => 0, 'ialt' => 0, 'pr_spil' => array_fill_keys(array_merge(array_keys(SPIL), ['biblioteket']), 0)];
     foreach (spillere((int) $k['id']) as $e) {
         $id = (int) $e['id'];
         $s = $senest[$id] ?? null;
@@ -239,6 +297,11 @@ case 'status':
         // Pulsen kommer hvert halve minut, mens barnet spiller
         $stat = $alder === null ? 'ude' : ($alder < 80 ? 'groen' : ($alder < 300 ? 'gul' : 'ude'));
         $spil_nu = $s && $stat !== 'ude' ? $s[0] : null;
+        // Eventyrbiblioteket har ingen spilletid: pulsen (elevskema.js) fortæller, at barnet er der
+        $sted_nu = $stat !== 'ude' ? (string) ($e['sidst_sted'] ?? '') : '';
+        if ($sted_nu === 'biblioteket' && (int) $e['sidst_inde'] >= ($s[1] ?? 0)) {
+            $spil_nu = 'biblioteket';
+        }
         $spil = [];
         foreach (array_keys(SPIL) as $sp) {
             $g = $gemt[$id][$sp] ?? null;
@@ -351,7 +414,7 @@ case 'goer_rigtig':
         // Eleverne, deres koder og gemte spil bliver stående. Kontoen får den almindelige
         // prøvetid, og velkomst og påmindelse springes over — invitationen er velkomsten.
         kør("UPDATE konti SET type = 'skole', navn = ?, kontakt = ?, bynavn = ?, email = ?, status = 'godkendt',
-             test = 0, fri_adgang = 0, velkomst_sendt = ?, paamindelse_sendt = ? WHERE id = ?",
+             test = 0, fri_adgang = 0, test_start = '', velkomst_sendt = ?, paamindelse_sendt = ? WHERE id = ?",
             [$f['navn'], $f['kontakt'], $f['bynavn'], $f['email'], $nu, $nu, $k['id']]);
         if ($klasse !== '') {
             kør('UPDATE grupper SET navn = ? WHERE konto_id = ?', [$klasse, $k['id']]);
