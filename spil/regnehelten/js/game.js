@@ -190,6 +190,17 @@
   function facing() { return facingFrom(S.x, S.y, S.dir); }
 
   // ---------------------------------------------------------------- g: hjælpere til historien
+  // Kapitlet starter blidt: 1-3 opgaver i første mission, 3-5 i bossen. Rækkefølgen bevares.
+  function trimSaet(qid, specs, bloom) {
+    var m = /q(\d)$/.exec(qid);
+    if (!m || K.quest(qid).side) return specs;
+    var lo = 1 + Math.round(+m[1] * 2 / 5), n = Math.min(specs.length, lo + ((Math.random() * 3) | 0));
+    var must = bloom === 'SKAB' ? specs.length - 2 : -1;      // bossen skal stadig måle "byg selv"
+    var idx = specs.map(function (_, i) { return i; }).filter(function (i) { return i !== must; });
+    for (var i = idx.length - 1; i > 0; i--) { var j = (Math.random() * (i + 1)) | 0, t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+    var keep = idx.slice(0, must >= 0 ? n - 1 : n); if (must >= 0) keep.push(must);
+    return keep.sort(function (a, b) { return a - b; }).map(function (i) { return specs[i]; });
+  }
   var g = {
     get S() { return S; },
     get world() { return world; },
@@ -198,8 +209,8 @@
     // Et helt opgavesæt. Giver {ratio} tilbage, eller null, hvis man trykkede "Senere".
     saet: async function (qid, saetNoegle, scene) {
       var specs = S.sets[qid];
-      if (!specs) { specs = S.sets[qid] = O.lav(saetNoegle, S.klasse); save(); }
       var bloom = O.SAET[saetNoegle].bloom;
+      if (!specs) { specs = S.sets[qid] = trimSaet(qid, O.lav(saetNoegle, S.klasse), bloom); save(); }
       for (var i = 0; i < specs.length; i++) {
         var key = qid + ':' + i;
         if (S.loest[key]) continue;

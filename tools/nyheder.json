@@ -2,6 +2,16 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "regnehelten-blidere-start",
+      "dato": "2026-10-12",
+      "maerke": "Spil",
+      "titel": "Regnehelten starter blidere",
+      "kort": "Missionerne i Regnehelten er nu korte i starten af hvert kapitel og vokser gradvist, så der ikke er fem opgaver hver gang.",
+      "tekst": [
+        "Før skulle man igennem fem regneopgaver i hver mission. Nu begynder hvert kapitel med 1–3 opgaver, og antallet stiger gradvist, så den sidste mission i kapitlet har 3–5 opgaver. Det giver et blidere afsæt, især for børn der er usikre, og de længere missioner kommer først, når barnet er kommet godt i gang."
+      ]
+    },
+    {
       "id": "skarpere-video",
       "dato": "2026-10-09",
       "maerke": "Siden",

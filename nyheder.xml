@@ -6,7 +6,15 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Fri, 09 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 12 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Regnehelten starter blidere</title>
+      <link>https://learnification.dk/nyheder#regnehelten-blidere-start</link>
+      <guid isPermaLink="false">learnification-nyhed-regnehelten-blidere-start</guid>
+      <pubDate>Mon, 12 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>Før skulle man igennem fem regneopgaver i hver mission. Nu begynder hvert kapitel med 1–3 opgaver, og antallet stiger gradvist, så den sidste mission i kapitlet har 3–5 opgaver. Det giver et blidere afsæt, især for børn der er usikre, og de længere missioner kommer først, når barnet er kommet godt i gang.</p>]]></description>
+    </item>
     <item>
       <title>Skarpere optagelser på forsiden</title>
       <link>https://learnification.dk/nyheder#skarpere-video</link>
