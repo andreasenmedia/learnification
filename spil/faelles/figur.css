@@ -1,0 +1,19 @@
+/* Figureditoren — bruger spillenes egne farver (--panel-2, --edge-2, --gold ...),
+   så den ser ens ud i Eventyrbiblioteket, Runeborg og Regnehelten. */
+.fig-ed { display: grid; gap: 12px; text-align: left; }
+.fig-navn { text-align: center; }
+.fig-krop { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; }
+@media (max-width: 560px) { .fig-krop { grid-template-columns: 1fr; justify-items: center; } }
+.fig-prev canvas { display: block; width: 128px; height: 128px; image-rendering: pixelated; border: 3px solid var(--edge-2); background: var(--panel-2); }
+.fig-rows { display: grid; gap: 6px; width: 100%; }
+.fig-row { display: grid; grid-template-columns: 6.5em auto minmax(5em, 1fr) auto; gap: 8px; align-items: center; }
+.fig-row[hidden] { display: none; }
+.fig-row .lbl { color: var(--txt-soft); font-size: .9em; }
+.fig-row .val { text-align: center; }
+.fig-row .arr { background: var(--ink); border: 2px solid var(--edge-2); color: var(--txt); width: 2em; height: 1.8em; padding: 0; }
+.fig-row .arr:hover, .fig-row .arr:focus-visible { border-color: var(--gold); outline: none; }
+.fig-prove { display: inline-block; width: 2.6em; height: 1.1em; border: 2px solid var(--edge); vertical-align: middle; }
+.fig-rows .btn.small { justify-self: start; margin-top: 4px; }
+.fig-laast { border: 2px dashed var(--edge-2); padding: 8px 12px; color: var(--txt-soft); font-size: .9em; }
+.fig-laast ul { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.fig-laast small { color: var(--txt-soft); }

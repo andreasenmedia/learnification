@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vælg et spil — Learnification</title>
-<!-- Spiloversigten: her lander man lige efter login og oprettelse, og
-     "Spil nu" peger hertil. Siden kræver login ligesom spillene.
-     Gamle links og QR-koder til /spil/ (dengang Regnehelten) ender også her. -->
+<!-- Spiloversigten: her lander voksne lige efter login og oprettelse, og "Spil nu" peger hertil.
+     Børn lander i stedet i Eventyrbiblioteket (/spil/biblioteket/), men kan også se oversigten her.
+     Siden kræver login ligesom spillene. Gamle links og QR-koder til /spil/ ender også her. -->
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#faf7f0">
 <link rel="canonical" href="https://learnification.dk/spil/">
@@ -73,6 +73,17 @@
 
       <!-- Runeborg står først, ligesom alle andre steder på siden -->
       <div class="spilkort">
+        <!-- Eventyrbiblioteket: den åbne verden, hvor man går gennem portaler ind i spillene og ser sine præstationer -->
+        <article class="bibliotek" style="grid-column:1/-1;">
+          <a class="billede" href="/spil/biblioteket/" tabindex="-1" aria-hidden="true"><img src="/assets/billeder/biblioteket-hal.png" alt=""></a>
+          <div class="indhold">
+            <p class="alder"><span class="maerke ny">Åben verden</span></p>
+            <h2>Eventyrbiblioteket</h2>
+            <p>Gå rundt i biblioteket og vælg spil gennem portalerne. Her kan du også skifte tøj og se dine præstationer. Du spiller som den samme figur i alle spil.</p>
+            <p class="status" data-praes-i-alt></p>
+            <a class="btn btn-primary" href="/spil/biblioteket/">Gå ind i biblioteket</a>
+          </div>
+        </article>
         <article data-spil="runeborg">
           <a class="billede" href="/spil/runeborg/" tabindex="-1" aria-hidden="true"><img src="/assets/billeder/runeborg-by.png" alt=""></a>
           <div class="indhold">
@@ -80,6 +91,7 @@
             <h2>Runeborg</h2>
             <p>Opklar mysteriet om den grønne brønd i en 8-bit fantasyverden — med læsning, kildekritik, forsøg og data.</p>
             <p class="status" data-status></p>
+            <p class="status" data-praes></p>
             <a class="btn btn-primary" href="/spil/runeborg/" data-knap>Spil Runeborg</a>
           </div>
         </article>
@@ -90,6 +102,7 @@
             <h2>Regnehelten</h2>
             <p>En helt almindelig skoledag fuld af regneopgaver — med en matematikbog i tasken og ingen karakterer.</p>
             <p class="status" data-status></p>
+            <p class="status" data-praes></p>
             <a class="btn btn-primary" href="/spil/regnehelten/" data-knap>Spil Regnehelten</a>
           </div>
         </article>
@@ -115,6 +128,7 @@
 </main>
 
 <script src="/assets/konto.js?v=4"></script>
+<script src="/spil/faelles/praestationer.js?v=1"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -176,6 +190,20 @@
     });
   }
 
+  // "★ 3 af 13 præstationer" pr. spil, fra barnets fælles profil (api/profil.php). Mangler profilen, står der intet.
+  function praestationer() {
+    fetch('/api/profil.php?handling=hent', { credentials: 'same-origin', cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
+      var p = d && d.ok && d.data ? JSON.parse(d.data) : null;
+      if (!p || !p.praes) return;
+      function tael(spil) {
+        var liste = spil ? LFPraes.forSpil(spil) : LFPraes.KATALOG;
+        return liste.filter(function (pr) { return Object.prototype.hasOwnProperty.call(p.praes, pr.id); }).length + ' af ' + liste.length;
+      }
+      document.querySelectorAll('article[data-spil]').forEach(function (kort) { kort.querySelector('[data-praes]').textContent = '★ ' + tael(kort.dataset.spil) + ' præstationer'; });
+      document.querySelector('[data-praes-i-alt]').textContent = '★ ' + tael(null) + ' præstationer i alt';
+    }).catch(function () { /* så vises ingen tællere */ });
+  }
+
   // "Tilbage til …" i spillenes menu kommer hertil, så spillet har gemt som
   // barnet først (pagehide). Skiftet sker, FØR siden spørger, hvem der er
   // logget ind — ellers kan svaret komme bagefter og slette lf_in igen.
@@ -190,6 +218,7 @@
   foerst.then(function () { return LF.hent('konto', 'mig'); }).then(function (d) {
     if (!d.logget_ind) { location.replace('/login?til=' + encodeURIComponent('/spil/')); return; }
     tegn(d);
+    praestationer();
   }).catch(function (err) {
     $('indlaeser').hidden = true;
     $('fejl').hidden = false;

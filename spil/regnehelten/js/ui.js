@@ -259,7 +259,7 @@
         // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
         if (window.LF_SPILLER && window.LFSpil) {
           // Tilbage til spiloversigten; pagehide gemmer, før siden skifter
-          var andre = el('a', 'btn', 'Vælg et andet spil'); andre.href = '/spil/'; andre.style.textDecoration = 'none'; m.appendChild(andre);
+          var kid = LF_SPILLER.hvem === 'elev', andre = el('a', 'btn', kid ? 'Tilbage til Eventyrbiblioteket' : 'Vælg et andet spil'); andre.href = kid ? '/spil/biblioteket/' : '/spil/'; andre.style.textDecoration = 'none'; m.appendChild(andre);
           // Gik den voksne ind som barnet fra /konto, kan den voksne komme tilbage.
           // Skiftet sker på /spil/, så spillet når at gemme som barnet først (pagehide)
           if (LF_SPILLER.tilbage_til) {
@@ -324,17 +324,12 @@
       });
     },
 
-    // Navn, klassetrin og udseende. pre er det sidst gemte, så man ikke skal starte forfra med alt.
+    // Klassetrin. Navn og udseende kommer fra den fælles figur (se figur nedenfor og /spil/faelles/).
     create: function (pre) {
       return new Promise(function (resolve) {
-        var K = RH.content, O = RH.opgaver;
+        var O = RH.opgaver;
         var s = el('div', 'screen-full'), c = el('div', 'title-card px create'); s.appendChild(c);
-        c.appendChild(el('h2', null, 'Hvem er du?'));
-        var name = el('input', 'name-in'); name.maxLength = 12; name.placeholder = 'Dit navn'; name.setAttribute('aria-label', 'Dit navn');
-        name.value = (pre && pre.name) || '';
-        c.appendChild(name);
-        c.appendChild(el('p', 'tiny', 'Dit fornavn eller et kælenavn. Det bliver kun i spillet.'));
-        c.appendChild(el('h3', null, 'Hvilken klasse går du i?'));
+        c.appendChild(el('h2', null, 'Hvilken klasse går du i?'));
         var kl = el('div', 'klasser'), klasse = (pre && pre.klasse) || startKlasse() || O.STANDARD_KLASSE;
         var maal = el('p', 'tiny maal');
         O.KLASSER.forEach(function (k) {
@@ -348,19 +343,9 @@
           maal.textContent = O.trin(klasse).navn + ': ' + O.trin(klasse).maal;
         }
         c.appendChild(kl); c.appendChild(maal); paintK();
-        c.appendChild(el('h3', null, 'Sådan ser du ud'));
-        var look = Object.assign({}, K.STD_LOOK, (pre && pre.look) || {});
-        var ed = lookEditor(look); c.appendChild(ed.node);
         var go = btn('btn primary', 'Begynd'); c.appendChild(go);
-        function start() {
-          var n = name.value.trim().slice(0, 12);
-          if (!n) { name.focus(); name.classList.add('need'); UI.toast('Skriv lige dit navn først'); return; }
-          pop(s); resolve({ name: n, klasse: klasse, look: ed.look });
-        }
-        go.addEventListener('click', start);
-        name.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); start(); } e.stopPropagation(); });
-        name.addEventListener('input', function () { name.classList.remove('need'); });
-        push(s); name.focus(); RH.vkbd.attach(name, 'text');
+        go.addEventListener('click', function () { pop(s); resolve({ klasse: klasse }); });
+        push(s); go.focus();
       });
     },
 
@@ -461,19 +446,35 @@
       push(s); home.focus();
     },
 
-    // ---------------------------------------------------------------- pausespil: Klæd om
-    dressup: function (look0) {
+    // ---------------------------------------------------------------- figur
+    // Den fælles figur (/spil/faelles/): "Hvem er du?" første gang og "Klæd om".
+    // opt: {titel, tekst, knap, visNavn, navn, look, oplaast, kanLukke}. Giver {navn, look} — eller null, hvis man lukker.
+    figur: function (opt) {
       return new Promise(function (resolve) {
-        var bg = el('div', 'modal-bg'), m = el('div', 'menu px dress'); bg.appendChild(m);
-        m.appendChild(el('h2', null, 'Klæd om'));
-        var ed = lookEditor(Object.assign({}, look0)); m.appendChild(ed.node);
-        var row = el('div', 'end-row');
-        var keep = btn('btn', 'Behold mit tøj'), okB = btn('btn primary', 'Færdig');
-        row.appendChild(keep); row.appendChild(okB); m.appendChild(row);
-        keep.addEventListener('click', function () { pop(bg); resolve(null); });
-        okB.addEventListener('click', function () { pop(bg); resolve(ed.look); });
-        bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); pop(bg); resolve(null); } });
-        push(bg); okB.focus();
+        var bg = el('div', 'modal-bg'), m = el('div', 'menu fig-vindue px'); bg.appendChild(m);
+        m.setAttribute('role', 'dialog');
+        m.appendChild(el('h2', null, esc(opt.titel)));
+        if (opt.tekst) m.appendChild(el('p', 'tiny', esc(opt.tekst)));
+        var ok = el('button', 'btn primary', esc(opt.knap || 'Gem')); ok.type = 'button';
+        var ed = LFEditor.bygg({
+          visNavn: opt.visNavn, navn: opt.navn, look: opt.look, oplaast: opt.oplaast,
+          lyd: function () { RH.audio.sfx('blip'); },
+          tastatur: function (inp) { RH.vkbd.attach(inp, 'text'); },
+          enter: function () { ok.click(); }
+        });
+        m.appendChild(ed.node);
+        var row = el('div', 'end-row'); row.appendChild(ok);
+        var luk = null;
+        if (opt.kanLukke) { luk = el('button', 'btn', esc(opt.lukTekst || 'Luk uden at gemme')); luk.type = 'button'; row.appendChild(luk); }
+        m.appendChild(row);
+        function ud(v) { pop(bg); resolve(v); }
+        ok.addEventListener('click', function () {
+          if (opt.visNavn && !ed.navn) { RH.audio.sfx('blip'); ed.fokus(); return; }
+          ud({ navn: ed.navn, look: ed.look });
+        });
+        if (luk) luk.addEventListener('click', function () { ud(null); });
+        bg.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opt.kanLukke) { e.stopPropagation(); ud(null); } });
+        push(bg); if (opt.visNavn) ed.fokus(); else ok.focus();
       });
     },
 
@@ -490,7 +491,7 @@
         [bL, bM, bR, shoot].forEach(function (b) { ctrl.appendChild(b); });
         m.appendChild(ctrl);
         var stop = btn('btn small', 'Stop'); m.appendChild(stop);
-        var me = RH.makeSheet(look), keeperSheet = RH.makeSheet({ skin: '#be8b62', hair: '#2c221e', style: 'kort', cloth: '#e8c440', pants: '#3c404c' });
+        var me = LFFigur.makeSheet(look), keeperSheet = RH.makeSheet({ skin: '#be8b62', hair: '#2c221e', style: 'kort', cloth: '#e8c440', pants: '#3c404c' });
         var SHOTS = 5, shot = 0, goals = 0, aim = 1, phase = 'aim', power = 0, pdir = 1, timer = 0, keeper = 1, last = '', t = 0, raf = 0, prev = 0;
         var zones = [W / 2 - 38, W / 2, W / 2 + 38];
         function paintInfo() {
@@ -713,56 +714,6 @@
       return svg(114, s);
     }
   };
-
-  // ---------------------------------------------------------------- figureditor (ny figur og Klæd om)
-  function lookEditor(look) {
-    var K = RH.content, node = el('div', 'looked');
-    var prev = el('div', 'look-prev'), cv = RH.canvas(64, 64); prev.appendChild(cv); node.appendChild(prev);
-    var rows = el('div', 'look-rows'); node.appendChild(rows);
-    var step = 0;
-    var spec = [
-      ['Frisure', function () { return K.STYLES.map(function (s) { return s[0]; }); }, 'style', function (v) { return K.STYLES.filter(function (s) { return s[0] === v; })[0][1]; }],
-      ['Hårfarve', function () { return K.HAIRC; }, 'hair'],
-      ['Hudfarve', function () { return K.SKIN; }, 'skin'],
-      ['Trøje', function () { return K.CLOTH; }, 'cloth'],
-      ['Bukser', function () { return K.PANTS; }, 'pants'],
-      ['Ekstra', function () { return K.EXTRAS.map(function (s) { return s[0]; }); }, 'extra', function (v) { return K.EXTRAS.filter(function (s) { return s[0] === v; })[0][1]; }]
-    ];
-    function paint() {
-      var sheet = RH.makeSheet(look), c = cv.getContext('2d');
-      c.imageSmoothingEnabled = false; c.fillStyle = '#2a2140'; c.fillRect(0, 0, 64, 64);
-      c.drawImage(sheet, (step % 3) * 16, 0, 16, 16, 0, 2, 64, 64);
-    }
-    spec.forEach(function (sp) {
-      var r = el('div', 'look-row'); r.appendChild(el('span', 'lbl', sp[0]));
-      var l = btn('arr', '&#9664;'), v = el('span', 'val'), rr = btn('arr', '&#9654;');
-      l.setAttribute('aria-label', sp[0] + ': forrige'); rr.setAttribute('aria-label', sp[0] + ': næste');
-      function show() {
-        var cur = look[sp[2]];
-        if (sp[3]) v.textContent = sp[3](cur); else v.innerHTML = '<i class="swatch" style="background:' + cur + '"></i>';
-      }
-      function change(d) {
-        var opts = sp[1](), i = opts.indexOf(look[sp[2]]); if (i < 0) i = 0;
-        look[sp[2]] = opts[(i + d + opts.length) % opts.length];
-        if (sp[2] === 'style' && look.style === 'kasket' && !look.hatColor) look.hatColor = '#c8282e';
-        show(); paint(); RH.audio.sfx('blip');
-      }
-      l.addEventListener('click', function () { change(-1); }); rr.addEventListener('click', function () { change(1); });
-      r.appendChild(l); r.appendChild(v); r.appendChild(rr); rows.appendChild(r); show();
-    });
-    var rnd = btn('btn small', 'Tilfældig');
-    rnd.addEventListener('click', function () {
-      spec.forEach(function (sp) { var o = sp[1](); look[sp[2]] = o[(Math.random() * o.length) | 0]; });
-      look.hatColor = K.CLOTH[(Math.random() * K.CLOTH.length) | 0];
-      rows.querySelectorAll('.look-row').forEach(function (r, i) { var sp = spec[i], v = r.querySelector('.val'); if (sp[3]) v.textContent = sp[3](look[sp[2]]); else v.innerHTML = '<i class="swatch" style="background:' + look[sp[2]] + '"></i>'; });
-      paint(); RH.audio.sfx('blip');
-    });
-    rows.appendChild(rnd);
-    // figuren går lidt på stedet, så man kan se den bevæge sig
-    var iv = setInterval(function () { if (!node.isConnected) { clearInterval(iv); return; } step++; paint(); }, 260);
-    paint();
-    return { node: node, get look() { return look; } };
-  }
 
   // ---------------------------------------------------------------- facit som tekst
   function answerText(S0) {

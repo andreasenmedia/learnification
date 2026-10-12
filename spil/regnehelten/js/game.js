@@ -29,6 +29,7 @@
   window.addEventListener('resize', resize);
 
   var S = null, world = null, cache = {}, sheets = {}, dogSheet = null;
+  var profil = null;   // barnets fælles figur (/spil/faelles/profil.js)
   var player = { px: 0, py: 0, moving: false, fromX: 0, fromY: 0, t: 0, alt: false };
   var busy = false, started = false, tick = 0, heldOrder = [];
   var cam = { x: 0, y: 0 }, particles = [], leaves = [];
@@ -62,6 +63,7 @@
   function save(nu) {
     if (!S || FOTO || !started || laast) return;
     S.hud = hudInfo();
+    LFPraes.tjek('regnehelten', S);
     var d = JSON.stringify(S);
     try { localStorage.setItem(SAVE, d); } catch (e) { /* privat vindue */ }
     RH.gem.gem(d, nu === true);
@@ -245,6 +247,7 @@
       }
       var bag = S.bag, first = !bag.counts[id], it = K.ITEMS[id];
       if (first) bag.owned.push(id);
+      if (first && id === 'toejpose') LFProfil.laasOp('hat:beret');   // nyt tøj til alle spil
       bag.counts[id] = (bag.counts[id] || 0) + 1;
       if (it.unlocks) bag.plays[it.unlocks] = Math.min(K.MAX_PLAYS, (bag.plays[it.unlocks] || 0) + K.PLAYS_PER_ITEM);
       RH.audio.sfx('item'); save(); hud();
@@ -572,6 +575,7 @@
     var n = S.kap || 1, kp = K.kapitler[n], sidste = n >= K.KAPITLER;
     if (kp.slut && kp.slut.scene) await kp.slut.scene(g);
     if (S.klaret.indexOf(n) < 0) S.klaret.push(n);
+    LFProfil.laasOp({ 1: 'hat:tophat', 3: 'hat:hood' }[n]);   // nyt tøj til alle spil
     S.res.faerdig = sidste; RH.resultat.send(S, true); save(true);
     RH.audio.music('slut'); RH.audio.sfx('fanfare');
     var cand = (O.CAN_KAP && O.CAN_KAP[n]) || O.CAN;
@@ -626,10 +630,15 @@
   }
   async function pausespil(kind) {
     if (!(S.bag.plays[kind] > 0)) { UI.toast('Du har ingen ture tilbage'); return; }
-    S.bag.plays[kind]--; save();
+    S.bag.plays[kind]--;
+    S.bag.spillet = S.bag.spillet || {}; S.bag.spillet[kind] = (S.bag.spillet[kind] || 0) + 1;   // til præstationen "Pausen er tjent"
+    save();
     if (kind === 'dressup') {
-      var look = await UI.dressup(S.look);
-      if (look) { S.look = look; sheets.player = RH.makeSheet(look); RH.audio.sfx('item'); UI.toast('<b>Nyt tøj på.</b>'); }
+      var r = await UI.figur({ titel: 'Klæd om', knap: 'Færdig', kanLukke: true, lukTekst: 'Behold mit tøj', look: S.look, oplaast: profil ? profil.oplaast : [] });
+      if (r) {
+        S.look = r.look; sheets.player = LFFigur.makeSheet(r.look); RH.audio.sfx('item'); UI.toast('<b>Nyt tøj på.</b>');
+        if (profil) { profil.look = r.look; LFProfil.gem(profil, true); }   // gælder i alle spil
+      }
       else UI.toast('Du beholdt dit tøj.');
     } else {
       var res = await UI.straffespark(S.look);
@@ -852,16 +861,22 @@
     if (window.LFSpil) LFSpil.aktiv(true);   // først nu tæller tiden (ikke på titelskærmen)
     RH.state = S;
     player.px = S.x * T; player.py = S.y * T;
-    sheets.player = RH.makeSheet(S.look);
+    // Navn og udseende er barnets egne (fælles for alle spil)
+    if (profil) { S.name = profil.navn || S.name; S.look = profil.look; }
+    sheets.player = LFFigur.makeSheet(S.look);
     refresh(); snapCam();
     document.getElementById('hud').hidden = false; hud();
     if (document.body.classList.contains('touching')) wake();
     musik();
+    LFPraes.tjek('regnehelten', S);   // en gammel save får det, den allerede har fortjent
   }
 
   async function boot() {
     K = RH.content; UI = RH.ui; O = RH.opgaver; UI.init(); resize();
     var hentning = FOTO ? null : RH.gem.hent(lokal());
+    var profilP = FOTO ? null : LFProfil.hent();
+    LFProfil.paaPraes(function (pr) { RH.audio.sfx('quest'); UI.toast('<b>Ny præstation: ' + RH.esc(pr.navn) + '</b><br>' + RH.esc(pr.tekst)); });
+    LFProfil.paaNyt(function (gen) { UI.toast('<b>Nyt tøj: ' + RH.esc(gen.navn) + '</b><br>Find det i Klædeskabet.'); });
     loadSettings();
     world = RH.buildWorld();
     dogSheet = RH.makeDog();
@@ -879,7 +894,10 @@
       info = { kap: saved.kap, kapnavn: saved.kap > 1 && K.kapitler[saved.kap] ? K.kapitler[saved.kap].navn : '',
                naeste: saved.klaret.indexOf(saved.kap) >= 0 && K.kapitler[nk] ? K.kapitler[nk].navn : '' };
     }
-    var choice = await UI.title(saved ? saved.name : '', info);
+    profil = await profilP;
+    // Har man spillet før uden en fælles figur, bliver den figur, man har her, til den fælles
+    if (!profil && saved && saved.look) { profil = LFProfil.ny(saved.name, saved.look); LFProfil.gem(profil, true); }
+    var choice = await UI.title(saved ? (profil && profil.navn) || saved.name : '', info);
     if ((choice === 'continue' || choice === 'naeste') && saved) {
       S = saved;
       // Lukkede man fanen midt i åbningsscenen, springer vi frem til morgenen
@@ -890,8 +908,15 @@
       return;
     }
     RH.audio.music('by');
-    var ny = await UI.create(saved ? { name: saved.name, klasse: saved.klasse, look: saved.look } : null);
-    S = fresh(ny.name, ny.klasse, ny.look);
+    if (!profil) {
+      // Første gang i et spil: lav din figur. Den bruges i alle spil.
+      var me = window.LF_SPILLER || {}, kald = me.elev ? me.elev.kaldenavn : '';
+      var f = await UI.figur({ titel: 'Hvem er du?', tekst: 'Lav din figur. Du spiller som den i alle spil og kan altid skifte tøj i Klædeskabet.', knap: 'Det er mig!', visNavn: true,
+                               navn: kald, look: LFFigur.tilfaeldig(), oplaast: [] });
+      profil = LFProfil.ny(f.navn, f.look); LFProfil.gem(profil, true);
+    }
+    var ny = await UI.create(saved ? { klasse: saved.klasse } : null);
+    S = fresh(profil.navn, ny.klasse, profil.look);
     begin(); save();
     await run(function () { return K.script.intro(g); });
   }

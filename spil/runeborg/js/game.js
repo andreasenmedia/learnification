@@ -27,7 +27,7 @@
   }
   window.addEventListener('resize', resize);
 
-  var S = null, world = null, cache = {}, sheets = {}, catSheet = null, dragonSheet = null;
+  var S = null, world = null, cache = {}, sheets = {}, catSheet = null, dragonSheet = null, profil = null;   // profil = barnets fælles figur (/spil/faelles/profil.js)
   var player = { px: 0, py: 0, moving: false, fromX: 0, fromY: 0, t: 0, alt: false };
   var cat = { x: 0, y: 0, px: 0, py: 0, trail: [] };
   var busy = false, started = false, tick = 0, held = {}, heldOrder = [];
@@ -61,6 +61,7 @@
   function save(nu) {
     if (!S || FOTO || !started || laast) return;
     S.hud = hudInfo();
+    LFPraes.tjek('runeborg', S);
     var d = JSON.stringify(S);
     try { localStorage.setItem(SAVE, d); } catch (e) { /* privat vindue */ }
     RB.gem.gem(d, nu === true);
@@ -528,6 +529,7 @@
       await kp.slut.scene(g);
     }
     if (S.klaret.indexOf(n) < 0) S.klaret.push(n);
+    LFProfil.laasOp({ 1: 'hat:wizard', 2: 'hat:feather', 3: 'hat:helmet' }[n]);   // nyt tøj til alle spil
     save(true); hud();
     var rows = K.CANDO.filter(function (c) { return (c[2] || 1) === n; }).map(function (c) {
       var st = S.stats[c[0]]; if (!st || !st.n) return null;
@@ -798,18 +800,24 @@
     started = true;
     if (window.LFSpil) LFSpil.aktiv(true);   // først nu tæller tiden (ikke på titelskærmen)
     player.px = S.x * T; player.py = S.y * T;
-    sheets.player = RB.makeSheet(K.classes[S.cls].look);
+    // Figuren er barnets egen (fælles for alle spil); klassen giver kun en hat
+    if (profil) S.name = profil.navn || S.name;
+    sheets.player = LFFigur.makeSheet(profil ? profil.look : LFFigur.STD_LOOK, { hat: K.classes[S.cls].hat });
     cat.trail = [[S.x, S.y + 1]]; cat.x = S.x; cat.y = S.y + 1; cat.px = cat.x * T; cat.py = cat.y * T;
     refresh(); snapCam();
     document.getElementById('hud').hidden = false; hud();
     if (document.body.classList.contains('touching')) wake();
     RB.audio.music(mapNow().music === 'by' && S.flags.clean ? 'fest' : mapNow().music);
+    LFPraes.tjek('runeborg', S);   // en gammel save får det, den allerede har fortjent
   }
 
   async function boot() {
     K = RB.content; UI = RB.ui; UI.init(); resize();
     // Spørg serveren med det samme — svaret skal bruges, når titlen kommer
     var hentning = FOTO ? null : RB.gem.hent(lokal());
+    var profilP = FOTO ? null : LFProfil.hent();
+    LFProfil.paaPraes(function (pr) { RB.audio.sfx('quest'); UI.toast('<b>Ny præstation: ' + RB.esc(pr.navn) + '</b><br>' + RB.esc(pr.tekst)); });
+    LFProfil.paaNyt(function (gen) { UI.toast('<b>Nyt tøj: ' + RB.esc(gen.navn) + '</b><br>Find det i Klædeskabet.'); });
     loadSettings();
     world = RB.buildWorld();
     catSheet = RB.makeCat(); dragonSheet = makeDragon();
@@ -827,7 +835,15 @@
       info = { kap: saved.kap, kapnavn: saved.kap > 1 && K.kapitler[saved.kap] ? K.kapitler[saved.kap].navn : '',
                naeste: saved.klaret.indexOf(saved.kap) >= 0 && K.kapitler[nk] ? K.kapitler[nk].navn : '' };
     }
-    var choice = await UI.title(saved ? saved.name || 'Lærling' : '', info);
+    profil = await profilP;
+    var choice = await UI.title(saved ? (profil && profil.navn) || saved.name || 'Lærling' : '', info);
+    if (!profil) {
+      // Første gang i et spil: lav din figur. Den bruges i alle spil.
+      var me = window.LF_SPILLER || {}, kald = me.elev ? me.elev.kaldenavn : '';
+      var f = await UI.figur({ titel: 'Hvem er du?', tekst: 'Lav din figur. Du spiller som den i alle spil og kan altid skifte tøj i Klædeskabet.', knap: 'Det er mig!', visNavn: true,
+                               navn: (saved && saved.name) || kald, look: LFFigur.tilfaeldig(), oplaast: [] });
+      profil = LFProfil.ny(f.navn, f.look); LFProfil.gem(profil, true);
+    }
     if ((choice === 'continue' || choice === 'naeste') && saved) {
       S = saved; RB.state = S; if (!S.q.q0) S.q.q0 = 'active'; begin();
       if (choice === 'naeste') { await run(naesteKapitel); return; }
@@ -835,8 +851,8 @@
       return;
     }
     RB.audio.music('by');
-    var who0 = await UI.create(K.classes);
-    S = fresh(who0.name, who0.cls); RB.state = S;
+    var who0 = await UI.create(K.classes, profil.look);
+    S = fresh(profil.navn, who0.cls); RB.state = S;
     begin(); save();
     await run(function () { return K.script.intro(g); });
   }

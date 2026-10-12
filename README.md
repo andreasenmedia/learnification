@@ -150,6 +150,20 @@ nåede, Regnekraft, tasken og omgangens resultater. `gemt_status()` i
 `python tools/regnehelten-billeder.py` → `assets/billeder/regnehelten-*.png`
 (fototilstanden `#foto=<scene>`).
 
+## Eventyrbiblioteket, den fælles figur og præstationer
+
+Børn lander efter login i **Eventyrbiblioteket** (`/spil/biblioteket/`): en stor hal i Runeborgs pixelstil, hvor man går rundt og vælger en port. Mod nord står Runeborgs lysende runeport og Regneheltens brune dør, og en afspærret dør er til de næste spil. Vest for hallen ligger Klædeskabet (spejl = figureditor), øst for den Trofærummet (præstationer). Ved en port vises, hvor langt barnet er (`gemt` fra `konto.php?handling=mig`) og om spillet passer til klassen; "Gå ind" sender til `/spil/<spil>/`.
+
+**Begge veje ind:** børn lander i biblioteket (`login.html` kodelogin og `konto.html` "Log ind som barn" sender til `/spil/biblioteket/`), men `/spil/` viser spilkortene til alle, også børn, med et bredt kort til biblioteket øverst og "★ x af y præstationer" pr. spil. Knapperne på forsiden, `runeborg.html` og `regnehelten.html` går direkte ind i spillet som før. Voksne lander stadig på `/spil/`.
+
+- **Motoren** er en kopi af Runeborgs (`spil/biblioteket/js/`, namespace `BB`), uden opgaver og kapitler. Portalfliserne (`Ø Þ Ð Æ Å Ý` i `art.js`) er nye; resten af fliserne er Runeborgs. Biblioteket tæller ikke som spilletid (`LFSpil.start` kaldes med `aktiv:false`, kun for login og prøvetid); er tiden brugt, er portene låst. Stemmerne laves med `python tools/biblioteket-stemmer.py` (samme værktøj som Runeborgs, kør igen efter tekstændringer i `content.js`). Skærmbilleder: `python tools/biblioteket-billeder.py` (scenerne `hal` og `trofae` via `#foto=`) → `assets/billeder/biblioteket-*.png`.
+- **Figuren** er barnets og fælles for alle spil: tegning, paletter og låst tøj i `spil/faelles/figur.js` (`LFFigur`), profilen i `spil/faelles/profil.js` (`LFProfil`, localStorage + `api/profil.php`, tabellen `profiler`, DB-trin 12) og editoren i `spil/faelles/editor.js` + `figur.css` (`LFEditor`). Spillene bruger kun figuren til spilleren; NPC'er tegnes af hvert spils egen `art.js`. Profilen er `{navn, look, oplaast, praes, bib:{fra,set}}`. Der er ét delt profilobjekt pr. side (det `hent()` giver); `gem()` renser det på stedet.
+- **Runeborg**: klassen giver kun en hat (`classes[i].hat`) ovenpå barnets figur. **Regnehelten**: "Klæd om" åbner den fælles editor og ændrer profilen.
+- **Låst tøj** (`GENSTANDE` i `figur.js`): `LFProfil.laasOp('hat:beret')` osv. (Regnehelten: Tøjposen → baret, kapitel 1 → høj hat, kapitel 3 → hætte; Runeborg: kapitel 1/2/3 → troldmandshat/fjerhat/hjelm). Nyt tøj skal stå i `GENSTANDE`, og en ny hat skal have et overlay i `HAT`.
+- **Præstationer** (`spil/faelles/praestationer.js`, `LFPraes`): kataloget (`KATALOG`) er det samme, Trofærummet viser. Hvert spil registrerer sine regler som `test(S)` i `js/praes.js` (Runeborg, Regnehelten) eller i `biblioteket/js/content.js`. `LFPraes.tjek(spil, S)` kaldes fra `save()` og `begin()`, så en gammel save også får det, den har fortjent. `LFProfil.opnaa(id)` er idempotent, gemmer med det samme, viser en toast og låser tøj op, hvis præstationen har `laas`. **En ny præstation:** føj den til `KATALOG`, skriv testen, og (hvis den giver tøj) sæt `laas`. Bump `?v=` på de ændrede filer.
+- **Første gang**: hvert sted uden profil åbner "Hvem er du?" (navn + figur). Har barnet en Regnehelten-save, bruges dens navn og udseende som start.
+- **Test lokalt**: biblioteket kræver login, så brug `learnification-php`-opsætningen i "Test lokalt med PHP". `BB.debug.tp('hal', 7, 4, 'up')` og `BB.debug.interact()` flytter og trykker E (rAF står stille i et skjult browserpane, så tag skærmbilleder). `LFProfil.opnaa('rb_runemester')` giver en præstation med det samme.
+
 ## Udseende
 
 Siden har ét stilark, `assets/style.css`, skrevet i hånden. Farverne er

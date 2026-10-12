@@ -473,6 +473,20 @@ function opret_tabeller(PDO $pdo): void
         11 => [
             'ALTER TABLE elever ADD COLUMN klassetrin INTEGER',
         ],
+        // Barnets figur (navn + udseende + låst tøj), fælles for alle spil og Eventyrbiblioteket (api/profil.php).
+        12 => [
+            "CREATE TABLE profiler (
+                id $id,
+                konto_id INTEGER NOT NULL,
+                elev_id INTEGER,
+                hvem $tekst NOT NULL,
+                data TEXT NOT NULL,
+                opdateret INTEGER NOT NULL,
+                FOREIGN KEY (konto_id) REFERENCES konti(id) ON DELETE CASCADE,
+                FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE UNIQUE INDEX profiler_hvem ON profiler(hvem)',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

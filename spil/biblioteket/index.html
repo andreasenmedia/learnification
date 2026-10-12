@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Eventyrbiblioteket — Learnification</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#140f1c">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/runeborg.css?v=3">
+<link rel="stylesheet" href="/spil/runeborg/runeborg.css?v=6">
+<link rel="stylesheet" href="/spil/faelles/figur.css?v=1">
+<link rel="stylesheet" href="biblioteket.css?v=1">
+</head>
+<body>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="screen" width="320" height="180" aria-label="Eventyrbiblioteket — den åbne verden"></canvas>
+
+    <div id="hud" hidden>
+      <div id="hud-quest"><span class="hud-label">Her er du</span><span id="hud-quest-title"></span><span id="hud-quest-goal"></span></div>
+      <div id="hud-right">
+        <span class="hud-chip" title="Præstationer"><i class="ico ico-star"></i><b id="hud-praes-tekst">0/0</b></span>
+        <span class="hud-chip" id="hud-tid" title="Spilletid tilbage" hidden><i class="ico ico-tid"></i><b id="hud-tid-tekst"></b></span>
+        <button class="hud-btn" id="btn-full" type="button" title="Fuld skærm (F)" aria-label="Fuld skærm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></button>
+        <button class="hud-btn" id="btn-menu" type="button" title="Menu (Esc)">Menu</button>
+      </div>
+    </div>
+
+    <div id="prompt" hidden></div>
+    <div id="toasts" aria-live="polite"></div>
+    <div id="fade"></div>
+    <div id="layer"></div>
+
+    <div id="touch" hidden>
+      <div id="stick-zone" aria-hidden="true">
+        <div id="stick-base"><div id="stick-knob"></div></div>
+      </div>
+      <div id="tbtns">
+        <button id="t-act" type="button">E</button>
+      </div>
+    </div>
+    <div id="vkbd" hidden aria-hidden="true"></div>
+  </div>
+</div>
+
+<noscript><p style="color:#fff;padding:24px;font-family:sans-serif">Eventyrbiblioteket kræver JavaScript.</p></noscript>
+
+<!-- Login foran pladsen. spil: 'runeborg' er kun et navn, LFSpil kræver et; tiden tæller ikke her
+     (aktiv er aldrig true), men vi får login, svaret fra serveren og prøvetiden at vide. -->
+<script src="/assets/spilletid.js?v=2"></script>
+<script>
+LFSpil.start({ spil: 'runeborg', kraevLogin: true, aktiv: false,
+               bruger: function (d) { window.LF_SPILLER = d; },
+               tidenErGaaet: function () { if (window.BB && BB.tidSlut) BB.tidSlut(); },
+               snartSlut: function (sek) { if (window.BB && BB.tidSnart) BB.tidSnart(sek); } });
+</script>
+<script src="/spil/faelles/figur.js?v=2"></script>
+<script src="/spil/faelles/praestationer.js?v=1"></script>
+<script src="/spil/faelles/profil.js?v=2"></script>
+<script src="/spil/faelles/editor.js?v=1"></script>
+<script src="js/art.js?v=1"></script>
+<script src="js/audio.js?v=1"></script>
+<script src="js/world.js?v=1"></script>
+<script src="js/voice.js?v=1"></script>
+<script src="js/ui.js?v=1"></script>
+<script src="js/content.js?v=1"></script>
+<script src="js/game.js?v=1"></script>
+</body>
+</html>

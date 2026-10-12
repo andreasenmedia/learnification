@@ -40,10 +40,10 @@
 
   // ---------------------------------------------------------------- klasser
   var classes = [
-    { name: 'Kriger', desc: 'Modig og stærk — men beviser slår muskler.', look: { hair: '#7a4a2a', cloth: '#b03a3a', hat: 'helmet', hatColor: '#9a9aa8', accent: '#e8e8f0' } },
-    { name: 'Magiker', desc: 'Klog og nysgerrig — elsker gamle bøger.', look: { hair: '#e8d8a8', cloth: '#3a4ab0', hat: 'wizard', hatColor: '#3a4ab0', accent: '#ffe070' } },
-    { name: 'Spejder', desc: 'Skarpe øjne — ser detaljer, andre overser.', look: { hair: '#5a3a22', cloth: '#3a7a3a', hat: 'hood', hatColor: '#2c5a2c', skin: '#e0a878' } },
-    { name: 'Bard', desc: 'God til ord — og til at stille spørgsmål.', look: { hair: '#2a1a1a', cloth: '#8a3a8a', hat: 'feather', hatColor: '#c83a5a', accent: '#ffe070', skin: '#a86a48' } }
+    { name: 'Kriger', hat: 'helmet', desc: 'Modig og stærk — men beviser slår muskler.', look: { hair: '#7a4a2a', cloth: '#b03a3a', hat: 'helmet', hatColor: '#9a9aa8', accent: '#e8e8f0' } },
+    { name: 'Magiker', hat: 'wizard', desc: 'Klog og nysgerrig — elsker gamle bøger.', look: { hair: '#e8d8a8', cloth: '#3a4ab0', hat: 'wizard', hatColor: '#3a4ab0', accent: '#ffe070' } },
+    { name: 'Spejder', hat: 'hood', desc: 'Skarpe øjne — ser detaljer, andre overser.', look: { hair: '#5a3a22', cloth: '#3a7a3a', hat: 'hood', hatColor: '#2c5a2c', skin: '#e0a878' } },
+    { name: 'Bard', hat: 'feather', desc: 'God til ord — og til at stille spørgsmål.', look: { hair: '#2a1a1a', cloth: '#8a3a8a', hat: 'feather', hatColor: '#c83a5a', accent: '#ffe070', skin: '#a86a48' } }
   ];
 
   // ---------------------------------------------------------------- personer

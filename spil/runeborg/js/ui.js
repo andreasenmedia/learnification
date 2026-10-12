@@ -418,7 +418,7 @@
         // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
         if (window.LF_SPILLER && window.LFSpil) {
           // Tilbage til spiloversigten; pagehide gemmer, før siden skifter
-          var andre = el('a', 'btn', 'Vælg et andet spil'); andre.href = '/spil/'; andre.style.textDecoration = 'none'; m.appendChild(andre);
+          var kid = LF_SPILLER.hvem === 'elev', andre = el('a', 'btn', kid ? 'Tilbage til Eventyrbiblioteket' : 'Vælg et andet spil'); andre.href = kid ? '/spil/biblioteket/' : '/spil/'; andre.style.textDecoration = 'none'; m.appendChild(andre);
           // Gik den voksne ind som barnet fra /konto, kan den voksne komme tilbage.
           // Skiftet sker på /spil/, så spillet når at gemme som barnet først (pagehide)
           if (LF_SPILLER.tilbage_til) {
@@ -483,17 +483,49 @@
       });
     },
 
-    create: function (classes) {
+    // ---------------------------------------------------------------- figur
+    // Den fælles figur (/spil/faelles/): "Hvem er du?" første gang og "Klæd om".
+    // opt: {titel, tekst, knap, visNavn, navn, look, oplaast, kanLukke}. Giver {navn, look} — eller null, hvis man lukker.
+    figur: function (opt) {
+      return new Promise(function (resolve) {
+        var bg = el('div', 'modal-bg'), m = el('div', 'menu fig-vindue px'); bg.appendChild(m);
+        m.setAttribute('role', 'dialog');
+        m.appendChild(el('h2', null, esc(opt.titel)));
+        if (opt.tekst) m.appendChild(el('p', 'tiny', esc(opt.tekst)));
+        var ok = el('button', 'btn primary', esc(opt.knap || 'Gem')); ok.type = 'button';
+        var ed = LFEditor.bygg({
+          visNavn: opt.visNavn, navn: opt.navn, look: opt.look, oplaast: opt.oplaast,
+          lyd: function () { RB.audio.sfx('blip'); },
+          tastatur: function (inp) { RB.vkbd.attach(inp, 'text'); },
+          enter: function () { ok.click(); }
+        });
+        m.appendChild(ed.node);
+        var row = el('div', 'end-row'); row.appendChild(ok);
+        var luk = null;
+        if (opt.kanLukke) { luk = el('button', 'btn', esc(opt.lukTekst || 'Luk uden at gemme')); luk.type = 'button'; row.appendChild(luk); }
+        m.appendChild(row);
+        function ud(v) { pop(bg); resolve(v); }
+        ok.addEventListener('click', function () {
+          if (opt.visNavn && !ed.navn) { RB.audio.sfx('blip'); ed.fokus(); return; }
+          ud({ navn: ed.navn, look: ed.look });
+        });
+        if (luk) luk.addEventListener('click', function () { ud(null); });
+        bg.addEventListener('keydown', function (e) { if (e.key === 'Escape' && opt.kanLukke) { e.stopPropagation(); ud(null); } });
+        push(bg); if (opt.visNavn) ed.fokus(); else ok.focus();
+      });
+    },
+
+    // Klassen: hvilken slags eventyrer man er i Runeborg. Figuren er ens egen (/spil/faelles/), og klassen
+    // lægger bare en hat eller hjelm ovenpå. look er barnets udseende; giver {cls}.
+    create: function (classes, look) {
       return new Promise(function (resolve) {
         var s = el('div', 'screen-full'), c = el('div', 'title-card px'); s.appendChild(c);
-        c.appendChild(el('h2', null, 'Hvem er du, lærling?'));
-        var name = el('input', 'name-in'); name.maxLength = 16; name.placeholder = 'Dit heltenavn'; name.setAttribute('aria-label', 'Dit heltenavn');
-        c.appendChild(name);
-        c.appendChild(el('p', 'tiny', 'Brug gerne et opdigtet navn. Det bliver kun i spillet.'));
+        c.appendChild(el('h2', null, 'Hvilken slags lærling er du?'));
+        c.appendChild(el('p', 'tiny', 'Det er din egen figur — klassen giver dig bare en hat. Du kan altid skifte tøj i Klædeskabet på Eventyrbiblioteket.'));
         var grid = el('div', 'classes'), pick = 0;
         classes.forEach(function (k, i) {
           var b = el('button', 'cls'); b.type = 'button';
-          var cv = RB.portrait(RB.makeSheet(k.look), 64); b.appendChild(cv);
+          var cv = LFFigur.portrait(LFFigur.makeSheet(look, { hat: k.hat }), 64); b.appendChild(cv);
           b.appendChild(el('b', null, esc(k.name))); b.appendChild(el('small', null, esc(k.desc)));
           b.addEventListener('click', function () { pick = i; [].forEach.call(grid.children, function (x, xi) { x.classList.toggle('sel', xi === i); }); });
           if (i === 0) b.classList.add('sel');
@@ -501,10 +533,8 @@
         });
         c.appendChild(grid);
         var go = el('button', 'btn primary', 'Begynd eventyret'); go.type = 'button'; c.appendChild(go);
-        function start() { pop(s); resolve({ name: name.value.trim().slice(0, 16) || 'Lærling', cls: pick }); }
-        go.addEventListener('click', start);
-        name.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); start(); } e.stopPropagation(); });
-        push(s); name.focus(); RB.vkbd.attach(name, 'text');
+        go.addEventListener('click', function () { pop(s); resolve({ cls: pick }); });
+        push(s); go.focus();
       });
     },
 

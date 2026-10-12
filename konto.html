@@ -80,6 +80,7 @@
         <h2>Spil selv</h2>
         <p id="selv-status" style="margin-top:-4px;"></p>
         <div class="spilvalg">
+          <a href="/spil/biblioteket/"><img src="/assets/billeder/biblioteket-hal.png" alt=""><span>Eventyrbiblioteket</span></a>
           <a href="/spil/runeborg/"><img src="/assets/billeder/runeborg-by.png" alt=""><span>Runeborg</span></a>
           <a href="/spil/regnehelten/"><img src="/assets/billeder/regnehelten-by.png" alt=""><span>Regnehelten</span></a>
         </div>
@@ -349,8 +350,8 @@
 
     if (e.target.matches('[data-som-elev]')) {
       if (confirm('Log ind som ' + elev.kaldenavn + '?\n\n' + elev.kaldenavn
-          + ' kan spille med sit eget gemte spil og sin egen prøvetid. Du kommer tilbage til din konto med knappen "Tilbage til mig" på spilsiden.'))
-        LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/spil/'); }, fejl);
+          + ' kan spille med sit eget gemte spil og sin egen prøvetid. Du kommer tilbage til din konto med knappen "Tilbage til …" i spillets menu.'))
+        LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/spil/biblioteket/'); }, fejl);
     } else if (e.target.matches('[data-ny-elevkode]')) {
       if (confirm('Lav en ny kode til ' + elev.kaldenavn + '?\n\nDen gamle holder op med at virke, og ' + elev.kaldenavn + ' bliver logget ud. Husk at udskrive et nyt login-kort.'))
         LF.send('klasse', 'ny_elevkode', { id: eid }).then(hent, fejl);
