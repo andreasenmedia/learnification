@@ -25,7 +25,7 @@ Hostes på **Simply.com** (Apache-webhotel). Alt ligger i `public_html`.
 | `runeborg.html` | `/runeborg` | Om Runeborg: historien, PISA-grundlaget, missionerne |
 | `spil/runeborg/` | `/spil/runeborg/` | Selve Runeborg — skrevet direkte her, ingen bygning |
 | `login.html` | `/login` | Log ind: elev med sin egen kode, voksen med mail og kodeord, glemt kodeord |
-| `opret.html` | `/opret` | Opret testkonto som skole eller familie |
+| `opret.html` | `/opret` | Opret konto som et lille spørgeskema (hvem skal spille? → børnenes navne og klassetrin / skolens navn → om dig) |
 | `konto.html` | `/konto` | Den voksnes side: klasser, elever, koder og spilletid |
 | `login-kort.html` | `/login-kort?g=<id>` | Login-kort til udskrift, ét pr. elev |
 | `admin.html` | `/admin` | Overblikket over alle testbrugere (kun administrator) |
@@ -248,7 +248,15 @@ giver et overblik over, hvem der tester, og hvor meget de spiller.
 - **Den voksne** opretter en konto på `/opret` med navn, mail og kodeord og
   logger ind på `/login` (mail og kodeord er det første, man ser dér; børnenes
   kode-login står i en mindre boks under, og `/login#elev` går direkte til den).
-- **Alle konti starter som "til mig selv"** (`konti.type = 'privat'`): den
+- **/opret er et spørgeskema** (trin i samme panel): 1) *Hvem skal spille?*
+  Mig selv / Mine børn / En klasse, 2) børnenes fornavne med valgfrit klassetrin
+  (`boern: [{navn, klassetrin}]` → `opret_konto()` → `nye_elever()` skriver
+  `elever.klassetrin`) eller skolens navn, 3) om dig. Familie oprettes direkte som
+  `foraelder` med gruppen "Familien" og børnene; skole som `skole`. På
+  `/spil/` viser en familiekonto bagefter "Hvem skal spille?" med et kort pr.
+  barn (`log_ind_som`) og "Mig selv" (huskes i fanen). Det der står herunder om
+  "alle konti starter som til mig selv" gælder nu kun valget *Mig selv*.
+- **Konti til mig selv** (`konti.type = 'privat'`): den
   voksne spiller selv og har sin egen prøvetid. Kontoen er til
   folk, der er fyldt 15 år (det står på /opret og /login, og man bekræfter det i det påkrævede
   flueben på /opret); yngre sættes på
@@ -306,7 +314,11 @@ gangen), og en pause på over en halv time starter en ny "omgang". Det gælder
 på tværs af faner: hver fane er sin egen omgang, men har en anden omgang for
 samme spiller sendt en puls inden for 90 sek., tæller kun tiden siden den —
 ellers løb tiden dobbelt så hurtigt med spillet åbent to steder (rettet
-2026-10-07).
+2026-10-07). Det gælder kun **børn med egen kode**; på den voksnes login kan
+flere børn spille samtidig, så dér tæller hver fane fuldt (fra 2026-10-13).
+Tidslinjen i /admin har "Tæl tiden fuldt igen" (`fortryd_overlap`), som giver
+overlappende omgange på den voksnes login deres egen tid på uret tilbage
+(modsat "Ret den dobbelttalte tid").
 
 **Spilletid i /admin**: overblikket viser stablede søjler pr. dag pr. spil
 (Runeborg blå, Regnehelten guld — klasserne `spil-<id>` i `konto.css`), en

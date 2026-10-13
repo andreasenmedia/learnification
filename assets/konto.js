@@ -239,7 +239,7 @@ window.LF = LF;
         + '<strong>' + LF.esc(new Date(liste[valgt]).toLocaleDateString('da-DK', { weekday: 'long', day: 'numeric', month: 'long' })) + '</strong>'
         + '<button type="button" class="btn btn-sm" data-tl="1"' + (valgt < liste.length - 1 ? '' : ' disabled') + ' aria-label="Dagen efter">&rarr;</button></div>'
         + LF.forklaring(spil) + '<div class="tl">';
-      var advarsler = 0;
+      var advarsler = 0, voksenOverlap = false;
       // Stiplet streg ned gennem alle baner der, hvor kontoen blev oprettet
       var opr = oprettet >= t0 && oprettet <= t1 ? '<span class="tl-opr" style="left:' + pos(oprettet) + '"></span>' : '';
       raekke.forEach(function (k) {
@@ -267,6 +267,7 @@ window.LF = LF;
             + (o.overlap ? '<b class="ad" aria-hidden="true">⚠</b>' : '') + '<span class="tip">' + tip + '</span></span>';
         });
         var forMeget = talt > uret + 60;
+        if (k === 'voksen' && b.os.some(function (o) { return o.overlap; })) voksenOverlap = true;
         if (forMeget) advarsler++;
         html += '<div class="tl-bane"><div class="tl-navn">' + LF.esc(b.navn) + '<span class="lille">talt ' + LF.tid(talt)
           + (forMeget ? ' · <strong class="advar">⚠ på uret ' + LF.tid(uret) + '</strong>' : '') + '</span></div>'
@@ -276,6 +277,8 @@ window.LF = LF;
       if (opr) html += '<p class="tl-opr-tekst">┆ Stiplet streg: kontoen blev oprettet kl. ' + kl(oprettet) + '.</p>';
       if (advarsler) html += '<p class="lille advar">⚠ Der er talt mere tid, end der gik på uret. Spillet har været åbent flere steder på én gang.'
         + (ret ? ' <button type="button" class="btn btn-sm" data-ret-overlap>Ret den dobbelttalte tid</button>' : '') + '</p>';
+      if (ret && voksenOverlap) html += '<p class="lille">Flere børn kan have spillet samtidig på den voksnes login — så har hver af dem spillet sin egen tid. '
+        + '<button type="button" class="btn btn-sm" data-fortryd-overlap>Tæl tiden fuldt igen</button></p>';
       html += '<details class="foldud"><summary>Vis som tabel</summary><div class="tabel-rul"><table class="liste"><thead><tr><th>Spiller</th><th>Spil</th>'
         + '<th class="t">Fra</th><th class="t">Til</th><th class="t">Talt</th></tr></thead><tbody>'
         + os.map(function (o) {
@@ -285,7 +288,8 @@ window.LF = LF;
       el.innerHTML = html;
     }
     el.onclick = function (e) {
-      if (ret && e.target.closest('[data-ret-overlap]')) { ret(e.target.closest('[data-ret-overlap]')); return; }
+      if (ret && e.target.closest('[data-ret-overlap]')) { ret(e.target.closest('[data-ret-overlap]'), 'ret_overlap'); return; }
+      if (ret && e.target.closest('[data-fortryd-overlap]')) { ret(e.target.closest('[data-fortryd-overlap]'), 'fortryd_overlap'); return; }
       var b = e.target.closest('[data-tl]');
       if (!b) return;
       valgt = Math.max(0, Math.min(liste.length - 1, valgt + +b.dataset.tl));

@@ -21,7 +21,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=7">
-<link rel="stylesheet" href="/assets/konto.css?v=13">
+<link rel="stylesheet" href="/assets/konto.css?v=14">
 </head>
 <body>
 
@@ -59,79 +59,202 @@
     <div class="smal">
       <p class="eyebrow midt">Gratis, mens spillene er til test</p>
       <h1 class="midt" style="font-size:clamp(2rem,5vw,2.8rem);">Opret en konto</h1>
-      <p class="lead midt" style="font-size:1.05rem;">Kontoen er til dig, der er fyldt 15 år, og du kan spille med det samme. Er du under 15, skal en voksen oprette kontoen og sætte dig på. Skal dine børn eller din klasse også spille, sætter du det op bagefter under Min konto — børnene skal hverken have mail eller adgangskode.</p>
+      <p class="lead midt" style="font-size:1.05rem;">Tre hurtige spørgsmål, så er I i gang. Børnene skal hverken have mail eller adgangskode — hvert barn får sin egen kode.</p>
 
       <form class="panel" id="opret-form" novalidate style="margin-top:26px;">
+        <p class="trin-prik" id="trin-prik" aria-live="polite"></p>
         <p class="besked" id="besked"></p>
 
         <div class="honey" aria-hidden="true">
           <label>Lad dette felt stå tomt <input type="text" name="hjemmeside" tabindex="-1" autocomplete="off"></label>
         </div>
 
-        <div class="felt-raekke">
+        <section data-trin="hvem">
+          <h2>Hvem skal spille?</h2>
+          <div class="valg valg-store" role="radiogroup" aria-label="Hvem skal spille?">
+            <label><input type="radio" name="type" value="privat">
+              <span><strong>Mig selv</strong><small>Jeg er fyldt 15 år og spiller selv</small></span></label>
+            <label><input type="radio" name="type" value="foraelder">
+              <span><strong>Mine børn</strong><small>En familiekonto — hvert barn får sin egen profil</small></span></label>
+            <label><input type="radio" name="type" value="skole">
+              <span><strong>En klasse</strong><small>Jeg er lærer og vil bruge spillene i undervisningen</small></span></label>
+          </div>
+          <div class="trin-knapper"><button class="btn btn-primary btn-lg" type="button" data-videre style="margin-left:auto;">Videre</button></div>
+        </section>
+
+        <section data-trin="boern" hidden>
+          <h2>Hvad hedder børnene?</h2>
+          <p class="hj-tekst">Fornavn eller kaldenavn er nok. Klassetrin er valgfrit — så starter spillene på det rigtige niveau. Du kan altid rette og tilføje flere bagefter.</p>
+          <div id="boern-liste"></div>
+          <button class="btn btn-sm" type="button" id="tilfoej-barn">+ Et barn mere</button>
+          <div class="trin-knapper"><button class="btn" type="button" data-tilbage>Tilbage</button><button class="btn btn-primary btn-lg" type="button" data-videre>Videre</button></div>
+        </section>
+
+        <section data-trin="skole" hidden>
+          <h2>Hvilken skole?</h2>
           <div class="felt">
-            <label for="navn">Dit navn</label>
-            <input id="navn" name="navn" maxlength="120" autocomplete="name" required>
+            <label for="skolenavn">Skolens navn</label>
+            <input id="skolenavn" name="skolenavn" maxlength="120" autocomplete="organization">
+            <p class="hj">Du bliver kontaktperson. Bagefter opretter du en klasse og skriver elevernes fornavne.</p>
+          </div>
+          <div class="trin-knapper"><button class="btn" type="button" data-tilbage>Tilbage</button><button class="btn btn-primary btn-lg" type="button" data-videre>Videre</button></div>
+        </section>
+
+        <section data-trin="dig" hidden>
+          <h2>Om dig</h2>
+          <div class="felt-raekke">
+            <div class="felt">
+              <label for="navn">Dit navn</label>
+              <input id="navn" name="navn" maxlength="120" autocomplete="name" required>
+            </div>
+            <div class="felt">
+              <label for="bynavn">By <span>— valgfrit</span></label>
+              <input id="bynavn" name="bynavn" maxlength="80" autocomplete="address-level2">
+            </div>
           </div>
           <div class="felt">
-            <label for="bynavn">By <span>— valgfrit</span></label>
-            <input id="bynavn" name="bynavn" maxlength="80" autocomplete="address-level2">
+            <label for="email">Mailadresse</label>
+            <input id="email" name="email" type="email" maxlength="190" autocomplete="email" required>
+            <p class="hj">Vi skriver kun om din konto og testen — nyhedsbrevet er dit eget valg herunder.</p>
           </div>
-        </div>
-        <div class="felt">
-          <label for="email">Mailadresse</label>
-          <input id="email" name="email" type="email" maxlength="190" autocomplete="email" required>
-          <p class="hj">Vi skriver kun om din konto og testen — nyhedsbrevet er dit eget valg herunder.</p>
-        </div>
-        <div class="felt">
-          <label for="kodeord">Vælg en adgangskode <span>— mindst 8 tegn</span></label>
-          <input id="kodeord" name="kodeord" type="password" minlength="8" autocomplete="new-password" required>
-        </div>
+          <div class="felt">
+            <label for="kodeord">Vælg en adgangskode <span>— mindst 8 tegn</span></label>
+            <input id="kodeord" name="kodeord" type="password" minlength="8" autocomplete="new-password" required>
+          </div>
 
-        <label class="samtykke">
-          <input type="checkbox" name="samtykke" id="samtykke" required>
-          <span>Jeg er fyldt 15 år og har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig (og eventuelle børn), og at vi må skrive til mig om testen.</span>
-        </label>
+          <label class="samtykke">
+            <input type="checkbox" name="samtykke" id="samtykke" required>
+            <span>Jeg er fyldt 15 år og har læst <a href="/for-voksne#data" target="_blank">hvad der bliver gemt</a> om mig (og eventuelle børn), og at vi må skrive til mig om testen.</span>
+          </label>
 
-        <label class="samtykke nyhedsvalg">
-          <input type="checkbox" name="nyhedsbrev" id="nyhedsbrev">
-          <span><strong>Ja tak, send mig nyhedsbrevet</strong> — nye spil, nye kapitler og tilbud fra Learnification, højst et par gange om måneden. Frivilligt: du kan oprette kontoen uden, og du kan afmelde med ét klik. Vi sender et link, du skal bekræfte. <a href="/privatliv#nyhedsbrev" target="_blank">Læs mere</a></span>
-        </label>
+          <label class="samtykke nyhedsvalg">
+            <input type="checkbox" name="nyhedsbrev" id="nyhedsbrev">
+            <span><strong>Ja tak, send mig nyhedsbrevet</strong> — nye spil, nye kapitler og tilbud fra Learnification, højst et par gange om måneden. Frivilligt: du kan oprette kontoen uden, og du kan afmelde med ét klik. Vi sender et link, du skal bekræfte. <a href="/privatliv#nyhedsbrev" target="_blank">Læs mere</a></span>
+          </label>
 
-        <button class="btn btn-primary btn-lg btn-fuld" type="submit">Opret konto</button>
+          <div class="trin-knapper"><button class="btn" type="button" data-tilbage>Tilbage</button><button class="btn btn-primary btn-lg" type="submit">Opret konto</button></div>
+        </section>
+
         <p class="lille midt" style="margin:16px 0 0;">Har du allerede en konto? <a href="/login#voksen">Log ind</a></p>
       </form>
     </div>
   </div>
 </main>
 
-<script src="/assets/konto.js?v=4"></script>
+<script src="/assets/konto.js?v=6"></script>
 <script>
 (function () {
   var f = document.getElementById('opret-form');
-  // Kom man fra "Opret en skolekonto" o.l., åbner Min konto bagefter det rigtige næste skridt
-  var naeste = { skole: 'skole', familie: 'familie' }[new URLSearchParams(location.search).get('type')] || '';
+  var besked = document.getElementById('besked');
+  var typer = { skole: 'skole', familie: 'foraelder' };
+  var forvalgt = typer[new URLSearchParams(location.search).get('type')] || '';
+  var KLASSER = ['0. klasse', '1. klasse', '2. klasse', '3. klasse', '4. klasse', '5. klasse', '6. klasse', '7. klasse', '8. klasse', '9. klasse'];
+  var trin = [], nu = 0;
 
+  function sektion(n) { return f.querySelector('[data-trin=' + n + ']'); }
+  function type() { var r = f.querySelector('input[name=type]:checked'); return r ? r.value : ''; }
+  function vej() { return { privat: ['hvem', 'dig'], foraelder: ['hvem', 'boern', 'dig'], skole: ['hvem', 'skole', 'dig'] }[type()] || ['hvem']; }
+
+  function vis(i) {
+    trin = vej();
+    nu = Math.max(0, Math.min(i, trin.length - 1));
+    ['hvem', 'boern', 'skole', 'dig'].forEach(function (n) { sektion(n).hidden = trin[nu] !== n; });
+    document.getElementById('trin-prik').textContent = trin.length > 1 ? 'Trin ' + (nu + 1) + ' af ' + trin.length : '';
+    LF.besked(besked, '', '');
+    var foerste = sektion(trin[nu]).querySelector('input:not([type=radio]):not([type=checkbox]), select');
+    if (foerste && nu > 0) foerste.focus({ preventScroll: true });
+  }
+
+  function barnRaekke() {
+    var r = document.createElement('div');
+    r.className = 'barn-raekke';
+    r.innerHTML = '<input class="barn-navn" maxlength="30" placeholder="Fornavn eller kaldenavn" aria-label="Barnets navn" autocomplete="off">'
+      + '<select class="barn-klasse" aria-label="Klassetrin (valgfrit)"><option value="">Klassetrin?</option>'
+      + KLASSER.map(function (k, i) { return '<option value="' + i + '">' + k + '</option>'; }).join('') + '</select>'
+      + '<button type="button" class="barn-fjern" aria-label="Fjern barnet">×</button>';
+    return r;
+  }
+  var liste = document.getElementById('boern-liste');
+  liste.appendChild(barnRaekke());
+  document.getElementById('tilfoej-barn').addEventListener('click', function () {
+    if (liste.children.length >= 12) return;
+    var r = barnRaekke();
+    liste.appendChild(r);
+    r.querySelector('input').focus();
+  });
+  liste.addEventListener('click', function (e) {
+    var x = e.target.closest('.barn-fjern');
+    if (!x) return;
+    if (liste.children.length > 1) x.parentNode.remove();
+    else x.parentNode.querySelector('.barn-navn').value = '';
+  });
+  liste.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('tilfoej-barn').click(); }
+  });
+
+  function boern() {
+    return [].map.call(liste.children, function (r) {
+      var k = r.querySelector('.barn-klasse').value;
+      return { navn: r.querySelector('.barn-navn').value.trim(), klassetrin: k === '' ? null : +k };
+    }).filter(function (b) { return b.navn; });
+  }
+
+  function fejl(tekst) {
+    LF.besked(besked, tekst, 'fejl');
+    besked.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return false;
+  }
+
+  function tjekTrin() {
+    var n = trin[nu];
+    if (n === 'hvem' && !type()) return fejl('Vælg, hvem der skal spille.');
+    if (n === 'boern') {
+      var b = boern();
+      if (!b.length) return fejl('Skriv mindst ét barns navn.');
+      var set = {};
+      for (var i = 0; i < b.length; i++) {
+        var k = b[i].navn.toLowerCase();
+        if (set[k]) return fejl('Der er to børn, der hedder ' + b[i].navn + '. Skriv fx et forbogstav bagefter.');
+        set[k] = 1;
+      }
+    }
+    if (n === 'skole' && f.skolenavn.value.trim().length < 2) return fejl('Skriv skolens navn.');
+    return true;
+  }
+
+  f.addEventListener('click', function (e) {
+    if (e.target.closest('[data-videre]')) { if (tjekTrin()) vis(nu + 1); }
+    else if (e.target.closest('[data-tilbage]')) vis(nu - 1);
+  });
   f.addEventListener('submit', function (e) {
     e.preventDefault();
+    if (trin[nu] !== 'dig') { if (tjekTrin()) vis(nu + 1); return; }
     var knap = f.querySelector('button[type=submit]');
-    var besked = document.getElementById('besked');
+    var t = type();
     var d = {
-      type: 'privat',
-      navn: f.navn.value.trim(), bynavn: f.bynavn.value.trim(),
+      type: t,
+      navn: t === 'skole' ? f.skolenavn.value.trim() : f.navn.value.trim(),
+      kontakt: f.navn.value.trim(), bynavn: f.bynavn.value.trim(),
       email: f.email.value.trim(), kodeord: f.kodeord.value,
       samtykke: f.samtykke.checked, nyhedsbrev: f.nyhedsbrev.checked, hjemmeside: f.hjemmeside.value
     };
+    if (t === 'foraelder') d.boern = boern();
     LF.travl(knap, true);
     LF.send('konto', 'opret', d).then(function () {
       if (window.LFMaal) LFMaal('opret_konto');
-      location.replace(naeste ? '/konto?ny=1&saet=' + naeste : '/spil/?ny=1');
+      location.replace(t === 'skole' ? '/konto?ny=1' : '/spil/?ny=1');
     }).catch(function (err) {
-      LF.besked(besked, err.message, 'fejl');
-      besked.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      fejl(err.message);
       LF.travl(knap, false);
     });
   });
+
+  if (forvalgt) {
+    f.querySelector('input[name=type][value=' + forvalgt + ']').checked = true;
+    vis(1);
+  } else {
+    vis(0);
+  }
 })();
 </script>
 

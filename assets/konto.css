@@ -421,3 +421,41 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .sv-spor { height: 16px; background: var(--paper-2); border: 2px solid var(--ink); }
 .sv-spor i { display: block; height: 100%; background: var(--gold-dark); }
 .sv-tal { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- /opret som spørgeskema ------------------------------------------ */
+
+.trin-prik { margin: 0 0 8px; font-size: .88rem; font-weight: 700; color: var(--ink-soft); letter-spacing: .04em; text-transform: uppercase; }
+.trin-prik:empty { display: none; }
+#opret-form h2 { font-size: 1.45rem; margin-bottom: .5em; }
+.hj-tekst { margin: -4px 0 16px; color: var(--ink-soft); font-size: .96rem; }
+.valg.valg-store { grid-template-columns: 1fr; margin-bottom: 0; }
+.valg.valg-store label { padding: 18px 16px; }
+.valg.valg-store strong { font-size: 1.12rem; }
+.trin-knapper { display: flex; gap: 12px; justify-content: space-between; margin-top: 22px; }
+.barn-raekke { display: grid; grid-template-columns: minmax(0, 1fr) 150px 44px; gap: 8px; margin-bottom: 10px; }
+.barn-raekke input, .barn-raekke select {
+  font-family: var(--sans); font-size: 1.02rem; color: var(--ink); background: #fffaf0;
+  border: 3px solid var(--ink); border-radius: 0; padding: 11px 12px; min-width: 0;
+}
+.barn-raekke input:focus-visible, .barn-raekke select:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+.barn-fjern { border: 3px solid var(--ink); background: var(--paper); font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--ink); }
+.barn-fjern:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+@media (max-width: 480px) {
+  .barn-raekke { grid-template-columns: minmax(0, 1fr) 44px; }
+  .barn-raekke select { grid-column: 1; grid-row: 2; }
+  .barn-raekke .barn-fjern { grid-row: 1 / span 2; grid-column: 2; }
+}
+
+/* ---------- "Hvem skal spille?" på /spil/ ------------------------------------ */
+
+.hvem { margin-bottom: 22px; }
+.hvem-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.hvem-kort {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px 10px; cursor: pointer;
+  font: 650 1.1rem var(--sans); color: var(--ink); background: var(--paper);
+  border: 3px solid var(--ink); border-radius: 0; box-shadow: var(--shadow);
+}
+.hvem-kort .ikon { font-size: 2.4rem; line-height: 1; }
+.hvem-kort:hover { background: var(--gold-soft); }
+.hvem-kort.mig { border-style: dashed; box-shadow: none; }
+.hvem-kort:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }

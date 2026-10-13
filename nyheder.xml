@@ -6,7 +6,15 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Mon, 12 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 13 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Opret en konto ved at svare på få spørgsmål – og opret børnene med det samme</title>
+      <link>https://learnification.dk/nyheder#opret-som-spoergeskema</link>
+      <guid isPermaLink="false">learnification-nyhed-opret-som-spoergeskema</guid>
+      <pubDate>Tue, 13 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Oprettelsen er nu en lille serie spørgsmål: <strong>Hvem skal spille?</strong> (dig selv, dine børn eller en klasse), derefter børnenes <strong>fornavne eller kaldenavne</strong> og gerne deres klassetrin, og til sidst et par oplysninger om dig.</p><p>På en familiekonto vises der efter login <strong>Hvem skal spille?</strong> med et stort kort til hvert barn. Så spiller hvert barn på sin egen profil med sine egne gemte spil – i stedet for at dele den voksnes.</p><p>Når flere børn spiller samtidig på den voksnes login, tæller spilletiden nu for hvert barn.</p>]]></description>
+    </item>
     <item>
       <title>Regnehelten og biblioteket får minikort, farvede missioner og oplæsning</title>
       <link>https://learnification.dk/nyheder#spil-ens-rettelser</link>

@@ -14,8 +14,10 @@
  * kommer retur. Har en omgang ligget stille i over en halv time, bliver
  * der også startet en ny — så "gange" i overblikket betyder noget.
  *
- * En spiller kan aldrig få talt mere tid, end uret går — heller ikke med
- * spillet åbent i flere faner (hver fane er sin egen omgang).
+ * Et barn med egen kode kan aldrig få talt mere tid, end uret går — heller
+ * ikke med spillet åbent i flere faner (hver fane er sin egen omgang). Den
+ * voksnes login kan have flere børn ved spillet på én gang, så dér tæller
+ * hver fane fuldt.
  *
  * Pulsen kan komme med navigator.sendBeacon, når fanen bliver lukket, og
  * den kan ikke sætte egne headers. Derfor kræves X-LF ikke her — det
@@ -61,13 +63,14 @@ if (tal('id') > 0) {
     }
 }
 
-// Spillerens seneste puls på tværs af ALLE omgange. Har barnet spillet åbent
+// Barnets seneste puls på tværs af ALLE omgange. Har barnet spillet åbent
 // i to faner (eller begge spil side om side), har hver fane sin egen omgang,
-// og uden det her ville tiden løbe dobbelt så hurtigt som uret.
+// og uden det her ville tiden løbe dobbelt så hurtigt som uret. Gælder ikke
+// den voksnes login: dér kan flere børn spille på samme tid.
 $seneste = en('SELECT id, sidst FROM sessioner WHERE '
               . ($elev_id ? 'elev_id = ?' : "konto_id = ? AND elev_id IS NULL AND hvem = 'voksen'")
               . ' ORDER BY sidst DESC, id DESC LIMIT 1', [$elev_id ?: $konto_id]);
-$anden_fane = $seneste && (!$s || (int) $seneste['id'] !== (int) $s['id'])
+$anden_fane = $elev_id && $seneste && (!$s || (int) $seneste['id'] !== (int) $s['id'])
               && $nu - (int) $seneste['sidst'] < MAKS_PR_PULS;
 
 if (!$s) {

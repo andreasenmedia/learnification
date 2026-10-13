@@ -2,6 +2,18 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "opret-som-spoergeskema",
+      "dato": "2026-10-13",
+      "maerke": "Til voksne",
+      "titel": "Opret en konto ved at svare på få spørgsmål – og opret børnene med det samme",
+      "kort": "Man vælger først, hvem der skal spille, og kan skrive børnenes fornavne (og klassetrin) med det samme. På familiekontoen vælger man bagefter, hvilket barn der skal spille.",
+      "tekst": [
+        "Oprettelsen er nu en lille serie spørgsmål: <strong>Hvem skal spille?</strong> (dig selv, dine børn eller en klasse), derefter børnenes <strong>fornavne eller kaldenavne</strong> og gerne deres klassetrin, og til sidst et par oplysninger om dig.",
+        "På en familiekonto vises der efter login <strong>Hvem skal spille?</strong> med et stort kort til hvert barn. Så spiller hvert barn på sin egen profil med sine egne gemte spil – i stedet for at dele den voksnes.",
+        "Når flere børn spiller samtidig på den voksnes login, tæller spilletiden nu for hvert barn."
+      ]
+    },
+    {
       "id": "spil-ens-rettelser",
       "dato": "2026-10-12",
       "maerke": "Spil",

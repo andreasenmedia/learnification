@@ -781,7 +781,7 @@ function ny_elevkode(PDO $pdo): string
  * semikolon virker også). Svarer, hvor mange der kom på. Bruges af /konto,
  * /opret og /admin.
  */
-function nye_elever(int $gruppe_id, string $raa, int $maks = 40): int
+function nye_elever(int $gruppe_id, string $raa, int $maks = 40, array $klassetrin = []): int
 {
     $navne = [];
     foreach (preg_split('/[\r\n,;]+/', $raa) ?: [] as $n) {
@@ -809,8 +809,8 @@ function nye_elever(int $gruppe_id, string $raa, int $maks = 40): int
         db()->beginTransaction();
     }
     foreach ($navne as $n) {
-        kør('INSERT INTO elever (gruppe_id, kaldenavn, ikon, kode, oprettet) VALUES (?, ?, ?, ?, ?)',
-            [$gruppe_id, $n, nyt_ikon($gruppe_id), ny_elevkode(db()), time()]);
+        kør('INSERT INTO elever (gruppe_id, kaldenavn, ikon, kode, oprettet, klassetrin) VALUES (?, ?, ?, ?, ?, ?)',
+            [$gruppe_id, $n, nyt_ikon($gruppe_id), ny_elevkode(db()), time(), $klassetrin[lille($n)] ?? null]);
     }
     if ($egen) {
         db()->commit();
@@ -854,7 +854,7 @@ function tjek_kontofelter(array $d, int $id = 0): array
  * familie får sin gruppe "Familien" med det samme (og børnene i $boern, hvis
  * der står nogen). Svarer med den nye kontos id.
  */
-function opret_konto(array $f, string $kodeord_hash, string $status, string $boern = ''): int
+function opret_konto(array $f, string $kodeord_hash, string $status, string $boern = '', array $klassetrin = []): int
 {
     $nu = time();
     db()->beginTransaction();
@@ -867,7 +867,7 @@ function opret_konto(array $f, string $kodeord_hash, string $status, string $boe
             kør('INSERT INTO grupper (konto_id, navn, klassetrin, kode, oprettet) VALUES (?, ?, NULL, ?, ?)',
                 [$id, 'Familien', ny_kode(), $nu]);
             if (trim($boern) !== '') {
-                nye_elever((int) db()->lastInsertId(), $boern);
+                nye_elever((int) db()->lastInsertId(), $boern, 40, $klassetrin);
             }
         }
         db()->commit();

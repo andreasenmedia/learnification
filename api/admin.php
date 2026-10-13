@@ -217,6 +217,41 @@ function top(array $taelling, int $n = 12): array
     return $ud;
 }
 
+/**
+ * Omgangene på en konto, grupperet i klynger pr. spiller: omgange, der lå
+ * oven i hinanden i tid, hører sammen. Svarer med [[omgange, sekunder på uret], …].
+ */
+function overlap_klynger(int $id): array
+{
+    $spillere = [];
+    foreach (alle('SELECT id, elev_id, hvem, start, sidst, sekunder FROM sessioner
+                   WHERE konto_id = ? AND sekunder > 0 ORDER BY start, id', [$id]) as $s) {
+        $spillere[$s['elev_id'] !== null ? 'e' . $s['elev_id'] : $s['hvem']][] = $s;
+    }
+    $klynger = [];
+    foreach ($spillere as $os) {
+        $klynge = [];
+        $slut = PHP_INT_MIN;
+        $uret = 0;
+        foreach ($os as $o) {
+            // Første puls kan have op til et halvt minut med fra før omgangen startede
+            $fra = (int) $o['start'] - min(30, (int) $o['sekunder']);
+            if ($klynge && $fra > $slut) {
+                $klynger[] = [$klynge, $uret];
+                $klynge = [];
+                $uret = 0;
+            }
+            $uret += max(0, (int) $o['sidst'] - max($fra, $slut));
+            $slut = max($slut, (int) $o['sidst']);
+            $klynge[] = $o;
+        }
+        if ($klynge) {
+            $klynger[] = [$klynge, $uret];
+        }
+    }
+    return $klynger;
+}
+
 switch ($h) {
 
 case 'besoeg':
@@ -615,35 +650,10 @@ case 'ret_overlap':
     if (!vaerdi("SELECT 1 FROM konti WHERE id = ? AND type != 'admin'", [$id])) {
         fejl('Kontoen findes ikke.', 404);
     }
-    $spillere = [];
-    foreach (alle('SELECT id, elev_id, hvem, start, sidst, sekunder FROM sessioner
-                   WHERE konto_id = ? AND sekunder > 0 ORDER BY start, id', [$id]) as $s) {
-        $spillere[$s['elev_id'] !== null ? 'e' . $s['elev_id'] : $s['hvem']][] = $s;
-    }
     $foer = 0;
     $efter = 0;
     $rettet = 0;
-    $klynger = [];
-    foreach ($spillere as $os) {
-        $klynge = [];
-        $slut = PHP_INT_MIN;
-        $uret = 0;
-        foreach ($os as $o) {
-            // Første puls kan have op til et halvt minut med fra før omgangen startede
-            $fra = (int) $o['start'] - min(30, (int) $o['sekunder']);
-            if ($klynge && $fra > $slut) {
-                $klynger[] = [$klynge, $uret];
-                $klynge = [];
-                $uret = 0;
-            }
-            $uret += max(0, (int) $o['sidst'] - max($fra, $slut));
-            $slut = max($slut, (int) $o['sidst']);
-            $klynge[] = $o;
-        }
-        if ($klynge) {
-            $klynger[] = [$klynge, $uret];
-        }
-    }
+    $klynger = overlap_klynger($id);
     db()->beginTransaction();
     foreach ($klynger as [$klynge, $uret]) {
         $sum = array_sum(array_map(fn($o) => (int) $o['sekunder'], $klynge));
@@ -657,6 +667,39 @@ case 'ret_overlap':
             kør('UPDATE sessioner SET sekunder = ? WHERE id = ?', [$ny, $o['id']]);
             $efter += $ny;
             $rettet++;
+        }
+    }
+    db()->commit();
+    svar(['ok' => true, 'foer' => $foer, 'efter' => $efter, 'rettet' => $rettet]);
+
+// Modsatte vej af ret_overlap: to børn spillede rent faktisk samtidig på den
+// voksnes login, så hver omgang får sin egen tid på uret tilbage
+// (sidst - start, aldrig mindre end der står nu).
+case 'fortryd_overlap':
+    kraev_egen_side();
+    $id = tal('id');
+    if (!vaerdi("SELECT 1 FROM konti WHERE id = ? AND type != 'admin'", [$id])) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+    $foer = 0;
+    $efter = 0;
+    $rettet = 0;
+    db()->beginTransaction();
+    foreach (overlap_klynger($id) as [$klynge, $uret]) {
+        $sum = array_sum(array_map(fn($o) => (int) $o['sekunder'], $klynge));
+        $foer += $sum;
+        // Kun den voksnes login: et barn med egen kode kan ikke spille to steder
+        if (count($klynge) < 2 || $klynge[0]['hvem'] !== 'voksen') {
+            $efter += $sum;
+            continue;
+        }
+        foreach ($klynge as $o) {
+            $ny = max((int) $o['sekunder'], (int) $o['sidst'] - (int) $o['start']);
+            if ($ny !== (int) $o['sekunder']) {
+                kør('UPDATE sessioner SET sekunder = ? WHERE id = ?', [$ny, $o['id']]);
+                $rettet++;
+            }
+            $efter += $ny;
         }
     }
     db()->commit();

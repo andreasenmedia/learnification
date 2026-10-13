@@ -102,8 +102,30 @@ case 'opret':
 
     // En familie får sin gruppe med det samme — og børnene, hvis de er skrevet på
     $nu = time();
+    // Børnene kommer som tekst (ét navn pr. linje) eller som liste af {navn, klassetrin}
+    $boern = input()['boern'] ?? '';
+    $trin = [];
+    if (is_array($boern)) {
+        $navne = [];
+        foreach (array_slice($boern, 0, 40) as $b) {
+            $n = trim(is_array($b) ? (string) ($b['navn'] ?? '') : (string) $b);
+            $n = function_exists('mb_substr') ? mb_substr($n, 0, 30, 'UTF-8') : substr($n, 0, 30);
+            if ($n === '') {
+                continue;
+            }
+            $navne[] = $n;
+            $t = is_array($b) ? ($b['klassetrin'] ?? null) : null;
+            if ($t !== null && $t !== '' && (int) $t >= 0 && (int) $t <= 9) {
+                $trin[lille($n)] = (int) $t;
+            }
+        }
+        $boern = implode("\n", $navne);
+    }
+    if ($type === 'foraelder' && trim((string) $boern) === '') {
+        fejl('Skriv mindst ét barns navn, eller vælg "Mig selv".');
+    }
     $id = opret_konto($f, password_hash($kodeord, PASSWORD_DEFAULT), 'ny',
-                      $type === 'foraelder' ? (string) (input()['boern'] ?? '') : '');
+                      $type === 'foraelder' ? (string) $boern : '', $trin);
 
     log_ind($id, null, VOKSEN_LEVETID);
     kør('UPDATE konti SET sidst_inde = ? WHERE id = ?', [$nu, $id]);

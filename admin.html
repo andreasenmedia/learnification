@@ -425,7 +425,7 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=5"></script>
+<script src="/assets/konto.js?v=6"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -1274,11 +1274,15 @@
     }).catch(function (err) { alert(err.message); location.hash = ''; });
   }
 
-  // Gammel dobbelttælling (spillet åbent i flere faner før 2026-10-07): skalér ned til tiden på uret
-  function retOverlap(knap) {
-    if (!confirm('Ret spilletiden på ' + aktuel.konto.navn + ', så omgange, der lå samtidig, kun tæller den tid, der gik på uret? Det kan ikke fortrydes.')) return;
+  // ret_overlap: gammel dobbelttælling (spillet åbent i flere faner før 2026-10-07) skaleres ned til tiden på uret.
+  // fortryd_overlap: flere børn spillede rent faktisk samtidig på den voksnes login — hver omgang får sin egen tid igen.
+  function retOverlap(knap, handling) {
+    var fortryd = handling === 'fortryd_overlap';
+    if (!confirm(fortryd
+      ? 'Tæl spilletiden på ' + aktuel.konto.navn + ' fuldt igen, så hver omgang på den voksnes login får sin egen tid på uret? Det er rigtigt, hvis flere børn spillede samtidig.'
+      : 'Ret spilletiden på ' + aktuel.konto.navn + ', så omgange, der lå samtidig, kun tæller den tid, der gik på uret? Det kan ikke fortrydes.')) return;
     LF.travl(knap, true);
-    LF.send('admin', 'ret_overlap', { id: aktuel.konto.id }).then(function (r) {
+    LF.send('admin', handling, { id: aktuel.konto.id }).then(function (r) {
       alert('Rettet: ' + LF.tid(r.foer) + ' → ' + LF.tid(r.efter) + ' (' + r.rettet + ' omgange).');
       return visKonto(aktuel.konto.id);
     }, function (err) { alert(err.message); LF.travl(knap, false); });
