@@ -229,3 +229,13 @@
 .praes-top h2 { margin: 0; }
 .praes-top .praes-sum { grid-column: 1; }
 .praes-top .btn { grid-column: 2; grid-row: 1 / span 2; }
+
+/* ---------- Telefon: joystick og knapper fylder mindre og står ikke så tæt ---------- */
+@media (max-width: 600px), (max-height: 560px) {
+  #stick-base { width: 96px; height: 96px; left: 16px; bottom: 16px; }
+  #stick-knob { width: 42px; height: 42px; margin: -21px 0 0 -21px; }
+  #tbtns { right: max(14px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); gap: 8px; }
+  #t-act { width: 58px; height: 58px; font-size: 21px; }
+  #t-book, #t-map { width: 52px; height: 38px; font-size: 13px; }
+  body.touching #prompt { bottom: 120px; }
+}

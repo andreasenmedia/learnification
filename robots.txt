@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /start/
 Disallow: /konto
 Disallow: /admin
 Disallow: /login-kort

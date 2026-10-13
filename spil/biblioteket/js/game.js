@@ -547,7 +547,7 @@
 
   var zone = document.getElementById('stick-zone'), base = document.getElementById('stick-base'), knob = document.getElementById('stick-knob');
   function moveStick(dx, dy) {
-    var dist = Math.sqrt(dx * dx + dy * dy), max = 44;
+    var dist = Math.sqrt(dx * dx + dy * dy), max = Math.round(base.offsetWidth * 0.34);
     if (dist > max) { dx = dx / dist * max; dy = dy / dist * max; }
     knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
     stickDir = dist < 14 ? null : Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
@@ -564,8 +564,8 @@
     zone.classList.add('active');
     // joysticket flytter sig derhen, hvor tommelfingeren lander
     var zr = zone.getBoundingClientRect();
-    base.style.left = Math.max(4, e.clientX - zr.left - 64) + 'px';
-    base.style.bottom = Math.max(4, zr.bottom - e.clientY - 64) + 'px';
+    base.style.left = Math.max(4, e.clientX - zr.left - base.offsetWidth / 2) + 'px';
+    base.style.bottom = Math.max(4, zr.bottom - e.clientY - base.offsetWidth / 2) + 'px';
     moveStick(0, 0);
   });
   zone.addEventListener('pointermove', function (e) {

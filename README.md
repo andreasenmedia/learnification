@@ -164,6 +164,11 @@ Børn lander efter login i **Eventyrbiblioteket** (`/spil/biblioteket/`): en sto
 - **Første gang**: hvert sted uden profil åbner "Hvem er du?" (navn + figur). Har barnet en Regnehelten-save, bruges dens navn og udseende som start.
 - **Test lokalt**: biblioteket kræver login, så brug `learnification-php`-opsætningen i "Test lokalt med PHP". `BB.debug.tp('hal', 7, 4, 'up')` og `BB.debug.interact()` flytter og trykker E (rAF står stille i et skjult browserpane, så tag skærmbilleder). `LFProfil.opnaa('rb_runemester')` giver en præstation med det samme.
 
+### "Start eventyret her" (`/start/`)
+
+Menuen har ingen spil-links længere, kun den glimtende knap `.glimt` ("Start eventyret her", `/start/`, også i mobilmenuen og ved siden af burgeren under 960 px). `start/index.html` spørger `konto.php?handling=mig` og sender videre: ikke logget ind -> `/login?til=/start/` (login og `/opret` husker `?til=`; familie- og skolekonti går stadig til deres opsætning), ellers `kun_spil` (**findes endnu ikke**: forældrenes valg om kun ét spil; skal komme med i `mig` som `runeborg` eller `regnehelten`) -> testrundens `test_start` -> `/spil/biblioteket/`.
+Berøringsknapperne (joystick, E, Bog, Kort) er mindre på telefon i `spil/faelles/vinduer.css` (nederst); spillenes `game.js` læser joystickets størrelse fra `#stick-base`.
+
 ## Udseende
 
 Siden har ét stilark, `assets/style.css`, skrevet i hånden. Farverne er

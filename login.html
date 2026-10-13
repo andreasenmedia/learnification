@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/ikon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
-<link rel="stylesheet" href="/assets/style.css?v=7">
+<link rel="stylesheet" href="/assets/style.css?v=8">
 <link rel="stylesheet" href="/assets/konto.css?v=13">
 </head>
 <body>
@@ -32,13 +32,12 @@
       <span>Learnification</span>
     </a>
     <div class="nav-links">
-      <a href="/runeborg">Runeborg</a>
-      <a href="/regnehelten">Regnehelten</a>
       <a href="/for-voksne">For voksne</a>
       <a href="/nyheder">Nyheder</a>
       <a href="/om">Om os</a>
       <a href="/login" class="nav-login" aria-current="page">Log ind</a>
     </div>
+    <a href="/start/" class="btn btn-primary btn-sm nav-cta glimt">Start eventyret her</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -46,12 +45,11 @@
 </nav>
 
 <div id="mobile-menu">
-  <a href="/runeborg">Runeborg</a>
-  <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/nyheder">Nyheder</a>
   <a href="/om">Om os</a>
   <a href="/login" class="nav-login">Log ind</a>
+  <a href="/start/" class="btn btn-primary glimt" style="width:fit-content;margin-top:8px;">Start eventyret her</a>
 </div>
 
 <main class="konto-side">
@@ -123,7 +121,7 @@
 
           <hr style="border:0;border-top:2px solid var(--paper-edge);margin:24px 0 18px;">
           <p style="margin:0;"><strong>Har du ikke en konto?</strong> Den er gratis, mens spillene er til test, og er til dig, der er fyldt 15 år. Skal dine børn eller en klasse også spille, sætter du det op bagefter.</p>
-          <p style="margin:12px 0 0;"><a class="btn btn-sm" href="/opret">Opret en konto</a></p>
+          <p style="margin:12px 0 0;"><a class="btn btn-sm" id="opret-link" href="/opret">Opret en konto</a></p>
         </div>
 
         <!-- Børnene: deres egen kode fra login-kortet -->
@@ -154,6 +152,7 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var til = LF.til('');
+  if (til) $('opret-link').href = '/opret?til=' + encodeURIComponent(til);
 
   // Kontoen er det første, man ser; koden til børnene står lige under.
   // /login#elev (og #kode) går direkte til kodefeltet.

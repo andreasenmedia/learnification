@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "start-eventyret-knap",
+      "dato": "2026-10-13",
+      "maerke": "Siden",
+      "titel": "Én knap til at komme i gang: Start eventyret her",
+      "kort": "Menuen har nu en glimtende knap, der fører barnet det rigtige sted hen. Og knapperne på telefonen er blevet mindre.",
+      "tekst": [
+        "I menuen øverst står der nu en glimtende knap: <strong>Start eventyret her</strong>. Er man ikke logget ind, kommer man først forbi log ind eller opret konto og bagefter lige videre. Ellers går man direkte ind i Eventyrbiblioteket, hvor man vælger spil.",
+        "På telefonen var joysticket og knapperne til at tale, åbne Dagbogen og se kortet kommet for tæt på hinanden. De er nu gjort mindre og står med luft imellem, så tommelfingrene ikke rammer ved siden af."
+      ]
+    },
+    {
       "id": "opret-som-spoergeskema",
       "dato": "2026-10-13",
       "maerke": "Til voksne",

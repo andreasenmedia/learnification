@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/ikon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
-<link rel="stylesheet" href="/assets/style.css?v=7">
+<link rel="stylesheet" href="/assets/style.css?v=8">
 <link rel="stylesheet" href="/assets/konto.css?v=14">
 </head>
 <body>
@@ -32,13 +32,12 @@
       <span>Learnification</span>
     </a>
     <div class="nav-links">
-      <a href="/runeborg">Runeborg</a>
-      <a href="/regnehelten">Regnehelten</a>
       <a href="/for-voksne">For voksne</a>
       <a href="/nyheder">Nyheder</a>
       <a href="/om">Om os</a>
       <a href="/login" class="nav-login" aria-current="page">Log ind</a>
     </div>
+    <a href="/start/" class="btn btn-primary btn-sm nav-cta glimt">Start eventyret her</a>
     <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
     </button>
@@ -46,12 +45,11 @@
 </nav>
 
 <div id="mobile-menu">
-  <a href="/runeborg">Runeborg</a>
-  <a href="/regnehelten">Regnehelten</a>
   <a href="/for-voksne">For voksne</a>
   <a href="/nyheder">Nyheder</a>
   <a href="/om">Om os</a>
   <a href="/login" class="nav-login">Log ind</a>
+  <a href="/start/" class="btn btn-primary glimt" style="width:fit-content;margin-top:8px;">Start eventyret her</a>
 </div>
 
 <main class="konto-side">
@@ -242,7 +240,10 @@
     LF.travl(knap, true);
     LF.send('konto', 'opret', d).then(function () {
       if (window.LFMaal) LFMaal('opret_konto');
-      location.replace(t === 'skole' ? '/konto?ny=1' : '/spil/?ny=1');
+      // Kom man fra "Start eventyret her" (?til=/start/), går en konto til én selv videre dertil;
+      // familie og skole sætter først børn/klasse op
+      var til = LF.til('');
+      location.replace(t === 'skole' ? '/konto?ny=1' : til && t !== 'foraelder' ? til : '/spil/?ny=1');
     }).catch(function (err) {
       fejl(err.message);
       LF.travl(knap, false);
