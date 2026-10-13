@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=8">
-<link rel="stylesheet" href="/assets/konto.css?v=14">
+<link rel="stylesheet" href="/assets/konto.css?v=15">
 </head>
 <body>
 
@@ -77,12 +77,13 @@
       <div class="panel xp" id="xp" hidden>
         <p class="eyebrow">XP-tavle</p>
         <h2>Jeres eventyr</h2>
-        <div class="xp-top">
-          <div class="xp-niv"><span class="xp-niv-nr" id="xp-niv">1</span><div><small>Familiens niveau</small><strong id="xp-titel"></strong></div></div>
-          <div class="xp-tal"><strong id="xp-sum">0</strong> XP<span class="xp-plus" id="xp-uge" hidden></span></div>
+        <div class="xp-tiles">
+          <div class="xp-tile guld"><small>Familiens niveau</small><b class="stor" id="xp-niv">1</b><span id="xp-titel"></span></div>
+          <div class="xp-tile"><small>Familiens XP</small><b class="stor" id="xp-sum">0</b><span class="xp-plus" id="xp-uge" hidden></span></div>
+          <div class="xp-tile"><small>Til næste niveau</small><b class="stor" id="xp-mangler-tal">0</b>
+            <div class="xp-bar" role="progressbar" aria-label="Vej til næste niveau" aria-valuemin="0" aria-valuemax="100" id="xp-bar-ramme"><i id="xp-bar" style="width:0"></i></div>
+            <span id="xp-mangler"></span></div>
         </div>
-        <div class="xp-bar" role="progressbar" aria-label="Vej til næste niveau" aria-valuemin="0" aria-valuemax="100" id="xp-bar-ramme"><i id="xp-bar" style="width:0"></i></div>
-        <p class="lille" id="xp-mangler" style="margin:8px 0 0;"></p>
         <div class="xp-boern" id="xp-boern"></div>
         <h3 style="margin-top:22px;" id="xp-seneste-hoved" hidden>Seneste præstationer</h3>
         <ul class="xp-liste" id="xp-seneste"></ul>
@@ -393,20 +394,22 @@
       $('xp-uge').textContent = '+' + xpTal(x.uge || 0) + ' den sidste uge';
       $('xp-bar').style.width = Math.round(n.andel * 100) + '%';
       $('xp-bar-ramme').setAttribute('aria-valuenow', Math.round(n.andel * 100));
-      $('xp-mangler').textContent = xpTal(n.mangler) + ' XP til niveau ' + (n.niveau + 1) + '.';
+      $('xp-mangler-tal').textContent = xpTal(n.mangler);
+      $('xp-mangler').textContent = 'XP til niveau ' + (n.niveau + 1);
       var max = Math.max.apply(null, x.boern.map(function (b) { return b.xp; }).concat([1]));
       $('xp-boern').innerHTML = x.boern.map(function (b) {
-        var d = b.dele, dele = [];
-        if (d.praestationer) dele.push('★ ' + d.praestationer + (d.praestationer === 1 ? ' præstation' : ' præstationer'));
-        if (d.kapitler) dele.push(d.kapitler + (d.kapitler === 1 ? ' kapitel klaret' : ' kapitler klaret'));
-        if (d.missioner) dele.push(d.missioner + (d.missioner === 1 ? ' mission' : ' missioner'));
-        if (d.regnekraft) dele.push('Regnekraft ' + d.regnekraft + ' %');
-        if (!dele.length) dele.push('Er lige begyndt');
-        return '<div class="xp-barn"><span class="ikon" aria-hidden="true">' + LF.esc(b.ikon) + '</span>'
-          + '<span class="navn">' + LF.esc(b.navn) + ' <span class="lille">· niveau ' + b.niveau + '</span></span>'
-          + '<span class="xp">' + xpTal(b.xp) + ' XP' + (b.uge > 0 ? '<small>+' + xpTal(b.uge) + ' i ugen</small>' : '') + '</span>'
-          + '<span class="del">' + LF.esc(dele.join(' · ')) + (b.spilletid >= 60 ? ' · ' + LF.tid(b.spilletid) + ' spillet' : '') + '</span>'
-          + '<span class="stribe"><i style="width:' + Math.round(b.xp / max * 100) + '%"></i></span></div>';
+        var d = b.dele, bokse = [];
+        function boks(tal, tekst, farve) { bokse.push('<span class="chip' + (farve ? ' ' + farve : '') + '"><b>' + LF.esc(tal) + '</b>' + LF.esc(tekst) + '</span>'); }
+        boks(d.praestationer, d.praestationer === 1 ? 'præstation' : 'præstationer', 'guld');
+        boks(d.kapitler, d.kapitler === 1 ? 'kapitel klaret' : 'kapitler klaret');
+        boks(d.missioner, d.missioner === 1 ? 'mission klaret' : 'missioner klaret');
+        if (d.regnekraft) boks(d.regnekraft + ' %', 'Regnekraft');
+        if (b.spilletid >= 60) boks(LF.tid(b.spilletid), 'spillet');
+        return '<div class="xp-barn"><div class="hoved"><span class="ikon" aria-hidden="true">' + LF.esc(b.ikon) + '</span>'
+          + '<span class="navn">' + LF.esc(b.navn) + '<small>Niveau ' + b.niveau + '</small></span>'
+          + '<span class="xp">' + xpTal(b.xp) + ' XP' + (b.uge > 0 ? '<small>+' + xpTal(b.uge) + ' i ugen</small>' : '') + '</span></div>'
+          + '<div class="stribe"><i style="width:' + Math.round(b.xp / max * 100) + '%"></i></div>'
+          + '<div class="chips">' + bokse.join('') + '</div></div>';
       }).join('');
       $('xp-seneste-hoved').hidden = !x.seneste.length;
       $('xp-seneste').innerHTML = x.seneste.map(function (p) {
