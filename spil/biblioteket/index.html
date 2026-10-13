@@ -53,9 +53,9 @@
 
 <!-- Login foran pladsen. spil: 'runeborg' er kun et navn, LFSpil kræver et; tiden tæller ikke her
      (aktiv er aldrig true), men vi får login, svaret fra serveren og prøvetiden at vide. -->
-<script src="/assets/spilletid.js?v=2"></script>
+<script src="/assets/spilletid.js?v=3"></script>
 <script>
-LFSpil.start({ spil: 'runeborg', kraevLogin: true, aktiv: false,
+LFSpil.start({ spil: 'runeborg', bibliotek: true, kraevLogin: true, aktiv: false,
                bruger: function (d) { window.LF_SPILLER = d; },
                tidenErGaaet: function () { if (window.BB && BB.tidSlut) BB.tidSlut(); },
                snartSlut: function (sek) { if (window.BB && BB.tidSnart) BB.tidSnart(sek); } });
@@ -72,7 +72,7 @@ LFSpil.start({ spil: 'runeborg', kraevLogin: true, aktiv: false,
 <script src="js/voice.js?v=1"></script>
 <script src="js/ui.js?v=4"></script>
 <script src="js/content.js?v=1"></script>
-<script src="js/game.js?v=4"></script>
+<script src="js/game.js?v=5"></script>
 <script src="/assets/elevskema.js?v=5" defer></script>
 </body>
 </html>

@@ -122,6 +122,9 @@
     var sp = K.SPIL[id], me = window.LF_SPILLER || {}, gemt = (me.gemt && me.gemt[id]) || null, status;
     if (gemt) status = gemt.faerdig ? 'Gennemført' : (gemt.tekst || 'Du er i gang');
     else status = 'Ikke startet endnu';
+    // Forældrene har valgt, at barnet kun må spille ét af spillene
+    var kun = me.hvem === 'elev' && me.konto ? me.konto.kun_spil : '';
+    if (kun && kun !== id) { UI.toast('<b>' + sp.navn + '</b> er låst. Spørg din voksne.'); return; }
     var elevTrin = me.elev && me.elev.klassetrin;
     var passer = elevTrin != null && elevTrin >= sp.klasser[0] && elevTrin <= sp.klasser[1];
     var ja = await UI.port({ navn: sp.navn, tekst: sp.tekst, status: status, passer: passer, tidSlut: tidSlutFlag || (window.LFSpil && LFSpil.tidSlut()) });

@@ -9,6 +9,7 @@
  *   POST glemt                  send et link til en ny adgangskode
  *   POST nulstil                sæt nyt kodeord med linket
  *   POST skift_kodeord, ret, slet_konto
+ *   POST kun_spil {kun_spil}   familiekonto: børnene må kun spille ét spil ('' = begge)
  *   POST skift_type {type, skolenavn?}  en konto "til mig selv" bliver familie eller skole
  *
  * Nye konti kan bruges med det samme. De står som "ny" i admin-overblikket,
@@ -22,7 +23,9 @@ function konto_ud(array $k): array
 {
     return ['id' => (int) $k['id'], 'type' => $k['type'], 'navn' => $k['navn'],
             'kontakt' => $k['kontakt'], 'bynavn' => $k['bynavn'], 'email' => $k['email'],
-            'status' => $k['status'], 'oprettet' => (int) $k['oprettet']];
+            'status' => $k['status'], 'oprettet' => (int) $k['oprettet'],
+            // Forældrenes valg: børnene må kun spille ét spil ('' = alle). Gælder børn, ikke den voksne selv.
+            'kun_spil' => in_array($k['kun_spil'] ?? '', ['runeborg', 'regnehelten'], true) ? $k['kun_spil'] : ''];
 }
 
 function tjek_kodeord(string $k): void
@@ -126,6 +129,10 @@ case 'opret':
     }
     $id = opret_konto($f, password_hash($kodeord, PASSWORD_DEFAULT), 'ny',
                       $type === 'foraelder' ? (string) $boern : '', $trin);
+    $kun = felt('kun_spil', 20);
+    if ($type === 'foraelder' && in_array($kun, ['runeborg', 'regnehelten'], true)) {
+        kør('UPDATE konti SET kun_spil = ? WHERE id = ?', [$kun, $id]);
+    }
 
     log_ind($id, null, VOKSEN_LEVETID);
     kør('UPDATE konti SET sidst_inde = ? WHERE id = ?', [$nu, $id]);
@@ -320,6 +327,18 @@ case 'skift_type':
         svar(['ok' => true]);
     }
     fejl('Vælg familie eller skole.');
+
+case 'kun_spil':
+    // Familiekonto: børnene må kun spille ét af spillene ('' = begge)
+    if ($k['type'] !== 'foraelder') {
+        fejl('Det kan kun vælges på en familiekonto.');
+    }
+    $kun = felt('kun_spil', 20);
+    if ($kun !== '' && !in_array($kun, ['runeborg', 'regnehelten'], true)) {
+        fejl('Vælg et af spillene, eller begge.');
+    }
+    kør('UPDATE konti SET kun_spil = ? WHERE id = ?', [$kun, $k['id']]);
+    svar(['ok' => true, 'besked' => 'Gemt.']);
 
 case 'slet_konto':
     if ($k['type'] === 'admin') {

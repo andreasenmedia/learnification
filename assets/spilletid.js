@@ -126,6 +126,9 @@ var LFSpil = (function () {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (!d.logget_ind) { if (o.kraevLogin) login(); return; }
+        // Forældrene har valgt, at barnet kun må spille ét spil: det andet spil sender barnet videre
+        var kun = d.hvem === 'elev' && d.konto ? d.konto.kun_spil : '';
+        if (kun && !o.bibliotek && kun !== o.spil) { location.replace('/spil/' + kun + '/'); return; }
         logget_ind = true;
         sidstRoert = Date.now();
         if (o.bruger) o.bruger(d);

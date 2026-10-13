@@ -500,6 +500,10 @@ function opret_tabeller(PDO $pdo): void
                 FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
             )$slut",
         ],
+        // Forældrenes valg: børnene må kun spille ét spil (tom = alle spil)
+        14 => [
+            "ALTER TABLE konti ADD COLUMN kun_spil $tekst NOT NULL DEFAULT ''",
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

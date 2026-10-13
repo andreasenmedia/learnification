@@ -87,7 +87,8 @@ if ($h === 'oversigt') {
     }
     svar(['ok' => true,
           'konto' => ['id' => $kid, 'type' => $k['type'], 'navn' => $k['navn'], 'kontakt' => $k['kontakt'],
-                      'bynavn' => $k['bynavn'], 'email' => $k['email'], 'status' => $k['status']],
+                      'bynavn' => $k['bynavn'], 'email' => $k['email'], 'status' => $k['status'],
+                      'kun_spil' => in_array($k['kun_spil'] ?? '', ['runeborg', 'regnehelten'], true) ? $k['kun_spil'] : ''],
           'grupper' => $grupper,
           'tid' => spilletid('konto_id = ?', [$kid]),
           'voksen_tid' => spilletid("konto_id = ? AND hvem = 'voksen'", [$kid]),

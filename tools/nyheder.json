@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "kun-et-spil",
+      "dato": "2026-10-13",
+      "maerke": "Til voksne",
+      "titel": "Vælg, om børnene må spille begge spil eller kun ét",
+      "kort": "På familiekontoen kan du vælge, at børnene kun må spille Runeborg eller kun Regnehelten. Og \"Start eventyret her\" spørger nu, hvem der skal spille.",
+      "tekst": [
+        "Når du opretter en familiekonto, og senere under <strong>Min konto</strong>, kan du vælge, hvilke spil børnene må spille: <strong>begge</strong>, <strong>kun Runeborg</strong> eller <strong>kun Regnehelten</strong>. Vælger du ét spil, går børnene direkte ind i det, og det andet spil er låst for dem. Selv kan du stadig spille begge.",
+        "Trykker du som forælder på <strong>Start eventyret her</strong>, spørger siden nu først, hvem der skal spille – et af børnene eller dig selv. Knappen står også på forsiden i stedet for \"Spil nu\"."
+      ]
+    },
+    {
       "id": "start-eventyret-knap",
       "dato": "2026-10-13",
       "maerke": "Siden",

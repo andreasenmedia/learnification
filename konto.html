@@ -152,6 +152,21 @@
         <button class="btn btn-primary" type="submit">Opret klasse</button>
       </form>
 
+      <form class="panel ingen-print" id="kun-spil-form" hidden novalidate>
+        <h2>Hvilke spil må børnene spille?</h2>
+        <p class="lille" style="margin-top:-6px;">Vælger du ét spil, går børnene direkte ind i det, og det andet er låst for dem. Du kan selv spille begge.</p>
+        <p class="besked" id="kun-spil-besked"></p>
+        <div class="valg valg-store" role="radiogroup" aria-label="Hvilke spil må børnene spille?">
+          <label><input type="radio" name="kun_spil" value="" checked>
+            <span><strong>Begge spil</strong><small>Børnene vælger selv i Eventyrbiblioteket</small></span></label>
+          <label><input type="radio" name="kun_spil" value="runeborg">
+            <span><strong>Kun Runeborg</strong><small>Et fantasyeventyr for 5.-9. klasse</small></span></label>
+          <label><input type="radio" name="kun_spil" value="regnehelten">
+            <span><strong>Kun Regnehelten</strong><small>Regning i hverdagen for 1.-6. klasse</small></span></label>
+        </div>
+        <button class="btn btn-sm btn-primary" type="submit">Gem</button>
+      </form>
+
       <div class="panel ingen-print" id="indstillinger">
         <h2>Konto</h2>
         <details class="foldud">
@@ -255,6 +270,10 @@
         setTimeout(function () { $('saet-op').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
       }
     }
+    $('kun-spil-form').hidden = d.konto.type !== 'foraelder';
+    var kun = d.konto.kun_spil || '';
+    var valgt = $('kun-spil-form').querySelector('input[name=kun_spil][value="' + kun + '"]');
+    if (valgt) valgt.checked = true;
     $('slet-boks').hidden = admin;
 
     // Tal øverst
@@ -454,6 +473,13 @@
     LF.send('konto', 'ret', { navn: $('ret-navn').value.trim(), kontakt: $('ret-kontakt').value.trim(), bynavn: $('ret-by').value.trim() })
       .then(function (d) { LF.besked($('ret-besked'), d.besked, 'ok'); hent(); })
       .catch(function (err) { LF.besked($('ret-besked'), err.message, 'fejl'); });
+  });
+  $('kun-spil-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = ($('kun-spil-form').querySelector('input[name=kun_spil]:checked') || {}).value || '';
+    LF.send('konto', 'kun_spil', { kun_spil: v })
+      .then(function (d) { LF.besked($('kun-spil-besked'), d.besked, 'ok'); hent(); })
+      .catch(function (err) { LF.besked($('kun-spil-besked'), err.message, 'fejl'); });
   });
   $('kode-form').addEventListener('submit', function (e) {
     e.preventDefault();

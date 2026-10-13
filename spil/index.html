@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vælg et spil — Learnification</title>
-<!-- Spiloversigten: her lander voksne lige efter login og oprettelse, og "Spil nu" peger hertil.
+<!-- Spiloversigten: her lander voksne lige efter login og oprettelse, og "Start eventyret her" (/start/) sender forældre videre hertil eller til et barns spil.
      Børn lander i stedet i Eventyrbiblioteket (/spil/biblioteket/), men kan også se oversigten her.
      Siden kræver login ligesom spillene. Gamle links og QR-koder til /spil/ ender også her. -->
 <meta name="robots" content="noindex">
@@ -214,8 +214,11 @@
     $('kommer-voksen').hidden = elev;
 
     var trin = elev && d.elev.klassetrin;
+    var kun = elev && d.konto ? d.konto.kun_spil : '';
     document.querySelectorAll('article[data-spil]').forEach(function (kort) {
       var spil = kort.dataset.spil, g = (d.gemt || {})[spil];
+      // Forældrene har valgt, at barnet kun må spille ét spil: det andet kort bliver skjult
+      if (kun && kun !== spil) { kort.hidden = true; return; }
       var status = kort.querySelector('[data-status]'), knap = kort.querySelector('[data-knap]');
       if (g) {
         status.innerHTML = (g.faerdig ? '<strong>★ Gennemført</strong>' : '<strong>' + LF.esc(g.tekst) + '</strong>')

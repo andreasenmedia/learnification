@@ -35,7 +35,7 @@ switch (handling()) {
 case 'login':
     bremse('elevlogin', ip(), 30, 900, false);
     $kode = ren_kode(felt('kode', 30));
-    $e = $kode === '' ? null : en('SELECT e.*, g.konto_id, k.status, k.type, k.test, k.test_start FROM elever e
+    $e = $kode === '' ? null : en('SELECT e.*, g.konto_id, k.status, k.type, k.test, k.test_start, k.kun_spil FROM elever e
                                    JOIN grupper g ON g.id = e.gruppe_id
                                    JOIN konti k ON k.id = g.konto_id
                                    WHERE e.kode = ?', [$kode]);
@@ -54,6 +54,9 @@ case 'login':
     // Skoletest: læreren har valgt, hvor børnene starter
     if (!empty($e['test']) && in_array($e['test_start'], ['runeborg', 'regnehelten', 'biblioteket'], true)) {
         $ud['til'] = '/spil/' . $e['test_start'] . '/';
+    } elseif (in_array($e['kun_spil'], ['runeborg', 'regnehelten'], true)) {
+        // Forældrene har valgt, at barnet kun må spille ét spil
+        $ud['til'] = '/spil/' . $e['kun_spil'] . '/';
     }
     svar($ud);
 }

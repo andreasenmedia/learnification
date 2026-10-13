@@ -85,6 +85,16 @@
           <p class="hj-tekst">Fornavn eller kaldenavn er nok. Klassetrin er valgfrit — så starter spillene på det rigtige niveau. Du kan altid rette og tilføje flere bagefter.</p>
           <div id="boern-liste"></div>
           <button class="btn btn-sm" type="button" id="tilfoej-barn">+ Et barn mere</button>
+          <h3 style="margin:26px 0 8px;">Hvilke spil må børnene spille?</h3>
+          <p class="hj-tekst">Du kan skifte det igen under Min konto.</p>
+          <div class="valg valg-store" role="radiogroup" aria-label="Hvilke spil må børnene spille?">
+            <label><input type="radio" name="kun_spil" value="" checked>
+              <span><strong>Begge spil</strong><small>Børnene vælger selv i Eventyrbiblioteket</small></span></label>
+            <label><input type="radio" name="kun_spil" value="runeborg">
+              <span><strong>Kun Runeborg</strong><small>Et fantasyeventyr for 5.-9. klasse</small></span></label>
+            <label><input type="radio" name="kun_spil" value="regnehelten">
+              <span><strong>Kun Regnehelten</strong><small>Regning i hverdagen for 1.-6. klasse</small></span></label>
+          </div>
           <div class="trin-knapper"><button class="btn" type="button" data-tilbage>Tilbage</button><button class="btn btn-primary btn-lg" type="button" data-videre>Videre</button></div>
         </section>
 
@@ -236,7 +246,7 @@
       email: f.email.value.trim(), kodeord: f.kodeord.value,
       samtykke: f.samtykke.checked, nyhedsbrev: f.nyhedsbrev.checked, hjemmeside: f.hjemmeside.value
     };
-    if (t === 'foraelder') d.boern = boern();
+    if (t === 'foraelder') { d.boern = boern(); d.kun_spil = (f.querySelector('input[name=kun_spil]:checked') || {}).value || ''; }
     LF.travl(knap, true);
     LF.send('konto', 'opret', d).then(function () {
       if (window.LFMaal) LFMaal('opret_konto');
