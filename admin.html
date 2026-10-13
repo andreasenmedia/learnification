@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=8">
-<link rel="stylesheet" href="/assets/konto.css?v=13">
+<link rel="stylesheet" href="/assets/konto.css?v=14">
 </head>
 <body>
 
@@ -74,6 +74,7 @@
           <a class="btn btn-sm" href="/statistik">Besøg på siden</a>
           <a class="btn btn-sm" href="#nyhedsbrev">Nyhedsbrev</a>
           <a class="btn btn-sm" href="#velkomst">Velkomstmail</a>
+          <a class="btn btn-sm" href="#fremskridt">Fremskridtsmail</a>
           <a class="btn btn-sm" href="#spoergeskema">Spørgeskema</a>
           <a class="btn btn-sm btn-primary" href="#test">Skoletest</a>
           <a class="btn btn-sm" href="/api/admin.php?handling=eksport">Hent som Excel (CSV)</a>
@@ -231,6 +232,50 @@
       <div class="panel">
         <h2>Konti</h2>
         <div class="tabel-rul"><table class="liste" id="v-liste"></table></div>
+      </div>
+    </div>
+
+    <!-- Fremskridtsmailen (XP-tavlen) -->
+    <div id="fremskridt" hidden>
+      <a href="#" class="tilbage">&larr; Alle konti</a>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Til forældre med en familiekonto</p><h1>Fremskridtsmail</h1>
+          <p>En mail om børnenes fremskridt i spillene: nye præstationer, klarede kapitler og missioner, og familiens XP. Forældrene ser det samme på XP-tavlen under Min konto. Mailen går til alle familiekonti, der ikke har sagt nej tak — hver mail har et link, der kun stopper den, ikke kontoen og ikke nyhedsbrevet.</p></div>
+      </div>
+      <p class="besked fejl" id="x-smtp" hidden>Mailene bliver sendt med PHP's mail() og bliver derfor ikke DKIM-signeret, så mange modtagere afviser dem. Læg smtp.php i datamappen (se README under "Mails fra siden"), før du sender.</p>
+      <div class="tal-raekke" id="x-tal"></div>
+
+      <form class="panel" id="x-form" novalidate>
+        <h2>Send nu</h2>
+        <p class="besked" id="x-besked"></p>
+        <label class="samtykke" style="margin:0 0 6px;"><input type="checkbox" id="x-aktive" checked><span>Spring familier over, hvor der ikke er nyt siden sidste mail (de har så ikke noget at høre om)</span></label>
+        <p class="lille" style="margin:0;">Hver familie får højst én mail pr. døgn herfra. Mailen er en servicemail om børnenes fremskridt — den må ikke rumme tilbud eller reklame.</p>
+        <div class="knapper" style="margin-top:18px;">
+          <button type="submit" class="btn btn-primary" id="x-send">Send</button>
+          <button type="button" class="btn btn-sm" id="x-test">Send en test til mig</button>
+          <button type="button" class="btn btn-sm" id="x-vis">Forhåndsvis</button>
+        </div>
+        <div id="x-forhaand" hidden style="margin-top:18px;">
+          <p class="lille" id="x-forhaand-til" style="margin:0 0 8px;"></p>
+          <iframe id="x-ramme" title="Forhåndsvisning af fremskridtsmailen" sandbox="" style="width:100%;height:680px;border:2px solid var(--paper-edge);border-radius:12px;background:#faf7f0;"></iframe>
+        </div>
+      </form>
+
+      <div class="panel">
+        <h2>Automatisk hver uge</h2>
+        <p id="x-auto-regler"></p>
+        <p class="besked" id="x-auto-besked"></p>
+        <p class="besked fejl" id="x-cron-mangler" hidden></p>
+        <label class="samtykke" style="margin:0 0 12px;"><input type="checkbox" id="x-auto"><span><strong>Send automatisk</strong> — kun til familier med nyt siden sidste mail, og højst én mail på seks dage</span></label>
+        <div class="felt" style="max-width:260px;"><label for="x-dag">Ugedag</label>
+          <select id="x-dag"><option value="1">Mandag</option><option value="2">Tirsdag</option><option value="3">Onsdag</option><option value="4">Torsdag</option><option value="5">Fredag</option><option value="6">Lørdag</option><option value="0">Søndag</option></select></div>
+        <div class="knapper"><button type="button" class="btn btn-sm btn-primary" id="x-gem">Gem</button></div>
+        <p class="lille" style="margin-top:14px;">Den kører med det samme cronjob som påmindelsen (se <a href="#velkomst">Velkomstmail</a>), så der skal ikke sættes noget nyt op. Den automatiske udsendelse er slået fra, til du slår den til her.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Familiekonti</h2>
+        <div class="tabel-rul"><table class="liste" id="x-liste"></table></div>
       </div>
     </div>
 
@@ -433,7 +478,7 @@
   var alle = [], spilnavne = {};
 
   function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
-  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'skemaer', 'opret', 'test'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'fremskridt', 'skemaer', 'opret', 'test'].forEach(function (x) { $(x).hidden = x !== id; }); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -465,6 +510,7 @@
     if (m) visKonto(+m[1]);
     else if (location.hash === '#nyhedsbrev') visNyhed();
     else if (location.hash === '#velkomst') visVelkomst();
+    else if (location.hash === '#fremskridt') visFremskridt();
     else if (location.hash === '#spoergeskema') visSkemaer();
     else if (/^#test/.test(location.hash)) visTest((location.hash.match(/^#test=(\d+)/) || [])[1]);
     else if (location.hash === '#ny-konto') visOpret();
@@ -816,6 +862,125 @@
       LF.besked($('v-besked'), 'Velkomstmailen er sendt til ' + k.email + '.', 'ok');
       return visVelkomst();
     }, function (err) { LF.besked($('v-besked'), err.message, 'fejl'); });
+  });
+
+  // --- fremskridtsmailen (XP-tavlen) ----------------------------------------
+  var xKonti = [], xSender = false, xModtagere = 0, xAktive = 0;
+  var UGEDAGE = ['søndag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lørdag'];
+  function visFremskridt() {
+    return LF.hent('admin', 'xp_oversigt').then(function (d) {
+      xKonti = d.konti; xModtagere = d.modtagere; xAktive = d.aktive;
+      vis('fremskridt');
+      $('x-smtp').hidden = !!d.smtp;
+      $('x-test').textContent = 'Send en test til ' + d.mig;
+      $('x-tal').innerHTML = [[xKonti.length, 'Familiekonti'], [d.modtagere, 'Får mailen'], [d.afmeldte, 'Har sagt nej tak'],
+                              [d.aktive, 'Har nyt siden sidste mail']].map(kort).join('');
+      xKnap();
+      var a = d.auto;
+      if (!xAutoRoert) { $('x-auto').checked = a.til; $('x-dag').value = String(a.ugedag); }
+      $('x-auto-regler').textContent = 'Når den er slået til, går mailen hver ' + UGEDAGE[a.ugedag] + ' mellem kl. ' + a.timer[0] + ' og ' + a.timer[1]
+        + ' til de familier, hvor børnene har fået XP siden sidste mail.'
+        + (a.koersel ? ' Sidste kørsel: ' + LF.dato(a.koersel.tid) + ' — ' + a.koersel.sendt + ' sendt' + (a.koersel.fejlet ? ', ' + a.koersel.fejlet + ' fejlet' : '') + '.' : '');
+      var nu = Date.now() / 1000;
+      var m = $('x-cron-mangler');
+      m.hidden = !(a.til && (!a.cron || nu - a.cron > 3 * 3600));
+      m.textContent = a.cron ? 'Cronjobbet har ikke kaldt siden ' + LF.dato(a.cron) + ' — den automatiske udsendelse kører ikke, før det virker igen.'
+        : 'Cronjobbet har aldrig kaldt. Sæt det op under Velkomstmail → Automatisk påmindelse, ellers sker der ingenting af sig selv.';
+      var html = '<thead><tr><th>Konto</th><th class="t">Børn</th><th class="t">XP</th><th class="t">Nyt siden sidste mail</th><th class="t">Sidste mail</th><th>Status</th><th></th></tr></thead><tbody>';
+      xKonti.forEach(function (k) {
+        html += '<tr><td><strong>' + LF.esc(k.navn) + '</strong><br><span class="lille">' + LF.esc(k.email) + '</span></td>'
+          + '<td class="t">' + k.boern + '</td><td class="t">' + k.xp.toLocaleString('da-DK') + ' <span class="lille">(niv. ' + k.niveau + ')</span></td>'
+          + '<td class="t">' + (k.nyt === null ? '–' : k.nyt > 0 ? '+' + k.nyt.toLocaleString('da-DK') : '0') + '</td>'
+          + '<td class="t">' + LF.dato(k.sendt) + '</td>'
+          + '<td>' + (k.status === 'spaerret' ? maerke('spaerret') : k.til ? '<span class="maerke godkendt">Får mailen</span>' : '<span class="maerke spaerret">Nej tak ' + LF.dato(k.afmeldt) + '</span>') + '</td>'
+          + '<td class="t"><button type="button" class="link-knap" data-xvis="' + k.id + '">Vis</button>'
+          + (k.til && k.status !== 'spaerret' && k.boern ? ' · <button type="button" class="link-knap" data-xen="' + k.id + '">Send nu</button>' : '')
+          + '</td></tr>';
+      });
+      if (!xKonti.length) html += '<tr><td colspan="7" class="tom">Ingen familiekonti endnu.</td></tr>';
+      $('x-liste').innerHTML = html + '</tbody>';
+    }).catch(function (err) { alert(err.message); location.hash = ''; });
+  }
+  var xAutoRoert = false;
+  ['x-auto', 'x-dag'].forEach(function (id) { $(id).addEventListener('change', function () { xAutoRoert = true; }); });
+  function xKnap() {
+    if (xSender) return;
+    $('x-send').textContent = 'Send til ' + ($('x-aktive').checked ? xAktive : xModtagere) + ' familier';
+    $('x-send').disabled = !($('x-aktive').checked ? xAktive : xModtagere);
+  }
+  $('x-aktive').addEventListener('change', xKnap);
+
+  function xVis(id) {
+    return LF.send('admin', 'xp_vis', { id: id || 0 }).then(function (d) {
+      $('x-forhaand').hidden = false;
+      $('x-forhaand-til').textContent = 'Fremskridtsmailen, som den ser ud for ' + d.til + (d.eksempel ? ' (der er endnu ingen rigtig familie med nyt)' : '') + ':';
+      $('x-ramme').srcdoc = d.html;
+      $('x-forhaand').scrollIntoView({ block: 'start' });
+    }, function (err) { LF.besked($('x-besked'), err.message, 'fejl'); });
+  }
+  $('x-vis').addEventListener('click', function () { xVis(0); });
+  $('x-test').addEventListener('click', function () {
+    var knap = this;
+    LF.travl(knap, true);
+    LF.send('admin', 'xp_test', { id: 0 }).then(function (d) {
+      LF.besked($('x-besked'), 'Testen er sendt til ' + d.til + (d.eksempel ? ' (med et eksempel — der er endnu ingen rigtig familie med nyt)' : '') + '.', 'ok');
+    }, function (err) { LF.besked($('x-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
+  });
+
+  $('x-gem').addEventListener('click', function () {
+    var knap = this;
+    LF.travl(knap, true);
+    LF.send('admin', 'xp_indstil', { auto: $('x-auto').checked, ugedag: +$('x-dag').value }).then(function () {
+      xAutoRoert = false;
+      LF.besked($('x-auto-besked'), $('x-auto').checked ? 'Gemt — mailen går hver ' + UGEDAGE[+$('x-dag').value] + '.' : 'Gemt — den automatiske udsendelse er slået fra.', 'ok');
+      return visFremskridt();
+    }, function (err) { LF.besked($('x-auto-besked'), err.message, 'fejl'); })
+      .then(function () { LF.travl(knap, false); });
+  });
+
+  $('x-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var kun = $('x-aktive').checked, n = kun ? xAktive : xModtagere;
+    if (!n) return;
+    if (!confirm('Send fremskridtsmailen til ' + n + (n === 1 ? ' familie' : ' familier') + '?')) return;
+    var sendt = 0, sprunget = 0, fejl = 0, sidsteFejl = '';
+    xSender = true; $('x-send').disabled = true;
+    window.onbeforeunload = function () { return 'Mailene er ved at blive sendt.'; };
+    function stop() { xSender = false; window.onbeforeunload = null; }
+    function bunke(efter) {
+      return LF.send('admin', 'xp_send', { kun_aktive: kun, efter: efter }).then(function (d) {
+        sendt += d.sendt; sprunget += d.sprunget; fejl += d.fejlet;
+        if (d.fejl) sidsteFejl = d.fejl;
+        if (d.tilbage > 0 && d.behandlet > 0) {
+          LF.besked($('x-besked'), 'Sender … ' + sendt + ' sendt, ' + d.tilbage + ' tilbage at tjekke. Luk ikke siden.', 'ok');
+          return new Promise(function (ok) { setTimeout(ok, 800); }).then(function () { return bunke(d.efter); });
+        }
+        stop();
+        LF.besked($('x-besked'), 'Færdig: sendt til ' + sendt + (sendt === 1 ? ' familie' : ' familier')
+          + (sprunget ? ', sprunget ' + sprunget + ' over uden nyt' : '')
+          + (fejl ? '. ' + fejl + ' kunne ikke sendes (' + sidsteFejl + ')' : '') + '.', fejl ? 'fejl' : 'ok');
+        return visFremskridt();
+      });
+    }
+    bunke(0).catch(function (err) {
+      stop();
+      LF.besked($('x-besked'), err.message + ' — ' + sendt + ' er sendt. Tryk Send igen for at sende resten (dem, der har fået den, får den ikke igen).', 'fejl');
+      return visFremskridt();
+    });
+  });
+
+  $('x-liste').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-xvis]');
+    if (b) { xVis(+b.dataset.xvis); return; }
+    b = e.target.closest('[data-xen]');
+    if (!b) return;
+    var k = xKonti.filter(function (k) { return k.id === +b.dataset.xen; })[0];
+    if (!confirm('Send fremskridtsmailen til ' + k.email + ' nu?')) return;
+    LF.send('admin', 'xp_en', { id: k.id }).then(function () {
+      LF.besked($('x-besked'), 'Fremskridtsmailen er sendt til ' + k.email + '.', 'ok');
+      return visFremskridt();
+    }, function (err) { LF.besked($('x-besked'), err.message, 'fejl'); });
   });
 
   // --- påmindelsen ---------------------------------------------------------

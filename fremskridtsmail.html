@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fremskridtsmail — Learnification</title>
+<meta name="description" content="Slå mailen om børnenes fremskridt i spillene til eller fra.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#faf7f0">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/ikon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
+<link rel="stylesheet" href="/assets/style.css?v=8">
+<link rel="stylesheet" href="/assets/konto.css?v=14">
+</head>
+<body>
+
+<nav id="nav">
+  <div class="wrap">
+    <a href="/" class="nav-brand">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true" shape-rendering="crispEdges"><rect x="2" y="2" width="28" height="28" fill="#ffcc4d"/><rect x="2" y="26" width="28" height="4" fill="#b8862a"/><rect x="26" y="2" width="4" height="28" fill="#b8862a"/><rect x="8" y="9" width="16" height="3" fill="#140f1c"/><rect x="8" y="15" width="16" height="3" fill="#140f1c"/><rect x="8" y="21" width="9" height="3" fill="#140f1c"/></svg>
+      <span>Learnification</span>
+    </a>
+    <div class="nav-links">
+      <a href="/for-voksne">For voksne</a>
+      <a href="/nyheder">Nyheder</a>
+      <a href="/om">Om os</a>
+      <a href="/login" class="nav-login">Log ind</a>
+    </div>
+    <a href="/start/" class="btn btn-primary btn-sm nav-cta glimt">Start eventyret her</a>
+    <button id="burger" class="nav-burger" aria-label="Åbn menu" aria-expanded="false" aria-controls="mobile-menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+</nav>
+
+<div id="mobile-menu">
+  <a href="/for-voksne">For voksne</a>
+  <a href="/nyheder">Nyheder</a>
+  <a href="/om">Om os</a>
+  <a href="/login" class="nav-login">Log ind</a>
+  <a href="/start/" class="btn btn-primary glimt" style="width:fit-content;margin-top:8px;">Start eventyret her</a>
+</div>
+
+<main class="konto-side">
+  <div class="wrap">
+
+    <!-- Fra afmeldingslinket i hver fremskridtsmail. Der skal trykkes: nogle mailprogrammer
+         åbner links af sig selv for at tjekke dem, og så ville folk blive afmeldt uden at have gjort noget. -->
+    <div class="panel smal midt" id="afmeld" hidden>
+      <h2 id="afmeld-titel">Stop fremskridtsmails</h2>
+      <p id="afmeld-tekst">Tryk på knappen, så får du ikke flere mails om børnenes fremskridt i spillene. Din konto og dit eventuelle nyhedsbrev er upåvirket.</p>
+      <p class="besked" id="afmeld-besked"></p>
+      <p><button class="btn btn-primary" type="button" id="afmeld-knap">Stop mailene</button>
+         <button class="btn" type="button" id="tilmeld-knap" hidden>Fortryd — send dem igen</button></p>
+      <p class="lille">Du kan altid slå dem til eller fra igen under <a href="/konto#xp">Min konto</a>.</p>
+    </div>
+
+    <div class="panel smal midt" id="tom" hidden>
+      <h2>Fremskridtsmail</h2>
+      <p>Her kan du slå mailen om børnenes fremskridt til og fra. Du finder valget under XP-tavlen på <a href="/konto#xp">Min konto</a>.</p>
+      <p><a class="btn" href="/konto#xp">Til Min konto</a></p>
+    </div>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var noegle = new URLSearchParams(location.search).get('afmeld');
+
+  function send(handling) {
+    return fetch('/api/xp.php', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-LF': '1' },
+      body: JSON.stringify({ handling: handling, noegle: noegle })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.ok) throw new Error(d.besked || 'Noget gik galt.');
+      return d;
+    });
+  }
+  function fejl(err) {
+    var b = $('afmeld-besked');
+    b.textContent = err.message === 'Failed to fetch' ? 'Kunne ikke komme i kontakt med serveren. Prøv igen om lidt.' : err.message;
+    b.className = 'besked fejl';
+  }
+
+  if (!noegle) { $('tom').hidden = false; return; }
+  // Nøglen skal ikke blive stående i adressefeltet og historikken
+  history.replaceState(null, '', location.pathname);
+  $('afmeld').hidden = false;
+
+  $('afmeld-knap').addEventListener('click', function () {
+    var knap = this;
+    knap.disabled = true;
+    send('afmeld').then(function (d) {
+      $('afmeld-titel').textContent = 'Så er det slået fra';
+      $('afmeld-tekst').textContent = d.email + ' får ikke flere mails om børnenes fremskridt.';
+      $('afmeld-besked').textContent = '';
+      knap.hidden = true;
+      $('tilmeld-knap').hidden = false;
+    }).catch(function (err) { fejl(err); knap.disabled = false; });
+  });
+  $('tilmeld-knap').addEventListener('click', function () {
+    var knap = this;
+    knap.disabled = true;
+    send('tilmeld').then(function (d) {
+      $('afmeld-titel').textContent = 'Mailene er slået til igen';
+      $('afmeld-tekst').textContent = d.email + ' får igen en mail om børnenes fremskridt, når der er nyt.';
+      knap.hidden = true;
+    }).catch(function (err) { fejl(err); knap.disabled = false; });
+  });
+})();
+</script>
+
+<footer>
+  <div class="wrap cols">
+    <div style="max-width:320px;">
+      <a href="/" class="nav-brand" style="margin-bottom:12px;">
+        <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true" shape-rendering="crispEdges"><rect x="2" y="2" width="28" height="28" fill="#ffcc4d"/><rect x="2" y="26" width="28" height="4" fill="#b8862a"/><rect x="26" y="2" width="4" height="28" fill="#b8862a"/><rect x="8" y="9" width="16" height="3" fill="#140f1c"/><rect x="8" y="15" width="16" height="3" fill="#140f1c"/><rect x="8" y="21" width="9" height="3" fill="#140f1c"/></svg>
+        <span>Learnification</span>
+      </a>
+      <p class="small">Danske læringsspil for børn, der hellere vil spille end øve sig.</p>
+    </div>
+    <div>
+      <h4>Spil</h4>
+      <nav><a href="/runeborg">Om Runeborg</a><a href="/spil/runeborg/">Spil Runeborg</a><a href="/regnehelten">Om Regnehelten</a><a href="/spil/regnehelten/">Spil Regnehelten</a></nav>
+    </div>
+    <div>
+      <h4>Learnification</h4>
+      <nav><a href="/om">Om os</a><a href="/nyheder">Nyheder</a><a href="/for-voksne">For forældre og lærere</a><a href="/login">Log ind</a><a href="/privatliv">Privatliv og cookies</a><a href="mailto:kontakt@learnification.dk">kontakt@learnification.dk</a></nav>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:34px;">
+    <p class="small" style="margin:0;">© <span id="year">2026</span> Learnification. Lavet i Danmark.</p>
+  </div>
+</footer>
+
+<script src="/assets/script.js?v=5" defer></script>
+<script src="/assets/samtykke.js?v=2" defer></script>
+<script src="/assets/besoeg.js?v=2" defer></script>
+</body>
+</html>

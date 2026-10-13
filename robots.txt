@@ -3,6 +3,7 @@ Allow: /
 Disallow: /api/
 Disallow: /start/
 Disallow: /konto
+Disallow: /fremskridtsmail
 Disallow: /admin
 Disallow: /login-kort
 

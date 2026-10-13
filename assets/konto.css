@@ -459,3 +459,44 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .hvem-kort:hover { background: var(--gold-soft); }
 .hvem-kort.mig { border-style: dashed; box-shadow: none; }
 .hvem-kort:focus-visible { outline: 3px solid var(--gold-dark); outline-offset: 2px; }
+
+/* ---------- XP-tavlen (konto.html, familiekonti) --------------------------- */
+
+.panel.xp { background: var(--panel); color: var(--txt); border-color: var(--edge); }
+.panel.xp h2, .panel.xp h3 { color: var(--txt); }
+.panel.xp .eyebrow { color: var(--gold); margin-bottom: 4px; }
+.panel.xp .lille { color: var(--txt-soft); }
+.panel.xp a { color: var(--gold); }
+.xp-top { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: center; justify-content: space-between; margin: 6px 0 12px; }
+.xp-niv { display: flex; align-items: center; gap: 14px; }
+.xp-niv-nr {
+  display: grid; place-items: center; min-width: 58px; height: 58px; padding: 0 8px;
+  font: 700 1.9rem/1 var(--pixel); color: var(--ink-deep);
+  background: var(--gold); border: 3px solid var(--gold-edge); box-shadow: 3px 3px 0 rgba(0,0,0,.4);
+}
+.xp-niv small { display: block; font-size: .8rem; color: var(--txt-soft); text-transform: uppercase; letter-spacing: .06em; }
+.xp-niv strong { font: 700 1.3rem/1.2 var(--sans); }
+.xp-tal { text-align: right; font-size: 1rem; color: var(--txt-soft); }
+.xp-tal strong { font: 700 2.2rem/1 var(--pixel); color: var(--gold); }
+.xp-plus { display: inline-block; margin-left: 8px; padding: 2px 8px; font-weight: 700; color: #bff0cf; background: rgba(47,125,76,.45); border: 2px solid #2f7d4c; }
+.xp-bar { height: 16px; background: var(--ink-deep); border: 3px solid var(--edge-2); }
+.xp-bar i { display: block; height: 100%; background: var(--gold); transition: width .6s; }
+.xp-boern { display: grid; gap: 12px; margin: 22px 0 6px; }
+.xp-barn { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; padding: 12px 14px; background: var(--panel-2); border: 2px solid var(--edge-2); }
+.xp-barn .ikon { font-size: 1.7rem; line-height: 1; }
+.xp-barn .navn { font-weight: 700; }
+.xp-barn .del { grid-column: 2; font-size: .88rem; color: var(--txt-soft); }
+.xp-barn .xp { grid-row: 1 / span 2; grid-column: 3; text-align: right; font: 700 1.5rem/1.1 var(--pixel); color: var(--gold); }
+.xp-barn .xp small { display: block; font: 700 .85rem/1.3 var(--sans); color: #bff0cf; }
+.xp-barn .stribe { grid-column: 1 / -1; height: 8px; background: var(--ink-deep); }
+.xp-barn .stribe i { display: block; height: 100%; background: var(--blue); }
+.xp-liste { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.xp-liste li { display: flex; gap: 10px; align-items: baseline; }
+.xp-liste li b { color: var(--gold); }
+.xp-liste .dato { margin-left: auto; font-size: .85rem; color: var(--txt-soft); white-space: nowrap; }
+.xp-valg { margin-top: 20px; padding-top: 16px; border-top: 2px dashed var(--edge-2); }
+.xp-valg .samtykke { color: var(--txt); margin: 0; }
+.panel.xp details.foldud summary { color: var(--gold); }
+.panel.xp .besked { color: var(--txt); }
+@media (max-width: 560px) { .xp-tal { text-align: left; } }
+.panel.xp { scroll-margin-top: 90px; }

@@ -709,6 +709,52 @@ den, står i `udsendelse_modtagere` (DB v6), så en afbrudt udsendelse kan
 sendes færdig fra historikken, uden at nogen får den to gange. Lokalt havner
 mailene i `post.txt` i datamappen (`LF_POSTKASSE`).
 
+## XP-tavlen og fremskridtsmailen
+
+`api/_xp.php` + `api/xp.php`. Forældre med en familiekonto får en **XP-tavle** øverst
+på `/konto` (`#xp`) og kan få en **mail om børnenes fremskridt**. XP bliver
+**regnet ud af det, spillene allerede gemmer** — ingen XP-tæller i spillene, så intet
+kan komme ud af takt: præstation 100 (fra `profiler.praes`), klaret kapitel 75
+(`gemte_spil.klaret`), hovedmission 20, ekstramission 10, runestykke 5, og Regnekraft
+over de 10 %, man starter med, 1 pr. procent. **Spilletid giver bevidst ingen XP.**
+Tallene står som konstanter øverst i `_xp.php`; ændres de, ændres alles XP med det samme.
+Familiens XP = summen af børnenes; niveau n begynder ved 60·(n−1)² XP, titlerne står i
+`XP_TITLER`. Præstationernes navne læses ud af `spil/faelles/praestationer.js` med et
+regex (`xp_katalog()`) — hold den linjeform, ellers står mailen med id'er.
+
+**Ugens fremskridt** = forskellen på nu og et *stand* (tabellen `xp_stand`, DB v15: ét
+lille JSON-objekt pr. barn pr. dag). Stand gemmes første gang, nogen ser tavlen eller
+cronjobbet kører den dag, og overskrives altid, lige når en mail går — så næste mail
+kun fortæller om det nye. Uden stand ved vi ikke, hvad der er nyt, og viser ingen "+".
+
+**Mailen** er en **servicemail** om børnenes fremskridt på en konto, forældrene selv har
+oprettet — IKKE markedsføring og uafhængig af nyhedsbrevet. Den går til familiekonti
+(`type = 'foraelder'`, ikke test, ikke spærret) hvor `konti.xp_mail = 1` — sat fra start,
+dvs. opt-out. **Den må aldrig rumme tilbud, reklame eller nyhedsbrevsstof**; det er det,
+der gør, at den må sendes til alle uden nyhedsbrevssamtykke. Hver mail har et
+afmeldingslink (`/fremskridtsmail?afmeld=<konti.xp_noegle>`, kræver et tryk, rører hverken
+kontoen eller nyhedsbrevet) + `List-Unsubscribe`; forældrene kan også slå den til/fra
+med afkrydsningsfeltet under XP-tavlen. `konti.xp_mail_afmeldt` husker hvornår.
+
+**Udsendelse, /admin → Fremskridtsmail:**
+- *Send nu:* til alle, der får mailen — som standard springes familier uden nyt siden
+  sidste mail over (afkrydsning). Højst én mail pr. døgn pr. familie herfra. En bunke ad
+  gangen med cursor (`efter`), som velkomstmailen. Plus test til sig selv, forhåndsvisning
+  og "Send nu" pr. familie. En test/forhåndsvisning bruger altid en død afmeldingsnøgle.
+- *Automatisk hver uge:* slås til og fra under Fremskridtsmail (fil `fremskridtsmail.json`
+  i datamappen, **slået fra som standard**). Kører med det samme Simply.com-cronjob som
+  påmindelsen (`api/paamind.php`, hver time): `xp_stand_alle()` gemmer dagens stand, og
+  `xp_mail_cron()` sender på den valgte ugedag kl. 10-18 til familier med nyt, højst én
+  mail på 6 dage. Claim-mønstret er som velkomstmailen: `xp_mail_sendt` sættes FØR
+  mailen går og rulles tilbage ved fejl.
+
+| Fil | Handlinger |
+|---|---|
+| `api/xp.php` | `tavle` (voksen), `mail {til}` (voksen), `afmeld` / `tilmeld {noegle}` (fra mailens link) |
+| `api/admin.php` | `xp_oversigt`, `xp_indstil`, `xp_vis`, `xp_test`, `xp_send`, `xp_en` |
+
+Test lokalt som resten: kør `php -S` med `tools/lokal-router.php`; mails havner i `post.txt`.
+
 ## Velkomstmailen
 
 `api/_velkomst.php`: "sådan kommer I i gang" + en Log ind-knap til den voksne

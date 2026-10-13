@@ -24,6 +24,13 @@
  *   POST paamind_vis / paamind_test {id?}  påmindelsen (api/paamind.php kører den selv)
  *   POST paamind_koer           send påmindelserne, der er klar, nu
  *
+ *   XP-tavlen og fremskridtsmailen (_xp.php), fra /admin#fremskridt:
+ *   GET  ?handling=xp_oversigt  familiekonti, XP, hvem der får mailen, og den automatiske udsendelse
+ *   POST xp_indstil {auto, ugedag}   slå den ugentlige udsendelse til/fra
+ *   POST xp_vis / xp_test {id?}      mailen som HTML / sendt til administratoren (id = en families tal, ellers et eksempel)
+ *   POST xp_send {kun_aktive, efter} en bunke; kaldes igen med "efter", til tilbage = 0
+ *   POST xp_en {id}                  send til én familie nu
+ *
  * DEN FØRSTE ADMINISTRATOR. Første gang /admin bliver åbnet, skriver
  * serveren en tilfældig nøgle i opsaetningsnoegle.txt i datamappen
  * (learnification-data/ over public_html, eller public_html/data/). Den
@@ -902,6 +909,115 @@ case 'velkomst_send':
                             . ($spring ? ' AND k.id NOT IN (' . implode(',', $spring) . ')' : ''));
     svar(['ok' => true, 'sendt' => $sendt, 'fejlet' => $fejlet, 'fejl' => $sidste_fejl,
           'spring_over' => $spring, 'tilbage' => $tilbage]);
+
+// ---- XP-tavlen og fremskridtsmailen (se _xp.php), fra /admin#fremskridt ----
+
+case 'xp_oversigt':
+    require_once __DIR__ . '/_xp.php';
+    require_once __DIR__ . '/_velkomst.php';    // cronjobbets status og adresse
+    @set_time_limit(60);
+    $konti = [];
+    $modtagere = $aktive = $afmeldte = 0;
+    foreach (alle("SELECT * FROM konti k WHERE k.type = 'foraelder' AND k.test = 0 ORDER BY k.oprettet DESC") as $k) {
+        $f = xp_familie((int) $k['id'], xp_mail_baseline($k), false);
+        $kan = $k['status'] !== 'spaerret' && (int) $k['xp_mail'] === 1 && $f['boern'];
+        $aktiv = $kan && ($f['kendt'] ? $f['gevinst'] > 0 : $f['xp'] > 0);
+        $modtagere += $kan ? 1 : 0;
+        $aktive += $aktiv ? 1 : 0;
+        $afmeldte += (int) $k['xp_mail'] === 0 ? 1 : 0;
+        $konti[] = ['id' => (int) $k['id'], 'navn' => $k['navn'], 'email' => $k['email'], 'status' => $k['status'],
+                    'boern' => count($f['boern']), 'xp' => $f['xp'], 'nyt' => $f['kendt'] ? $f['gevinst'] : null,
+                    'niveau' => $f['niveau']['niveau'], 'til' => (int) $k['xp_mail'] === 1, 'aktiv' => $aktiv,
+                    'sendt' => $k['xp_mail_sendt'] !== null ? (int) $k['xp_mail_sendt'] : null,
+                    'afmeldt' => $k['xp_mail_afmeldt'] !== null ? (int) $k['xp_mail_afmeldt'] : null];
+    }
+    $s = xp_status();
+    svar(['ok' => true, 'konti' => $konti, 'modtagere' => $modtagere, 'aktive' => $aktive, 'afmeldte' => $afmeldte,
+          'auto' => ['til' => (bool) $s['auto'], 'ugedag' => (int) $s['ugedag'], 'timer' => XP_MAIL_TIMER,
+                     'koersel' => $s['koersel'] ?? null, 'stand' => $s['stand'] ?? null,
+                     'cron' => paamind_status()['cron'] ?? null,
+                     'url' => adresse() . '/api/paamind.php?noegle=' . paamind_noegle()],
+          'mig' => kraev_admin()['email'], 'smtp' => smtp_opsaetning() !== null]);
+
+case 'xp_indstil':
+    kraev_egen_side();
+    require_once __DIR__ . '/_xp.php';
+    $dag = tal('ugedag');
+    if ($dag < 0 || $dag > 6) {
+        fejl('Vælg en ugedag.');
+    }
+    xp_gem_status(['auto' => !empty(input()['auto']), 'ugedag' => $dag]);
+    svar(['ok' => true]);
+
+case 'xp_vis':
+case 'xp_test':
+    // Mailen som HTML eller sendt til administratoren selv — med en rigtig families tal, eller et eksempel
+    kraev_egen_side();
+    require_once __DIR__ . '/_xp.php';
+    $mig = kraev_admin();
+    $k = tal('id') ? en("SELECT * FROM konti WHERE id = ? AND type = 'foraelder'", [tal('id')]) : null;
+    $f = null;
+    if ($k) {
+        $f = xp_familie((int) $k['id'], xp_mail_baseline($k), false);
+    } else {
+        foreach (alle("SELECT * FROM konti k WHERE k.type = 'foraelder' AND k.test = 0 AND k.status != 'spaerret' ORDER BY k.oprettet DESC") as $kk) {
+            $ff = xp_familie((int) $kk['id'], xp_mail_baseline($kk), false);
+            if ($ff['boern'] && $ff['gevinst'] > 0) {
+                [$k, $f] = [$kk, $ff];
+                break;
+            }
+        }
+    }
+    $eksempel = !$f || !$f['boern'];
+    if ($eksempel) {
+        $k = ['id' => 0, 'navn' => $mig['navn'], 'kontakt' => $mig['navn'], 'email' => $mig['email'], 'xp_mail_sendt' => null];
+        $f = xp_eksempel();
+    }
+    // Afmeldingslinket i en test må aldrig kunne afmelde en rigtig familie
+    $k['xp_noegle'] = str_repeat('0', 40);
+    [$emne, $tekst, $html, $headere] = xp_mail($k, $f);
+    if ($h === 'xp_vis') {
+        svar(['ok' => true, 'html' => $html, 'til' => $eksempel ? 'et eksempel' : $k['email'], 'eksempel' => $eksempel]);
+    }
+    bremse('xp-test', (string) $mig['id'], 20, 3600);
+    if (!send_mail($mig['email'], '[TEST] ' . $emne, $tekst, $html, $headere)) {
+        fejl('Mailen blev ikke sendt: ' . (post_fejl() ?: 'ukendt fejl'), 502);
+    }
+    svar(['ok' => true, 'til' => $mig['email'], 'eksempel' => $eksempel]);
+
+case 'xp_send':
+    // En bunke ad gangen (som velkomstmailen); siden kalder igen med "efter", til tilbage = 0
+    kraev_egen_side();
+    require_once __DIR__ . '/_xp.php';
+    @set_time_limit(60);
+    svar(['ok' => true] + xp_mail_koer('admin', XP_MAIL_MANUEL_INTERVAL, !empty(input()['kun_aktive']), tal('efter')));
+
+case 'xp_en':
+    // Til én familie, også uden nyt — men ikke til en, der har sagt nej tak
+    kraev_egen_side();
+    require_once __DIR__ . '/_xp.php';
+    $k = en("SELECT * FROM konti WHERE id = ? AND type = 'foraelder'", [tal('id')]);
+    if (!$k || $k['status'] === 'spaerret') {
+        fejl('Familiekontoen findes ikke.', 404);
+    }
+    if ((int) $k['xp_mail'] !== 1) {
+        fejl('Familien har sagt nej tak til fremskridtsmailen.');
+    }
+    $f = xp_familie((int) $k['id'], xp_mail_baseline($k));
+    if (!$f['boern']) {
+        fejl('Der er ingen børn på kontoen.');
+    }
+    [$emne, $tekst, $html, $headere] = xp_mail($k, $f);
+    $foer = $k['xp_mail_sendt'];
+    kør('UPDATE konti SET xp_mail_sendt = ? WHERE id = ?', [time(), $k['id']]);
+    if (!send_mail($k['email'], $emne, $tekst, $html, $headere)) {
+        kør('UPDATE konti SET xp_mail_sendt = ? WHERE id = ?', [$foer, $k['id']]);
+        fejl('Mailen blev ikke sendt: ' . (post_fejl() ?: 'ukendt fejl'), 502);
+    }
+    foreach ($f['boern'] as $x) {
+        xp_gem_stand($x['id'], $x['b'], true);
+    }
+    svar(['ok' => true]);
 
 case 'eksport':
     $konti = konti_med_tal();

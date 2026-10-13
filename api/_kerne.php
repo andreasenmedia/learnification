@@ -504,6 +504,23 @@ function opret_tabeller(PDO $pdo): void
         14 => [
             "ALTER TABLE konti ADD COLUMN kun_spil $tekst NOT NULL DEFAULT ''",
         ],
+        // XP-tavlen og fremskridtsmailen (api/_xp.php): forældrenes valg (xp_mail = 1 er "ja tak", sat fra start,
+        // 0 er afmeldt), hvornår sidste mail gik, nøglen i afmeldingslinket og et lille stand pr. barn pr. dag,
+        // så ugens fremskridt kan regnes ud som forskellen på nu og for en uge siden
+        15 => [
+            'ALTER TABLE konti ADD COLUMN xp_mail INTEGER NOT NULL DEFAULT 1',
+            'ALTER TABLE konti ADD COLUMN xp_mail_sendt INTEGER',
+            'ALTER TABLE konti ADD COLUMN xp_mail_afmeldt INTEGER',
+            "ALTER TABLE konti ADD COLUMN xp_noegle $tekst",
+            'CREATE UNIQUE INDEX konti_xp_noegle ON konti(xp_noegle)',
+            "CREATE TABLE xp_stand (
+                elev_id INTEGER NOT NULL,
+                dag $tekst NOT NULL,
+                data TEXT NOT NULL,
+                PRIMARY KEY (elev_id, dag),
+                FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
+            )$slut",
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

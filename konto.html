@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=8">
-<link rel="stylesheet" href="/assets/konto.css?v=13">
+<link rel="stylesheet" href="/assets/konto.css?v=14">
 </head>
 <body>
 
@@ -72,6 +72,28 @@
           <li><span class="n">2</span><h3>Del koderne</h3><p>Hvert barn får sin egen kode som RAVN-4827, så ingen kan komme ind som en anden. Udskriv login-kortene — ét til hvert barn.</p></li>
           <li><span class="n">3</span><h3>Log ind og spil</h3><p>Børnene går ind på <strong>learnification.dk/login</strong> og skriver deres egen kode.</p></li>
         </ol>
+      </div>
+
+      <div class="panel xp" id="xp" hidden>
+        <p class="eyebrow">XP-tavle</p>
+        <h2>Jeres eventyr</h2>
+        <div class="xp-top">
+          <div class="xp-niv"><span class="xp-niv-nr" id="xp-niv">1</span><div><small>Familiens niveau</small><strong id="xp-titel"></strong></div></div>
+          <div class="xp-tal"><strong id="xp-sum">0</strong> XP<span class="xp-plus" id="xp-uge" hidden></span></div>
+        </div>
+        <div class="xp-bar" role="progressbar" aria-label="Vej til næste niveau" aria-valuemin="0" aria-valuemax="100" id="xp-bar-ramme"><i id="xp-bar" style="width:0"></i></div>
+        <p class="lille" id="xp-mangler" style="margin:8px 0 0;"></p>
+        <div class="xp-boern" id="xp-boern"></div>
+        <h3 style="margin-top:22px;" id="xp-seneste-hoved" hidden>Seneste præstationer</h3>
+        <ul class="xp-liste" id="xp-seneste"></ul>
+        <details class="foldud">
+          <summary>Sådan får familien XP</summary>
+          <p class="lille" id="xp-regler" style="margin-top:0;"></p>
+        </details>
+        <div class="xp-valg">
+          <label class="samtykke"><input type="checkbox" id="xp-mail"><span>Send mig en mail om børnenes fremskridt ca. en gang om ugen — kun når der er nyt. Du kan altid slå den fra igen, og det rører ikke nyhedsbrevet.</span></label>
+          <p class="besked" id="xp-besked" style="margin:8px 0 0;"></p>
+        </div>
       </div>
 
       <div class="panel" id="spil-selv" hidden>
@@ -270,6 +292,7 @@
         setTimeout(function () { $('saet-op').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
       }
     }
+    if (d.konto.type === 'foraelder') tegnXp();
     $('kun-spil-form').hidden = d.konto.type !== 'foraelder';
     var kun = d.konto.kun_spil || '';
     var valgt = $('kun-spil-form').querySelector('input[name=kun_spil][value="' + kun + '"]');
@@ -355,6 +378,58 @@
     $('ret-kontakt-felt').hidden = !skole;
     $('ret-navn-label').textContent = skole ? 'Skolens navn' : 'Dit navn';
   }
+
+  // --- XP-tavlen (kun familiekonti) ----------------------------------------
+  function xpTal(n) { return Number(n).toLocaleString('da-DK'); }
+  function tegnXp() {
+    LF.hent('xp', 'tavle').then(function (x) {
+      if (!x.relevant) return;
+      var n = x.niveau;
+      $('xp').hidden = false;
+      $('xp-niv').textContent = n.niveau;
+      $('xp-titel').textContent = n.titel;
+      $('xp-sum').textContent = xpTal(x.xp);
+      $('xp-uge').hidden = !(x.uge > 0);
+      $('xp-uge').textContent = '+' + xpTal(x.uge || 0) + ' den sidste uge';
+      $('xp-bar').style.width = Math.round(n.andel * 100) + '%';
+      $('xp-bar-ramme').setAttribute('aria-valuenow', Math.round(n.andel * 100));
+      $('xp-mangler').textContent = xpTal(n.mangler) + ' XP til niveau ' + (n.niveau + 1) + '.';
+      var max = Math.max.apply(null, x.boern.map(function (b) { return b.xp; }).concat([1]));
+      $('xp-boern').innerHTML = x.boern.map(function (b) {
+        var d = b.dele, dele = [];
+        if (d.praestationer) dele.push('★ ' + d.praestationer + (d.praestationer === 1 ? ' præstation' : ' præstationer'));
+        if (d.kapitler) dele.push(d.kapitler + (d.kapitler === 1 ? ' kapitel klaret' : ' kapitler klaret'));
+        if (d.missioner) dele.push(d.missioner + (d.missioner === 1 ? ' mission' : ' missioner'));
+        if (d.regnekraft) dele.push('Regnekraft ' + d.regnekraft + ' %');
+        if (!dele.length) dele.push('Er lige begyndt');
+        return '<div class="xp-barn"><span class="ikon" aria-hidden="true">' + LF.esc(b.ikon) + '</span>'
+          + '<span class="navn">' + LF.esc(b.navn) + ' <span class="lille">· niveau ' + b.niveau + '</span></span>'
+          + '<span class="xp">' + xpTal(b.xp) + ' XP' + (b.uge > 0 ? '<small>+' + xpTal(b.uge) + ' i ugen</small>' : '') + '</span>'
+          + '<span class="del">' + LF.esc(dele.join(' · ')) + (b.spilletid >= 60 ? ' · ' + LF.tid(b.spilletid) + ' spillet' : '') + '</span>'
+          + '<span class="stribe"><i style="width:' + Math.round(b.xp / max * 100) + '%"></i></span></div>';
+      }).join('');
+      $('xp-seneste-hoved').hidden = !x.seneste.length;
+      $('xp-seneste').innerHTML = x.seneste.map(function (p) {
+        return '<li><b>★</b><span>' + LF.esc(p.barn) + ': ' + LF.esc(p.navn) + ' <span class="lille">(' + LF.esc(p.spil) + ')</span></span><span class="dato">' + LF.esc(p.dato) + '</span></li>';
+      }).join('');
+      var r = x.regler;
+      $('xp-regler').textContent = 'Familiens XP er summen af børnenes. En præstation giver ' + r.praestation + ' XP, et klaret kapitel ' + r.kapitel
+        + ', en hovedmission ' + r.hovedmission + ', en ekstramission ' + r.ekstramission + ' og et runestykke ' + r.runestykke
+        + ' — og i Regnehelten giver hver procent Regnekraft over de første 10 en XP. Spilletid giver ingen XP, så ingen bliver belønnet for at sidde længere.';
+      $('xp-mail').checked = x.mail.til;
+      if (location.hash === '#xp' && !$('xp').dataset.set) { $('xp').dataset.set = 1; $('xp').scrollIntoView({ block: 'start' }); }
+    }).catch(function () { /* tavlen er en ekstra — resten af siden virker uden */ });
+  }
+  $('xp-mail').addEventListener('change', function () {
+    var boks = this;
+    boks.disabled = true;
+    LF.send('xp', 'mail', { til: boks.checked }).then(function (d) {
+      LF.besked($('xp-besked'), d.til ? 'Du får en mail om børnenes fremskridt ca. en gang om ugen, når der er nyt.' : 'Du får ikke flere fremskridtsmails.', 'ok');
+    }, function (err) {
+      boks.checked = !boks.checked;
+      LF.besked($('xp-besked'), err.message, 'fejl');
+    }).then(function () { boks.disabled = false; });
+  });
 
   // --- handlinger i grupperne -----------------------------------------------
   $('grupper').addEventListener('click', function (e) {

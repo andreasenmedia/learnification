@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "xp-tavle",
+      "dato": "2026-10-13",
+      "maerke": "Til voksne",
+      "titel": "XP-tavle til forældre og en ugentlig mail om børnenes fremskridt",
+      "kort": "Under Min konto kan du nu se, hvor meget XP familien har fået, hvad hvert barn har opnået — og få en mail om det, når der er nyt.",
+      "tekst": [
+        "Har du en familiekonto, finder du nu en <strong>XP-tavle</strong> øverst under <strong>Min konto</strong>. Hver gang et barn klarer en mission eller et kapitel eller får en præstation, giver det XP til hele familien. Familien stiger i niveau, og tavlen viser, hvad hvert barn har opnået, og hvad der er sket den sidste uge. Spilletid giver ingen XP — det er det, børnene når, der tæller.",
+        "Vil du følge med uden at logge ind, kan vi sende dig en <strong>mail om børnenes fremskridt</strong>, cirka en gang om ugen og kun når der er nyt. Du kan stoppe den med ét tryk i mailen eller under XP-tavlen, og den er helt adskilt fra nyhedsbrevet."
+      ]
+    },
+    {
       "id": "kun-et-spil",
       "dato": "2026-10-13",
       "maerke": "Til voksne",
