@@ -503,3 +503,4 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .panel.xp .besked { color: var(--txt); }
 @media (max-width: 640px) { .xp-tiles { grid-template-columns: 1fr; } .xp-tile .stor { font-size: 1.9rem; } }
 .panel.xp { scroll-margin-top: 90px; }
+.xp-privat { margin: 0 0 10px; padding: 8px 12px; font-size: .92rem; color: var(--txt); background: var(--panel-2); border-left: 4px solid var(--gold); }

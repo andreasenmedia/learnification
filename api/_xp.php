@@ -381,6 +381,7 @@ function xp_mail(array $k, array $f): array
     $indled = $nyt
         ? 'Her er, hvad jeres børn har opnået i spillene siden sidst.'
         : 'Her er jeres børns stand i spillene lige nu — fremover får I en lille opsummering af, hvad der er nyt.';
+    $indled .= ' XP er kun for jer forældre — børnene kan ikke se det.';
     $sum = $nyt
         ? 'I alt +' . xp_tal($f['gevinst']) . ' XP til familien. I har nu ' . xp_tal($f['xp']) . ' XP'
         : 'Familien har i alt ' . xp_tal($f['xp']) . ' XP';
