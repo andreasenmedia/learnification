@@ -179,6 +179,12 @@ def lines():
         for blok in re.findall(r"\b(?:items|cats): \[(.*?)\]", content, flags=re.S):
             for t in re.findall(STR, blok):
                 found.add(('fortaeller', unesc(t)))
+        # dokumenterne i opgaverne ("Læs teksten op"): overskrift, linjer og afsender
+        for blok in re.findall(r"\blines: \[(.*?)\]", content, flags=re.S):
+            for t in re.findall(STR, blok):
+                found.add(('fortaeller', unesc(t)))
+        for t in re.findall(r"\b(?:title|by): " + STR, content):
+            found.add(('fortaeller', unesc(t)))
         for t in re.findall(r"\b(?:hint2?|explain): " + STR, content):
             found.add(('fortaeller', unesc(t)))
     # personer uden egen klang (fx Glød) bliver læst af fortælleren

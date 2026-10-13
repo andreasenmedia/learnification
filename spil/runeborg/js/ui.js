@@ -262,13 +262,17 @@
           } else if (T.type === 'order') T.items.forEach(function (t) { laesMaal.push({ n: qEl, tekst: t }); });
           if (T.type === 'choice' || T.type === 'multi') laesMaal.forEach(function (m) { lytKnap(m, m.n); });
           else if (T.type === 'sort') laesMaal.slice(0, -1).forEach(function (m) { lytKnap(m, m.n.parentNode); });
-          // dokumenterne til venstre: én knap pr. dokument
+          // dokumenterne til venstre: én knap pr. dokument. Overskrift og hver sætning læses for sig (så de kan være indtalt),
+          // og sætningen, der læses, lyser op.
           [].forEach.call(side.querySelectorAll('.doc'), function (d, di) {
             var D = [].concat(T.doc)[di]; if (!D) return;
-            var tekst = [D.title].concat(D.lines || []).concat(D.by ? [D.by] : []).filter(Boolean).join('. ');
-            if (!tekst) return;
-            var b = el('button', 'btn small read-q', SPK + ' Læs teksten op'); b.type = 'button';
-            b.addEventListener('click', function () { RB.voice.raekke([{ tekst: tekst, start: function () { d.classList.add('laeses'); } }], function () { d.classList.remove('laeses'); }); });
+            var sents = [].slice.call(d.querySelectorAll('.sent')), liste = [];
+            if (D.title) liste.push({ tekst: D.title, start: function () { fremhaev(null); } });
+            (D.lines || []).forEach(function (ln, li) { liste.push({ tekst: ln, start: function () { sents.forEach(function (x, xi) { x.classList.toggle('laeses', xi === li); }); } }); });
+            if (D.by) liste.push({ tekst: D.by, start: function () { sents.forEach(function (x) { x.classList.remove('laeses'); }); } });
+            if (!liste.length) return;
+            var b = el('button', 'btn small read-q doc-read', SPK + ' Læs teksten op'); b.type = 'button';
+            b.addEventListener('click', function () { RB.voice.raekke(liste, function () { sents.forEach(function (x) { x.classList.remove('laeses'); }); }); });
             d.insertBefore(b, d.firstChild);
           });
           setTimeout(laesAlt, 350);

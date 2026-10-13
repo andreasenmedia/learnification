@@ -246,3 +246,7 @@
 .opt .lyt:hover, .opt .lyt:focus-visible, .tile .lyt:hover, .tile .lyt:focus-visible, .feedback .lyt:hover, .feedback .lyt:focus-visible { border-color: var(--gold); color: var(--gold); outline: none; }
 .laeses { outline: 3px solid var(--gold); outline-offset: 2px; }
 @media (pointer: coarse) { .opt .lyt, .tile .lyt { min-width: 40px; min-height: 36px; } }
+
+/* "Læs teksten op" i et dokument: dokumentets mørke tekstfarve må ikke smitte af på knappen */
+.doc .doc-read { color: var(--txt, #fff); background: var(--panel, #1f1830); margin: 0 0 10px; }
+.doc .sent.laeses { outline: none; background: rgba(255,204,77,.6); }
