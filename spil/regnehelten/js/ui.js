@@ -143,12 +143,13 @@
           main.appendChild(w);
         }
         var qText = S0.q;
-        if (RH.voice.on && RH.voice.has(qText, meta.who ? meta.who.id : null)) {
+        var qEl = el('p', 'task-q', esc(qText));
+        if (RH.voice.opgaver || (RH.voice.on && RH.voice.has(qText, meta.who ? meta.who.id : null))) {
           var rd = btn('btn small read-q', SPEAKER + ' Læs op');
-          rd.addEventListener('click', function () { RH.voice.speak(qText, meta.who ? meta.who.id : null); });
+          rd.addEventListener('click', function () { if (RH.voice.opgaver) laesAlt(); else RH.voice.speak(qText, meta.who ? meta.who.id : null); });
           main.appendChild(rd);
         }
-        main.appendChild(el('p', 'task-q', esc(qText)));
+        main.appendChild(qEl);
         var area = el('div', 'task-area-play'); main.appendChild(area);
 
         var fb = el('div', 'feedback'); main.appendChild(fb);
@@ -164,6 +165,42 @@
         var tries = 0, solved = false, finished = false;
         push(bg);
         setTimeout(function () { if (G.focus) G.focus(); else ok.focus(); }, 60);
+
+        // "Læs opgaver op": spørgsmålet, udsagnet og svarmulighederne læses efter hinanden, og hver mulighed
+        // har sin egen højttaler. Svarknapperne findes i DOM'en, så det virker for alle typer med tekstsvar.
+        var stmtEl = area.querySelector('.statement');
+        var muligheder = [].slice.call(area.querySelectorAll('.opt'));
+        var felter = [].slice.call(area.querySelectorAll('.tiles .tile'));
+        function tekstAf(b) {
+          var c = b.cloneNode(true);
+          [].forEach.call(c.querySelectorAll('.num, .lyt, .mark'), function (x) { x.parentNode.removeChild(x); });
+          return c.textContent.replace(/\s+/g, ' ').trim();
+        }
+        function fremhaev(x) {
+          [qEl, stmtEl].concat(muligheder, felter).forEach(function (n) { if (n) n.classList.toggle('laeses', n === x); });
+        }
+        var hvem = meta.who ? meta.who.id : null;
+        function laesAlt() {
+          var liste = [{ tekst: qText, hvem: hvem, start: function () { fremhaev(qEl); } }];
+          if (stmtEl) liste.push({ tekst: stmtEl.textContent, hvem: hvem, start: function () { fremhaev(stmtEl); } });
+          muligheder.forEach(function (b) {
+            liste.push({ tekst: tekstAf(b), hvem: hvem, start: function () { fremhaev(b); } });
+          });
+          RH.voice.raekke(liste, function () { fremhaev(null); });
+        }
+        function laesEn(b) {
+          RH.voice.raekke([{ tekst: tekstAf(b), hvem: hvem, start: function () { fremhaev(b); } }], function () { fremhaev(null); });
+        }
+        function lytKnap(b) {
+          var l = el('span', 'lyt', SPEAKER); l.setAttribute('role', 'button'); l.tabIndex = 0; l.title = 'Læs op'; l.setAttribute('aria-label', 'Læs op: ' + tekstAf(b));
+          l.addEventListener('click', function (e) { e.stopPropagation(); e.preventDefault(); laesEn(b); });
+          l.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); e.preventDefault(); laesEn(b); } });
+          b.appendChild(l);
+        }
+        if (RH.voice.opgaver) {
+          muligheder.concat(felter).forEach(lytKnap);
+          setTimeout(laesAlt, 350);
+        }
 
         later.addEventListener('click', function () { RH.voice.stop(); pop(bg); resolve(null); });
         bookB.addEventListener('click', function () { if (meta.onBook) meta.onBook(S0.book); });
@@ -196,7 +233,16 @@
           }
         }
         function done() { ok.textContent = 'Videre'; later.hidden = true; G.lock && G.lock(); ok.focus(); }
-        function show(kind, html) { fb.className = 'feedback show ' + kind; fb.innerHTML = html; }
+        function show(kind, html) {
+          fb.className = 'feedback show ' + kind; fb.innerHTML = html;
+          if (RH.voice.opgaver) {
+            var txt = fb.textContent.replace(/\s+/g, ' ').trim();
+            var l = el('span', 'lyt', SPEAKER); l.setAttribute('role', 'button'); l.tabIndex = 0; l.title = 'Læs op'; l.setAttribute('aria-label', 'Læs svaret op');
+            var go = function (e) { e.preventDefault(); RH.voice.speak(txt, 'fortaeller'); };
+            l.addEventListener('click', go); l.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(e); });
+            fb.insertBefore(l, fb.firstChild);
+          }
+        }
         function finish() { RH.voice.stop(); pop(bg); resolve({ first: solved && tries === 1, tries: tries, klaret: solved }); }
       });
     },
@@ -252,6 +298,7 @@
         toggle('Musik (L)', function () { return RH.audio.musicOn; }, function (v) { RH.audio.setMusic(v); });
         toggle('Lydeffekter', function () { return RH.audio.sfxOn; }, function (v) { RH.audio.setSfx(v); });
         toggle('Oplæsning', function () { return RH.voice.on; }, function (v) { RH.voice.on = v; });
+        toggle('Læs opgaver op', function () { return RH.voice.opgaver; }, function (v) { RH.voice.opgaver = v; });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
         if (RH.canFullscreen) toggle('Fuld skærm', function () { return RH.isFullscreen(); }, function () { RH.toggleFullscreen(); });
         var kapB = btn('btn', 'Kapitler'); m.appendChild(kapB);

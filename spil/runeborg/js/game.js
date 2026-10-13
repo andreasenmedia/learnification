@@ -80,12 +80,12 @@
     } catch (e) { return null; }
   }
   RB.saveSettings = function () {
-    try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, voice: RB.voice.on, big: document.body.classList.contains('big') })); } catch (e) { }
+    try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RB.audio.musicOn, sfx: RB.audio.sfxOn, voice: RB.voice.on, oplaes: RB.voice.opgaver, big: document.body.classList.contains('big') })); } catch (e) { }
   };
   function loadSettings() {
     try {
       var s = JSON.parse(localStorage.getItem(SETTINGS)); if (!s) return;
-      RB.audio.setMusic(s.music !== false); RB.audio.setSfx(s.sfx !== false); RB.voice.on = s.voice !== false; document.body.classList.toggle('big', !!s.big);
+      RB.audio.setMusic(s.music !== false); RB.audio.setSfx(s.sfx !== false); RB.voice.on = s.voice !== false; RB.voice.setLokalOpgaver(!!s.oplaes); document.body.classList.toggle('big', !!s.big);
     } catch (e) { }
   }
   RB.resetGame = function () {

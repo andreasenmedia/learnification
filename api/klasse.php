@@ -6,6 +6,7 @@
  *   POST ny_gruppe, ret_gruppe, slet_gruppe
  *   POST nye_elever             ét kaldenavn pr. linje
  *   POST ret_elev, slet_elev, ny_elevkode
+ *   POST oplaes {id, til}       "Læs opgaver op" til/fra for et barn
  *   POST log_ind_som {id}       den voksne går ind som barnet (fx på familiens
  *                               tablet) — "tilbage" i api/konto.php henter den
  *                               voksne igen
@@ -78,7 +79,7 @@ if ($h === 'oversigt') {
         $elever = [];
         foreach (alle('SELECT * FROM elever WHERE gruppe_id = ? ORDER BY kaldenavn', [$g['id']]) as $e) {
             $elever[] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
-                         'kode' => $e['kode'], 'tid' => spilletid('elev_id = ?', [$e['id']]),
+                         'kode' => $e['kode'], 'oplaes' => (int) ($e['oplaes'] ?? 0), 'tid' => spilletid('elev_id = ?', [$e['id']]),
                          'gemt' => $gemt[(int) $e['id']] ?? (object) []];
         }
         $grupper[] = ['id' => (int) $g['id'], 'navn' => $g['navn'],
@@ -209,6 +210,12 @@ case 'log_ind_som':
     log_ind_som_barn($kid, (int) $e['id'], $k['type'] === 'skole' ? SKOLEELEV_LEVETID : HJEMMEBARN_LEVETID);
     kør('UPDATE elever SET sidst_inde = ? WHERE id = ?', [time(), $e['id']]);
     svar(['ok' => true, 'kaldenavn' => $e['kaldenavn']]);
+
+case 'oplaes':
+    // Læs opgaver op til/fra for ét barn: {id, til}
+    $e = min_elev($kid, tal('id'));
+    kør('UPDATE elever SET oplaes = ? WHERE id = ?', [!empty(input()['til']) ? 1 : 0, $e['id']]);
+    svar(['ok' => true]);
 
 case 'slet_elev':
     $e = min_elev($kid, tal('id'));

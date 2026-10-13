@@ -154,8 +154,65 @@
     done();
   }
 
+  // ---- "Læs opgaver op": spørgsmål + svarmuligheder efter hinanden
+  // Barnets valg ligger på serveren (LF_SPILLER.elev.oplaes, sat af den voksne på /konto eller i menuen).
+  // Voksne, der spiller selv, har kun en lokal indstilling.
+  var opgLokal = false;
+  function opgaverOn() {
+    var me = window.LF_SPILLER;
+    if (me && me.elev) return !!me.elev.oplaes;
+    return opgLokal;
+  }
+  function sætOpgaver(v) {
+    v = !!v;
+    var me = window.LF_SPILLER;
+    if (me && me.elev) {
+      me.elev.oplaes = v ? 1 : 0;
+      try { fetch('/api/profil.php', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-LF': '1' }, body: JSON.stringify({ handling: 'oplaes', til: v ? 1 : 0 }) }); } catch (e) { }
+    } else opgLokal = v;
+    if (v) on = true;
+  }
+  // Én tekst; kalder naeste() når den er læst (eller ikke kan læses)
+  function en(text, profile, my, naeste) {
+    profile = profile || 'fortaeller';
+    var k = key(profile, text);
+    if (have[k]) {
+      audio = new Audio('lyd/' + k + '.mp3');
+      audio.onended = naeste; audio.onerror = naeste;
+      var p = audio.play(); if (p && p.catch) p.catch(naeste);
+      return;
+    }
+    var koe = !(synth && daVoice) && stykkeKoe(text);
+    if (koe) { spilKoe(koe, my, naeste); return; }
+    if (synth && daVoice) {
+      var u = new SpeechSynthesisUtterance(clean(text));
+      u.lang = daVoice.lang; u.voice = daVoice; u.rate = 0.92; u.pitch = PITCH[profile] || 1;
+      u.onend = naeste; u.onerror = naeste;
+      synth.speak(u);
+      return;
+    }
+    naeste();
+  }
+  // liste: [{tekst, hvem?, start?: fn}] — start() kaldes lige før hvert stykke (til fremhævning)
+  function raekke(liste, done) {
+    stop();
+    if (!(on || opgaverOn()) || !liste || !liste.length) { if (done) done(); return; }
+    var my = token, i = 0;
+    if (RH.audio && RH.audio.duck) RH.audio.duck(true);
+    (function naeste() {
+      if (my !== token) return;
+      if (i >= liste.length) { if (RH.audio && RH.audio.duck) RH.audio.duck(false); if (done) done(); return; }
+      var x = liste[i++];
+      if (!x || !x.tekst) { naeste(); return; }
+      if (x.start) x.start();
+      en(String(x.tekst), x.hvem, my, function () { setTimeout(naeste, 250); });
+    })();
+  }
+
   RH.voice = {
-    speak: speak, stop: stop, clean: clean, key: key, dele: dele, ordene: ordene, talTekst: talTekst,
+    speak: speak, stop: stop, clean: clean, key: key, dele: dele, ordene: ordene, talTekst: talTekst, raekke: raekke,
+    get opgaver() { return opgaverOn(); }, set opgaver(v) { sætOpgaver(v); },
+    setLokalOpgaver: function (v) { opgLokal = !!v; },
     get on() { return on; }, set on(v) { on = !!v; if (!on) stop(); },
     // Kan netop den her tekst læses op?
     has: function (text, profile) { return !!text && (!!have[key(profile || 'fortaeller', text)] || !!daVoice || !!stykkeKoe(text)); }

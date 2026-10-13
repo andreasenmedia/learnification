@@ -173,6 +173,14 @@ def lines():
             found.add(('fortaeller', 'Du fylder måleglasset. ' + unesc(look)))
         for q in re.findall(r"\bq: " + STR, content):
             found.add(('fortaeller', unesc(q)))
+        # "Læs opgaver op": svarmuligheder ({ t: '…' }), kategorier og punkter (items/cats), tip og forklaringer
+        for t in re.findall(r"\{ t: " + STR, content):
+            found.add(('fortaeller', unesc(t)))
+        for blok in re.findall(r"\b(?:items|cats): \[(.*?)\]", content, flags=re.S):
+            for t in re.findall(STR, blok):
+                found.add(('fortaeller', unesc(t)))
+        for t in re.findall(r"\b(?:hint2?|explain): " + STR, content):
+            found.add(('fortaeller', unesc(t)))
     # personer uden egen klang (fx Glød) bliver læst af fortælleren
     return sorted((w if w in PROFIL else 'fortaeller', t) for w, t in found)
 

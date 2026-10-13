@@ -118,12 +118,12 @@
     return s;
   }
   RH.saveSettings = function () {
-    try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RH.audio.musicOn, sfx: RH.audio.sfxOn, voice: RH.voice.on, big: document.body.classList.contains('big') })); } catch (e) { }
+    try { localStorage.setItem(SETTINGS, JSON.stringify({ music: RH.audio.musicOn, sfx: RH.audio.sfxOn, voice: RH.voice.on, oplaes: RH.voice.opgaver, big: document.body.classList.contains('big') })); } catch (e) { }
   };
   function loadSettings() {
     try {
       var s = JSON.parse(localStorage.getItem(SETTINGS)); if (!s) return;
-      RH.audio.setMusic(s.music !== false); RH.audio.setSfx(s.sfx !== false); RH.voice.on = s.voice !== false; document.body.classList.toggle('big', !!s.big);
+      RH.audio.setMusic(s.music !== false); RH.audio.setSfx(s.sfx !== false); RH.voice.on = s.voice !== false; RH.voice.setLokalOpgaver(!!s.oplaes); document.body.classList.toggle('big', !!s.big);
     } catch (e) { }
   }
   RH.resetGame = function () {

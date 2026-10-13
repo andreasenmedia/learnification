@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "laes-opgaver-op",
+      "dato": "2026-10-13",
+      "maerke": "Spil",
+      "titel": "Læs opgaver op: spørgsmål og svarmuligheder læses højt",
+      "kort": "Til børn, der har svært ved at læse eller med tal: i begge spil kan opgaverne nu læses op, også hver enkelt svarmulighed.",
+      "tekst": [
+        "Har dit barn svært ved at læse eller ved tal, kan du slå <strong>Læs op</strong> til under <strong>Min konto</strong> ud for barnet. Så bliver spørgsmålet og alle svarmulighederne læst højt, så snart en opgave åbner, og den, der læses lige nu, lyser op. Hver svarmulighed har desuden sin egen lille højttaler, så barnet kan høre netop den igen.",
+        "Barnet kan også selv slå det til i pausemenuen (<kbd>Esc</kbd>) under <strong>Læs opgaver op</strong>. Det gælder i både Runeborg og Regnehelten og følger barnet på tværs af enheder."
+      ]
+    },
+    {
       "id": "xp-tavle",
       "dato": "2026-10-13",
       "maerke": "Til voksne",

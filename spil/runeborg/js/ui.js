@@ -152,9 +152,9 @@
         if (T.chart) [].concat(T.chart).forEach(function (ch) { side.appendChild(chart(ch)); });
 
         var qEl = el('p', 'task-q', T.q); main.appendChild(qEl);
-        if (RB.voice.on) {
+        if (RB.voice.on || RB.voice.opgaver) {
           var rd = el('button', 'btn small read-q', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12"/></svg> Læs spørgsmålet op'); rd.type = 'button';
-          rd.addEventListener('click', function () { RB.voice.speak(T.q, 'fortaeller'); });
+          rd.addEventListener('click', function () { if (RB.voice.opgaver) laesAlt(); else RB.voice.speak(T.q, 'fortaeller'); });
           main.insertBefore(rd, qEl);
         }
         if (T.help) main.appendChild(el('p', 'task-help', T.help));
@@ -237,6 +237,42 @@
         main.appendChild(foot);
         push(bg);
 
+        // "Læs opgaver op": spørgsmålet og svarmulighederne læses efter hinanden, og hver mulighed har sin egen
+        // højttaler. Teksterne til venstre (dokumenter) læses kun, når man trykker.
+        var SPK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7M18.5 6a8 8 0 0 1 0 12"/></svg>';
+        var laesMaal = [];   // [{n: element, tekst}] i den rækkefølge, de står
+        function fremhaev(x) { [qEl].concat(laesMaal.map(function (m) { return m.n; })).forEach(function (n) { n.classList.toggle('laeses', n === x); }); }
+        function lytKnap(m, tilfoej) {
+          var l = el('span', 'lyt', SPK); l.setAttribute('role', 'button'); l.tabIndex = 0; l.title = 'Læs op'; l.setAttribute('aria-label', 'Læs op: ' + m.tekst);
+          var go = function (e) { e.stopPropagation(); e.preventDefault(); RB.voice.raekke([{ tekst: m.tekst, start: function () { fremhaev(m.n); } }], function () { fremhaev(null); }); };
+          l.addEventListener('click', go);
+          l.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(e); });
+          tilfoej.appendChild(l);
+        }
+        function laesAlt() {
+          var liste = [{ tekst: T.q, start: function () { fremhaev(qEl); } }];
+          laesMaal.forEach(function (m) { liste.push({ tekst: m.tekst, start: function () { fremhaev(m.n); } }); });
+          RB.voice.raekke(liste, function () { fremhaev(null); });
+        }
+        if (RB.voice.opgaver) {
+          if (T.type === 'choice' || T.type === 'multi') optEls.forEach(function (x) { laesMaal.push({ n: x.el, tekst: T.opts[x.i].t }); });
+          else if (T.type === 'sort') {
+            optEls.forEach(function (x) { laesMaal.push({ n: x.el.firstChild, tekst: T.items[x.i].t }); });
+            laesMaal.push({ n: qEl, tekst: 'Kategorierne er: ' + T.cats.join(', eller ') + '.' });
+          } else if (T.type === 'order') T.items.forEach(function (t) { laesMaal.push({ n: qEl, tekst: t }); });
+          if (T.type === 'choice' || T.type === 'multi') laesMaal.forEach(function (m) { lytKnap(m, m.n); });
+          else if (T.type === 'sort') laesMaal.slice(0, -1).forEach(function (m) { lytKnap(m, m.n.parentNode); });
+          // dokumenterne til venstre: én knap pr. dokument
+          [].forEach.call(side.querySelectorAll('.doc'), function (d, di) {
+            var D = [].concat(T.doc)[di]; if (!D) return;
+            var tekst = [D.title].concat(D.lines || []).concat(D.by ? [D.by] : []).filter(Boolean).join('. ');
+            if (!tekst) return;
+            var b = el('button', 'btn small read-q', SPK + ' Læs teksten op'); b.type = 'button';
+            b.addEventListener('click', function () { RB.voice.raekke([{ tekst: tekst, start: function () { d.classList.add('laeses'); } }], function () { d.classList.remove('laeses'); }); });
+            d.insertBefore(b, d.firstChild);
+          });
+          setTimeout(laesAlt, 350);
+        }
         var tries = 0, solved = false;
         later.addEventListener('click', function () { RB.voice.stop(); pop(bg); resolve(null); });
         ok.addEventListener('click', function () { if (solved) finish(); else check(); });
@@ -259,7 +295,16 @@
             show('bad', msg + '<br><span style="color:var(--txt-soft)">Prøv igen — det er her, man lærer mest.</span>');
           }
         }
-        function show(kind, html) { fb.className = 'feedback show ' + kind; fb.innerHTML = html; }
+        function show(kind, html) {
+          fb.className = 'feedback show ' + kind; fb.innerHTML = html;
+          if (RB.voice.opgaver) {
+            var txt = fb.textContent.replace(/\s+/g, ' ').trim();
+            var l = el('span', 'lyt', SPK); l.setAttribute('role', 'button'); l.tabIndex = 0; l.title = 'Læs op'; l.setAttribute('aria-label', 'Læs svaret op');
+            var go = function (e) { e.preventDefault(); RB.voice.speak(txt, 'fortaeller'); };
+            l.addEventListener('click', go); l.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') go(e); });
+            fb.insertBefore(l, fb.firstChild);
+          }
+        }
         function finish() { RB.voice.stop(); pop(bg); resolve({ first: tries === 1, tries: tries }); }
 
         function evaluate() {
@@ -411,6 +456,7 @@
         toggle('Musik (L)', function () { return RB.audio.musicOn; }, function (v) { RB.audio.setMusic(v); });
         toggle('Lydeffekter', function () { return RB.audio.sfxOn; }, function (v) { RB.audio.setSfx(v); });
         toggle('Oplæsning', function () { return RB.voice.on; }, function (v) { RB.voice.on = v; });
+        toggle('Læs opgaver op', function () { return RB.voice.opgaver; }, function (v) { RB.voice.opgaver = v; });
         toggle('Større tekst', function () { return document.body.classList.contains('big'); }, function (v) { document.body.classList.toggle('big', v); });
         if (RB.canFullscreen) toggle('Fuld skærm', function () { return RB.isFullscreen(); }, function () { RB.toggleFullscreen(); });
         var kapB = el('button', 'btn', 'Kapitler'); kapB.type = 'button'; m.appendChild(kapB);

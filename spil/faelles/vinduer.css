@@ -239,3 +239,10 @@
   #t-book, #t-map { width: 52px; height: 38px; font-size: 13px; }
   body.touching #prompt { bottom: 120px; }
 }
+
+/* "Læs opgaver op": lille højttaler i hver svarmulighed + fremhævning af den, der læses lige nu */
+.opt .lyt, .tile .lyt, .feedback .lyt { flex: none; display: inline-grid; place-items: center; min-width: 34px; min-height: 30px; margin-left: auto; padding: 0 6px; background: var(--panel-2); border: 2px solid var(--edge-2); color: var(--txt-soft); cursor: pointer; }
+.feedback .lyt { margin: 0 0 0 8px; vertical-align: middle; }
+.opt .lyt:hover, .opt .lyt:focus-visible, .tile .lyt:hover, .tile .lyt:focus-visible, .feedback .lyt:hover, .feedback .lyt:focus-visible { border-color: var(--gold); color: var(--gold); outline: none; }
+.laeses { outline: 3px solid var(--gold); outline-offset: 2px; }
+@media (pointer: coarse) { .opt .lyt, .tile .lyt { min-width: 40px; min-height: 36px; } }

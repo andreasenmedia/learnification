@@ -60,6 +60,7 @@ if ($h === 'mig') {
         $ud['hvem'] = 'elev';
         $ud['elev'] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
                        'gruppe' => $e['gruppe'],
+                       'oplaes' => (int) ($e['oplaes'] ?? 0),
                        // Barnets eget svar, ellers klassens. null = ingen ved det endnu, så spillene spørger.
                        'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin']
                            : ($e['gruppe_klassetrin'] !== null ? (int) $e['gruppe_klassetrin'] : null)];

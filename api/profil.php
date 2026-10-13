@@ -6,6 +6,8 @@
  *   GET  ?handling=hent        -> {ok, data|null}
  *   POST {handling: "gem", data, hvem}  -> {ok}
  *
+ *   POST {handling: "oplaes", til}      -> {ok}  barnet slår "Læs opgaver op" til/fra
+ *
  * Ét lille JSON-objekt pr. spiller (barnet på sin kode, den voksne på sin
  * konto). Sidste skrivning vinder — profilen er lille, og der er ingen
  * konflikter at tage hensyn til som i api/gem.php.
@@ -28,6 +30,15 @@ switch (handling()) {
 case 'hent':
     $r = en('SELECT data FROM profiler WHERE hvem = ?', [$hvem]);
     svar(['ok' => true, 'data' => $r ? $r['data'] : null]);
+
+case 'oplaes':
+    // Barnet slår "Læs opgaver op" til/fra i spillets menu. Voksne spillere gemmer kun lokalt.
+    kraev_egen_side();
+    if (!$elev_id) {
+        svar(['ok' => true]);
+    }
+    kør('UPDATE elever SET oplaes = ? WHERE id = ?', [!empty(input()['til']) ? 1 : 0, $elev_id]);
+    svar(['ok' => true]);
 
 case 'gem':
     kraev_egen_side();

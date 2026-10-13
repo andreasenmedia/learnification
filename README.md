@@ -134,6 +134,13 @@ regningsarter, talområde, regneloft, fortegn) — og tjekker, at alle
 byg-selv-opgaver kan løses, og at hvert facit bliver godkendt.
 
 **Oplæsning:** `python tools/regnehelten-stemmer.py`, som i Runeborg.
+
+**Læs opgaver op** (begge spil, 2026-10-13): `elever.oplaes` (DB-trin 16) slås til af den voksne på
+/konto (`klasse.php` `oplaes`) eller af barnet i spillets menu (`profil.php` `oplaes`); spillene læser det
+fra `LF_SPILLER.elev.oplaes` (voksne spillere: kun localStorage). `voice.raekke()` læser spørgsmål +
+svarmuligheder efter hinanden, `.laeses` fremhæver, og hver mulighed har et `.lyt`-højttalerknap
+(`spil/faelles/vinduer.css`). Svarmulighederne er indtalt af stemme-værktøjerne; mangler en fil, læser
+enhedens egen danske stemme (Regnehelten: stykker), ellers er der stille.
 Opgaverne bliver lavet på stedet med nye tal hver gang, så de kan ikke
 indtales på forhånd; dem læser enhedens egen danske stemme op, hvis den har
 en (fx iPad). Ellers vises knappen "Læs op" ikke ved opgaven.

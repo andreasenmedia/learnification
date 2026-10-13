@@ -521,6 +521,11 @@ function opret_tabeller(PDO $pdo): void
                 FOREIGN KEY (elev_id) REFERENCES elever(id) ON DELETE CASCADE
             )$slut",
         ],
+        // "Læs opgaver op": barnets spørgsmål og svarmuligheder læses højt (til ordblinde og talblinde).
+        // Slås til af den voksne (api/klasse.php) eller af barnet selv i spillets menu (api/profil.php).
+        16 => [
+            'ALTER TABLE elever ADD COLUMN oplaes INTEGER NOT NULL DEFAULT 0',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {
