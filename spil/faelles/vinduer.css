@@ -305,6 +305,11 @@
    og valgmulighederne står i to spalter, så der er mindre at rulle. */
 @media (orientation: landscape) and (max-height: 560px) {
   .task-foot { position: sticky; bottom: -12px; z-index: 2; background: var(--panel); margin: 4px -14px -12px; padding: 6px 14px 12px; }
+  /* Figur-vinduet ("Hvem er du?", Klædeskabet): Gem/Det er mig! bliver stående, og mens bogstavtastaturet er åbent
+     fylder overskrift og forklaring ikke, så der er plads til navnefeltet over tastaturet */
+  .fig-vindue .end-row { position: sticky; bottom: -12px; z-index: 2; background: var(--panel); margin: 4px -14px -12px; padding: 6px 14px 12px; }
+  body.vkbd-open .fig-vindue > h2, body.vkbd-open .fig-vindue > p.tiny { display: none; }
+  body.vkbd-open #vkbd:not(.num) .vk { height: clamp(28px, 9.5vh, 40px); }
   .task .read-q { padding: 2px 10px; min-height: 0; margin: 0 0 4px; font-size: .85em; box-shadow: 0 2px 0 var(--ink); }
   .task .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
 }
