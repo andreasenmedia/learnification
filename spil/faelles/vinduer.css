@@ -241,22 +241,30 @@
   #t-book, #t-map { width: 52px; height: 38px; font-size: 13px; }
   body.touching #prompt { bottom: 120px; }
 }
-/* E-knappen hæves, så den ligger, hvor højre tommelfinger hviler; Kort og Bog bliver nederst */
-@media (max-width: 600px), (max-height: 560px) {
-  #t-act { margin-bottom: 30px; }
-  body.touching #prompt { bottom: 150px; }
+/* E-knappen: ens i alle spil (den hænger ikke på Kort/Bog-rækken), stor, halvgennemsigtig og tæt på højre kant.
+   Kort og Bog står i hjørnet nederst. --e-lift er, hvor højt E løftes over hjørnet. */
+:root { --e-lift: 56px; --e-size: 72px; }   /* mindst over Kort/Bog */
+#tbtns {
+  left: 0; top: 0; right: 0; bottom: 0; margin: 0; gap: 8px; justify-content: flex-end; pointer-events: none;
+  padding: 0 max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) 0;
 }
-/* Telefon på højkant: E højere oppe, og joysticket i samme højde (midten ud for E: 16px + løft + 29px - 48px) */
+#tbtns button { pointer-events: auto; }
+#t-act {
+  position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: calc(max(16px, env(safe-area-inset-bottom)) + var(--e-lift));
+  width: var(--e-size); height: var(--e-size); margin: 0; font-size: 26px;
+  background: rgba(31,24,48,.45) !important; border-color: rgba(255,204,77,.75) !important;
+}
+#t-map, #t-book { background: rgba(31,24,48,.6) !important; }
+@media (max-width: 600px), (max-height: 560px) { body.touching #prompt { bottom: 150px; } }
+/* Telefon på højkant: E højere oppe, og joysticket i samme højde (midten ud for E: 16px + løft + halv E - halv joystick) */
 @media (orientation: portrait) and (max-width: 600px) {
   :root { --e-lift: 24vh; }
-  #t-act { margin-bottom: var(--e-lift); }
-  #stick-base { bottom: calc(var(--e-lift) - 3px); }
+  #stick-base { bottom: calc(var(--e-lift) + 4px); }
   #stick-zone { height: 70%; }
   body.touching #prompt { bottom: 120px; }
 }
 @media (orientation: landscape) and (max-height: 560px) {
-  #tbtns { right: max(36px, env(safe-area-inset-right)); }
-  #t-act { margin-bottom: 7vh; }
+  :root { --e-lift: max(7vh, 56px); }
   body.touching #prompt { bottom: 110px; }
 }
 
