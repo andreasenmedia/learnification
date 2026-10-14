@@ -277,6 +277,38 @@
   body.touching #prompt { bottom: 110px; }
 }
 
+/* Skærmtastaturet på en lav skærm (telefon på langs): det fyldte 240-310 px i bunden, så der næsten ikke var plads til opgaven.
+   Taltastaturet bliver en smal flade i højre side (opgaven får hele højden og lidt mindre bredde),
+   og bogstavtastaturet får lavere taster. */
+@media (orientation: landscape) and (max-height: 560px) {
+  #vkbd { padding: 5px 6px calc(5px + env(safe-area-inset-bottom)); gap: 4px; }
+  .vk { height: clamp(32px, 11vh, 44px); font-size: 17px; border-bottom-width: 4px; }
+  .vk.wide { font-size: 14px; }
+  #vkbd.num {
+    left: auto; right: 0; width: min(210px, 32vw); box-sizing: border-box;
+    padding-right: max(6px, env(safe-area-inset-right)); border-left: 3px solid var(--edge-2);
+  }
+  #vkbd.num .vk { max-width: none; height: clamp(34px, 11.5vh, 46px); font-size: 20px; }
+  #vkbd.num .vk.ok { max-width: none; }
+  body.vkbd-open:has(#vkbd.num) .modal-bg, body.vkbd-open:has(#vkbd.num) .screen-full {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding-right: calc(min(210px, 32vw) + 8px); align-items: center;
+  }
+  /* Dokument og tabel til venstre får mere af den smalle plads, og en bred tabel kan rulles sidelæns */
+  body.vkbd-open:has(#vkbd.num) .task-body.two { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+  .task .doc { overflow-x: auto; }
+  .task .doc table { font-size: .9em; }
+  .task .doc th, .task .doc td { padding: 3px 5px; }
+}
+
+/* Opgaver på en lav skærm: knapperne (Senere / Svar) bliver stående i bunden af vinduet, mens indholdet ruller,
+   og valgmulighederne står i to spalter, så der er mindre at rulle. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .task-foot { position: sticky; bottom: -12px; z-index: 2; background: var(--panel); margin: 4px -14px -12px; padding: 6px 14px 12px; }
+  .task .read-q { padding: 2px 10px; min-height: 0; margin: 0 0 4px; font-size: .85em; box-shadow: 0 2px 0 var(--ink); }
+  .task .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+}
+
 /* "Læs opgaver op": lille højttaler i hver svarmulighed + fremhævning af den, der læses lige nu */
 .opt .lyt, .tile .lyt, .feedback .lyt { flex: none; display: inline-grid; place-items: center; min-width: 34px; min-height: 30px; margin-left: auto; padding: 0 6px; background: var(--panel-2); border: 2px solid var(--edge-2); color: var(--txt-soft); cursor: pointer; }
 .feedback .lyt { margin: 0 0 0 8px; vertical-align: middle; }
