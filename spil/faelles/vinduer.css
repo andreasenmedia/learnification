@@ -246,12 +246,17 @@
   #t-act { margin-bottom: 30px; }
   body.touching #prompt { bottom: 150px; }
 }
+/* Telefon på højkant: E højere oppe, og joysticket i samme højde (midten ud for E: 16px + løft + 29px - 48px) */
+@media (orientation: portrait) and (max-width: 600px) {
+  :root { --e-lift: 16vh; }
+  #t-act { margin-bottom: var(--e-lift); }
+  #stick-base { bottom: calc(var(--e-lift) - 3px); }
+  #stick-zone { height: 70%; }
+  body.touching #prompt { bottom: 120px; }
+}
 @media (orientation: landscape) and (max-height: 560px) {
   #tbtns { right: max(36px, env(safe-area-inset-right)); }
-  :root { --e-lift: 40vh; }   /* E og joysticket står i samme højde */
-  #t-act { margin-bottom: var(--e-lift); }
-  #stick-base { bottom: calc(var(--e-lift) - 3px); }   /* midten ud for E: 16px + løft + 29px - 48px */
-  #stick-zone { height: 85%; }
+  #t-act { margin-bottom: 14vh; }
   body.touching #prompt { bottom: 110px; }
 }
 
