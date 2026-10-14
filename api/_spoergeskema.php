@@ -3,6 +3,8 @@
  * Spørgeskemaet til de voksne, når et barn har prøvet Learnification færdig.
  *
  * Det går af sted ÉN gang pr. konto, første gang
+ *   - ét barn (eller den voksne selv) har spillet over en halv time (api/spilletid.php, og
+ *     skema_indhent() for dem, der allerede havde gjort det, da reglen kom), eller
  *   - et barn (eller den voksne selv) har brugt hele prøvetiden (api/spilletid.php), eller
  *   - et barn har klaret sidste kapitel i et spil (api/gem.php).
  * Kontoen bliver markeret (konti.skema_sendt), FØR mailen går, så to samtidige
@@ -18,6 +20,15 @@ require_once __DIR__ . '/_nyhedsbrev.php';
 
 const SKEMA_EMNE = 'Hvordan gik det med Learnification? Et kort spørgeskema';
 const SKEMA_MAKS_FEJL = 3;
+const SKEMA_EFTER_SEK = 1800;       // en halv time hos ét barn udløser skemaet
+
+/** Sekunder, ét barn (elev_id) eller den voksne selv (null) har spillet på kontoen i alt. */
+function skema_sekunder(int $konto_id, ?int $elev_id): int
+{
+    return (int) vaerdi('SELECT COALESCE(SUM(sekunder), 0) FROM sessioner WHERE konto_id = ? AND '
+                        . ($elev_id === null ? 'elev_id IS NULL' : 'elev_id = ?'),
+                        $elev_id === null ? [$konto_id] : [$konto_id, $elev_id]);
+}
 
 /** Hvem der kan få skemaet: aldrig administratoren eller spærrede konti. */
 function skema_kan_sendes(array $k): bool
@@ -44,19 +55,26 @@ function skema_mail(array $k, array $s, string $kaldenavn): array
         . ($selv
             ? ($s['aarsag'] === 'faerdig'
                 ? "Du har klaret hele $spil. Tak, fordi du har prøvet det!"
-                : 'Du har brugt hele prøvetiden på en time i Learnification. Tak, fordi du har prøvet det!')
+                : ($s['aarsag'] === 'halv'
+                    ? 'Du har nu spillet over en halv time i Learnification. Tak, fordi du har prøvet det!'
+                    : 'Du har brugt hele prøvetiden på en time i Learnification. Tak, fordi du har prøvet det!'))
             : ($s['aarsag'] === 'faerdig'
                 ? "$barn har klaret hele $spil. Tak, fordi I har prøvet det!"
-                : "$barn har brugt hele prøvetiden på en time i Learnification. Tak, fordi I har prøvet det!"))
+                : ($s['aarsag'] === 'halv'
+                    ? "$barn har nu spillet over en halv time i Learnification. Tak, fordi I har prøvet det!"
+                    : "$barn har brugt hele prøvetiden på en time i Learnification. Tak, fordi I har prøvet det!")))
         . "\n\nVi vil rigtig gerne vide, hvordan det gik. Spørgeskemaet tager to minutter, "
-        . "og I får det kun denne ene gang. Jeres svar hjælper os med at gøre spillene bedre.\n\n"
+        . ($selv ? 'og du får det kun denne ene gang. Dine' : 'og I får det kun denne ene gang. Jeres')
+        . " svar hjælper os med at gøre spillene bedre.\n\n"
         . ($s['aarsag'] === 'tid'
-            ? "Vil I gerne have lov at spille videre, så skriv til os — så åbner vi for mere tid.\n\n"
+            ? ($selv ? 'Vil du' : 'Vil I') . " gerne have lov at spille videre, så skriv til os — så åbner vi for mere tid.\n\n"
             : '')
         . "Venlig hilsen\nLearnification";
 
     $hvorfor = 'Du får denne mail én gang, fordi du har oprettet en konto på learnification.dk, '
-        . 'og et barn på kontoen har prøvet spillene færdig. Vi sender ikke flere spørgeskemaer.';
+        . 'og ' . ($selv ? 'du selv' : 'et barn på kontoen') . ' har '
+        . (['faerdig' => 'prøvet spillene færdig', 'tid' => 'brugt hele prøvetiden'][$s['aarsag']] ?? 'spillet over en halv time')
+        . '. Vi sender ikke flere spørgeskemaer.';
     $ren = nyhedsbrev_maerk_links($tekst . "\n\nSpørgeskemaet: $link", 'spoergeskema', 'servicemail')
         . "\n\n-- \n" . $hvorfor . "\n" . NYHEDSBREV_AFSENDER . "\n";
 
@@ -108,6 +126,36 @@ function skema_udloes(int $konto_id, string $aarsag, ?int $elev_id, string $spil
     kør('UPDATE konti SET skema_sendt = NULL, skema_fejl = skema_fejl + 1 WHERE id = ?', [$konto_id]);
     kør('DELETE FROM spoergeskemaer WHERE noegle = ? AND sendt IS NULL', [$noegle]);
     return false;
+}
+
+/**
+ * Cron: send skemaet til de konti, hvor ét barn (eller den voksne selv) har spillet
+ * mindst en halv time, og som ikke har fået det — både de gamle, som nåede det, før
+ * reglen kom, og dem, hvor en tidligere mail fejlede (højst SKEMA_MAKS_FEJL forsøg).
+ * Højst $max pr. kørsel. Svarer, hvor mange mails der gik af sted.
+ */
+function skema_indhent(int $max = 25): int
+{
+    $sendt = 0;
+    $stop = microtime(true) + 20;
+    $konti = alle("SELECT k.* FROM konti k WHERE k.type != 'admin' AND k.test = 0 AND k.status != 'spaerret'
+                   AND k.skema_sendt IS NULL AND k.skema_fejl < ?
+                   AND EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id
+                               GROUP BY s.elev_id HAVING SUM(s.sekunder) >= CAST(? AS INTEGER))
+                   ORDER BY k.oprettet LIMIT " . $max, [SKEMA_MAKS_FEJL, SKEMA_EFTER_SEK]);
+    foreach ($konti as $k) {
+        // Barnet (eller den voksne selv) med mest tid er det, skemaet handler om
+        $r = en('SELECT elev_id, SUM(sekunder) AS sek, MAX(spil) AS spil FROM sessioner WHERE konto_id = ?
+                 GROUP BY elev_id HAVING SUM(sekunder) >= CAST(? AS INTEGER) ORDER BY sek DESC LIMIT 1', [$k['id'], SKEMA_EFTER_SEK]);
+        if ($r) {
+            $aarsag = (int) $r['sek'] >= 3600 ? 'tid' : 'halv';
+            $sendt += skema_udloes((int) $k['id'], $aarsag, $r['elev_id'] !== null ? (int) $r['elev_id'] : null, '') ? 1 : 0;
+        }
+        if (microtime(true) > $stop) {
+            break;
+        }
+    }
+    return $sendt;
 }
 
 /**

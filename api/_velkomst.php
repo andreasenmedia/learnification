@@ -120,25 +120,43 @@ function velkomst_hvor(string $gruppe): string
 // ------------------------------------------------------------ påmindelsen
 
 /*
- * Én påmindelse til en konto, hvor intet barn har spillet endnu, et par
- * dage efter oprettelsen. Den går af sted fra api/paamind.php, som Simply.coms
- * cronjob åbner hver time (adressen står på /admin#velkomst). Kun én gang
- * pr. konto — det står i mailen, og det skal blive ved med at være sandt.
+ * Én påmindelse til en konto, hvor børnene (eller den voksne selv) har spillet
+ * under 5 minutter i alt — også slet ikke — et par dage efter oprettelsen. Den
+ * går af sted fra api/paamind.php, som Simply.coms cronjob åbner hver halve
+ * time (adressen står på /admin#velkomst), og først fra kl. 16:30, så den lander,
+ * når folk er kommet hjem fra arbejde. Kun én gang pr. konto — det står i
+ * mailen, og det skal blive ved med at være sandt.
  */
 
 const PAAMIND_EMNE = 'Er I kommet i gang med Learnification?';
 const PAAMIND_EFTER = 3 * 86400;        // så længe efter oprettelsen
 const PAAMIND_HOEJST = 30 * 86400;      // ældre konti får ingen
-const PAAMIND_TIMER = [9, 19];          // kun mellem kl. 9 og 19
+const PAAMIND_TIMER = [9, 19];          // kun mellem kl. 9 og 19 (de andre mails)
+const PAAMIND_FRA = [16, 30];           // påmindelsen går først fra kl. 16:30 (til PAAMIND_TIMER[1])
+const PAAMIND_MAKS_SEK = 300;           // "lidt spillet" = under 5 minutter i alt
 
 /**
  * SQL: intet barn på kontoen har spillet endnu (den voksnes egne spil tæller
  * ikke) — på en konto "til mig selv" er det den voksne selv, der tæller.
  */
-const PAAMIND_IKKE_SPILLET = "NOT EXISTS (SELECT 1 FROM sessioner s WHERE s.konto_id = k.id
-                              AND (s.elev_id IS NOT NULL OR k.type = 'privat') AND s.sekunder > 0)";
+const PAAMIND_IKKE_SPILLET = "COALESCE((SELECT SUM(s.sekunder) FROM sessioner s WHERE s.konto_id = k.id
+                              AND (s.elev_id IS NOT NULL OR k.type = 'privat')), 0) < " . PAAMIND_MAKS_SEK;
 
-/** De konti, der skal have den nu. */
+/** Er klokken nået til, at påmindelsen må gå af sted (16:30-19)? */
+function paamind_tid_nu(): bool
+{
+    $minutter = (int) date('G') * 60 + (int) date('i');
+    return $minutter >= PAAMIND_FRA[0] * 60 + PAAMIND_FRA[1] && (int) date('G') < PAAMIND_TIMER[1];
+}
+
+/** Sekunder spillet i alt af børnene (eller den voksne selv på en privat konto). */
+function paamind_sekunder(array $k): int
+{
+    return (int) vaerdi("SELECT COALESCE(SUM(sekunder), 0) FROM sessioner
+                         WHERE konto_id = ? AND (elev_id IS NOT NULL OR ? = 'privat')", [$k['id'], $k['type']]);
+}
+
+/** De konti, der skal have den nu (tidspunktet tjekkes i paamind_koer). */
 function paamind_hvor(): string
 {
     $nu = time();
@@ -168,16 +186,27 @@ function paamind_mail(array $k): array
     $side = adresse();
     $boern = $skole ? 'elever' : 'børn';
 
+    $sek = paamind_sekunder($k);
+    $lidt = $sek > 0;                       // har spillet et par minutter, men ikke mere
+    $hilsen = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n";
+    $slut = "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
+        . "Venlig hilsen\nLearnification";
+
     if ($k['type'] === 'privat') {
-        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
-            . "For et par dage siden oprettede du en konto på Learnification, men du har ikke prøvet spillene endnu.\n\n"
+        $tekst = $hilsen . ($lidt
+            ? "For et par dage siden oprettede du en konto på Learnification og har prøvet spillene i et par minutter. "
+              . "Vi skriver bare for at sikre, at alt var, som det skulle være — og at du kan komme videre, når du har lyst.\n\n"
+            : "For et par dage siden oprettede du en konto på Learnification, men du har ikke prøvet spillene endnu.\n\n")
             . "Log ind på $side/login, og vælg Runeborg eller Regnehelten under Min konto. "
-            . "Spillet gemmer af sig selv, så du kan stoppe, når du vil, og fortsætte en anden dag.\n\n"
-            . "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
-            . "Venlig hilsen\nLearnification";
+            . "Spillet gemmer af sig selv, så du kan stoppe, når du vil, og fortsætte en anden dag.\n\n" . $slut;
+    } elseif ($lidt) {
+        $tekst = $hilsen . 'For et par dage siden oprettede du en konto' . ($skole ? ' til ' . $k['navn'] : '')
+            . " på Learnification, og der er spillet et par minutter. Vi skriver bare for at sikre, at alt var, som det skulle være.\n\n"
+            . 'Virkede det, som det skulle — lyd, login og selve spillet? Hvis noget drillede, eller hvis ' . $boern
+            . " gerne vil videre, men ikke vidste hvordan, så svar på denne mail. "
+            . ($skole ? 'Eleverne' : 'Børnene') . " går ind på $side/login og skriver deres kode, og så fortsætter spillet, hvor de slap.\n\n" . $slut;
     } else {
-        $tekst = ($fornavn !== '' ? "Hej $fornavn" : 'Hej') . ",\n\n"
-            . 'For et par dage siden oprettede du en konto' . ($skole ? ' til ' . $k['navn'] : '')
+        $tekst = $hilsen . 'For et par dage siden oprettede du en konto' . ($skole ? ' til ' . $k['navn'] : '')
             . " på Learnification, men der er ingen $boern, der har spillet endnu.\n\n";
         if ($st['elever'] === 0) {
             $tekst .= ($skole ? 'Det næste skridt er at oprette en klasse under Min konto og skrive elevernes fornavne — ét pr. linje.'
@@ -189,12 +218,11 @@ function paamind_mail(array $k): array
                 . ($skole ? 'eleverne' : 'børnene') . " gå ind på $side/login og skrive deres kode. "
                 . "Så kan de vælge Runeborg eller Regnehelten.\n\n";
         }
-        $tekst .= "Driller noget, eller passer det bare ikke lige nu? Svar på denne mail, så hjælper vi gerne.\n\n"
-            . "Venlig hilsen\nLearnification";
+        $tekst .= $slut;
     }
 
-    $hvorfor = 'Du får denne påmindelse én gang, fordi du har oprettet en konto på learnification.dk, '
-        . 'og ingen har spillet endnu. Vi sender ikke flere.';
+    $hvorfor = 'Du får denne mail én gang, fordi du har oprettet en konto på learnification.dk, '
+        . 'og ' . ($lidt ? 'der kun er spillet få minutter' : 'ingen har spillet endnu') . '. Vi sender ikke flere.';
     $ren = nyhedsbrev_maerk_links($tekst . "\n\nLog ind: $side/login", 'paamindelse', 'velkomstmail')
         . "\n\n-- \n" . $hvorfor . "\n" . NYHEDSBREV_AFSENDER . "\n";
 

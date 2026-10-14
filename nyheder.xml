@@ -6,7 +6,23 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Tue, 13 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 14 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Tydeligere kort og en sværere rør-opgave i Runeborg</title>
+      <link>https://learnification.dk/nyheder#tydeligere-kort-roer</link>
+      <guid isPermaLink="false">learnification-nyhed-tydeligere-kort-roer</guid>
+      <pubDate>Wed, 14 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>Efter de første test har vi gjort <strong>Brynjas kort</strong> i Runeborg lettere at læse: Der står nu, at de 3 cm går fra Runeborg til broen og de 4,5 cm fra broen til farveriet, og målestokken er præcis 1 cm.</p><p>Og i farveriet skal man selv finde ud af, <strong>hvilket rør</strong> der leder til åen — det står ikke længere i svarmuligheden.</p>]]></description>
+    </item>
+    <item>
+      <title>En hjælpemail efter få minutter og spørgeskemaet efter en halv time</title>
+      <link>https://learnification.dk/nyheder#servicemails-og-skema</link>
+      <guid isPermaLink="false">learnification-nyhed-servicemails-og-skema</guid>
+      <pubDate>Wed, 14 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Har I kun spillet i under fem minutter, sender vi efter et par dage <strong>én</strong> mail klokken 16.30 for at sikre, at alt virker, og at I kan komme videre.</p><p>Har ét barn spillet over en halv time, får I <strong>ét kort spørgeskema</strong> om, hvordan det gik — tidligere kom det først efter en hel times spil. Begge mails er servicemails uden reklame, og det står nu på <a href="https://learnification.dk/opret">oprettelsessiden</a> og i <a href="https://learnification.dk/privatliv">privatlivspolitikken</a>.</p>]]></description>
+    </item>
     <item>
       <title>Læs opgaver op: spørgsmål og svarmuligheder læses højt</title>
       <link>https://learnification.dk/nyheder#laes-opgaver-op</link>

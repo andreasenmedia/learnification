@@ -106,5 +106,8 @@ $efter = tid_status($h);
 if ($efter['slut']) {
     // skema_udloes gør selv ingenting, hvis kontoen har fået det før
     skema_udloes($konto_id, 'tid', $elev_id, $spil);
+} elseif (skema_sekunder($konto_id, $elev_id ?: null) >= SKEMA_EFTER_SEK) {
+    // Over en halv time hos dette barn (eller den voksne selv)
+    skema_udloes($konto_id, 'halv', $elev_id ?: null, $spil);
 }
 svar(['ok' => true, 'id' => (int) $s['id'], 'tid' => $efter]);

@@ -220,7 +220,7 @@
         <div class="felt" style="margin-top:14px;">
           <label for="p-url">Adressen til cronjobbet <span>— hemmelig, del den ikke</span></label>
           <div style="display:flex;gap:10px;flex-wrap:wrap;"><input id="p-url" readonly style="flex:1 1 320px;font-family:monospace;font-size:.85rem;"><button type="button" class="btn btn-sm" id="p-kopier">Kopiér</button></div>
-          <p class="hj">I Simply.coms kontrolpanel: <strong>Website → Cronjobs</strong> → tilføj adressen, og vælg <strong>hver time</strong>. Brug adressen præcis som den står — cronjobbet følger ikke omdirigeringer.</p>
+          <p class="hj">I Simply.coms kontrolpanel: <strong>Website → Cronjobs</strong> → tilføj adressen, og vælg <strong>hver halve time</strong> (minut 0 og 30) — ellers rammer påmindelsen ikke kl. 16:30. Brug adressen præcis som den står — cronjobbet følger ikke omdirigeringer.</p>
         </div>
         <div class="knapper">
           <button type="button" class="btn btn-sm" id="p-koer">Send dem, der er klar, nu</button>
@@ -985,10 +985,10 @@
 
   // --- påmindelsen ---------------------------------------------------------
   function visPaamind(p) {
-    $('p-regler').textContent = 'Går af sig selv til konti, hvor intet barn har spillet ' + p.dage + ' dage efter oprettelsen'
-      + ' (højst 30 dage gamle). Kun én gang pr. konto, og kun mellem kl. ' + p.timer[0] + ' og ' + p.timer[1] + '.'
-      + ' Den husker dem på at logge ind og fortæller, hvad det næste skridt er.';
-    $('p-tal').innerHTML = [[p.klar, 'Klar til at få den nu'], [p.venter, 'Får den senere, hvis ingen spiller'],
+    $('p-regler').textContent = 'Går af sig selv til konti, hvor børnene (eller den voksne selv) har spillet under 5 minutter i alt — også slet ikke — ' + p.dage + ' dage efter oprettelsen'
+      + ' (højst 30 dage gamle). Kun én gang pr. konto, og kun fra kl. 16:30 til ' + p.timer[1] + ', så den lander, når folk er kommet hjem fra arbejde.'
+      + ' Den sikrer, at alt er, som det skal være, og fortæller, hvad det næste skridt er.';
+    $('p-tal').innerHTML = [[p.klar, 'Klar til at få den nu'], [p.venter, 'Får den senere, hvis de stadig har spillet under 5 min'],
                             [p.sendt, 'Har fået den']].map(kort).join('');
     $('p-url').value = p.url;
     $('p-koer').textContent = 'Send dem, der er klar, nu (' + p.klar + ')';
@@ -1031,7 +1031,7 @@
 
   // --- spørgeskemaet --------------------------------------------------------
   var skemaData = null;
-  var AARSAG = { tid: 'Brugte prøvetiden', faerdig: 'Klarede spillet' };
+  var AARSAG = { halv: 'Spillede over 30 min', tid: 'Brugte prøvetiden', faerdig: 'Klarede spillet' };
   var SPILNAVN = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
 
   function svarTekst(sp, nøgle, v) {

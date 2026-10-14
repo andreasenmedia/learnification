@@ -5,8 +5,9 @@
  *
  *   https://learnification.dk/api/paamind.php?noegle=<nøglen>
  *
- * Sæt den til at køre hver time. Uden for kl. 9-19 gør den ingenting, så
- * ingen får mail midt om natten. Reglerne står i _velkomst.php. Den samme
+ * Sæt den til at køre hver halve time (…:00 og …:30). Uden for kl. 9-19 gør
+ * den ingenting, så ingen får mail midt om natten, og påmindelsen går først fra
+ * kl. 16:30, så den lander, når folk er kommet hjem fra arbejde. Reglerne står i _velkomst.php. Den samme
  * kørsel gemmer dagens XP-stand og sender ugens fremskridtsmail (_xp.php),
  * hvis det er slået til under /admin#fremskridt.
  */
@@ -36,8 +37,8 @@ if ($time < PAAMIND_TIMER[0] || $time >= PAAMIND_TIMER[1]) {
 
 @set_time_limit(60);
 require_once __DIR__ . '/_spoergeskema.php';
-$skemaer = skema_genforsoeg();
-$s = paamind_koer('cron');
+$skemaer = skema_genforsoeg() + skema_indhent();
+$s = paamind_tid_nu() ? paamind_koer('cron') : ['sendt' => 0, 'fejlet' => 0, 'fejl' => ''];
 // XP-tavlen: dagens stand for børnene, og — hvis administratoren har slået det til — ugens fremskridtsmail
 require_once __DIR__ . '/_xp.php';
 xp_stand_alle();

@@ -775,15 +775,27 @@ har fået den; spærrede konti og administratoren får den aldrig. Links får
 (de sagde ja til, at vi må skrive om testen) — kommer der tilbud eller reklame
 i den, er den markedsføring og må kun gå til nyhedsbrevets aktive.
 
-**Påmindelsen** (også `_velkomst.php`): én mail til konti, hvor intet barn
-har spillet 3 dage efter oprettelsen (højst 30 dage gamle), kun kl. 9-19 og
-kun én gang pr. konto — det lover mailen. Den sendes af
-`api/paamind.php?noegle=<nøgle>`, som **Simply.coms cronjob** åbner hver time
+**Påmindelsen** (også `_velkomst.php`): én mail til konti, hvor børnene (eller
+den voksne selv på en privat konto) har spillet under 5 minutter i alt
+(`PAAMIND_MAKS_SEK`, også 0) 3 dage efter oprettelsen (højst 30 dage gamle),
+kun fra kl. 16:30 til 19 (`PAAMIND_FRA`) og kun én gang pr. konto — det lover
+mailen. Teksten er en anden for "slet ikke spillet" og "få minutter". Den
+sendes af `api/paamind.php?noegle=<nøgle>`, som **Simply.coms cronjob** åbner
+**hver halve time** (minut 0 og 30, ellers rammer den ikke 16:30)
 (Kontrolpanel → Website → Cronjobs; adressen med nøglen står på
 /admin → Velkomstmail, nøglen i `cron-noegle.txt` i datamappen). Siden viser,
 hvornår cronjobbet sidst kaldte (`paamindelse-status.json`), og advarer, hvis
 det er mere end 3 timer siden. `konti.paamindelse_sendt` / `paamindelse_fejl`
 (DB v8): en fejlet mail bliver prøvet igen ved de næste kørsler, højst 3 gange.
+
+**Spørgeskemaet til de voksne** (`api/_spoergeskema.php`, `/spoergeskema?n=<nøgle>`):
+én mail pr. konto (`konti.skema_sendt` er claim), første gang ét barn (eller den
+voksne selv) har spillet mindst en halv time (`SKEMA_EFTER_SEK`, årsag `halv`),
+har brugt hele prøvetiden (`tid`) eller har klaret et helt spil (`faerdig`).
+`api/spilletid.php` udløser det live; `skema_indhent()` (kaldt fra
+`api/paamind.php`, kl. 9-19, højst 25 pr. kørsel) sender til konti, der allerede
+havde nået en halv time, og prøver fejlede mails igen. Servicemail, ingen reklame;
+/opret og /privatliv fortæller, at den må sendes, fordi testen er gratis.
 
 ## Mails fra siden
 

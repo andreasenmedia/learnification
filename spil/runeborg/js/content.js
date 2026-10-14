@@ -216,18 +216,21 @@
     '<tr><td>Liv (elver)</td><td>30 skefulde</td><td>15 guld</td></tr>' +
     '<tr><td>Knud (kræmmer)</td><td>75 skefulde</td><td>36 guld — <b>i dag 25 % rabat!</b></td></tr></table>' };
   var DOC_KORT = { kind: 'letter', title: 'Brynjas kort over egnen', html:
-    '<svg viewBox="0 0 400 220" style="width:100%;height:auto;display:block" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="14">' +
-    '<rect x="0" y="0" width="400" height="220" fill="#ead6a6"/>' +
+    '<svg viewBox="0 0 400 232" style="width:100%;height:auto;display:block" font-family="Atkinson Hyperlegible, Verdana, sans-serif" font-size="14">' +
+    '<rect x="0" y="0" width="400" height="232" fill="#ead6a6"/>' +
     '<path d="M0 150 C80 140 120 170 200 150 S320 120 400 135" stroke="#6a9a4a" stroke-width="10" fill="none" opacity=".8"/>' +
     '<g fill="#5a8a4a">' + [30, 60, 330, 360, 300].map(function (x, i) { return '<circle cx="' + x + '" cy="' + (40 + (i % 2) * 18) + '" r="12"/>'; }).join('') + '</g>' +
     '<line x1="50" y1="185" x2="170" y2="185" stroke="#8a2a2a" stroke-width="4" stroke-dasharray="10 6"/>' +
     '<line x1="170" y1="185" x2="350" y2="95" stroke="#8a2a2a" stroke-width="4" stroke-dasharray="10 6"/>' +
-    '<rect x="30" y="170" width="36" height="28" fill="#a02e38" stroke="#3a2616" stroke-width="3"/><text x="18" y="214" fill="#3a2616">Runeborg</text>' +
-    '<rect x="160" y="140" width="22" height="12" fill="#8e5a32" stroke="#3a2616" stroke-width="2"/><text x="140" y="132" fill="#3a2616">Broen</text>' +
-    '<rect x="336" y="72" width="40" height="30" fill="#2c4a9c" stroke="#3a2616" stroke-width="3"/><text x="286" y="64" fill="#3a2616">Farveriet</text>' +
-    '<text x="92" y="178" fill="#8a2a2a" font-weight="bold">3 cm</text><text x="262" y="130" fill="#8a2a2a" font-weight="bold">4,5 cm</text>' +
-    '<rect x="230" y="190" width="40" height="8" fill="#3a2616"/><rect x="270" y="190" width="40" height="8" fill="#ead6a6" stroke="#3a2616" stroke-width="2"/>' +
-    '<text x="232" y="184" fill="#3a2616">1 cm = 200 m</text>' +
+    '<line x1="171" y1="153" x2="171" y2="185" stroke="#3a2616" stroke-width="2" stroke-dasharray="3 3"/><circle cx="170" cy="185" r="5" fill="#3a2616"/>' +
+    '<rect x="30" y="170" width="36" height="28" fill="#a02e38" stroke="#3a2616" stroke-width="3"/><text x="14" y="164" fill="#3a2616" stroke="#ead6a6" stroke-width="3" paint-order="stroke">Runeborg</text>' +
+    '<rect x="160" y="140" width="22" height="12" fill="#8e5a32" stroke="#3a2616" stroke-width="2"/><text x="140" y="132" fill="#3a2616" stroke="#ead6a6" stroke-width="3" paint-order="stroke">Broen</text>' +
+    '<rect x="336" y="72" width="40" height="30" fill="#2c4a9c" stroke="#3a2616" stroke-width="3"/><text x="286" y="64" fill="#3a2616" stroke="#ead6a6" stroke-width="3" paint-order="stroke">Farveriet</text>' +
+    '<g stroke="#8a2a2a" stroke-width="2" fill="none"><path d="M50 202 V209 H170 V202"/></g>' +
+    '<text x="110" y="223" text-anchor="middle" fill="#8a2a2a" font-weight="bold" stroke="#ead6a6" stroke-width="3" paint-order="stroke">3 cm til broen</text>' +
+    '<text x="228" y="172" fill="#8a2a2a" font-weight="bold" stroke="#ead6a6" stroke-width="3" paint-order="stroke">4,5 cm til farveriet</text>' +
+    '<rect x="290" y="196" width="40" height="8" fill="#3a2616"/><path d="M290 192 V208 M330 192 V208" stroke="#3a2616" stroke-width="2"/>' +
+    '<text x="284" y="188" fill="#3a2616" stroke="#ead6a6" stroke-width="3" paint-order="stroke">1 cm = 200 m</text>' +
     '</svg>' };
   var DOC_CERT = { kind: 'pamphlet', title: 'CERTIFIKAT', lines: ['Hermed bekræftes, at Grimmarks Farveri er 100 % rent og ufarligt.', 'Undersøgt og godkendt af: Baron Grimmark', 'Underskrevet af: Baron Grimmark'] };
   var CH_ROR = { kind: 'line', title: 'Farvesalt gennem rørene (skefulde i timen)', labels: ['Morgen', 'Middag', 'Aften', 'Nat'], max: 10, series: [
@@ -590,7 +593,7 @@
         { t: 'Hele tiden lige meget', why: 'Det er rør 1, der er lige højt hele tiden. Rør 2 er den grønne linje.' }
       ], explain: 'Rør 2 hopper op til 9 om natten — når ingen kigger.' })) return;
       if (!await g.task('q10d', { type: 'choice', area: AREA.data, chart: CH_ROR, q: 'Hvilket rør skal lukkes for at stoppe udslippet til åen?', opts: [
-        { t: 'Rør 2 — det, der går til åen', ok: true }, { t: 'Rør 1', why: 'Rør 1 går til farvekarrene. Det er dér, farveriet bruger farven.' },
+        { t: 'Rør 2', ok: true }, { t: 'Rør 1', why: 'Rør 1 går til farvekarrene. Det er dér, farveriet bruger farven.' },
         { t: 'Rør 3', why: 'Rør 3 går til lageret — ikke til åen.' }
       ] })) return;
       RB.audio.sfx('door');
