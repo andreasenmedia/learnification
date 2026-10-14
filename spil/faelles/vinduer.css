@@ -248,7 +248,10 @@
 }
 @media (orientation: landscape) and (max-height: 560px) {
   #tbtns { right: max(36px, env(safe-area-inset-right)); }
-  #t-act { margin-bottom: 30vh; }
+  :root { --e-lift: 40vh; }   /* E og joysticket står i samme højde */
+  #t-act { margin-bottom: var(--e-lift); }
+  #stick-base { bottom: calc(var(--e-lift) - 3px); }   /* midten ud for E: 16px + løft + 29px - 48px */
+  #stick-zone { height: 85%; }
   body.touching #prompt { bottom: 110px; }
 }
 
