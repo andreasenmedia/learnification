@@ -248,7 +248,7 @@
 }
 /* Telefon på højkant: E højere oppe, og joysticket i samme højde (midten ud for E: 16px + løft + 29px - 48px) */
 @media (orientation: portrait) and (max-width: 600px) {
-  :root { --e-lift: 16vh; }
+  :root { --e-lift: 24vh; }
   #t-act { margin-bottom: var(--e-lift); }
   #stick-base { bottom: calc(var(--e-lift) - 3px); }
   #stick-zone { height: 70%; }
@@ -256,7 +256,7 @@
 }
 @media (orientation: landscape) and (max-height: 560px) {
   #tbtns { right: max(36px, env(safe-area-inset-right)); }
-  #t-act { margin-bottom: 14vh; }
+  #t-act { margin-bottom: 7vh; }
   body.touching #prompt { bottom: 110px; }
 }
 
