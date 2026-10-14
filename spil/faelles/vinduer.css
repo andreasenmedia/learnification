@@ -248,7 +248,7 @@
 }
 @media (orientation: landscape) and (max-height: 560px) {
   #tbtns { right: max(36px, env(safe-area-inset-right)); }
-  #t-act { margin-bottom: 14vh; }
+  #t-act { margin-bottom: 30vh; }
   body.touching #prompt { bottom: 110px; }
 }
 
