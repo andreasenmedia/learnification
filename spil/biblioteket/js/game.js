@@ -513,22 +513,17 @@
     S.seen.guide = true; gemProfil();
   }
   // Fuld skærm. Knappen skjules, hvor browseren ikke kan (fx iPhone-Safari).
-  var root = document.documentElement;
-  var canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
-  function isFull() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
-  BB.toggleFullscreen = function () {
-    if (!canFull) return;
-    if (isFull()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
-    var p = (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
-    if (p && p.catch) p.catch(function () { });
-  };
+  // Fuld skærm styres af rammen om spillene (spil/faelles/ramme.js), så den holder, når man skifter spil.
+  var canFull = LFFuld.kan;
+  function isFull() { return LFFuld.er(); }
+  BB.toggleFullscreen = function () { LFFuld.skift(); };
   BB.isFullscreen = isFull; BB.canFullscreen = canFull;
   var fullBtn = document.getElementById('btn-full');
   if (!canFull) fullBtn.hidden = true;
   fullBtn.addEventListener('click', function () { BB.toggleFullscreen(); fullBtn.blur(); });
-  ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
-    document.addEventListener(ev, function () { fullBtn.title = isFull() ? 'Forlad fuld skærm (F)' : 'Fuld skærm (F)'; setTimeout(resize, 50); });
-  });
+  function fuldSkiftet() { fullBtn.title = isFull() ? 'Forlad fuld skærm (F)' : 'Fuld skærm (F)'; setTimeout(resize, 50); }
+  LFFuld.paaSkift(fuldSkiftet);
+  fuldSkiftet();
   document.getElementById('btn-menu').addEventListener('click', openMenu);
   document.getElementById('btn-map').addEventListener('click', openMap);
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Spil — Learnification</title>
+<meta name="theme-color" content="#140f1c">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/runeborg.css?v=3">
+<style>
+  html, body { margin: 0; height: 100%; background: #140f1c; overflow: hidden; }
+  #spil { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; background: #140f1c; }
+
+  /* "Drej telefonen"-kort: kun på en berøringsskærm på højkant */
+  #drej { position: fixed; inset: 0; z-index: 5; display: none; place-items: center; padding: 24px; background: rgba(20,15,28,.94); font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; color: #fff; }
+  #drej.paa { display: grid; }
+  #drej .kort { max-width: 340px; padding: 24px 22px; background: #1f1830; border: 3px solid #ffcc4d; text-align: center; box-shadow: 6px 6px 0 rgba(0,0,0,.5); }
+  #drej h1 { margin: 14px 0 8px; font-size: 22px; line-height: 1.2; }
+  #drej p { margin: 0 0 16px; font-size: 17px; line-height: 1.45; color: #e6dff5; }
+  #drej button { display: block; width: 100%; box-sizing: border-box; min-height: 52px; margin: 0 0 12px; padding: 10px 16px; font: inherit; font-weight: 700; font-size: 18px; color: #140f1c; background: #ffcc4d; border: 3px solid #fff; cursor: pointer; }
+  #drej button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  #drej .link { display: inline-block; min-height: 44px; padding: 10px 8px; margin: 0; width: auto; font-weight: 400; font-size: 16px; color: #e6dff5; background: none; border: 0; text-decoration: underline; }
+  #telefon { width: 44px; height: 74px; margin: 0 auto; border: 4px solid #ffcc4d; border-radius: 8px; position: relative; animation: drej 2.6s ease-in-out infinite; }
+  #telefon::after { content: ''; position: absolute; left: 50%; bottom: 6px; width: 14px; height: 4px; margin-left: -7px; background: #ffcc4d; }
+  @keyframes drej { 0%, 25% { transform: rotate(0); } 55%, 85% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+  @media (prefers-reduced-motion: reduce) { #telefon { animation: none; transform: rotate(-90deg); } }
+</style>
+</head>
+<body>
+
+<iframe id="spil" title="Spillet" allow="fullscreen; autoplay"></iframe>
+
+<div id="drej" role="dialog" aria-modal="true" aria-labelledby="drej-h">
+  <div class="kort">
+    <div id="telefon" aria-hidden="true"></div>
+    <h1 id="drej-h">Spillet er bedst på langs</h1>
+    <p id="drej-tekst">Drej telefonen, så du kan se mere af verdenen, og så knapperne ligger lige under tommelfingrene.</p>
+    <button type="button" id="drej-fuld" hidden>Spil i fuld skærm</button>
+    <button type="button" class="link" id="drej-alligevel">Spil på højkant alligevel</button>
+  </div>
+</div>
+
+<noscript><p style="color:#fff;padding:24px;font-family:sans-serif">Spillene kræver JavaScript.</p></noscript>
+
+<script>
+(function () {
+  var frame = document.getElementById('spil');
+  var SPIL = /^\/spil\/(runeborg|regnehelten|biblioteket)\//;
+  var rod = document.documentElement;
+
+  // ---------- Hvilket spil skal vises? Adressen efter # ----------
+  function onsket() {
+    var h = decodeURIComponent(location.hash.slice(1));
+    return SPIL.test(h.split(/[?#]/)[0]) ? h : '/spil/biblioteket/';
+  }
+  frame.src = onsket();
+  window.addEventListener('hashchange', function () {
+    var vil = onsket();
+    try { var nu = frame.contentWindow.location; if (nu.pathname + nu.search + nu.hash === vil) return; } catch (e) { }
+    frame.src = vil;
+  });
+
+  // ---------- Fuld skærm (på rammen, så den overlever spilskift) ----------
+  var kan = !!(rod.requestFullscreen || rod.webkitRequestFullscreen);
+  function er() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function berøring() { return window.matchMedia('(pointer: coarse)').matches; }
+  function laasVandret() {
+    try {
+      if (berøring() && screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(function () { });
+    } catch (e) { }
+  }
+  function skift() {
+    if (!kan) return;
+    if (er()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) { }
+      return;
+    }
+    var p = (rod.requestFullscreen || rod.webkitRequestFullscreen).call(rod);
+    if (p && p.then) p.then(laasVandret, function () { }); else laasVandret();
+  }
+  window.LFRamme = { kan: kan, er: er, skift: skift };
+
+  function fortælSpillet() {
+    try { frame.contentWindow.postMessage({ lf: 'fuld', til: er() }, location.origin); } catch (e) { }
+  }
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+    document.addEventListener(ev, function () { fortælSpillet(); vis(); });
+  });
+
+  // ---------- Hver gang et nyt spil er indlæst ----------
+  frame.addEventListener('load', function () {
+    var l;
+    try { l = frame.contentWindow.location; } catch (e) { return; }
+    // Landede rammen uden for spillene (login, konto, hub …), forlader vi rammen helt
+    if (!SPIL.test(l.pathname)) { if (l.href !== 'about:blank') location.replace(l.href); return; }
+    try { history.replaceState(null, '', '/spil/ramme/#' + l.pathname + l.search + l.hash); } catch (e) { }
+    try { if (frame.contentDocument.title) document.title = frame.contentDocument.title; } catch (e) { }
+    try { frame.contentWindow.focus(); } catch (e) { }
+    fortælSpillet();
+  });
+  // Tastatur: giv spillet fokus, hvis man klikker på rammens kant
+  window.addEventListener('focus', function () { try { frame.contentWindow.focus(); } catch (e) { } });
+
+  // ---------- "Drej telefonen" ----------
+  var kort = document.getElementById('drej');
+  var knapFuld = document.getElementById('drej-fuld');
+  var tekst = document.getElementById('drej-tekst');
+  var afvist = false;
+  try { afvist = sessionStorage.getItem('lf-hojkant') === '1'; } catch (e) { }
+  var paaHojkant = window.matchMedia('(orientation: portrait) and (pointer: coarse) and (max-width: 700px)');
+  function vis() {
+    var skalVises = paaHojkant.matches && !afvist;
+    kort.classList.toggle('paa', skalVises);
+    if (skalVises) {
+      knapFuld.hidden = !kan;
+      // iPhone kan ikke låses til vandret: der bliver det "drej telefonen"
+      tekst.textContent = kan
+        ? 'Tryk på knappen, så fylder spillet hele skærmen og står på langs. Du kan også bare dreje telefonen.'
+        : 'Drej telefonen, så du kan se mere af verdenen, og så knapperne ligger lige under tommelfingrene.';
+    }
+  }
+  knapFuld.addEventListener('click', function () { skift(); });
+  document.getElementById('drej-alligevel').addEventListener('click', function () {
+    afvist = true;
+    try { sessionStorage.setItem('lf-hojkant', '1'); } catch (e) { }
+    vis();
+    try { frame.contentWindow.focus(); } catch (e) { }
+  });
+  if (paaHojkant.addEventListener) paaHojkant.addEventListener('change', vis); else paaHojkant.addListener(vis);
+  vis();
+})();
+</script>
+</body>
+</html>

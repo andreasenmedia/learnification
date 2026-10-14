@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "fuld-skaerm-holder",
+      "dato": "2026-10-14",
+      "maerke": "Spil",
+      "titel": "Fuld skærm bliver nu ved, når man skifter spil",
+      "kort": "Går du fra Eventyrbiblioteket ind i et spil, bliver skærmen fuld. Og på en telefon foreslår spillet at spille på langs.",
+      "tekst": [
+        "Før røg <strong>fuld skærm</strong> hver gang, man gik gennem en port til et nyt spil. Nu bliver den ved, når man skifter mellem Eventyrbiblioteket, Runeborg og Regnehelten.",
+        "På en telefon på højkant spørger spillet nu, om man vil spille <strong>på langs</strong> i fuld skærm. Man kan også bare dreje telefonen, eller vælge at blive på højkant. <strong>E-knappen</strong> og de små knapper Kort og Bog sidder desuden i en bue omkring højre tommelfinger."
+      ]
+    },
+    {
       "id": "joystick-paa-langs",
       "dato": "2026-10-14",
       "maerke": "Spil",

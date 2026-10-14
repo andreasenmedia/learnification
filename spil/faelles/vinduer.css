@@ -243,28 +243,37 @@
 }
 /* E-knappen: ens i alle spil (den hænger ikke på Kort/Bog-rækken), stor, halvgennemsigtig og tæt på højre kant.
    Kort og Bog står i hjørnet nederst. --e-lift er, hvor højt E løftes over hjørnet. */
-:root { --e-lift: 56px; --e-size: 72px; }   /* mindst over Kort/Bog */
-#tbtns {
-  left: 0; top: 0; right: 0; bottom: 0; margin: 0; gap: 8px; justify-content: flex-end; pointer-events: none;
-  padding: 0 max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) 0;
+/* Placering som i andre mobilspil: joysticket nederst til venstre, E som den store knap, hvor højre tommelfinger
+   hviler (ikke helt ude i hjørnet), og Kort og Bog som mindre knapper i en bue omkring E.
+   --ex/--eb er E's afstand fra højre kant og bunden, --es dens størrelse; Kort og Bog regnes ud fra dem. */
+:root {
+  --e-lift: 56px; --e-size: clamp(64px, 18vmin, 84px);
+  --es: var(--e-size);
+  --ex: max(16px, env(safe-area-inset-right));
+  --eb: calc(max(16px, env(safe-area-inset-bottom)) + var(--e-lift));
 }
-#tbtns button { pointer-events: auto; }
+#tbtns { left: 0; top: 0; right: 0; bottom: 0; margin: 0; pointer-events: none; }
+#tbtns button { pointer-events: auto; position: absolute; margin: 0; }
 #t-act {
-  position: absolute; right: max(16px, env(safe-area-inset-right)); bottom: calc(max(16px, env(safe-area-inset-bottom)) + var(--e-lift));
-  width: var(--e-size); height: var(--e-size); margin: 0; font-size: 26px;
+  right: var(--ex); bottom: var(--eb);
+  width: var(--es); height: var(--es); font-size: 26px;
   background: rgba(31,24,48,.45) !important; border-color: rgba(255,204,77,.75) !important;
 }
-#t-map, #t-book { background: rgba(31,24,48,.6) !important; }
+#t-map, #t-book { background: rgba(31,24,48,.6) !important; width: 52px; height: 40px; }
+#t-book { right: calc(var(--ex) + var(--es) + 10px); bottom: var(--eb); }                     /* ved siden af E */
+#t-map  { right: calc(var(--ex) + var(--es) * .75); bottom: calc(var(--eb) + var(--es) + 8px); } /* over E, mod venstre */
 @media (max-width: 600px), (max-height: 560px) { body.touching #prompt { bottom: 150px; } }
-/* Telefon på højkant: E højere oppe, og joysticket i samme højde (midten ud for E: 16px + løft + halv E - halv joystick) */
+/* Telefon på højkant: E i nederste tredjedel, og joysticket i samme højde (midte ud for E) */
 @media (orientation: portrait) and (max-width: 600px) {
-  :root { --e-lift: 24vh; }
-  #stick-base { bottom: calc(var(--e-lift) + 4px); }
+  :root { --e-lift: 15vh; --ex: max(8vw, 20px, env(safe-area-inset-right)); }
+  #stick-base { bottom: calc(var(--eb) + (var(--es) - 96px) / 2); }
   #stick-zone { height: 70%; }
   body.touching #prompt { bottom: 120px; }
 }
+/* Telefon på langs: E lidt inde fra kanten, tommelfingeren hviler skråt ind fra hjørnet */
 @media (orientation: landscape) and (max-height: 560px) {
-  :root { --e-lift: max(7vh, 56px); }
+  :root { --e-lift: max(9vh, 14px); --ex: max(6vw, 24px, env(safe-area-inset-right)); }
+  #stick-base { bottom: calc(var(--eb) + (var(--es) - 96px) / 2); left: max(6vw, 24px, env(safe-area-inset-left)); }
   body.touching #prompt { bottom: 110px; }
 }
 
