@@ -859,9 +859,11 @@
   });
   zone.addEventListener('pointermove', function (e) {
     if (e.pointerId !== stickId) return;
-    var br = base.getBoundingClientRect();
-    moveStick(e.clientX - (br.left + br.width / 2), e.clientY - (br.top + br.height / 2));
+    // i forhold til hvor fingeren landede, ikke basens midte (safe area og kanter flytter basen)
+    moveStick(e.clientX - stickNed.x, e.clientY - stickNed.y);
   });
+  window.addEventListener('resize', function () { if (stickId !== null) endStick(); });
+  window.addEventListener('orientationchange', function () { if (stickId !== null) endStick(); });
   zone.addEventListener('pointerup', function (e) {
     if (e.pointerId === stickId && erTryk(stickNed, e)) trykPaaVerden(e.clientX, e.clientY);
   });

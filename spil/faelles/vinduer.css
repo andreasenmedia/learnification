@@ -20,9 +20,11 @@
 .book-head, .task-head { position: sticky; top: 0; z-index: 2; background: var(--panel); }
 .book-head { margin: -4px -4px 0; padding: 4px; }
 .dialog { max-height: calc(100% - 28px); overflow: auto; }
-#hud, #tbtns, #stick-base {
+#hud, #tbtns {
   margin-left: env(safe-area-inset-left); margin-right: env(safe-area-inset-right);
 }
+/* Zonen (ikke selve joysticket) viger for hakket, så joysticket står under tommelfingeren */
+#stick-zone { left: env(safe-area-inset-left); }
 
 /* Pausemenuen: knapperne i to rækker, så den også er der på en lav skærm */
 .menu.pause { width: min(100%, 640px); grid-template-columns: 1fr 1fr; gap: 8px 10px; }
@@ -238,6 +240,16 @@
   #t-act { width: 58px; height: 58px; font-size: 21px; }
   #t-book, #t-map { width: 52px; height: 38px; font-size: 13px; }
   body.touching #prompt { bottom: 120px; }
+}
+/* E-knappen hæves, så den ligger, hvor højre tommelfinger hviler; Kort og Bog bliver nederst */
+@media (max-width: 600px), (max-height: 560px) {
+  #t-act { margin-bottom: 30px; }
+  body.touching #prompt { bottom: 150px; }
+}
+@media (orientation: landscape) and (max-height: 560px) {
+  #tbtns { right: max(36px, env(safe-area-inset-right)); }
+  #t-act { margin-bottom: 14vh; }
+  body.touching #prompt { bottom: 110px; }
 }
 
 /* "Læs opgaver op": lille højttaler i hver svarmulighed + fremhævning af den, der læses lige nu */

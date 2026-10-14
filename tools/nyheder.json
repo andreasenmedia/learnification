@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "joystick-paa-langs",
+      "dato": "2026-10-14",
+      "maerke": "Spil",
+      "titel": "Joysticket virker nu også, når telefonen holdes på langs",
+      "kort": "Joysticket styrer rigtigt på langs, og E-knappen sidder, hvor tommelfingeren naturligt hviler.",
+      "tekst": [
+        "Når telefonen blev holdt på langs, kunne <strong>joysticket</strong> finde på at trække figuren i en retning, man slet ikke havde valgt. Det er rettet i Runeborg, Regnehelten og Eventyrbiblioteket.",
+        "<strong>E-knappen</strong> sidder desuden lidt højere oppe og længere inde fra kanten, så den ligger lige under højre tommelfinger."
+      ]
+    },
+    {
       "id": "tydeligere-kort-roer",
       "dato": "2026-10-14",
       "maerke": "Spil",
