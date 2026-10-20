@@ -6,7 +6,15 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Wed, 14 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 20 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Kom til at trykke &quot;Start forfra&quot;? Nu kan du fortryde</title>
+      <link>https://learnification.dk/nyheder#fortryd-start-forfra</link>
+      <guid isPermaLink="false">learnification-nyhed-fortryd-start-forfra</guid>
+      <pubDate>Tue, 20 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Spil</category>
+      <description><![CDATA[<p>Trykker man på <strong>Start forfra</strong> i Runeborg eller Regnehelten, bliver spillet nulstillet. Det gik galt for en elev under en skoletest. Nu gemmer vi det nulstillede spil i 14 dage, og i pausemenuen står der <strong>Fortryd start forfra</strong>, som henter det gamle eventyr tilbage.</p><p>Sletter du barnet eller kontoen, slettes sikkerhedskopien med det samme. Det står også i <a href="https://learnification.dk/privatliv">privatlivspolitikken</a>.</p>]]></description>
+    </item>
     <item>
       <title>Regneopgaver kan nu ses helt, når telefonen holdes på langs</title>
       <link>https://learnification.dk/nyheder#opgaver-paa-langs</link>

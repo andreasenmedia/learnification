@@ -132,6 +132,14 @@
     try { localStorage.removeItem(SAVE); localStorage.removeItem('regnehelten-gem:' + (RH.gem.inde || 'gaest')); } catch (e) { }
     RH.gem.nulstil().then(function () { location.reload(); });
   };
+  // Fortryd "Start forfra": hent det nulstillede spil tilbage fra serveren (api/gem.php) og start fra det
+  RH.fortrydStart = function () {
+    laast = true;
+    return RH.gem.fortryd().then(function (d) {
+      try { localStorage.setItem(SAVE, d); } catch (e) { }
+      location.reload();
+    }, function (e) { laast = false; window.alert(e.message); });
+  };
   RH.gem.naarKonflikt(function () {
     laast = true;
     UI.konflikt().then(function () {

@@ -27,7 +27,7 @@
   var META = 'runeborg-synk' + (inde ? '-' + inde : '');
   var enhed = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   var server = !!inde, udgave = 0, venter = null, timer = null, sender = false;
-  var konflikt = false, nyeste = '', nyesteUdgave = 0, lyttere = [];
+  var konflikt = false, nyeste = '', nyesteUdgave = 0, lyttere = [], forrige = null;
 
   function laesMeta() {
     try {
@@ -59,6 +59,7 @@
       if (x.status === 401) { server = false; return lokal || null; }
       if (!x.d.ok) throw new Error(x.d.besked);
       udgave = x.d.udgave || 0;
+      forrige = x.d.forrige || null;
       var m = laesMeta();
       // Den lokale kopi vinder kun, hvis den bygger videre på netop den
       // udgave, serveren har, og aldrig nåede op (fx fordi nettet røg)
@@ -113,6 +114,16 @@
       if (!server) return Promise.resolve();
       return kald('POST', { handling: 'gem', spil: SPIL, data: '{"slettet":true}', udgave: udgave, enhed: enhed, hvem: inde })
         .catch(function () { /* så må den lokale sletning være nok */ });
+    },
+    // Det "Start forfra" slettede, hvis det kan fortrydes: null eller {tid, tekst}
+    forrige: function () { return forrige; },
+    // Hent det tilbage -> løfte med det gamle spil som tekst
+    fortryd: function () {
+      return kald('POST', { handling: 'fortryd', spil: SPIL, udgave: udgave, enhed: enhed, hvem: inde }).then(function (x) {
+        if (!x.d.ok) throw new Error(x.d.besked || 'Det kunne ikke fortrydes.');
+        udgave = x.d.udgave; forrige = null; skrivMeta(true);
+        return x.d.data;
+      });
     },
     naarKonflikt: function (fn) { lyttere.push(fn); },
     tagNyeste: function () {

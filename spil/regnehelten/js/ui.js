@@ -304,6 +304,14 @@
         var kapB = btn('btn', 'Kapitler'); m.appendChild(kapB);
         kapB.addEventListener('click', function () { pop(bg); resolve('kapitler'); });
         var restart = btn('btn', 'Start forfra'); m.appendChild(restart);
+        // Trykkede man på Start forfra ved en fejl? Så ligger det gamle spil gemt hos os i 14 dage
+        if (RH.gem.forrige && RH.gem.forrige()) {
+          var fortryd = btn('btn', 'Fortryd start forfra'); m.appendChild(fortryd);
+          fortryd.addEventListener('click', function () {
+            var f = RH.gem.forrige();
+            if (window.confirm('Vil du have dit gamle eventyr tilbage' + (f && f.tekst ? ' (' + f.tekst + ')' : '') + '? Det, du har nået siden, bliver erstattet.')) { RH.fortrydStart(); }
+          });
+        }
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/regnehelten'; home.style.textDecoration = 'none'; m.appendChild(home);
         // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
         if (window.LF_SPILLER && window.LFSpil) {
@@ -322,7 +330,7 @@
         function done() { pop(bg); resolve(); }
         first.addEventListener('click', done);
         restart.addEventListener('click', function () {
-          if (window.confirm('Vil du starte forfra? Alt, du har nået, bliver slettet.')) RH.resetGame();
+          if (window.confirm('Vil du starte forfra? Alt, du har nået, bliver nulstillet. Du kan fortryde det bagefter her i menuen.')) RH.resetGame();
         });
         bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); done(); } });
         push(bg); first.focus();

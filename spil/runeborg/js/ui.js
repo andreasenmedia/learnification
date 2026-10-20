@@ -466,6 +466,14 @@
         var kapB = el('button', 'btn', 'Kapitler'); kapB.type = 'button'; m.appendChild(kapB);
         kapB.addEventListener('click', function () { pop(bg); resolve('kapitler'); });
         var restart = el('button', 'btn', 'Start forfra'); restart.type = 'button'; m.appendChild(restart);
+        // Trykkede man på Start forfra ved en fejl? Så ligger det gamle spil gemt hos os i 14 dage
+        if (RB.gem.forrige && RB.gem.forrige()) {
+          var fortryd = el('button', 'btn', 'Fortryd start forfra'); fortryd.type = 'button'; m.appendChild(fortryd);
+          fortryd.addEventListener('click', function () {
+            var f = RB.gem.forrige();
+            if (window.confirm('Vil du have dit gamle eventyr tilbage' + (f && f.tekst ? ' (' + f.tekst + ')' : '') + '? Det, du har nået siden, bliver erstattet.')) { RB.fortrydStart(); }
+          });
+        }
         var home = el('a', 'btn', 'Til Learnification.dk'); home.href = '/runeborg'; home.style.textDecoration = 'none'; m.appendChild(home);
         // Logget ind? Så kan man logge ud herfra — vigtigt på en delt skolecomputer
         if (window.LF_SPILLER && window.LFSpil) {
@@ -484,7 +492,7 @@
         function done() { pop(bg); resolve(); }
         first.addEventListener('click', done);
         restart.addEventListener('click', function () {
-          if (window.confirm('Vil du starte forfra? Alt, du har nået, bliver slettet.')) { RB.resetGame(); }
+          if (window.confirm('Vil du starte forfra? Alt, du har nået, bliver nulstillet. Du kan fortryde det bagefter her i menuen.')) { RB.resetGame(); }
         });
         bg.addEventListener('keydown', function (e) { if (e.key === 'Escape') { e.stopPropagation(); done(); } });
         push(bg); first.focus();

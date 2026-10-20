@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "fortryd-start-forfra",
+      "dato": "2026-10-20",
+      "maerke": "Spil",
+      "titel": "Kom til at trykke \"Start forfra\"? Nu kan du fortryde",
+      "kort": "Pausemenuen i Runeborg og Regnehelten har fået en knap, der henter det gamle eventyr tilbage.",
+      "tekst": [
+        "Trykker man på <strong>Start forfra</strong> i Runeborg eller Regnehelten, bliver spillet nulstillet. Det gik galt for en elev under en skoletest. Nu gemmer vi det nulstillede spil i 14 dage, og i pausemenuen står der <strong>Fortryd start forfra</strong>, som henter det gamle eventyr tilbage.",
+        "Sletter du barnet eller kontoen, slettes sikkerhedskopien med det samme. Det står også i <a href=\"/privatliv\">privatlivspolitikken</a>."
+      ]
+    },
+    {
       "id": "opgaver-paa-langs",
       "dato": "2026-10-14",
       "maerke": "Spil",

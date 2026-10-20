@@ -526,6 +526,11 @@ function opret_tabeller(PDO $pdo): void
         16 => [
             'ALTER TABLE elever ADD COLUMN oplaes INTEGER NOT NULL DEFAULT 0',
         ],
+        // "Start forfra" kan fortrydes: det gemte spil, som blev nulstillet, ligger i forrige (api/gem.php)
+        17 => [
+            'ALTER TABLE gemte_spil ADD COLUMN forrige TEXT',
+            'ALTER TABLE gemte_spil ADD COLUMN forrige_tid INTEGER',
+        ],
     ];
 
     foreach ($trin as $version => $saetninger) {

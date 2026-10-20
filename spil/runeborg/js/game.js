@@ -93,6 +93,14 @@
     try { localStorage.removeItem(SAVE); } catch (e) { }
     RB.gem.nulstil().then(function () { location.reload(); });
   };
+  // Fortryd "Start forfra": hent det nulstillede spil tilbage fra serveren (api/gem.php) og start fra det
+  RB.fortrydStart = function () {
+    laast = true;
+    return RB.gem.fortryd().then(function (d) {
+      try { localStorage.setItem(SAVE, d); } catch (e) { }
+      location.reload();
+    }, function (e) { laast = false; window.alert(e.message); });
+  };
   RB.gem.naarKonflikt(function () {
     laast = true;
     UI.konflikt().then(function () {
