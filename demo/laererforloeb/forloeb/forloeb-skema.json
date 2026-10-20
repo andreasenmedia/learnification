@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Forløbspakke til Lærerens forløb",
+  "description": "Det, AI'en udfylder ud fra lærerens materiale, og som læreren retter og godkender. Spillet læser kun denne fil.",
+  "type": "object",
+  "required": ["id", "titel", "undertitel", "start", "laeringsmaal", "intro", "figurer", "missioner", "afslutning"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "titel": { "type": "string" },
+    "undertitel": { "type": "string" },
+    "fag": { "type": "string" },
+    "klassetrin": { "type": "integer", "minimum": 0, "maximum": 9 },
+    "laerer": { "type": "string" },
+    "klasse": { "type": "string" },
+    "start": {
+      "type": "object",
+      "required": ["map", "x", "y", "stedNavn"],
+      "properties": {
+        "map": { "enum": ["skole"] },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "dir": { "enum": ["up", "down", "left", "right"] },
+        "stedNavn": { "type": "string" }
+      }
+    },
+    "laeringsmaal": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "omraade", "tekst"],
+        "properties": {
+          "id": { "type": "string" },
+          "omraade": { "type": "string", "description": "Vises over opgaven, fx 'Natur/teknologi · Vandets kredsløb'" },
+          "tekst": { "type": "string", "description": "Fortsætter 'Jeg kan …' på slutskærmen" },
+          "fm": { "type": "string", "description": "Fælles Mål-kompetenceområde" }
+        }
+      }
+    },
+    "intro": { "$ref": "#/definitions/replikker" },
+    "figurer": {
+      "type": "object",
+      "description": "Nøglerne brynja, havn, mikkel og strand giver fast plads på kortet; navn, udseende og replikker bestemmer pakken.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["navn", "map", "x", "y", "look"],
+        "properties": {
+          "navn": { "type": "string" },
+          "map": { "enum": ["skole", "stue"] },
+          "x": { "type": "integer" },
+          "y": { "type": "integer" },
+          "dir": { "enum": ["up", "down", "left", "right"] },
+          "look": { "type": "object", "description": "Som figurernes look i art.js: hair, beard, beardColor, hat, hatColor, cloth, skin, accent" },
+          "tomgang": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "steder": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["felter", "tekst"],
+        "properties": {
+          "felter": { "type": "array", "items": { "type": "string", "pattern": "^[a-z]+:[0-9]+,[0-9]+$" } },
+          "tekst": { "type": "string" }
+        }
+      }
+    },
+    "laaste": { "type": "object", "additionalProperties": { "type": "string" } },
+    "dokumenter": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "kind": { "enum": ["letter", "notice", "pamphlet", "log", "recipe"] },
+          "title": { "type": "string" },
+          "lines": { "type": "array", "items": { "type": "string" } },
+          "html": { "type": "string" },
+          "by": { "type": "string" }
+        }
+      }
+    },
+    "grafer": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["kind", "labels"],
+        "properties": {
+          "kind": { "enum": ["bar", "line"] },
+          "title": { "type": "string" },
+          "labels": { "type": "array", "items": { "type": "string" } },
+          "values": { "type": "array", "items": { "type": "number" } },
+          "max": { "type": "number" }
+        }
+      }
+    },
+    "begreber": {
+      "type": "object",
+      "description": "Fagord, der havner i Dagbogen",
+      "additionalProperties": { "type": "object", "required": ["t", "src"], "properties": { "t": { "type": "string" }, "src": { "type": "string" } } }
+    },
+    "evner": {
+      "type": "object",
+      "additionalProperties": { "type": "object", "required": ["name", "desc"], "properties": { "name": { "type": "string" }, "desc": { "type": "string" } } }
+    },
+    "missioner": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "titel", "beskrivelse", "giver", "maal", "intro", "opgaver", "afslutning"],
+        "properties": {
+          "id": { "type": "string" },
+          "titel": { "type": "string" },
+          "beskrivelse": { "type": "string" },
+          "giver": { "type": "string", "description": "Nøgle i figurer" },
+          "maal": { "type": "string", "description": "Teksten i HUD'en: hvad skal der ske nu?" },
+          "begreber": { "type": "array", "items": { "type": "string" } },
+          "evne": { "type": "string" },
+          "intro": { "$ref": "#/definitions/replikker" },
+          "afslutning": { "$ref": "#/definitions/replikker" },
+          "opgaver": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/opgave" } }
+        }
+      }
+    },
+    "afslutning": {
+      "type": "object",
+      "required": ["titel", "tekst", "hudTitel", "hudMaal", "scene"],
+      "properties": {
+        "titel": { "type": "string" },
+        "tekst": { "type": "string" },
+        "hudTitel": { "type": "string" },
+        "hudMaal": { "type": "string" },
+        "scene": { "$ref": "#/definitions/replikker" }
+      }
+    }
+  },
+  "definitions": {
+    "replikker": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["t"],
+        "properties": {
+          "hvem": { "type": "string", "description": "Nøgle i figurer; udeladt = fortælleren" },
+          "t": { "type": "string", "description": "Må indeholde {navn}" }
+        }
+      }
+    },
+    "opgave": {
+      "type": "object",
+      "required": ["id", "type", "maal", "q"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "enum": ["choice", "multi", "sort", "order", "number", "pick"] },
+        "maal": { "type": "string", "description": "id på et læringsmål" },
+        "q": { "type": "string" },
+        "help": { "type": "string" },
+        "hint": { "type": "string" },
+        "explain": { "type": "string" },
+        "doc": { "description": "id (eller liste af id'er) i dokumenter", "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+        "chart": { "description": "id (eller liste af id'er) i grafer", "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }] },
+        "opts": {
+          "type": "array",
+          "description": "choice/multi: præcis ét ok (choice) eller mindst ét (multi)",
+          "items": { "type": "object", "required": ["t"], "properties": { "t": { "type": "string" }, "ok": { "type": "boolean" }, "why": { "type": "string" } } }
+        },
+        "cats": { "type": "array", "items": { "type": "string" } },
+        "items": { "type": "array", "description": "sort: [{t, c: kategori-nummer}]; order: tekster i den rigtige rækkefølge" },
+        "answer": { "description": "number: tallet. pick: nummer på den rigtige linje i dokumentet (eller liste)", "oneOf": [{ "type": "number" }, { "type": "array", "items": { "type": "integer" } }] },
+        "unit": { "type": "string" },
+        "near": { "type": "array", "items": { "type": "object", "required": ["v", "why"], "properties": { "v": { "type": "number" }, "why": { "type": "string" } } } },
+        "whyLine": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    }
+  }
+}

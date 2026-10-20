@@ -1,0 +1,304 @@
+{
+  "id": "vand",
+  "titel": "Vandets rejse",
+  "undertitel": "Følg en vanddråbe fra søen til skyen og videre ned til vandværket.",
+  "fag": "Natur/teknologi",
+  "klassetrin": 4,
+  "laerer": "Fru Nielsen",
+  "klasse": "4.b",
+  "start": { "map": "skole", "x": 24, "y": 11, "dir": "up", "stedNavn": "Naturskolen" },
+
+  "laeringsmaal": [
+    { "id": "tilstande", "omraade": "Natur/teknologi · Vands tilstande", "tekst": "fortælle, hvornår vand er fast, flydende og luftart", "fm": "Modellering" },
+    { "id": "kredsloeb", "omraade": "Natur/teknologi · Vandets kredsløb", "tekst": "forklare vandets kredsløb med fagord som fordampning og nedbør", "fm": "Kommunikation" },
+    { "id": "data", "omraade": "Natur/teknologi · Aflæs data", "tekst": "aflæse en graf over nedbør og vandstand", "fm": "Undersøgelse" },
+    { "id": "rensning", "omraade": "Natur/teknologi · Rent vand", "tekst": "forklare, hvordan vand bliver renset, og hvordan vi passer på det", "fm": "Perspektivering" }
+  ],
+
+  "intro": [
+    { "t": "En tidlig morgen på Naturskolen. Solen er lige stået op, og der hænger dug over græsset." },
+    { "t": "I går stod der en stor vandpyt på gårdspladsen. I dag er den væk. Hvor blev vandet af?" },
+    { "t": "Gå ind i klasseværelset og tal med <b>Brynja</b>. Følg pilen, eller tryk <span class=\"key\">M</span> for kortet." }
+  ],
+
+  "figurer": {
+    "brynja": {
+      "navn": "Brynja Jernskæg", "map": "stue", "x": 6, "y": 3, "dir": "down",
+      "look": { "hair": "#c8502a", "beard": true, "beardColor": "#c8502a", "hat": "helmet", "hatColor": "#c0a040", "accent": "#ffe070", "cloth": "#3a5aa8", "skin": "#f0b890" },
+      "tomgang": ["Godt gået! Tryk <span class=\"key\">B</span>, hvis du vil se de fagord, du har samlet.", "Vand findes overalt – i søen, i skyerne og i dig. Din krop er over halvdelen vand."]
+    },
+    "havn": {
+      "navn": "Fru Havn, naturvejleder", "map": "skole", "x": 10, "y": 10, "dir": "down",
+      "look": { "hair": "#e8d8a8", "cloth": "#3a7a5a", "skin": "#f0c8a0", "accent": "#9ad0ff" },
+      "tomgang": ["Kig op! Hver sky er en lille fabrik, der laver vanddråber.", "Nogle gange kan man se vanddampen, som stiger op fra søen en kold morgen."]
+    },
+    "mikkel": {
+      "navn": "Mikkel, målemand", "map": "skole", "x": 14, "y": 6, "dir": "left",
+      "look": { "hair": "#6a4a2a", "beard": true, "beardColor": "#6a4a2a", "cloth": "#3a5aa8", "hat": "beret", "hatColor": "#2a3a5a" },
+      "tomgang": ["Jeg måler hver dag. Tal fortæller sandheden – hvis man læser dem rigtigt.", "Regnmåleren er en lille spand med streger. Meget enkel, meget præcis."]
+    },
+    "strand": {
+      "navn": "Hr. Strand, vandværksmester", "map": "skole", "x": 28, "y": 21, "dir": "up",
+      "look": { "hair": "#9a9a9a", "cloth": "#5a5a7a", "hat": "helmet", "hatColor": "#d8a82c", "skin": "#e0a878" },
+      "tomgang": ["Alt vand, der kommer ud af hanen, har været en lang rejse først.", "Vi tager over hundrede prøver om året. Rent vand er ikke en tilfældighed."]
+    }
+  },
+
+  "steder": {
+    "skilt_skole": { "felter": ["skole:21,12"], "tekst": "NATURSKOLEN – 4.b undersøger vand. Tør fødderne. Spørg, hvis du er i tvivl." },
+    "skilt_soe": { "felter": ["skole:14,5"], "tekst": "SKOLESØEN – Dybde ca. 2 meter. Husk: Man må kigge, men ikke vade ud." },
+    "tavle": { "felter": ["skole:16,9"], "tekst": "Målestationens tavle. Mikkel skriver tallene op hver morgen: regn i millimeter og søens vandstand i centimeter." },
+    "brond": { "felter": ["skole:11,17"], "tekst": "En gammel brønd. Vandet nede i brønden er grundvand – regn, der for længst har sivet ned gennem jorden." }
+  },
+  "laaste": {
+    "skole:28,20": "Vandværket. Døren er låst, men hr. Strand står udenfor og vinker."
+  },
+
+  "dokumenter": {
+    "pytten": {
+      "kind": "log", "title": "Dagbog: pytten på gårdspladsen",
+      "lines": [
+        "Kl. 08.00 – Stor vandpyt på gårdspladsen. Solen skinner.",
+        "Kl. 10.00 – Pytten er cirka halvt så stor. Det er varmt.",
+        "Kl. 12.00 – Pytten er væk. Gårdspladsen er tør.",
+        "Kl. 12.00 – Ved søen svæver der en tynd tåge over vandet."
+      ]
+    },
+    "skyer": {
+      "kind": "pamphlet", "title": "Sådan bliver en sky til",
+      "lines": [
+        "1. Solen varmer søen. Vandet fordamper og bliver til vanddamp.",
+        "2. Vanddampen stiger op, for varm luft er lettere end kold luft.",
+        "3. Højt oppe er luften kold. Vanddampen bliver til bittesmå vanddråber. Det kaldes fortætning.",
+        "4. Millioner af dråber samles til en sky.",
+        "5. Når dråberne bliver store og tunge, falder de som regn, sne eller hagl. Det kaldes nedbør."
+      ]
+    },
+    "vandvaerk": {
+      "kind": "notice", "title": "Vandværkets vej fra jord til hane",
+      "lines": [
+        "Pumpe: Vandet pumpes op fra jorden. Det kaldes grundvand.",
+        "Luftning: Vandet sprøjtes ud i luften, så lugt og jern kan slippe ud.",
+        "Sandfilter: Vandet løber langsomt gennem sand, som fanger snavs.",
+        "Kontrol: Vi tager prøver og måler, at vandet er rent.",
+        "Hanen: Det rene drikkevand sendes ud i rørene til byen."
+      ]
+    }
+  },
+
+  "grafer": {
+    "regn": { "kind": "bar", "title": "Regn pr. dag (millimeter)", "labels": ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"], "values": [0, 0, 14, 6, 0, 0, 10], "colors": ["#6fb0e8", "#6fb0e8", "#6fb0e8", "#6fb0e8", "#6fb0e8", "#6fb0e8", "#6fb0e8"], "max": 16 },
+    "stand": { "kind": "line", "title": "Vandstand i skolesøen (centimeter)", "labels": ["Man", "Tir", "Ons", "Tor", "Fre", "Lør", "Søn"], "values": [40, 40, 46, 48, 47, 46, 49], "max": 50, "xlabel": "Dag" }
+  },
+
+  "begreber": {
+    "b_fordampning": { "t": "Fordampning: Når flydende vand bliver varmet og bliver til vanddamp, en luftart vi ikke kan se.", "src": "Mission 1 · Hvor blev vandet af?" },
+    "b_fortaetning": { "t": "Fortætning: Når vanddamp bliver kold og bliver til bittesmå vanddråber – sådan bliver skyer til.", "src": "Mission 2 · Skyernes værksted" },
+    "b_nedboer": { "t": "Nedbør: Vand, der falder fra skyerne som regn, sne eller hagl.", "src": "Mission 2 · Skyernes værksted" },
+    "b_data": { "t": "Måledata: En graf viser tal, så vi kan se mønstre og sammenligne dage. Spørg altid: hvad viser tallene egentlig?", "src": "Mission 3 · Søens tal" },
+    "b_grundvand": { "t": "Grundvand: Regnvand, der er sivet ned i jorden. Det pumper vi op og renser til drikkevand.", "src": "Mission 4 · Rent vand" }
+  },
+  "evner": {
+    "dampoeje": { "name": "Dampøjet", "desc": "Du ved, at vand ikke forsvinder, når det fordamper – det bliver til vanddamp." },
+    "skymager": { "name": "Skymageren", "desc": "Du kan forklare, hvordan en sky bliver til, og hvorfor det regner." },
+    "dataoeje": { "name": "Dataøjet", "desc": "Du kan aflæse tal og grafer og se, hvad de faktisk viser." },
+    "vandvogter": { "name": "Vandvogteren", "desc": "Du ved, hvordan vandet bliver renset, og hvordan du passer på det." }
+  },
+
+  "missioner": [
+    {
+      "id": "m1", "titel": "Hvor blev vandet af?", "beskrivelse": "Find ud af, hvor pytten på gårdspladsen tog hen.",
+      "giver": "brynja", "maal": "Tal med Brynja i klasseværelset",
+      "begreber": ["b_fordampning"], "evne": "dampoeje",
+      "intro": [
+        { "hvem": "brynja", "t": "Nå, dér er du jo, {navn}! Se her – nogen har skrevet dagbog om pytten på gårdspladsen." },
+        { "hvem": "brynja", "t": "Pytten er væk. Men vand forsvinder ikke bare. Læs dagbogen, og find ud af, hvor det blev af." }
+      ],
+      "opgaver": [
+        { "id": "a", "type": "pick", "maal": "kredsloeb", "doc": "pytten", "answer": 2,
+          "q": "Hvornår var pytten helt væk? Klik på linjen, der fortæller det.",
+          "whyLine": { "1": "Her er pytten kun halvt så stor. Er den helt væk?" }, "explain": "Klokken 12 var pytten væk – efter flere timer i solen." },
+        { "id": "b", "type": "choice", "maal": "kredsloeb", "doc": "pytten",
+          "q": "Hvad sker der med vandet i pytten, når solen varmer det?",
+          "opts": [
+            { "t": "Det bliver til vanddamp, som blandes med luften", "ok": true },
+            { "t": "Det forsvinder helt og findes ikke mere", "why": "Stof forsvinder ikke bare. Hvor kan vandet være taget hen?" },
+            { "t": "Det bliver til is", "why": "Det var en varm dag. Bliver vand til is af varme?" },
+            { "t": "Det synker ned i jorden, og solen har ingen betydning", "why": "Lidt vand siver ned, men solen får også vand til at fordampe. Se tågen ved søen." }
+          ],
+          "explain": "Når vand bliver varmet, bliver det til vanddamp. Det kaldes fordampning." },
+        { "id": "c", "type": "sort", "maal": "tilstande",
+          "q": "Vand kan være fast, flydende eller luftart. Sortér.",
+          "help": "Fast: har sin egen form. Flydende: løber. Luftart: fylder hele rummet og kan ikke ses.",
+          "cats": ["Fast", "Flydende", "Luftart"],
+          "items": [
+            { "t": "En isterning", "c": 0 }, { "t": "Sne på marken", "c": 0 }, { "t": "Vand i søen", "c": 1 },
+            { "t": "Regndråber", "c": 1 }, { "t": "Vanddamp i luften (kan ikke ses)", "c": 2 }, { "t": "Haglkorn", "c": 0 }
+          ] }
+      ],
+      "afslutning": [
+        { "hvem": "brynja", "t": "Så pytten er ikke væk – den er blevet til usynlig vanddamp! Godt tænkt, {navn}." },
+        { "hvem": "brynja", "t": "Men hvor tager vanddampen hen? Fru Havn ude ved søen ved alt om skyerne. Du finder hende vest for skolen." }
+      ]
+    },
+    {
+      "id": "m2", "titel": "Skyernes værksted", "beskrivelse": "Lær, hvordan vanddamp bliver til skyer og regn.",
+      "giver": "havn", "maal": "Find Fru Havn ved søen",
+      "begreber": ["b_fortaetning", "b_nedboer"], "evne": "skymager",
+      "intro": [
+        { "hvem": "havn", "t": "Hej {navn}! Brynja har sendt bud. Du vil vide, hvor vanddampen tager hen?" },
+        { "hvem": "havn", "t": "Den stiger op, og højt oppe sker der noget. Læs min lille folder, og lav så en rigtig sky i tankerne." }
+      ],
+      "opgaver": [
+        { "id": "a", "type": "order", "maal": "kredsloeb",
+          "q": "Sæt vandets rejse i den rigtige rækkefølge.",
+          "items": [
+            "Solen varmer søen, og vandet fordamper",
+            "Vanddampen stiger op og bliver kold",
+            "Dampen bliver til dråber og danner en sky",
+            "Dråberne falder som regn",
+            "Regnen løber tilbage til søen"
+          ],
+          "explain": "Det er vandets kredsløb. Det starter forfra hver eneste dag." },
+        { "id": "b", "type": "pick", "maal": "kredsloeb", "doc": "skyer", "answer": 2,
+          "q": "Klik på sætningen, der forklarer, hvad fortætning er.",
+          "whyLine": { "0": "Den handler om fordampning – det modsatte.", "4": "Den handler om nedbør. Hvad kaldes det, når damp bliver til dråber?" },
+          "explain": "Fortætning er, når vanddamp bliver afkølet og bliver til dråber." },
+        { "id": "c", "type": "multi", "maal": "kredsloeb", "doc": "skyer",
+          "q": "Hvad skal der til, før en sky kan blive til? Vælg alle, der passer.",
+          "opts": [
+            { "t": "Varme fra solen, så vandet kan fordampe", "ok": true },
+            { "t": "Vanddamp i luften", "ok": true },
+            { "t": "Kold luft højt oppe", "ok": true },
+            { "t": "Lyn og torden", "why": "Lyn og torden kommer først, når skyen er blevet meget stor." },
+            { "t": "Is på søen", "why": "Skyer kan sagtens blive til over åbent vand." }
+          ] },
+        { "id": "d", "type": "choice", "maal": "kredsloeb",
+          "q": "Hvad hedder det, når vanddråber falder ned fra skyerne?",
+          "opts": [
+            { "t": "Nedbør", "ok": true },
+            { "t": "Fordampning", "why": "Fordampning er, når vand bliver til damp og stiger op." },
+            { "t": "Fortætning", "why": "Fortætning er, når damp bliver til dråber – før de falder." },
+            { "t": "Afkøling", "why": "Det er en del af det, der sker, men ordet for dråberne, der falder, er et andet." }
+          ],
+          "explain": "Regn, sne og hagl kaldes samlet nedbør." }
+      ],
+      "afslutning": [
+        { "hvem": "havn", "t": "Flot! Nu ved du, hvorfor vi altid har vand: Det går i ring, igen og igen." },
+        { "hvem": "havn", "t": "Hvis du vil se, hvordan man måler det, så gå hen til Mikkel. Han står i den anden side af søen, ved tavlen." }
+      ]
+    },
+    {
+      "id": "m3", "titel": "Søens tal", "beskrivelse": "Læs Mikkels målinger af regn og vandstand.",
+      "giver": "mikkel", "maal": "Tal med Mikkel ved søen",
+      "begreber": ["b_data"], "evne": "dataoeje",
+      "intro": [
+        { "hvem": "mikkel", "t": "Velkommen, {navn}! Jeg måler regn og vandstand hver eneste dag. I har fået mine tal for sidste uge." },
+        { "hvem": "mikkel", "t": "Grafer er smarte, men man skal læse dem rigtigt. Prøv selv." }
+      ],
+      "opgaver": [
+        { "id": "a", "type": "choice", "maal": "data", "chart": "regn",
+          "q": "Hvilken dag regnede det mest?",
+          "opts": [
+            { "t": "Onsdag", "ok": true },
+            { "t": "Torsdag", "why": "Torsdag regnede det 6 mm. Er der en dag med mere?" },
+            { "t": "Søndag", "why": "Søndag regnede det 10 mm. Er der en dag med endnu mere?" },
+            { "t": "Fredag", "why": "Fredag regnede det slet ikke." }
+          ] },
+        { "id": "b", "type": "number", "maal": "data", "chart": "regn",
+          "q": "Hvor mange millimeter regnede det i alt i løbet af ugen?", "unit": "mm", "answer": 30,
+          "near": [{ "v": 20, "why": "Så har du glemt en dag med regn. Tjek søndag." }, { "v": 14, "why": "Det var kun onsdag. Læg alle dage med regn sammen." }],
+          "hint": "Læg tallene fra alle de dage, hvor søjlen er over nul, sammen.", "explain": "14 + 6 + 10 = 30 mm." },
+        { "id": "c", "type": "choice", "maal": "data", "chart": ["regn", "stand"],
+          "q": "Hvad skete der med vandstanden i søen, da det regnede onsdag?",
+          "opts": [
+            { "t": "Den steg fra 40 til 46 centimeter", "ok": true },
+            { "t": "Den faldt", "why": "Kig på linjen fra tirsdag til onsdag. Går den op eller ned?" },
+            { "t": "Den ændrede sig ikke", "why": "Tirsdag var der 40 cm. Hvad var der onsdag?" }
+          ] },
+        { "id": "d", "type": "choice", "maal": "data", "chart": ["regn", "stand"],
+          "q": "Fredag og lørdag regnede det slet ikke, men vandstanden faldt alligevel lidt (48 → 47 → 46). Hvad kan forklare det?",
+          "opts": [
+            { "t": "Noget af vandet fordampede", "ok": true },
+            { "t": "Skyerne tog vandet tilbage", "why": "Skyerne tager ikke vand fra søen direkte – men noget andet gør, i det små." },
+            { "t": "Termometeret var i stykker", "why": "Der var ikke noget i dataene, der tyder på en fejl. Find en forklaring i kredsløbet." }
+          ],
+          "explain": "Fordampning. Søen mister lidt vand hver dag, når solen og vinden tager fat." },
+        { "id": "e", "type": "multi", "maal": "data", "chart": ["regn", "stand"],
+          "q": "Hvilke konklusioner kan vi trække ud fra tallene? Vælg alle, der passer.",
+          "opts": [
+            { "t": "Når det regner meget, stiger vandstanden i søen", "ok": true },
+            { "t": "Søen mister vand, også når det ikke regner", "ok": true },
+            { "t": "Det regner mest om fredagen", "why": "Fredag er der ingen søjle. Det regnede slet ikke." },
+            { "t": "Det regner hver dag", "why": "Mandag, tirsdag, fredag og lørdag var der ingen regn." }
+          ] }
+      ],
+      "afslutning": [
+        { "hvem": "mikkel", "t": "Præcis! Tal fortæller kun noget, hvis man læser dem langsomt og spørger sig selv: hvad viser de?" },
+        { "hvem": "mikkel", "t": "Nu må du hellere se, hvad der sker med regnvandet, der ikke ender i søen. Hr. Strand på vandværket venter på dig – syd for skolen." }
+      ]
+    },
+    {
+      "id": "m4", "titel": "Rent vand", "beskrivelse": "Følg vandet gennem vandværket, og lær at passe på det.",
+      "giver": "strand", "maal": "Besøg Hr. Strand ved vandværket",
+      "begreber": ["b_grundvand"], "evne": "vandvogter",
+      "intro": [
+        { "hvem": "strand", "t": "Goddag, {navn}! En del af regnen siver ned i jorden og bliver til grundvand. Det pumper vi op." },
+        { "hvem": "strand", "t": "Men inden det kommer ud af din hane, skal det renses. Her er vores plan." }
+      ],
+      "opgaver": [
+        { "id": "a", "type": "order", "maal": "rensning", "doc": "vandvaerk",
+          "q": "Sæt vandværkets trin i rækkefølge, fra jord til hane.",
+          "items": [
+            "Vandet pumpes op fra jorden",
+            "Vandet sprøjtes ud i luften (luftning)",
+            "Vandet løber gennem et sandfilter",
+            "Vi tager prøver og kontrollerer vandet",
+            "Drikkevandet sendes ud i rørene"
+          ] },
+        { "id": "b", "type": "choice", "maal": "rensning", "doc": "vandvaerk",
+          "q": "Hvad gør sandfilteret?",
+          "opts": [
+            { "t": "Det fanger snavs, mens vandet løber igennem", "ok": true },
+            { "t": "Det gør vandet varmt", "why": "Vandet er koldt hele vejen. Hvad kan sand egentlig gøre?" },
+            { "t": "Det putter salt i vandet", "why": "Drikkevand skal ikke være salt." }
+          ] },
+        { "id": "c", "type": "sort", "maal": "rensning",
+          "q": "Hvad må skylles ud i afløbet, og hvad skal afleveres på genbrugspladsen?",
+          "help": "Tænk på, hvad der kan forurene vores vand og skade dyrene i naturen.",
+          "cats": ["Må skylles ud i afløbet", "Skal afleveres på genbrugspladsen"],
+          "items": [
+            { "t": "Opvaskevand fra aftensmaden", "c": 0 }, { "t": "Rester af maling", "c": 1 },
+            { "t": "Brugte batterier", "c": 1 }, { "t": "Skyllevand fra tandbørstning", "c": 0 },
+            { "t": "Olie fra bilen", "c": 1 }
+          ] },
+        { "id": "d", "type": "multi", "maal": "rensning",
+          "q": "Hvordan passer vi på vores vand? Vælg alle gode idéer.",
+          "opts": [
+            { "t": "Lukke for hanen, mens vi børster tænder", "ok": true },
+            { "t": "Aflevere malingrester og olie, så de ikke havner i naturen", "ok": true },
+            { "t": "Hælde rester af maling ud i åen", "why": "Maling forurener åen og skader fisk og planter." },
+            { "t": "Smide skrald i søen", "why": "Skrald forurener, og dyrene kan komme til skade." }
+          ] },
+        { "id": "e", "type": "number", "maal": "rensning",
+          "q": "En dansker bruger cirka 100 liter vand om dagen. Hvor mange liter bruger en familie på 4 personer på ét døgn?", "unit": "liter", "answer": 400,
+          "near": [{ "v": 100, "why": "Det er kun ét menneske. Hvor mange er der i familien?" }],
+          "explain": "4 · 100 = 400 liter. Det er næsten to fulde badekar." }
+      ],
+      "afslutning": [
+        { "hvem": "strand", "t": "Nu kender du hele rejsen. Fra søen til skyen, ned som regn, ned i jorden – og op i din hane." }
+      ]
+    }
+  ],
+
+  "afslutning": {
+    "titel": "Vandets rejse er forstået!",
+    "tekst": "Du har fulgt en dråbe fra søen til skyen, ned som regn og videre gennem vandværket. Her er, hvad du har vist, at du kan:",
+    "hudTitel": "Naturskolen venter",
+    "hudMaal": "Du har klaret hele forløbet – gå rundt og tal med de andre",
+    "scene": [
+      { "hvem": "brynja", "t": "Se, hvad du har lært, {navn}. Fra en lille vandpyt til hele kredsløbet – og du kunne selv forklare det." },
+      { "hvem": "brynja", "t": "Tag det med hjem: Næste gang det regner, ved du, hvor dråberne har været." }
+    ]
+  }
+}

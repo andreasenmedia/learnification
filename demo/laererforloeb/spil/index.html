@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Lærerens forløb — demo</title>
+<meta name="description" content="Demo: et spilforløb lavet ud fra lærerens materiale.">
+<meta name="theme-color" content="#140f1c">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/runeborg.css?v=3">
+<link rel="stylesheet" href="runeborg.css?v=1">
+<link rel="stylesheet" href="/spil/faelles/figur.css?v=1">
+<link rel="stylesheet" href="/spil/faelles/vinduer.css?v=31">
+</head>
+<body>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="screen" width="320" height="180" aria-label="Spilverdenen"></canvas>
+
+    <!-- HUD: kvest øverst til venstre, ting øverst til højre -->
+    <div id="hud" hidden>
+      <button id="minikort" type="button" title="Åbn kortet (M)" aria-label="Åbn kortet"><canvas width="104" height="104" aria-hidden="true"></canvas></button>
+      <div id="hud-quest"><span class="hud-label">Mission</span><span id="hud-quest-title"></span><span id="hud-quest-goal"></span></div>
+      <div id="hud-right">
+        <span class="hud-chip" title="Missioner klaret"><i class="ico ico-rune"></i><b id="hud-runes">0/4</b></span>
+        <button class="hud-btn" id="btn-map" type="button" title="Kortet (M)">Kort</button>
+        <button class="hud-btn" id="btn-book" type="button" title="Dagbogen (B)">Bog</button>
+        <button class="hud-btn" id="btn-full" type="button" title="Fuld skærm (F)" aria-label="Fuld skærm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg></button>
+        <button class="hud-btn" id="btn-menu" type="button" title="Menu (Esc)">Menu</button>
+      </div>
+    </div>
+
+    <div id="prompt" hidden></div>
+    <div id="toasts" aria-live="polite"></div>
+    <div id="fade"></div>
+
+    <!-- Alle vinduer (dialog, opgaver, bog, menu) lægger sig her -->
+    <div id="layer"></div>
+
+    <!-- Berøringsknapper — vises først, når nogen rører skærmen, og gemmer
+         sig igen efter 5 sekunder uden berøring -->
+    <div id="touch" hidden>
+      <div id="stick-zone" aria-hidden="true">
+        <div id="stick-base"><div id="stick-knob"></div></div>
+      </div>
+      <div id="tbtns">
+        <button id="t-act" type="button">E</button>
+        <button id="t-map" type="button">Kort</button>
+        <button id="t-book" type="button">Bog</button>
+      </div>
+    </div>
+    <div id="vkbd" hidden aria-hidden="true"></div>
+  </div>
+</div>
+
+<noscript><p style="color:#fff;padding:24px;font-family:sans-serif">Demoen kræver JavaScript.</p></noscript>
+
+<script src="js/fuld.js"></script>
+<script src="/spil/faelles/figur.js?v=2"></script>
+<script src="/spil/faelles/kort.js?v=3"></script>
+<script src="/spil/faelles/guide.js?v=1"></script>
+<script src="js/art.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/world.js"></script>
+<script src="js/voice.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/content.js"></script>
+<script src="js/gem.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

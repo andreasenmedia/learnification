@@ -1,0 +1,170 @@
+{
+  "id": "vikinger",
+  "titel": "Vikingernes verden",
+  "undertitel": "Fra langskib til runesten – et eventyr om vikingetiden.",
+  "fag": "Historie",
+  "klassetrin": 5,
+  "laerer": "Hr. Winther",
+  "klasse": "5.a",
+  "start": { "map": "skole", "x": 24, "y": 11, "dir": "up", "stedNavn": "Vikingelandsbyen" },
+
+  "laeringsmaal": [
+    { "id": "tid", "omraade": "Historie · Kronologi", "tekst": "placere vikingetiden i tid og kende ting fra dengang", "fm": "Kronologi og sammenhæng" },
+    { "id": "skib", "omraade": "Historie · Vikingernes liv", "tekst": "fortælle, hvorfor langskibet var vigtigt for vikingerne", "fm": "Kronologi og sammenhæng" },
+    { "id": "kilder", "omraade": "Historie · Kilder", "tekst": "vurdere, hvem der har skrevet en kilde, og hvorfor det betyder noget", "fm": "Kildearbejde" },
+    { "id": "handel", "omraade": "Historie · Handel", "tekst": "regne med byttehandel og sølv, som vikingerne gjorde", "fm": "Kronologi og sammenhæng" }
+  ],
+
+  "intro": [
+    { "t": "Tidlig morgen i vikingelandsbyen. Røgen stiger op fra langhusene, og der lugter af tjære og brændende ved." },
+    { "t": "Skjald Brynja har fundet en gammel kiste. Gå ind i langhuset og tal med hende. Følg pilen, eller tryk <span class=\"key\">M</span> for kortet." }
+  ],
+
+  "figurer": {
+    "brynja": {
+      "navn": "Skjald Brynja", "map": "stue", "x": 6, "y": 3, "dir": "down",
+      "look": { "hair": "#c8502a", "beard": true, "beardColor": "#c8502a", "hat": "helmet", "hatColor": "#c0a040", "accent": "#ffe070", "cloth": "#3a5aa8", "skin": "#f0b890" },
+      "tomgang": ["Skjalde fortalte historier om helte. Nogle af dem var sande – andre var for gode til at være sande."]
+    },
+    "havn": {
+      "navn": "Ragna, runemester", "map": "skole", "x": 10, "y": 10, "dir": "down",
+      "look": { "hair": "#e8d8a8", "cloth": "#8a3a5a", "skin": "#f0c8a0", "accent": "#ffe070" },
+      "tomgang": ["Runer blev ridset i sten, træ og knogle. Det er vores allerældste skrift her i Norden."]
+    },
+    "mikkel": {
+      "navn": "Torvald, skibsbygger", "map": "skole", "x": 14, "y": 6, "dir": "left",
+      "look": { "hair": "#6a4a2a", "beard": true, "beardColor": "#6a4a2a", "cloth": "#5a7a3a", "hat": "beret", "hatColor": "#8a6a3a" },
+      "tomgang": ["Et godt skib bygges af eg, og man skal kunne høre på træet, om det er godt."]
+    },
+    "strand": {
+      "navn": "Knud, købmand", "map": "skole", "x": 28, "y": 21, "dir": "up",
+      "look": { "hair": "#8a5a3a", "cloth": "#c8a030", "hat": "beret", "hatColor": "#3a3a8a", "skin": "#e0a878" },
+      "tomgang": ["Sølv vejes, ikke tælles. Og man bider i det for at tjekke, om det er ægte."]
+    }
+  },
+
+  "steder": {
+    "skilt_skole": { "felter": ["skole:21,12"], "tekst": "LANGHUSET – Her bor Brynja. Gæster er velkomne, våben stilles udenfor." },
+    "skilt_soe": { "felter": ["skole:14,5"], "tekst": "HAVNEN – Her ligger langskibet. Rør ikke ved årerne." },
+    "tavle": { "felter": ["skole:16,9"], "tekst": "Tinget, hvor fri mænd og kvinder mødtes for at afgøre sager. Her blev loven sagt højt." },
+    "brond": { "felter": ["skole:11,17"], "tekst": "Landsbyens brønd. Her hentede man vand til både mennesker og dyr." }
+  },
+  "laaste": { "skole:28,20": "Købmandens lager. Døren er bomstærk, men Knud står udenfor og venter på kunder." },
+
+  "dokumenter": {
+    "tid": {
+      "kind": "log", "title": "Tavle i langhuset: Vikingetiden",
+      "lines": [
+        "Vikingetiden varede fra cirka år 800 til år 1050.",
+        "Vikingerne boede i Danmark, Norge og Sverige.",
+        "De sejlede til England, Frankrig, Island og helt til Amerika.",
+        "Efter vikingetiden kom middelalderen."
+      ]
+    },
+    "kilde": {
+      "kind": "letter", "title": "To kilder om vikingerne",
+      "lines": [
+        "Munkens krønike (England, år 793): «Hedninge fra nord kom som vilde ulve og brændte vores kloster.»",
+        "Runesten i Jelling (Danmark, ca. år 965): «Kong Harald lod denne sten rejse efter sin far Gorm og sin mor Thyra.»"
+      ]
+    }
+  },
+  "grafer": {},
+
+  "begreber": {
+    "b_tid": { "t": "Vikingetiden: cirka år 800 til 1050. Derefter kom middelalderen.", "src": "Mission 1 · Hvem var vikingerne?" },
+    "b_langskib": { "t": "Langskib: et smalt, let skib med sejl og årer, som kunne sejle både på hav og floder.", "src": "Mission 2 · Skibet og rejsen" },
+    "b_kilde": { "t": "Kilde: noget, der fortæller om fortiden. Spørg altid: hvem har skrevet det, og hvorfor?", "src": "Mission 3 · Kilderne taler" },
+    "b_handel": { "t": "Byttehandel: man bytter varer uden penge. Vikingerne brugte også sølv, som blev vejet.", "src": "Mission 4 · Fra hav til marked" }
+  },
+  "evner": {
+    "tidsrejsende": { "name": "Tidsrejsende", "desc": "Du kan placere vikingetiden og kende ting fra dengang." },
+    "skibsbygger": { "name": "Skibsbyggeren", "desc": "Du ved, hvorfor langskibet var vigtigt." },
+    "kildejaeger": { "name": "Kildejægeren", "desc": "Du spørger: hvem har skrevet det, og hvorfor?" },
+    "koebmand": { "name": "Købmandsøjet", "desc": "Du kan regne med bytte og sølv." }
+  },
+
+  "missioner": [
+    {
+      "id": "m1", "titel": "Hvem var vikingerne?", "beskrivelse": "Læs tavlen i langhuset, og find ud af, hvornår vikingetiden var.",
+      "giver": "brynja", "maal": "Tal med Skjald Brynja i langhuset",
+      "begreber": ["b_tid"], "evne": "tidsrejsende",
+      "intro": [
+        { "hvem": "brynja", "t": "Velkommen, {navn}! Kisten her er fuld af gamle ting. Men først skal vi vide, hvornår vikingerne levede." }
+      ],
+      "opgaver": [
+        { "id": "a", "type": "pick", "maal": "tid", "doc": "tid", "answer": 0, "q": "Klik på sætningen, der fortæller, hvornår vikingetiden var.", "explain": "Vikingetiden var fra cirka år 800 til år 1050." },
+        { "id": "b", "type": "sort", "maal": "tid", "q": "Hvad hører til vikingetiden, og hvad hører til nutiden?",
+          "cats": ["Vikingetid", "Nutid"],
+          "items": [{ "t": "Langskib", "c": 0 }, { "t": "Runesten", "c": 0 }, { "t": "Mobiltelefon", "c": 1 }, { "t": "Sværd og skjold", "c": 0 }, { "t": "Elektrisk lys", "c": 1 }] },
+        { "id": "c", "type": "choice", "maal": "tid", "doc": "tid", "q": "Hvad kom efter vikingetiden?",
+          "opts": [{ "t": "Middelalderen", "ok": true }, { "t": "Stenalderen", "why": "Stenalderen var mange tusind år før vikingetiden." }, { "t": "Nutiden", "why": "Der gik mange hundrede år, før vi nåede til nutiden." }] }
+      ],
+      "afslutning": [
+        { "hvem": "brynja", "t": "Godt! Så ved du, hvor i tiden vi er." },
+        { "hvem": "brynja", "t": "Gå ned til Torvald ved havnen. Han bygger skibe – og har brug for et par tal." }
+      ]
+    },
+    {
+      "id": "m2", "titel": "Skibet og rejsen", "beskrivelse": "Hjælp Torvald med at forstå, hvorfor langskibet var så godt.",
+      "giver": "mikkel", "maal": "Tal med Torvald ved havnen",
+      "begreber": ["b_langskib"], "evne": "skibsbygger",
+      "intro": [{ "hvem": "mikkel", "t": "Se her, {navn}! Mit nyeste langskib: 30 meter langt og let som en fjer. Vil du hjælpe mig med at regne på det?" }],
+      "opgaver": [
+        { "id": "a", "type": "multi", "maal": "skib", "q": "Hvorfor var langskibet så godt til vikingernes rejser? Vælg alle, der passer.",
+          "opts": [
+            { "t": "Det var smalt og let, så det kunne sejle hurtigt", "ok": true },
+            { "t": "Det kunne sejle både på hav og langt op ad floder", "ok": true },
+            { "t": "Det havde en motor", "why": "Der var ingen motorer dengang. Man brugte sejl og årer." },
+            { "t": "Det var bygget af jern", "why": "Langskibe var bygget af træ, mest eg." }
+          ] },
+        { "id": "b", "type": "number", "maal": "skib", "q": "Der sidder 2 mænd ved hver åre-plads på tværs. Der er 40 mænd ved årerne. Hvor mange rækker er der?", "unit": "rækker", "answer": 20, "near": [{ "v": 80, "why": "Så har du ganget. Skal du dele?" }], "explain": "40 : 2 = 20 rækker." },
+        { "id": "c", "type": "order", "maal": "skib", "q": "Sæt vikingernes sejlads i rækkefølge.", "items": ["Skibet bygges af træ", "Mandskabet stiger ombord", "Sejlet sættes, og skibet sejler ud", "De lander på en fjern kyst"] }
+      ],
+      "afslutning": [{ "hvem": "mikkel", "t": "Flot arbejde! Ragna ved søen har gamle ting at vise dig – tal med hende." }]
+    },
+    {
+      "id": "m3", "titel": "Kilderne taler", "beskrivelse": "Sammenlign to kilder om vikingerne.",
+      "giver": "havn", "maal": "Find Ragna ved søen",
+      "begreber": ["b_kilde"], "evne": "kildejaeger",
+      "intro": [{ "hvem": "havn", "t": "Hej {navn}! To kilder, to historier. Den ene er skrevet af en munk, den anden er ridset i en sten." }],
+      "opgaver": [
+        { "id": "a", "type": "choice", "maal": "kilder", "doc": "kilde", "q": "Hvem skrev krøniken, og hvorfor skal vi være forsigtige med den?",
+          "opts": [
+            { "t": "En munk, der selv blev overfaldet, så han var ikke neutral", "ok": true },
+            { "t": "En viking, der var stolt af sin rejse", "why": "Teksten siger «hedninge fra nord» – den er ikke skrevet af en viking." },
+            { "t": "En konge, der ville vinde krigen", "why": "Der er ingen konge nævnt som forfatter." }
+          ] },
+        { "id": "b", "type": "pick", "maal": "kilder", "doc": "kilde", "answer": 1, "q": "Klik på den kilde, der er ridset i sten af vikingerne selv.", "explain": "Runestenen er skrevet af vikingerne selv – det gør den til en vigtig kilde." },
+        { "id": "c", "type": "multi", "maal": "kilder", "doc": "kilde", "q": "Hvad kan vi lære ved at bruge begge kilder? Vælg alle, der passer.",
+          "opts": [
+            { "t": "At vikingerne også angreb klostre, set fra de angrebnes side", "ok": true },
+            { "t": "At vikingerne rejste runesten til deres familie", "ok": true },
+            { "t": "At alle vikinger var ens", "why": "Kilderne fortæller om forskellige mennesker og steder." }
+          ] }
+      ],
+      "afslutning": [{ "hvem": "havn", "t": "Præcis! Aldrig stol blindt på én kilde. Nu skal du lære, hvordan vikingerne handlede – Knud venter ved lageret." }]
+    },
+    {
+      "id": "m4", "titel": "Fra hav til marked", "beskrivelse": "Lær, hvordan vikingerne handlede.",
+      "giver": "strand", "maal": "Besøg Knud ved lageret",
+      "begreber": ["b_handel"], "evne": "koebmand",
+      "intro": [{ "hvem": "strand", "t": "Goddag, {navn}! Hos mig bytter vi skind, jern og sølv. Kan du regne med det?" }],
+      "opgaver": [
+        { "id": "a", "type": "number", "maal": "handel", "q": "5 skind giver 15 stykker sølv. Hvor mange stykker sølv giver 8 skind?", "unit": "stykker sølv", "answer": 24, "near": [{ "v": 40, "why": "Hvor meget sølv giver ét skind? Start der." }], "hint": "Ét skind giver 15 : 5 = 3 stykker sølv.", "explain": "8 · 3 = 24." },
+        { "id": "b", "type": "sort", "maal": "handel", "q": "Hvad bytter man væk, og hvad får man? Sortér efter, hvad vikingerne typisk kom med.",
+          "cats": ["Kom fra Norden", "Kom langvejs fra"],
+          "items": [{ "t": "Pelse og skind", "c": 0 }, { "t": "Jern og tjære", "c": 0 }, { "t": "Krydderier", "c": 1 }, { "t": "Silke", "c": 1 }] }
+      ],
+      "afslutning": [{ "hvem": "strand", "t": "Du har regnet som en rigtig købmand!" }]
+    }
+  ],
+
+  "afslutning": {
+    "titel": "Vikingernes verden er udforsket!",
+    "tekst": "Du har fundet ud af, hvornår vikingerne levede, hvordan de sejlede, og hvordan man bruger kilder. Her er, hvad du kan:",
+    "hudTitel": "Landsbyen venter",
+    "hudMaal": "Du har klaret hele forløbet – gå rundt og tal med de andre",
+    "scene": [{ "hvem": "brynja", "t": "Se, hvad du har lært, {navn}! Kisten er din. Og husk: Spørg altid, hvem der har skrevet kilden." }]
+  }
+}

@@ -177,6 +177,29 @@ Menuen har ingen spil-links, kun den glimtende knap `.glimt` ("Start eventyret h
 **Kun ét spil** (DB-version 14, `konti.kun_spil` = `''`/`runeborg`/`regnehelten`): valgt på `/opret` (børnetrinnet) og under Min konto (`konto.php kun_spil`, kun familiekonti). Gælder børnene, ikke den voksne (`mig` giver `konto.kun_spil`, klienterne bruger den kun når `hvem === 'elev'`). Håndhævelse er i JavaScript som login-kravet: `assets/spilletid.js` sender barnet fra det andet spil til det tilladte (biblioteket sætter `bibliotek: true`), porten i Eventyrbiblioteket er låst, `/spil/` skjuler det andet kort, og `elev.php login` giver `til`. Et barn uden figur sendes stadig først til biblioteket (`game.js`), så figuren kan laves.
 Berøringsknapperne (joystick, E, Bog, Kort) er mindre på telefon i `spil/faelles/vinduer.css` (nederst); spillenes `game.js` læser joystickets størrelse fra `#stick-base`.
 
+## Skjult demo: Lærerens forløb
+
+`/demo/laererforloeb/` er en **skjult demo** (noindex, `Disallow: /demo/`, ikke i sitemap, intet link fra sitet, ingen
+nyhed) til pitch og møder med kommuner og LMS-leverandører. Den viser, hvordan en lærer vil kunne hente materiale fra sit
+LMS, få et spilforløb foreslået af AI, rette og godkende det og give det til en klasse. Intet er koblet til rigtige
+LMS'er eller AI endnu: trin 1 og 2 er spillet, og tallene i trin 5 er eksempler.
+
+- `index.html` er lærerens flow i fem trin (hent materiale, AI læser, ret og godkend, tildel klasse, overblik). Den
+  læser `forloeb/vand.json`. `#trin=N` springer direkte til et trin (bruges til skærmbilleder).
+- `forloeb/*.json` er **forløbspakker**: det, AI'en udfylder ud fra lærerens materiale, og som læreren godkender.
+  De indeholder læringsmål, figurer, tekster, grafer, missioner og opgaver i motorens egne opgavetyper (`choice`,
+  `multi`, `sort`, `order`, `number`, `pick`). `vand.json` (natur/teknologi, 4. kl.) er hovedeksemplet; `vikinger.json`
+  (historie) viser, at samme verden skifter indhold (`spil/?forloeb=vikinger`). Skemaet er `forloeb/forloeb-skema.json`.
+- `spil/` er en kopi af Runeborgs motor (art, audio, voice, ui, game), renset for Runeborg-indhold. `js/content.js`
+  bygger missioner, personer og opgaver ud fra pakken, `js/world.js` har to kort (Naturskolen og klasseværelset), og
+  `js/gem.js` gemmer kun i localStorage (`demo-forloeb-v1-<pakke>`). Intet går til `/api/`, og der er ingen login,
+  spilletid eller statistik. Rettes motoren (ui.js, game.js, art.js), skal rettelsen også laves her, hvis den skal med.
+- Foto-tilstand: `spil/#foto=skole|dialog|opgave|graf|sort|ordn|bog`. `RB.debug.tp/interact/g` virker som i Runeborg.
+- `python tools/demo-billeder.py` tager skærmbillederne til decks (`demo/laererforloeb/billeder/`).
+- Skal det en dag være rigtigt: pakken bliver genereret af et API-kald (lærerens materiale ind, JSON efter skemaet ud),
+  vises til læreren til godkendelse og bliver først da gemt på serveren og knyttet til en klasse som en port i
+  Eventyrbiblioteket. Der skal ikke sendes børnedata til AI.
+
 ## Udseende
 
 Siden har ét stilark, `assets/style.css`, skrevet i hånden. Farverne er

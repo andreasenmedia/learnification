@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lærerens forløb — demo</title>
+<meta name="description" content="Demo: fra lærerens eget materiale til et spilforløb, som klassen kan spille.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#140f1c">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
+<link rel="stylesheet" href="/assets/style.css?v=8">
+<style>
+  .demo-bar { background: var(--gold); color: var(--ink-deep); font-weight: 700; font-size: .92rem; text-align: center; padding: 8px 16px; border-bottom: 3px solid var(--gold-edge); }
+  .top { background: var(--ink-deep); padding: 14px 0; border-bottom: 3px solid var(--edge-2); }
+  .top .wrap { display: flex; align-items: center; gap: 14px; color: var(--txt); font-weight: 700; }
+  .top .brand { display: flex; align-items: center; gap: 10px; color: var(--txt); text-decoration: none; }
+  .top .sp { margin-left: auto; font-weight: 400; color: var(--txt-soft); font-size: .92rem; }
+  .intro { padding: 44px 0 26px; }
+  .intro h1 { margin: 0 0 .3em; }
+
+  .stepper { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0 26px; padding: 0; list-style: none; }
+  .stepper button { font: inherit; font-weight: 700; cursor: pointer; display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: var(--paper-card); color: var(--ink); border: 3px solid var(--ink); box-shadow: 3px 3px 0 rgba(58,38,22,.22); }
+  .stepper button .n { width: 26px; height: 26px; display: grid; place-items: center; background: var(--paper-2); border: 2px solid var(--ink); font-size: .9rem; }
+  .stepper button[aria-current="step"] { background: var(--gold); box-shadow: inset -3px -3px 0 var(--gold-edge), 3px 3px 0 rgba(58,38,22,.22); }
+  .stepper button[aria-current="step"] .n { background: var(--ink-deep); color: var(--gold); }
+  .stepper button.done .n { background: var(--green); color: #fff; border-color: var(--green); }
+  .stepper button:disabled { opacity: .5; cursor: not-allowed; }
+  @media (max-width: 620px) { .stepper button .t { display: none; } .stepper button[aria-current="step"] .t { display: inline; } }
+
+  .panel { display: none; }
+  .panel.on { display: block; }
+  .box { background: var(--paper-card); border: 3px solid var(--ink); box-shadow: var(--shadow); padding: 24px; }
+  .box + .box { margin-top: 18px; }
+  .box h2 { font-size: 1.3rem; margin: 0 0 .3em; }
+  .note { font-size: .92rem; color: var(--ink-soft); }
+  .note.demo { background: var(--gold-soft); border: 2px dashed var(--gold-edge); padding: 10px 14px; margin-top: 16px; }
+  .nav-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; align-items: center; }
+  .nav-row .sp { margin-left: auto; }
+
+  /* 1: kilder */
+  .tiles { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 16px 0 6px; }
+  .tile { font: inherit; text-align: left; cursor: pointer; background: #fff; border: 3px solid var(--ink); padding: 14px; box-shadow: 3px 3px 0 rgba(58,38,22,.22); color: var(--ink); }
+  .tile b { display: block; }
+  .tile small { color: var(--ink-soft); }
+  .tile[aria-pressed="true"] { background: var(--gold); box-shadow: inset -3px -3px 0 var(--gold-edge), 3px 3px 0 rgba(58,38,22,.22); }
+  .tile .lg { width: 34px; height: 34px; margin-bottom: 8px; display: grid; place-items: center; background: var(--ink-deep); color: var(--gold); font-weight: 700; }
+  .files { list-style: none; margin: 14px 0 0; padding: 0; border: 3px solid var(--ink); background: #fff; }
+  .files li { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border-bottom: 2px dashed var(--paper-edge); }
+  .files li:last-child { border-bottom: 0; }
+  .files input { width: 20px; height: 20px; accent-color: var(--gold-dark); }
+  .files .ty { margin-left: auto; font-size: .85rem; color: var(--ink-soft); white-space: nowrap; }
+
+  /* 2: AI læser */
+  .work { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+  .work li { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: #fff; border: 2px solid var(--paper-edge); opacity: .45; }
+  .work li.on { opacity: 1; border-color: var(--ink); }
+  .work li .ic { width: 22px; height: 22px; border: 2px solid var(--ink); display: grid; place-items: center; font-size: .8rem; font-weight: 700; }
+  .work li.ok .ic { background: var(--green); border-color: var(--green); color: #fff; }
+  .found { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: 18px; }
+  .found > div { background: #fff; border: 3px solid var(--ink); padding: 16px; }
+  .found h3 { font-size: 1rem; margin: 0 0 8px; }
+  .found ul { margin: 0; padding-left: 18px; font-size: .95rem; }
+  .found li { margin-bottom: 6px; }
+  .tag { display: inline-block; font-size: .75rem; font-weight: 700; padding: 1px 7px; background: var(--paper-2); border: 2px solid var(--paper-edge); margin-left: 4px; white-space: nowrap; }
+  .tag.fm { background: var(--blue-soft); border-color: var(--blue); color: var(--blue); }
+
+  /* 3: forslag */
+  .mission { background: #fff; border: 3px solid var(--ink); margin-top: 16px; }
+  .mission > header { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; padding: 12px 16px; background: var(--ink-deep); color: var(--txt); }
+  .mission > header .no { width: 30px; height: 30px; display: grid; place-items: center; background: var(--gold); color: var(--ink-deep); font-weight: 700; }
+  .mission > header h3 { margin: 0; color: var(--txt); font-size: 1.05rem; }
+  .mission > header small { color: var(--txt-soft); margin-left: auto; }
+  .opg { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 12px; align-items: start; padding: 12px 16px; border-top: 2px dashed var(--paper-edge); }
+  .opg .ty { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; background: var(--paper-2); border: 2px solid var(--paper-edge); white-space: nowrap; }
+  .opg .q[contenteditable="true"] { outline: 3px solid var(--gold); background: var(--gold-soft); padding: 2px 6px; }
+  .opg .acts { display: flex; gap: 6px; }
+  .opg .acts button { font: inherit; font-size: .85rem; font-weight: 700; padding: 4px 10px; cursor: pointer; background: var(--paper-card); border: 2px solid var(--ink); color: var(--ink); }
+  .opg .acts button:hover { background: var(--gold); }
+  .opg.gone { display: none; }
+  .opg .meta { grid-column: 2 / 4; font-size: .85rem; color: var(--ink-soft); }
+  .cover { display: grid; gap: 8px; margin-top: 12px; }
+  .cover div { display: grid; grid-template-columns: minmax(160px, 1.3fr) 3fr auto; gap: 10px; align-items: center; font-size: .92rem; }
+  .bar { height: 14px; background: var(--paper-2); border: 2px solid var(--ink); }
+  .bar i { display: block; height: 100%; background: var(--gold); box-shadow: inset 0 -3px 0 var(--gold-edge); }
+  .approve label { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+  .approve input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--gold-dark); }
+  .stamp { display: none; margin-top: 14px; padding: 12px 16px; background: var(--green-soft); border: 3px solid var(--green); font-weight: 700; }
+  .stamp.on { display: block; }
+
+  /* 4: tildel */
+  .assign { display: grid; gap: 22px; grid-template-columns: 1fr 1fr; align-items: start; }
+  @media (max-width: 760px) { .assign { grid-template-columns: 1fr; } }
+  .assign label { display: block; font-weight: 700; margin: 12px 0 4px; }
+  .assign select, .assign input[type=date] { font: inherit; padding: 8px 10px; border: 3px solid var(--ink); background: #fff; width: 100%; max-width: 280px; }
+  .port { background: var(--ink-deep); border: 3px solid var(--edge); box-shadow: 0 0 0 3px var(--ink-deep), 6px 6px 0 3px rgba(0,0,0,.4); color: var(--txt); overflow: hidden; }
+  .port img { display: block; width: 100%; image-rendering: pixelated; }
+  .port .gate { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-top: 3px solid var(--edge-2); }
+  .port .gate .door { width: 38px; height: 52px; flex: none; background: linear-gradient(#2a6ab0, #6fb0e8); border: 3px solid var(--gold); box-shadow: 0 0 14px 2px rgba(111,176,232,.7); }
+  .port .gate b { display: block; color: var(--txt); }
+  .port .gate span { color: var(--txt-soft); font-size: .9rem; }
+  .port .gate .new { margin-left: auto; background: var(--gold); color: var(--ink-deep); font-weight: 700; font-size: .78rem; padding: 3px 8px; }
+
+  /* 5: overblik */
+  .stats { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .stat { background: #fff; border: 3px solid var(--ink); padding: 14px; }
+  .stat b { display: block; font-size: 1.8rem; color: var(--gold-dark); line-height: 1.1; }
+  .jegkan { display: grid; gap: 10px; margin-top: 8px; }
+  .jegkan > div { display: grid; grid-template-columns: minmax(180px, 2fr) 3fr 52px; gap: 12px; align-items: center; }
+  .jegkan .bar { height: 18px; }
+  .elever { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .95rem; }
+  .elever th, .elever td { text-align: left; padding: 8px 10px; border-bottom: 2px dashed var(--paper-edge); }
+  .elever .dots { letter-spacing: 3px; color: var(--gold-dark); }
+  .elever .dots .o { color: var(--paper-edge); }
+  .tip { background: var(--blue-soft); border: 3px solid var(--blue); padding: 14px 16px; margin-top: 16px; }
+  .footer-demo { padding: 28px 0 50px; font-size: .92rem; color: var(--ink-soft); }
+  .footer-demo a { color: var(--gold-dark); }
+</style>
+</head>
+<body>
+
+<div class="demo-bar">DEMO – eksempeldata. Forbindelsen til LMS'et og AI'en er simuleret. Siden er skjult og ikke linket fra sitet.</div>
+<div class="top">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Learnification">
+      <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true" shape-rendering="crispEdges"><rect x="2" y="2" width="28" height="28" fill="#ffcc4d"/><rect x="2" y="26" width="28" height="4" fill="#b8862a"/><rect x="9" y="8" width="4" height="14" fill="#140f1c"/><rect x="9" y="18" width="12" height="4" fill="#140f1c"/></svg>
+      <span>Learnification</span>
+    </a>
+    <span class="sp">Lærerens forløb · Fru Nielsen, 4.b</span>
+  </div>
+</div>
+
+<main>
+<header class="intro">
+  <div class="wrap">
+    <p class="eyebrow">Demo · Natur/teknologi</p>
+    <h1>Fra dit materiale til et spil, klassen kan spille.</h1>
+    <p class="lead" style="max-width:720px">Du vælger det materiale, du allerede bruger. Vi laver et forslag til et spilforløb i samme verden som de andre spil. Du retter og godkender, og først <b>derefter</b> kan eleverne se det.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <ol class="stepper" id="stepper" aria-label="Trin">
+    <li><button type="button" data-s="1"><span class="n">1</span><span class="t">Hent materiale</span></button></li>
+    <li><button type="button" data-s="2"><span class="n">2</span><span class="t">AI læser</span></button></li>
+    <li><button type="button" data-s="3"><span class="n">3</span><span class="t">Ret og godkend</span></button></li>
+    <li><button type="button" data-s="4"><span class="n">4</span><span class="t">Tildel klasse</span></button></li>
+    <li><button type="button" data-s="5"><span class="n">5</span><span class="t">Overblik</span></button></li>
+  </ol>
+
+  <!-- 1 ------------------------------------------------------------------ -->
+  <section class="panel on" id="p1" style="padding:0">
+    <div class="box">
+      <h2>1 · Hvor ligger dit materiale?</h2>
+      <p class="note">Vælg dit læringssystem – eller læg en fil op. Du ser kun dit eget materiale, og vi henter aldrig noget om eleverne.</p>
+      <div class="tiles" id="tiles" role="group" aria-label="Kilde"></div>
+      <ul class="files" id="files"></ul>
+      <p class="note demo">I en rigtig løsning logger du ind med dit eget login (fx Google, Microsoft eller UniLogin), og vi læser kun de filer, du vælger. Her er forbindelsen spillet, så du kan se, hvordan det ville føles.</p>
+      <div class="nav-row"><button class="btn btn-primary" id="to2" type="button">Brug <span id="nfiles">3</span> filer →</button></div>
+    </div>
+  </section>
+
+  <!-- 2 ------------------------------------------------------------------ -->
+  <section class="panel" id="p2" style="padding:0">
+    <div class="box">
+      <h2>2 · AI læser dit materiale</h2>
+      <p class="note">AI'en finder læringsmål, fagord, tekster og tal – og skriver dem om til opgaver i spillets faste opgavetyper.</p>
+      <ul class="work" id="work"></ul>
+      <div id="found" hidden></div>
+      <div class="nav-row"><button class="btn" data-go="1" type="button">← Tilbage</button><button class="btn btn-primary" id="to3" type="button" disabled>Se forslaget →</button></div>
+    </div>
+  </section>
+
+  <!-- 3 ------------------------------------------------------------------ -->
+  <section class="panel" id="p3" style="padding:0">
+    <div class="box">
+      <h2>3 · Forslag til forløb: <span id="ftitel"></span></h2>
+      <p class="note">Intet kommer til eleverne, før du har godkendt det. Ret en tekst, slet en opgave, eller tryk <b>Ret</b> og skriv det, som du ville sige det i klassen.</p>
+      <div class="cover" id="cover"></div>
+    </div>
+    <div id="missions"></div>
+    <div class="box approve">
+      <h2>Godkend</h2>
+      <label><input type="checkbox" class="ck"> Jeg har læst opgaverne, og de er faglig korrekte.</label>
+      <label><input type="checkbox" class="ck"> Sproget og sværhedsgraden passer til 4.b.</label>
+      <label><input type="checkbox" class="ck"> Eleverne må spille forløbet.</label>
+      <div class="nav-row"><button class="btn" data-go="2" type="button">← Tilbage</button><button class="btn btn-primary" id="approve" type="button" disabled>Godkend forløbet</button></div>
+      <div class="stamp" id="stamp">✓ Godkendt af Fru Nielsen. Nu kan du give det til en klasse.</div>
+      <div class="nav-row" id="to4row" hidden><button class="btn btn-primary" data-go="4" type="button">Tildel klasse →</button></div>
+    </div>
+  </section>
+
+  <!-- 4 ------------------------------------------------------------------ -->
+  <section class="panel" id="p4" style="padding:0">
+    <div class="box">
+      <h2>4 · Giv forløbet til en klasse</h2>
+      <div class="assign">
+        <div>
+          <label for="kl">Klasse</label>
+          <select id="kl"><option>4.b (23 elever)</option><option>4.a (21 elever)</option><option>5.a (24 elever)</option></select>
+          <label for="dato">Åbner</label>
+          <input type="date" id="dato" value="2026-11-03">
+          <label for="tid">Anbefalet tid</label>
+          <select id="tid"><option>Ét modul på 45 min (som lektion)</option><option>To moduler (45 + 45 min)</option><option>Som hjemmeopgave</option></select>
+          <p class="note" style="margin-top:14px">Børnene logger ind som i dag, og forløbet ligger som en ny port i Eventyrbiblioteket, ved siden af Runeborg og Regnehelten.</p>
+        </div>
+        <div class="port" aria-label="Sådan ser det ud for eleven">
+          <img src="/assets/billeder/biblioteket-hal.png" alt="Eventyrbiblioteket med porte til spillene">
+          <div class="gate"><span class="door" aria-hidden="true"></span><div><b id="gtitel">Vandets rejse</b><span>Natur/teknologi · 4. klasse · ca. 35 min</span></div><span class="new">NY</span></div>
+        </div>
+      </div>
+      <div class="nav-row"><button class="btn" data-go="3" type="button">← Tilbage</button>
+        <a class="btn" href="spil/" target="_blank" rel="noopener">▶ Prøv som elev</a>
+        <button class="btn btn-primary sp" id="assign" type="button">Giv til klassen →</button></div>
+    </div>
+  </section>
+
+  <!-- 5 ------------------------------------------------------------------ -->
+  <section class="panel" id="p5" style="padding:0">
+    <div class="box">
+      <h2>5 · Hvordan gik det? <small class="note">(eksempeltal for 4.b efter to lektioner)</small></h2>
+      <div class="stats">
+        <div class="stat"><b>21 af 23</b>har spillet</div>
+        <div class="stat"><b>31 min</b>gennemsnit</div>
+        <div class="stat"><b>76 %</b>rigtigt i første forsøg</div>
+        <div class="stat"><b>14</b>nåede hele forløbet</div>
+      </div>
+      <h3 style="margin-top:22px">Jeg kan … <span class="note">(klassen samlet, ikke karakterer)</span></h3>
+      <div class="jegkan" id="jegkan"></div>
+      <div class="tip"><b>Her sidder klassen fast:</b> opgaven om vandstanden fredag og lørdag (fordampning i data). 9 af 21 svarede forkert første gang. <b>Forslag:</b> tag 10 minutter i morgen og lad dem fordampe en vandpyt på tavlen med en tusch.</div>
+      <h3 style="margin-top:22px">Eleverne <span class="note">(kun dig som lærer kan se navnene)</span></h3>
+      <table class="elever" id="elever"><thead><tr><th>Elev</th><th>Missioner</th><th>Trængte til hjælp</th></tr></thead><tbody></tbody></table>
+      <div class="nav-row"><button class="btn" data-go="4" type="button">← Tilbage</button><button class="btn" data-go="1" type="button">Start forfra</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="wrap footer-demo">
+  Under motorhjelmen er forløbet en lille fil: <a href="forloeb/vand.json" target="_blank" rel="noopener">forløbspakken (JSON)</a>. Spillet læser den, og det er den, AI'en udfylder og du godkender.
+  Samme verden med andet materiale: <a href="spil/?forloeb=vikinger" target="_blank" rel="noopener">vikinger, 4.–5. klasse</a>.
+</div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); }, $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+  var pak = null, now = 1, reached = 1, approved = false, still = /trin=/.test(location.hash);
+  var TYPER = { choice: 'Vælg svar', multi: 'Vælg flere', sort: 'Sortér', order: 'Rækkefølge', number: 'Tal', pick: 'Find i tekst' };
+
+  var KILDER = [
+    { id: 'meebook', n: 'Meebook', s: 'Forløb og årsplaner', l: 'M', filer: [
+      ['Forløbsplan: Vandets kredsløb (4.b)', 'Meebook-forløb', 1], ['Kapitel 3: Vand i naturen', 'PDF · 8 sider', 1], ['Måledata fra skolesøen', 'Regneark · 7 dage', 1], ['Elevopgave: Pytten på gårdspladsen', 'Word', 0], ['Årsplan 4. klasse', 'Meebook', 0]] },
+    { id: 'aula', n: 'Aula / MinUddannelse', s: 'Opgaver og dokumenter', l: 'A', filer: [
+      ['Ugeplan uge 44 – natur/teknologi', 'Aula-opslag', 0], ['Vandets kredsløb – elevark', 'PDF · 3 sider', 1], ['Måledata fra skolesøen', 'Regneark', 1], ['Fagord om vand', 'Word', 1]] },
+    { id: 'google', n: 'Google Classroom', s: 'Klasserum og Drev', l: 'G', filer: [
+      ['Vandets kredsløb – slides', 'Google Slides', 1], ['Skolesøen – målinger', 'Google Ark', 1], ['Rensning af drikkevand', 'Google Docs', 1], ['Bytur til vandværket', 'Google Docs', 0]] },
+    { id: 'teams', n: 'Microsoft Teams', s: 'Klasseteam og OneDrive', l: 'T', filer: [
+      ['Vand og kredsløb.pptx', 'PowerPoint', 1], ['Målinger.xlsx', 'Excel', 1], ['Fagord.docx', 'Word', 1]] },
+    { id: 'upload', n: 'Læg en fil op', s: 'PDF, Word, tekst eller link', l: '+', filer: [
+      ['vandets-kredsloeb.pdf', 'PDF · 8 sider', 1], ['maalinger.xlsx', 'Excel', 1], ['Indsat tekst fra lærervejledning', 'Tekst', 1]] }
+  ];
+
+  // --------------------------------------------------------------- trin
+  function go(n) {
+    now = n; reached = Math.max(reached, n);
+    $$('.panel').forEach(function (p) { p.classList.toggle('on', p.id === 'p' + n); });
+    $$('#stepper button').forEach(function (b) {
+      var s = +b.dataset.s; b.setAttribute('aria-current', s === n ? 'step' : 'false');
+      b.classList.toggle('done', s < n); b.disabled = s > reached;
+    });
+    if (n === 2) laes();
+    if (n === 5) overblik();
+    if (!still) window.scrollTo({ top: $('#stepper').offsetTop - 12, behavior: 'smooth' });
+  }
+  $$('#stepper button').forEach(function (b) { b.addEventListener('click', function () { go(+b.dataset.s); }); });
+  document.addEventListener('click', function (e) { var g = e.target.closest('[data-go]'); if (g) go(+g.dataset.go); });
+
+  // --------------------------------------------------------------- 1
+  var kilde = KILDER[0];
+  function tegnKilder() {
+    var t = $('#tiles'); t.innerHTML = '';
+    KILDER.forEach(function (k) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'tile'; b.setAttribute('aria-pressed', k === kilde);
+      b.innerHTML = '<span class="lg">' + k.l + '</span><b>' + k.n + '</b><small>' + k.s + '</small>';
+      b.addEventListener('click', function () { kilde = k; tegnKilder(); });
+      t.appendChild(b);
+    });
+    var f = $('#files'); f.innerHTML = '';
+    kilde.filer.forEach(function (x) {
+      var li = document.createElement('li');
+      li.innerHTML = '<input type="checkbox" ' + (x[2] ? 'checked' : '') + ' aria-label="' + x[0] + '"><span>' + x[0] + '</span><span class="ty">' + x[1] + '</span>';
+      li.querySelector('input').addEventListener('change', tael);
+      f.appendChild(li);
+    });
+    tael();
+  }
+  function tael() { var n = $$('#files input:checked').length; $('#nfiles').textContent = n; $('#to2').disabled = !n; }
+  $('#to2').addEventListener('click', function () { go(2); });
+
+  // --------------------------------------------------------------- 2
+  var laest = false;
+  function laes() {
+    if (laest) return; laest = true;
+    var trin = ['Åbner de valgte filer', 'Finder læringsmål og fagord', 'Henter tal og grafer fra regnearket', 'Skriver opgaver i spillets opgavetyper', 'Tjekker, at alle opgaver har ét rigtigt svar og en forklaring'];
+    var w = $('#work'); w.innerHTML = '';
+    trin.forEach(function (t) { var li = document.createElement('li'); li.innerHTML = '<span class="ic"></span><span>' + t + '</span>'; w.appendChild(li); });
+    var lis = $$('li', w), i = 0;
+    (function nxt() {
+      if (i > 0) { lis[i - 1].classList.add('ok'); lis[i - 1].querySelector('.ic').textContent = '✓'; }
+      if (i >= lis.length) { visFundet(); return; }
+      lis[i].classList.add('on'); i++; setTimeout(nxt, 650);
+    })();
+  }
+  function visFundet() {
+    var f = $('#found'); f.hidden = false; f.className = 'found';
+    f.innerHTML =
+      '<div><h3>Læringsmål <span class="tag">4</span></h3><ul>' + pak.laeringsmaal.map(function (l) { return '<li>Jeg kan ' + l.tekst + ' <span class="tag fm">' + l.fm + '</span></li>'; }).join('') + '</ul></div>' +
+      '<div><h3>Fagord <span class="tag">' + Object.keys(pak.begreber).length + '</span></h3><ul>' + Object.keys(pak.begreber).map(function (k) { return '<li>' + pak.begreber[k].t.split(':')[0] + '</li>'; }).join('') + '</ul></div>' +
+      '<div><h3>Tekster og data</h3><ul><li>' + Object.keys(pak.dokumenter).length + ' tekster (dagbog, folder, vandværksplan)</li><li>' + Object.keys(pak.grafer).length + ' grafer fra dine måledata</li><li>Alt er skrevet på 4. klasses niveau</li></ul></div>';
+    $('#to3').disabled = false;
+  }
+  $('#to3').addEventListener('click', function () { go(3); });
+
+  // --------------------------------------------------------------- 3
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function plain(s) { var d = document.createElement('div'); d.innerHTML = s; return d.textContent; }
+  function tegnForslag() {
+    $('#ftitel').textContent = pak.titel;
+    var tot = 0, m = $('#missions'); m.innerHTML = '';
+    pak.missioner.forEach(function (ms, i) {
+      var div = document.createElement('div'); div.className = 'mission';
+      div.innerHTML = '<header><span class="no">' + (i + 1) + '</span><h3>' + esc(ms.titel) + '</h3><small>Giver: ' + esc(pak.figurer[ms.giver].navn) + ' · ' + ms.opgaver.length + ' opgaver</small></header>';
+      ms.opgaver.forEach(function (o) {
+        tot++;
+        var maal = pak.laeringsmaal.filter(function (l) { return l.id === o.maal; })[0];
+        var r = document.createElement('div'); r.className = 'opg'; r.dataset.maal = o.maal;
+        r.innerHTML = '<span class="ty">' + TYPER[o.type] + '</span><div><span class="q">' + o.q + '</span></div><span class="acts"><button type="button" data-a="ret">Ret</button><button type="button" data-a="slet">Slet</button></span>' +
+          '<span class="meta">Læringsmål: ' + esc(maal.tekst) + '</span>';
+        div.appendChild(r);
+      });
+      m.appendChild(div);
+    });
+    dæk();
+  }
+  function dæk() {
+    var r = $$('.opg:not(.gone)'), tot = r.length;
+    var c = $('#cover'); c.innerHTML = '<div><b>' + tot + ' opgaver · ' + pak.missioner.length + ' missioner · ca. ' + Math.round(tot * 2.1) + ' min</b></div>';
+    pak.laeringsmaal.forEach(function (l) {
+      var n = r.filter(function (x) { return x.dataset.maal === l.id; }).length;
+      var d = document.createElement('div');
+      d.innerHTML = '<span>' + esc(l.omraade.split(' · ')[1]) + '</span><span class="bar"><i style="width:' + Math.min(100, n * 20) + '%"></i></span><span>' + n + ' opg.</span>';
+      c.appendChild(d);
+    });
+  }
+  $('#missions').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-a]'); if (!b) return;
+    var row = b.closest('.opg'), q = $('.q', row);
+    if (b.dataset.a === 'slet') { row.classList.add('gone'); dæk(); return; }
+    var on = q.isContentEditable;
+    q.contentEditable = on ? 'false' : 'true';
+    if (!on) { q.textContent = plain(q.innerHTML); q.focus(); b.textContent = 'Gem'; } else { b.textContent = 'Ret'; }
+  });
+  $$('.ck').forEach(function (c) { c.addEventListener('change', function () { $('#approve').disabled = $$('.ck:checked').length < 3; }); });
+  $('#approve').addEventListener('click', function () { approved = true; $('#stamp').classList.add('on'); $('#to4row').hidden = false; $('#approve').disabled = true; });
+
+  // --------------------------------------------------------------- 4 + 5
+  $('#assign').addEventListener('click', function () { go(5); });
+  function overblik() {
+    var tal = [88, 74, 61, 52], j = $('#jegkan'); j.innerHTML = '';
+    pak.laeringsmaal.forEach(function (l, i) {
+      var d = document.createElement('div');
+      d.innerHTML = '<span>Jeg kan ' + esc(l.tekst) + '</span><span class="bar"><i style="width:' + tal[i] + '%"></i></span><b>' + tal[i] + '%</b>';
+      j.appendChild(d);
+    });
+    var navne = ['Elev 1', 'Elev 2', 'Elev 3', 'Elev 4', 'Elev 5', 'Elev 6'], prog = [4, 4, 3, 4, 2, 1], hj = ['–', '–', 'Søens tal', '–', 'Søens tal, Rent vand', 'Skyernes værksted'];
+    var tb = $('#elever tbody'); tb.innerHTML = '';
+    navne.forEach(function (n, i) {
+      var dots = ''; for (var k = 0; k < 4; k++) dots += k < prog[i] ? '●' : '<span class="o">●</span>';
+      var tr = document.createElement('tr'); tr.innerHTML = '<td>' + n + '</td><td class="dots">' + dots + '</td><td>' + hj[i] + '</td>'; tb.appendChild(tr);
+    });
+  }
+
+  // --------------------------------------------------------------- start
+  // #trin=N springer direkte til trin N med alt udfyldt (bruges af tools/demo-billeder.py til skærmbilleder)
+  function forhaand(n) {
+    if (n >= 2) { laest = true; var w = $('#work'); w.innerHTML = ''; ['Åbner de valgte filer', 'Finder læringsmål og fagord', 'Henter tal og grafer fra regnearket', 'Skriver opgaver i spillets opgavetyper', 'Tjekker, at alle opgaver har ét rigtigt svar og en forklaring'].forEach(function (t) { var li = document.createElement('li'); li.className = 'on ok'; li.innerHTML = '<span class="ic">✓</span><span>' + t + '</span>'; w.appendChild(li); }); visFundet(); }
+    if (n >= 4) { $$('.ck').forEach(function (c) { c.checked = true; }); $('#approve').disabled = false; $('#approve').click(); }
+    still = true; reached = 5; go(n);
+  }
+  tegnKilder();
+  fetch('forloeb/vand.json').then(function (r) { return r.json(); }).then(function (p) { pak = p; tegnForslag(); go(1); var m = location.hash.match(/trin=(\d)/); if (m) forhaand(+m[1]); })
+    .catch(function () { document.body.insertAdjacentHTML('afterbegin', '<p style="padding:20px">Kunne ikke hente forløbet.</p>'); });
+})();
+</script>
+</body>
+</html>

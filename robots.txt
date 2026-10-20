@@ -6,5 +6,6 @@ Disallow: /konto
 Disallow: /fremskridtsmail
 Disallow: /admin
 Disallow: /login-kort
+Disallow: /demo/
 
 Sitemap: https://learnification.dk/sitemap.xml
