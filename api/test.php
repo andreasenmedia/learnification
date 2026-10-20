@@ -58,10 +58,10 @@ function skema_for_barn(): array
     return $ud;
 }
 
-/** Testrunden skal findes og være en testrunde. */
-function runde(int $id): array
+/** Testrunden skal findes og være en testrunde. Til læsning dur også en runde, der siden er blevet en rigtig konto (så svarene kan hentes). */
+function runde(int $id, bool $skriv = false): array
 {
-    $k = en('SELECT * FROM konti WHERE id = ? AND test = 1', [$id]);
+    $k = en('SELECT * FROM konti WHERE id = ? AND (test = 1' . ($skriv ? '' : ' OR id IN (SELECT konto_id FROM testskema)') . ')', [$id]);
     if (!$k) {
         fejl('Testrunden findes ikke.', 404);
     }
@@ -176,6 +176,7 @@ function runde_ud(array $k): array
     $s = en('SELECT id, aabnet FROM testskema WHERE konto_id = ? AND lukket IS NULL ORDER BY id DESC LIMIT 1', [$k['id']]);
     $n = (int) vaerdi('SELECT COUNT(*) FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?', [$k['id']]);
     return ['id' => (int) $k['id'], 'navn' => $k['navn'], 'oprettet' => (int) $k['oprettet'], 'spillere' => $n,
+            'tidligere' => empty($k['test']),
             'start' => (string) ($k['test_start'] ?? ''),
             'gruppe' => (int) vaerdi('SELECT id FROM grupper WHERE konto_id = ? ORDER BY id LIMIT 1', [$k['id']]),
             'skema_aaben' => $s ? (int) $s['id'] : null,
@@ -187,7 +188,7 @@ switch ($h) {
 
 case 'liste':
     $ud = [];
-    foreach (alle('SELECT * FROM konti WHERE test = 1 ORDER BY oprettet DESC') as $k) {
+    foreach (alle('SELECT * FROM konti WHERE test = 1 OR id IN (SELECT konto_id FROM testskema) ORDER BY oprettet DESC') as $k) {
         $ud[] = runde_ud($k);
     }
     svar(['ok' => true, 'runder' => $ud]);
@@ -224,7 +225,7 @@ case 'opret':
 
 case 'indstil':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     kør('UPDATE konti SET test_start = ? WHERE id = ?', [start_spil(felt('start', 20)), $k['id']]);
     svar(['ok' => true]);
 
@@ -244,13 +245,13 @@ case 'live_hent':
 
 case 'live_stop':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     kør('DELETE FROM testlive WHERE elev_id IN (SELECT e.id FROM elever e JOIN grupper g ON g.id = e.gruppe_id WHERE g.konto_id = ?)', [$k['id']]);
     svar(['ok' => true]);
 
 case 'flere':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     $antal = tal('antal');
     $har = spillere((int) $k['id']);
     if ($antal < 1 || count($har) + $antal > TEST_MAKS_SPILLERE) {
@@ -323,7 +324,7 @@ case 'status':
 
 case 'skema_aaben':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     // Kun ét åbent ad gangen — et nyt skema lukker det gamle
     kør('UPDATE testskema SET lukket = ? WHERE konto_id = ? AND lukket IS NULL', [time(), $k['id']]);
     kør('INSERT INTO testskema (konto_id, aabnet) VALUES (?, ?)', [$k['id'], time()]);
@@ -331,7 +332,7 @@ case 'skema_aaben':
 
 case 'skema_luk':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     kør('UPDATE testskema SET lukket = ? WHERE konto_id = ? AND lukket IS NULL', [time(), $k['id']]);
     svar(['ok' => true]);
 
@@ -404,7 +405,7 @@ case 'csv':
 
 case 'goer_rigtig':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     $f = tjek_kontofelter(['type' => 'skole', 'navn' => felt('navn', 120), 'kontakt' => felt('kontakt', 120),
                            'bynavn' => felt('bynavn', 80), 'email' => felt('email', 190)], (int) $k['id']);
     $klasse = felt('klasse', 60);
@@ -447,7 +448,7 @@ case 'goer_rigtig':
 
 case 'slet':
     kraev_egen_side();
-    $k = runde(tal('id'));
+    $k = runde(tal('id'), true);
     // Grupper, elever, spilletid, gemte spil, skemaer og svar går med (ON DELETE CASCADE)
     kør('DELETE FROM konti WHERE id = ?', [$k['id']]);
     svar(['ok' => true]);

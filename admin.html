@@ -1125,7 +1125,7 @@
     LF.hent('test', 'liste').then(function (d) {
       var h = '<thead><tr><th>Runde</th><th class="t">Spillere</th><th class="t">Oprettet</th><th class="t">Svar</th><th></th></tr></thead><tbody>';
       d.runder.forEach(function (r) {
-        h += '<tr><td><a href="#test=' + r.id + '"><strong>' + LF.esc(r.navn) + '</strong></a></td><td class="t">' + r.spillere + '</td>'
+        h += '<tr><td><a href="#test=' + r.id + '"><strong>' + LF.esc(r.navn) + '</strong></a>' + (r.tidligere ? ' <span class="lille">(nu en rigtig konto)</span>' : '') + '</td><td class="t">' + r.spillere + '</td>'
           + '<td class="t">' + LF.dato(r.oprettet) + '</td><td class="t">' + r.svar + '</td>'
           + '<td class="t"><a class="btn btn-sm" href="#test=' + r.id + '">Åbn</a></td></tr>';
       });
