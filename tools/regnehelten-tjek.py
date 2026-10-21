@@ -32,10 +32,16 @@ TRIN = {
     4: dict(gange=True, procent=False, negative=False, decimal=True, plus=200, gange_top=200, del_top=200, kr=400),
     5: dict(gange=True, procent=True, negative=True, decimal=True, plus=1000, gange_top=600, del_top=600, kr=800),
     6: dict(gange=True, procent=True, negative=True, decimal=True, plus=1000, gange_top=900, del_top=900, kr=1200),
+    7: dict(gange=True, procent=True, negative=True, decimal=True, plus=1000, gange_top=1200, del_top=1200, kr=2000),
+    8: dict(gange=True, procent=True, negative=True, decimal=True, plus=1000, gange_top=1500, del_top=1500, kr=3000),
+    9: dict(gange=True, procent=True, negative=True, decimal=True, plus=1000, gange_top=2000, del_top=2000, kr=5000),
+    10: dict(gange=True, procent=True, negative=True, decimal=True, plus=1000, gange_top=3000, del_top=3000, kr=8000),
 }
+# Regnebogens overbygningssider (fra 7. klasse) må ikke dukke op tidligere
+OVERBYGNING = {"potens", "algebra", "funktion", "geometri", "sandsynlighed", "procent"}
 # Tal, der overhovedet må stå i en opgave, og det, eleven selv skal regne sig frem til
-LOFT = {1: 50, 2: 200, 3: 1200, 4: 12000, 5: 120000, 6: 120000}
-SVAR_LOFT = {1: 20, 2: 100, 3: 1000, 4: 10000, 5: 100000, 6: 100000}
+LOFT = {1: 50, 2: 200, 3: 1200, 4: 12000, 5: 120000, 6: 120000, 7: 200000, 8: 200000, 9: 200000, 10: 200000}
+SVAR_LOFT = {1: 20, 2: 100, 3: 1000, 4: 10000, 5: 100000, 6: 100000, 7: 100000, 8: 100000, 9: 100000, 10: 100000}
 GANGE = re.compile(r"(\d+)\s*(?:x|·)\s*(\d+)")
 DELT = re.compile(r"(\d+)\s*:\s*(\d+)")
 GANGE_ORD = re.compile(r"\bgange\b|\bgang(er|et)\b|\bdividere\b|\bdel(t|es|er)? med\b|"
@@ -71,6 +77,10 @@ def tjek(k, navn, sp, fejl):
             fejl.append(f"{hvor}: gange/division i teksten: {tekst[:80]!r}")
         if sp["kind"] == "balance" and sp.get("op") == "x":
             fejl.append(f"{hvor}: vægtskål med gange")
+    if k < 7 and sp.get("book") in OVERBYGNING:
+        fejl.append(f"{hvor}: overbygningsemnet '{sp['book']}' før 7. klasse")
+    if sp.get("k") not in (None, k):
+        fejl.append(f"{hvor}: opgaven er mærket med klassetrin {sp.get('k')}")
     if not t["procent"] and "%" in tekst:
         fejl.append(f"{hvor}: procent, som trinnet ikke har mødt")
 
@@ -84,7 +94,8 @@ def tjek(k, navn, sp, fejl):
             break
     if tal and abs(svar) > SVAR_LOFT[k]:
         fejl.append(f"{hvor}: svaret {svar} er over talområdet {SVAR_LOFT[k]}")
-    if tal and abs(svar) > regneloft(t):
+    # Overbygningsemner (potens, rente, enheder ...) har egne tal; regneloftet gælder hverdagsopgaverne
+    if tal and abs(svar) > regneloft(t) and not (k >= 7 and sp.get("book") in OVERBYGNING):
         fejl.append(f"{hvor}: svaret {svar} er over regneloftet {regneloft(t)}  ({tekst[:60]!r})")
     for a, b in GANGE.findall(tekst):
         if int(a) * int(b) > t["gange_top"]:

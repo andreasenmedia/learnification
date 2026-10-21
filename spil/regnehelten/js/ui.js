@@ -12,12 +12,14 @@
   var RH = window.RH = window.RH || {};
   var layer, open = 0;
 
-  // Barnets eget klassetrin (assets/klassetrin.js), holdt inden for Regneheltens 1.-6. klasse
+  // Barnets eget klassetrin (assets/klassetrin.js), holdt inden for Regneheltens 1.-10. klasse
   function startKlasse() {
     var k = window.LF_KLASSETRIN;
     if (k === undefined || k === null) k = window.LF_SPILLER && LF_SPILLER.elev ? LF_SPILLER.elev.klassetrin : null;
-    return k === undefined || k === null ? 0 : Math.max(1, Math.min(6, k | 0));
+    return k === undefined || k === null ? 0 : Math.max(1, Math.min(10, k | 0));
   }
+  // En voksen har slået "Tilpas niveau" til for barnet (konto → barn): så er det ikke et valg
+  function tilpasLaast() { return !!(window.LF_SPILLER && LF_SPILLER.elev && LF_SPILLER.elev.tilpas); }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function btn(cls, html) { var b = el('button', cls, html); b.type = 'button'; return b; }
@@ -401,20 +403,29 @@
         var s = el('div', 'screen-full'), c = el('div', 'title-card px create'); s.appendChild(c);
         c.appendChild(el('h2', null, 'Hvilken klasse går du i?'));
         var kl = el('div', 'klasser'), klasse = (pre && pre.klasse) || startKlasse() || O.STANDARD_KLASSE;
+        var tilpas = tilpasLaast() || !!(pre && pre.tilpas), laast = tilpasLaast();
         var maal = el('p', 'tiny maal');
         O.KLASSER.forEach(function (k) {
           var b = btn('kl', k + '.');
           b.setAttribute('aria-label', k + '. klasse');
-          b.addEventListener('click', function () { klasse = k; paintK(); });
+          b.addEventListener('click', function () { klasse = k; if (!laast) tilpas = false; paintK(); });
           kl.appendChild(b);
         });
+        var star = btn('kl stjerne', '★ Tilpas til mig');
+        star.setAttribute('aria-label', 'Tilpas opgaverne til mig'); star.addEventListener('click', function () { tilpas = !tilpas; paintK(); });
         function paintK() {
-          [].forEach.call(kl.children, function (b, i) { b.classList.toggle('sel', O.KLASSER[i] === klasse); b.setAttribute('aria-pressed', O.KLASSER[i] === klasse); });
-          maal.textContent = O.trin(klasse).navn + ': ' + O.trin(klasse).maal;
+          [].forEach.call(kl.children, function (b, i) {
+            if (b === star) { b.classList.toggle('sel', tilpas); b.setAttribute('aria-pressed', tilpas); return; }
+            b.classList.toggle('sel', O.KLASSER[i] === klasse); b.setAttribute('aria-pressed', O.KLASSER[i] === klasse);
+          });
+          maal.textContent = tilpas
+            ? 'Opgaverne starter i ' + O.trin(klasse).navn + ' og bliver lidt lettere eller sværere, alt efter hvordan det går.' + (laast ? ' (Slået til af en voksen.)' : '')
+            : O.trin(klasse).navn + ': ' + O.trin(klasse).maal;
         }
+        kl.appendChild(star);
         c.appendChild(kl); c.appendChild(maal); paintK();
         var go = btn('btn primary', 'Begynd'); c.appendChild(go);
-        go.addEventListener('click', function () { pop(s); resolve({ klasse: klasse }); });
+        go.addEventListener('click', function () { pop(s); resolve({ klasse: klasse, tilpas: tilpas }); });
         push(s); go.focus();
       });
     },
@@ -680,7 +691,9 @@
       page.appendChild(ex);
       if (p.diagram) page.insertAdjacentHTML('beforeend', DIAGRAM[p.diagram]());
     }
+    var niveau = Math.ceil((RH.state && (RH.state.niveau || RH.state.klasse)) || 0);
     K.BOG.forEach(function (p) {
+      if (p.fra && p.fra > niveau && p.id !== sideId) return;     // overbygningens sider kommer frem fra 7. klasse
       var b = btn('tab', esc(p.title)); b.dataset.id = p.id;
       b.addEventListener('click', function () { vis(p.id); });
       list.appendChild(b);
@@ -782,6 +795,45 @@
       s += '<rect x="214" y="50" width="72" height="4" fill="' + RED + '"/><text x="250" y="74" text-anchor="middle" fill="' + RED + '">først: 12</text>';
       s += '<text x="200" y="104" text-anchor="middle" fill="' + BLUE + '">så: 2 + 12 = 14</text>';
       return svg(114, s);
+    },
+    potens: function () {
+      var s = '';
+      for (var r = 0; r < 4; r++) for (var c = 0; c < 4; c++) s += '<rect x="' + (50 + c * 30) + '" y="' + (14 + r * 30) + '" width="28" height="28" fill="' + BLUE + '" opacity=".5" stroke="' + INK + '" stroke-width="2"/>';
+      s += '<text x="240" y="48" fill="' + INK + '" font-size="20" font-weight="bold">4² = 4 · 4 = 16</text><text x="240" y="82" fill="' + RED + '">√16 = 4</text><text x="240" y="108" fill="' + INK + '">2³ = 2 · 2 · 2 = 8</text>';
+      return svg(142, s);
+    },
+    algebra: function () {
+      var s = '<line x1="200" y1="30" x2="200" y2="96" stroke="' + INK + '" stroke-width="4"/><line x1="70" y1="40" x2="330" y2="40" stroke="' + INK + '" stroke-width="4"/>';
+      s += '<rect x="90" y="14" width="80" height="26" fill="#fff3c4" stroke="' + INK + '" stroke-width="2.5"/><text x="130" y="33" text-anchor="middle" fill="' + INK + '" font-weight="bold">3x + 4</text>';
+      s += '<rect x="230" y="14" width="80" height="26" fill="#fff" stroke="' + INK + '" stroke-width="2.5"/><text x="270" y="33" text-anchor="middle" fill="' + INK + '" font-weight="bold">19</text>';
+      s += '<path d="M150 96h100l-10 14h-80z" fill="' + INK + '"/><text x="200" y="130" text-anchor="middle" fill="' + BLUE + '">træk 4 fra begge sider, del med 3: x = 5</text>';
+      return svg(144, s);
+    },
+    funktion: function () {
+      var s = '<line x1="40" y1="100" x2="360" y2="100" stroke="' + INK + '" stroke-width="2.5"/><line x1="60" y1="110" x2="60" y2="14" stroke="' + INK + '" stroke-width="2.5"/>';
+      for (var i = 1; i <= 6; i++) s += '<line x1="' + (60 + i * 48) + '" y1="96" x2="' + (60 + i * 48) + '" y2="104" stroke="' + INK + '"/><text x="' + (60 + i * 48) + '" y="120" text-anchor="middle" fill="' + INK + '" font-size="12">' + i + '</text>';
+      s += '<line x1="60" y1="84" x2="348" y2="12" stroke="' + RED + '" stroke-width="3.5"/><circle cx="60" cy="84" r="5" fill="' + RED + '"/>';
+      s += '<text x="196" y="66" fill="' + RED + '" font-weight="bold">y = 0,5x + 3</text><text x="300" y="86" text-anchor="middle" fill="' + BLUE + '" font-size="13">hældning: op 1 pr. 2 til højre</text>';
+      return svg(130, s);
+    },
+    geometri: function () {
+      var s = '<polygon points="60,100 60,30 150,100" fill="#e8f0d8" stroke="' + INK + '" stroke-width="3"/><rect x="60" y="88" width="12" height="12" fill="none" stroke="' + INK + '" stroke-width="2"/>';
+      s += '<text x="44" y="68" text-anchor="middle" fill="' + INK + '">b</text><text x="105" y="118" text-anchor="middle" fill="' + INK + '">a</text><text x="116" y="58" fill="' + INK + '">c</text>';
+      s += '<text x="200" y="44" fill="' + BLUE + '" font-weight="bold">a² + b² = c²</text><text x="200" y="72" fill="' + INK + '">Cirkel: omkreds = π · d</text><text x="200" y="96" fill="' + INK + '">areal = π · r · r</text><text x="200" y="120" fill="' + INK + '">Rumfang = l · b · h</text>';
+      return svg(132, s);
+    },
+    sandsynlighed: function () {
+      var s = '';
+      for (var i = 0; i < 10; i++) s += '<circle cx="' + (50 + i * 32) + '" cy="40" r="12" fill="' + (i < 3 ? RED : BLUE) + '" stroke="' + INK + '" stroke-width="2"/>';
+      s += '<text x="200" y="86" text-anchor="middle" fill="' + INK + '">3 røde ud af 10 kugler</text><text x="200" y="110" text-anchor="middle" fill="' + BLUE + '">chancen for rød: 3 : 10 = 30 %</text>';
+      return svg(124, s);
+    },
+    procent: function () {
+      var s = '<rect x="40" y="16" width="320" height="30" fill="#fff" stroke="' + INK + '" stroke-width="3"/><rect x="40" y="16" width="80" height="30" fill="' + BLUE + '" opacity=".55"/>';
+      for (var i = 1; i < 4; i++) s += '<line x1="' + (40 + i * 80) + '" y1="16" x2="' + (40 + i * 80) + '" y2="46" stroke="' + INK + '" stroke-width="2"/>';
+      s += '<text x="80" y="36" text-anchor="middle" fill="' + INK + '">25 %</text>';
+      s += '<text x="200" y="76" text-anchor="middle" fill="' + INK + '">400 kr + 25 % moms</text><text x="200" y="100" text-anchor="middle" fill="' + BLUE + '">400 · 1,25 = 500 kr</text>';
+      return svg(112, s);
     }
   };
 

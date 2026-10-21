@@ -27,13 +27,17 @@ window.LF = LF;
     throw new Error('Kunne ikke komme i kontakt med serveren. Er der net?');
   }
 
+  // LF.som = kontoens id, når administratoren ser /konto?som=<id> som ejeren: kun visning (serveren afviser alt andet)
+  LF.som = 0;
   LF.hent = function (fil, handling, params) {
+    if (LF.som && (fil === 'klasse' || fil === 'xp')) params = Object.assign({ konto: LF.som }, params || {});
     var q = new URLSearchParams(Object.assign({ handling: handling }, params || {}));
     return fetch('/api/' + fil + '.php?' + q, { credentials: 'same-origin', cache: 'no-store' })
       .then(svar, netfejl);
   };
 
   LF.send = function (fil, handling, data) {
+    if (LF.som && handling !== 'logud') return Promise.reject(new Error('Du ser kun kontoen — der kan ikke ændres her.'));
     return fetch('/api/' + fil + '.php', {
       method: 'POST', credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-LF': '1' },

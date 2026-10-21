@@ -127,6 +127,10 @@ function kraev_egen_side(): void
     if (($_SERVER['HTTP_X_LF'] ?? '') !== '1') {
         fejl('Forespørgslen kom ikke fra siden.', 403);
     }
+    // /konto?som=… (administratoren ser en kontos side som ejeren): kun visning, ingen ændringer
+    if (($_SERVER['HTTP_X_LF_SOM'] ?? '') === '1') {
+        fejl('Du ser kun kontoen — der kan ikke ændres her.', 403);
+    }
 }
 
 function lille(string $s): string
@@ -469,7 +473,7 @@ function opret_tabeller(PDO $pdo): void
             )$slut",
             'CREATE UNIQUE INDEX testsvar_en ON testsvar (testskema_id, elev_id)',
         ],
-        // Barnets eget klassetrin (0-9), spurgt inden første spil (assets/klassetrin.js). Har klassen et, bruges det.
+        // Barnets eget klassetrin (0-10), spurgt inden første spil (assets/klassetrin.js). Har klassen et, bruges det.
         11 => [
             'ALTER TABLE elever ADD COLUMN klassetrin INTEGER',
         ],
@@ -530,6 +534,32 @@ function opret_tabeller(PDO $pdo): void
         17 => [
             'ALTER TABLE gemte_spil ADD COLUMN forrige TEXT',
             'ALTER TABLE gemte_spil ADD COLUMN forrige_tid INTEGER',
+        ],
+        // "Tilpas niveau": en voksen lader Regnehelten gøre opgaverne lettere/sværere efter barnets resultater.
+        // Supportsager (api/support.php): voksne skriver fra hjælpeboblen, admin svarer i /admin#support.
+        18 => [
+            'ALTER TABLE elever ADD COLUMN tilpas INTEGER NOT NULL DEFAULT 0',
+            "CREATE TABLE support_sager (
+                id $id,
+                konto_id INTEGER NOT NULL,
+                kategori $tekst NOT NULL,
+                emne $tekst NOT NULL,
+                status $tekst NOT NULL DEFAULT 'ny',
+                side $tekst,
+                oprettet INTEGER NOT NULL,
+                opdateret INTEGER NOT NULL,
+                FOREIGN KEY (konto_id) REFERENCES konti(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE INDEX support_sager_konto ON support_sager(konto_id)',
+            "CREATE TABLE support_beskeder (
+                id $id,
+                sag_id INTEGER NOT NULL,
+                fra $tekst NOT NULL,
+                tekst TEXT NOT NULL,
+                tid INTEGER NOT NULL,
+                FOREIGN KEY (sag_id) REFERENCES support_sager(id) ON DELETE CASCADE
+            )$slut",
+            'CREATE INDEX support_beskeder_sag ON support_beskeder(sag_id)',
         ],
     ];
 

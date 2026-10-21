@@ -93,7 +93,7 @@
             <label><input type="radio" name="kun_spil" value="runeborg">
               <span><strong>Kun Runeborg</strong><small>Et fantasyeventyr for 5.-9. klasse</small></span></label>
             <label><input type="radio" name="kun_spil" value="regnehelten">
-              <span><strong>Kun Regnehelten</strong><small>Regning i hverdagen for 1.-6. klasse</small></span></label>
+              <span><strong>Kun Regnehelten</strong><small>Regning i hverdagen for 1.-10. klasse</small></span></label>
           </div>
           <div class="trin-knapper"><button class="btn" type="button" data-tilbage>Tilbage</button><button class="btn btn-primary btn-lg" type="button" data-videre>Videre</button></div>
         </section>
@@ -149,14 +149,14 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=6"></script>
+<script src="/assets/konto.js?v=7"></script>
 <script>
 (function () {
   var f = document.getElementById('opret-form');
   var besked = document.getElementById('besked');
   var typer = { skole: 'skole', familie: 'foraelder' };
   var forvalgt = typer[new URLSearchParams(location.search).get('type')] || '';
-  var KLASSER = ['0. klasse', '1. klasse', '2. klasse', '3. klasse', '4. klasse', '5. klasse', '6. klasse', '7. klasse', '8. klasse', '9. klasse'];
+  var KLASSER = ['0. klasse', '1. klasse', '2. klasse', '3. klasse', '4. klasse', '5. klasse', '6. klasse', '7. klasse', '8. klasse', '9. klasse', '10. klasse'];
   var trin = [], nu = 0;
 
   function sektion(n) { return f.querySelector('[data-trin=' + n + ']'); }
@@ -292,7 +292,7 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=5" defer></script>
+<script src="/assets/script.js?v=6" defer></script>
 <script src="/assets/samtykke.js?v=2" defer></script>
 <script src="/assets/besoeg.js?v=2" defer></script>
 </body>

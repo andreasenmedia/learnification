@@ -541,3 +541,10 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .lr-katalog { margin-top: 18px; }
 @media (max-width: 640px) { .lr { padding: 14px 10px 6px; } .lr-spor { width: 60px; } }
 @media print { .lr-detalje[hidden] { display: none; } }
+
+/* /konto?som=<id>: administratoren ser en konto som ejeren — kun visning */
+#som-banner { position: sticky; top: 0; z-index: 50; background: var(--gold, #ffcc4d); color: #1a1226; border-bottom: 3px solid #1a1226; padding: 10px 16px; text-align: center; font-weight: 600; }
+#som-banner a { color: inherit; text-decoration: underline; margin-left: 8px; }
+body.som #velkommen, body.som #saet-op, body.som #ny-gruppe, body.som #kun-spil-form, body.som #indstillinger, body.som .xp-valg,
+body.som [data-som-elev], body.som [data-oplaes], body.som [data-tilpas], body.som [data-ret-elev], body.som [data-ny-elevkode], body.som [data-slet-elev],
+body.som [data-ret-gruppe], body.som [data-slet-gruppe], body.som [data-ret-navne], body.som details.foldud:has([data-tilfoej]), body.som [data-logud] { display: none !important; }

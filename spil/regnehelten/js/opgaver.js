@@ -45,8 +45,20 @@
       gange: true, division: true, rest: true, halve: true, fjerdedele: true, broek: true, decimal: true, procent: true,
       ligning: true, hierarki: true, negative: true, areal: true, gennemsnit: true, klokke: 'minut' }
   };
-  var KLASSER = [1, 2, 3, 4, 5, 6], STANDARD_KLASSE = 3;
-  function trin(k) { return TRIN[k | 0] || TRIN[STANDARD_KLASSE]; }
+  // 7.-10. klasse: de samme hverdagsopgaver med større tal, og så bytter blandSenior() nogle af dem ud
+  // med emner fra overbygningen (potenser, algebra, funktioner, Pythagoras, sandsynlighed ...).
+  function overbygning(k, maal, kr, gange, spring) {
+    return { klasse: k, navn: k + '. klasse', maal: maal, senior: true,
+      hi: 1000000, sum: 100000, kr: kr, plus: 1000, gange_top: gange, del_top: gange, tabeller: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], spring: spring,
+      gange: true, division: true, rest: true, halve: true, fjerdedele: true, broek: true, decimal: true, procent: true,
+      ligning: true, hierarki: true, negative: true, areal: true, gennemsnit: true, klokke: 'minut' };
+  }
+  TRIN[7] = overbygning(7, 'Negative tal. Potenser og kvadratrødder. Procent og moms. Ligninger. Rumfang. Sandsynlighed og median.', 2000, 1200, [8, 9, 12, 15, 25, 50, 100]);
+  TRIN[8] = overbygning(8, 'Pythagoras. Cirklens omkreds. Funktioner og hældning. Rente. Procentvis ændring. Reducering af udtryk.', 3000, 1500, [9, 12, 15, 25, 50, 100, 125]);
+  TRIN[9] = overbygning(9, 'Renters rente. Ligninger med x på begge sider. Cirklens areal. Pythagoras og funktioner. Sandsynlighed med flere forsøg.', 5000, 2000, [12, 15, 25, 50, 100, 125, 250]);
+  TRIN[10] = overbygning(10, 'Ligninger med parenteser. Cylinderens rumfang. Linjens nulpunkt. Potenser. Alt det, du skal bruge til afgangsprøven.', 8000, 3000, [15, 25, 50, 100, 125, 250, 500]);
+  var KLASSER = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], STANDARD_KLASSE = 3;
+  function trin(k) { k = k | 0; return k ? TRIN[Math.max(1, Math.min(10, k))] : TRIN[STANDARD_KLASSE]; }
 
   // ---------------------------------------------------------------- små hjælpere
   function r(a, b) { a = Math.trunc(a); b = Math.trunc(b); var lo = Math.min(a, b), hi = Math.max(a, b); return lo + Math.floor(Math.random() * (hi - lo + 1)); }
@@ -614,6 +626,203 @@
     ];
   }
 
+  // ---------------------------------------------------------------- overbygningen (7.-10. klasse)
+  // Hvert emne er en lille fabrik: sen(fra klasse, Blooms trin, Regnebogens side, (t, hvem) -> opgave).
+  var SEN = [];
+  function sen(min, bloom, book, f) { SEN.push({ min: min, bloom: [].concat(bloom), book: book, f: f }); }
+  function tilfaeldigeUnikke(n, lo, hi) { var s = {}, a = []; while (a.length < n) { var v = r(lo, hi); if (!s[v]) { s[v] = 1; a.push(v); } } return a; }
+
+  sen(7, ['HUSK', 'FORSTÅ'], 'potens', function (t, w) {
+    var s = r(6, t.klasse >= 9 ? 25 : 15);
+    return write(w, 'Et kvadratisk bed har siden ' + s + ' m. Hvor stort er arealet?', s * s, 'Areal af et kvadrat: side gange side, altså ' + s + ' · ' + s + '.', 'm²', 'potens');
+  });
+  sen(7, ['HUSK', 'FORSTÅ'], 'potens', function (t, w) {
+    var s = r(7, t.klasse >= 9 ? 30 : 16);
+    return write(w, 'Et kvadratisk gulv er på ' + (s * s) + ' m². Hvor lang er siden?', s, 'Hvilket tal ganget med sig selv giver ' + (s * s) + '? Det er kvadratroden.', 'm', 'potens');
+  });
+  sen(7, 'HUSK', 'potens', function (t, w) {
+    var b = choice([2, 3, 4, 5, 6, 10]), e = (b <= 5 || b === 10) && Math.random() < 0.5 ? 3 : 2;
+    if (b === 6) e = 2;
+    return write(w, 'Hvad er ' + b + (e === 2 ? '²' : '³') + '?', Math.pow(b, e), e === 2 ? b + '² er ' + b + ' · ' + b + '.' : b + '³ er ' + b + ' · ' + b + ' · ' + b + '.', '', 'potens');
+  });
+  sen(9, 'HUSK', 'potens', function (t, w) {
+    var b = choice([2, 2, 3]), e = b === 2 ? r(5, 8) : r(4, 5), led = []; for (var i = 0; i < e; i++) led.push(b);
+    return write(w, 'Hvad er ' + b + ' i ' + e + '. potens?', Math.pow(b, e), 'Gang ' + b + ' med sig selv ' + e + ' gange: ' + led.join(' · ') + '.', '', 'potens');
+  });
+  sen(7, 'ANVEND', 'potens', function (t, w) {
+    var start = r(2, 5), timer = r(3, 5);
+    return write(w, 'Bakterierne fordobles hver time. Der er ' + start + ' i starten. Hvor mange er der efter ' + timer + ' timer?', start * Math.pow(2, timer), 'Fordobl ' + timer + ' gange i træk, ét trin ad gangen.', 'stk', 'potens');
+  });
+  sen(7, ['HUSK', 'FORSTÅ'], 'plus', function (t, w) {
+    var a = r(3, 12), b = r(3, 12), v = choice([0, 1, 2]);
+    if (v === 0) return write(w, 'Regn: -' + a + ' · ' + b, -a * b, 'Minus gange plus giver minus.', '', 'plus');
+    if (v === 1) return write(w, 'Regn: -' + a + ' · -' + b, a * b, 'Minus gange minus giver plus.', '', 'plus');
+    var c = r(2, 9);
+    return write(w, 'Regn: -' + (a + c) + ' + ' + (b + c + 10) + ' - ' + c, -(a + c) + (b + c + 10) - c, 'Regn fra venstre mod højre. Start på tallinjen ved ' + (-(a + c)) + '.', '', 'plus');
+  });
+  sen(7, ['HUSK', 'FORSTÅ'], 'algebra', function (t, w) {
+    var p = r(2, 9), q = r(1, 20), v = r(2, 10);
+    return write(w, 'Hvad er værdien af ' + p + 'a + ' + q + ', når a = ' + v + '?', p * v + q, 'Sæt ' + v + ' ind i stedet for a: ' + p + ' · ' + v + ' + ' + q + '.', '', 'algebra');
+  });
+  sen(8, ['FORSTÅ', 'ANALYSÉR'], 'algebra', function (t, w) {
+    var a = r(2, 7), c = r(2, 7), b = r(2, 12), d = r(1, 9);
+    return write(w, 'Udtrykket ' + a + 'x + ' + (b + d) + ' + ' + c + 'x - ' + d + ' kan skrives som px + q. Hvad er p + q?', a + c + b, 'Saml x-erne for sig og tallene for sig.', '', 'algebra');
+  });
+  sen(7, ['ANALYSÉR', 'SKAB'], 'algebra', function (t, w) {
+    var x = r(2, 15), a = r(2, 9), b = r(1, 30);
+    return write(w, 'Man ganger et tal med ' + a + ' og lægger ' + b + ' til. Resultatet er ' + (a * x + b) + '. Hvilket tal startede man med?', x, 'Gå baglæns: træk ' + b + ' fra ' + (a * x + b) + ', og del med ' + a + '.', '', 'algebra');
+  });
+  sen(9, ['ANALYSÉR', 'SKAB'], 'algebra', function (t, w) {
+    var x = r(2, 12), c = r(2, 6), a = c + r(2, 5), b = r(1, 20), d = b + (a - c) * x;
+    return write(w, 'Løs ligningen: ' + a + ' · x + ' + b + ' = ' + c + ' · x + ' + d + '. Hvad er x?', x, 'Træk ' + c + 'x fra begge sider, så er x kun på den ene side.', '', 'algebra');
+  });
+  sen(10, 'SKAB', 'algebra', function (t, w) {
+    var x = r(1, 10), a = r(2, 6), b = r(1, 9);
+    return write(w, 'Løs ligningen: ' + a + ' · (x + ' + b + ') = ' + (a * (x + b)) + '. Hvad er x?', x, 'Del først begge sider med ' + a + ', og træk så ' + b + ' fra.', '', 'algebra');
+  });
+  sen(7, ['ANVEND', 'ANALYSÉR'], 'funktion', function (t, w) {
+    var s = r(20, 50), k = r(8, 18), n = r(4, 15);
+    return write(w, 'En taxa tager ' + s + ' kr i startgebyr og ' + k + ' kr pr. km. Hvad koster en tur på ' + n + ' km?', s + k * n, 'Prisen er startgebyret plus ' + k + ' kr for hver km: ' + s + ' + ' + k + ' · ' + n + '.', 'kr', 'funktion');
+  });
+  sen(8, ['HUSK', 'FORSTÅ'], 'funktion', function (t, w) {
+    var a = r(2, 6), b = r(1, 9), x = r(2, 9), minus = Math.random() < 0.5;
+    return write(w, 'En funktion er y = ' + a + 'x ' + (minus ? '- ' : '+ ') + b + '. Hvad er y, når x = ' + x + '?', a * x + (minus ? -b : b), 'Sæt ' + x + ' ind på x\'s plads, og regn ud.', '', 'funktion');
+  });
+  sen(8, 'ANALYSÉR', 'funktion', function (t, w) {
+    var a = r(2, 9), b = r(0, 10);
+    return write(w, 'En ret linje går gennem punkterne (0, ' + b + ') og (3, ' + (b + 3 * a) + '). Hvad er hældningen?', a, 'Hældning: hvor meget y vokser pr. 1 skridt i x. y vokser ' + (3 * a) + ' på 3 skridt.', '', 'funktion');
+  });
+  sen(9, ['ANALYSÉR', 'SKAB'], 'funktion', function (t, w) {
+    var a = r(2, 5), x0 = r(2, 12);
+    return write(w, 'Linjen har ligningen y = ' + a + 'x - ' + (a * x0) + '. For hvilken x er y = 0?', x0, 'Sæt y til 0 og løs ligningen: ' + a + 'x = ' + (a * x0) + '.', '', 'funktion');
+  });
+  var TRIPLER = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20], [7, 24, 25], [15, 20, 25], [20, 21, 29]];
+  sen(8, ['ANVEND', 'FORSTÅ'], 'geometri', function (t, w) {
+    var p = choice(TRIPLER);
+    return write(w, 'En stige står ' + p[0] + ' m fra væggen og når ' + p[1] + ' m op ad den. Hvor lang er stigen?', p[2], 'Pythagoras: ' + p[0] + '² + ' + p[1] + '² = ' + (p[0] * p[0] + p[1] * p[1]) + '. Find kvadratroden.', 'm', 'geometri');
+  });
+  sen(9, 'ANALYSÉR', 'geometri', function (t, w) {
+    var p = choice(TRIPLER);
+    return write(w, 'En stige på ' + p[2] + ' m står ' + p[0] + ' m fra væggen. Hvor højt op når den?', p[1], 'Pythagoras baglæns: ' + p[2] + '² - ' + p[0] + '² = ' + (p[2] * p[2] - p[0] * p[0]) + '. Find kvadratroden.', 'm', 'geometri');
+  });
+  sen(8, ['FORSTÅ', 'ANVEND'], 'geometri', function (t, w) {
+    var d = choice([5, 10, 20, 30, 50]);
+    return write(w, 'En rund dam har en diameter på ' + d + ' m. Hvad er omkredsen? (brug π = 3,14)', Math.round(d * 314) / 100, 'Omkreds = π gange diameter: 3,14 · ' + d + '.', 'm', 'geometri');
+  });
+  sen(9, 'ANVEND', 'geometri', function (t, w) {
+    var rr = choice([2, 5, 10]);
+    return write(w, 'En rund trampolin har radius ' + rr + ' m. Hvor stort er arealet? (brug π = 3,14)', Math.round(rr * rr * 314) / 100, 'Areal = π · radius · radius: 3,14 · ' + rr + ' · ' + rr + '.', 'm²', 'geometri');
+  });
+  sen(7, ['FORSTÅ', 'ANVEND'], 'geometri', function (t, w) {
+    var l = r(3, 9), b = r(2, 6), h = r(2, 5);
+    return write(w, 'Et rum er ' + l + ' m langt, ' + b + ' m bredt og ' + h + ' m højt. Hvad er rumfanget?', l * b * h, 'Rumfang: længde gange bredde gange højde.', 'm³', 'geometri');
+  });
+  sen(10, 'ANVEND', 'geometri', function (t, w) {
+    var c = choice([[2, 5], [5, 10], [10, 3], [5, 4]]);
+    return write(w, 'En cylinder har radius ' + c[0] + ' cm og højden ' + c[1] + ' cm. Hvad er rumfanget? (brug π = 3,14)', Math.round(c[0] * c[0] * c[1] * 314) / 100, 'Rumfang = grundfladens areal gange højden. Grundfladen er π · ' + c[0] + ' · ' + c[0] + '.', 'cm³', 'geometri');
+  });
+  sen(7, ['HUSK', 'FORSTÅ'], 'geometri', function (t, w) {
+    var a = r(30, 80), b = r(30, 80);
+    return write(w, 'I en trekant er to af vinklerne ' + a + '° og ' + b + '°. Hvor mange grader er den tredje?', 180 - a - b, 'Vinklerne i en trekant er tilsammen 180°.', '°', 'geometri');
+  });
+  sen(7, 'FORSTÅ', 'geometri', function (t, w) {
+    var cm = choice([2, 4, 6, 8, 10, 12]), m = choice([50000, 100000]);
+    return write(w, 'På et kort i målestok 1 : ' + String(m).replace(/\B(?=(\d{3})+$)/g, '.') + ' er der ' + cm + ' cm mellem to byer. Hvor mange km er der i virkeligheden?', cm * m / 100000, '1 cm på kortet er ' + String(m).replace(/\B(?=(\d{3})+$)/g, '.') + ' cm i virkeligheden. 100.000 cm er 1 km.', 'km', 'geometri');
+  });
+  sen(7, 'HUSK', 'geometri', function (t, w) {
+    var v = choice([[2.5, 'm³', 'liter', 1000], [3, 'liter', 'cm³', 1000], [4, 'm³', 'liter', 1000], [1.5, 'liter', 'cm³', 1000]]);
+    return write(w, 'Hvor mange ' + v[2] + ' er ' + fmt(v[0]) + ' ' + v[1] + '?', v[0] * v[3], '1 ' + v[1] + ' er 1.000 ' + v[2] + '.', v[2], 'geometri');
+  });
+  sen(7, ['FORSTÅ', 'ANALYSÉR'], 'sandsynlighed', function (t, w) {
+    var total = choice([10, 20, 25, 50]), mult = 100 / total, rod = r(1, total - 1);
+    return write(w, 'I en pose er der ' + rod + ' røde og ' + (total - rod) + ' blå kugler. Hvor stor er chancen for at trække en rød, i procent?', rod * mult, 'Chance = antal røde : alle kugler = ' + rod + ' : ' + total + '. Gang med 100 for procent.', '%', 'sandsynlighed');
+  });
+  sen(7, 'ANALYSÉR', 'sandsynlighed', function (t, w) {
+    var n = t.klasse >= 9 ? 7 : 5, tal = tilfaeldigeUnikke(n, 3, 40), sorteret = tal.slice().sort(function (a, b) { return a - b; });
+    return write(w, 'Find medianen af tallene: ' + tal.join(', ') + '.', sorteret[(n - 1) / 2], 'Sortér tallene fra mindst til størst. Medianen er det midterste tal.', '', 'sandsynlighed');
+  });
+  sen(7, ['FORSTÅ', 'ANALYSÉR'], 'sandsynlighed', function (t, w) {
+    var m = r(3, 12), andre = tilfaeldigeUnikke(4, 13, 30), liste = shuffle([m, m, m].concat(andre.slice(0, 3)).concat([andre[3]]));
+    return write(w, 'Find typetallet (det tal, der kommer flest gange): ' + liste.join(', ') + '.', m, 'Typetallet er det tal, der forekommer oftest.', '', 'sandsynlighed');
+  });
+  sen(9, 'ANALYSÉR', 'sandsynlighed', function (t, w) {
+    var v = choice([['Man kaster to terninger. Hvor mange af de 36 mulige udfald giver summen 7?', 6, 'Skriv dem op: 1+6, 2+5, 3+4 og de samme baglæns.'],
+      ['En mønt kastes tre gange i træk. Hvor mange forskellige rækkefølger af krone og plat er der?', 8, 'To muligheder første gang, to næste gang og to tredje gang: 2 · 2 · 2.'],
+      ['Man trækker ét kort fra et almindeligt spil på 52 kort. Hvor mange kort er hjerter eller konger? (kongen af hjerter tæller kun én gang)', 16, '13 hjerter plus 3 andre konger.']]);
+    return write(w, v[0], v[1], v[2], 'stk', 'sandsynlighed');
+  });
+  sen(8, ['ANALYSÉR', 'ANVEND'], 'procent', function (t, w) {
+    var gammel = choice([200, 400, 500, 800]), p = choice([10, 20, 25, 50]), ny = gammel * (100 + p) / 100;
+    return write(w, 'Prisen steg fra ' + gammel + ' kr til ' + ny + ' kr. Hvor mange procent steg den?', p, 'Stigningen er ' + (ny - gammel) + ' kr. Del den med den gamle pris: ' + (ny - gammel) + ' : ' + gammel + '.', '%', 'procent');
+  });
+  sen(7, ['ANVEND', 'FORSTÅ'], 'procent', function (t, w) {
+    var pris = choice([120, 200, 360, 400, 800]);
+    return write(w, 'En vare koster ' + pris + ' kr uden moms. Momsen er 25 %. Hvad koster den med moms?', pris * 1.25, '25 % af ' + pris + ' er ' + (pris / 4) + '. Læg det til prisen.', 'kr', 'procent');
+  });
+  sen(7, 'FORSTÅ', 'procent', function (t, w) {
+    var base = choice([120, 160, 240, 300, 400]), p = choice([5, 15, 35, 45, 60, 75]);
+    return write(w, 'Hvad er ' + p + ' % af ' + base + '?', base * p / 100, 'Find 1 % (' + base + ' : 100), og gang med ' + p + '.', '', 'procent');
+  });
+  sen(8, 'ANVEND', 'procent', function (t, w) {
+    if (t.klasse >= 9) {
+      var c = choice([[1000, 10, 1210], [2000, 5, 2205], [5000, 10, 6050]]);
+      return write(w, 'Du sætter ' + c[0] + ' kr i banken til ' + c[1] + ' % rente om året. Hvor mange kroner har du efter to år, hvis renterne bliver stående?', c[2], 'Regn renten for første år, læg den til, og regn så renten af det nye beløb.', 'kr', 'procent');
+    }
+    var k = choice([1000, 2000, 5000]), p = choice([2, 5, 10]);
+    return write(w, 'Du sætter ' + k + ' kr i banken til ' + p + ' % rente om året. Hvor mange kroner får du i rente efter ét år?', k * p / 100, 'Find ' + p + ' % af ' + k + '.', 'kr', 'procent');
+  });
+  sen(7, 'ANVEND', 'funktion', function (t, w) {
+    var v = choice([60, 80, 90, 120]), tid = choice([0.5, 1.5, 2.5, 3]);
+    return write(w, 'En bil kører ' + v + ' km/t i ' + fmt(tid) + ' timer. Hvor langt kommer den?', v * tid, 'Strækning = hastighed gange tid.', 'km', 'funktion');
+  });
+  sen(7, 'VURDÉR', 'potens', function (t, w) {
+    var b = r(3, 12), e = choice([2, 3]), rigtigt = Math.random() < 0.5, fa = Math.pow(b, e), vist = rigtigt ? fa : fa + choice([-b, b, e * b - b]);
+    return truefalse(w, 'Et hurtigt tjek af en potens. Passer det her?', b + (e === 2 ? '²' : '³') + ' = ' + vist, rigtigt, 'Regn ' + b + (e === 2 ? ' · ' + b : ' · ' + b + ' · ' + b) + ' selv.', 'potens');
+  });
+  sen(8, 'VURDÉR', 'geometri', function (t, w) {
+    var p = choice(TRIPLER), rigtigt = Math.random() < 0.5, c = rigtigt ? p[2] : p[2] + choice([-1, 1]);
+    return truefalse(w, 'Er trekanten med siderne ' + p[0] + ', ' + p[1] + ' og ' + c + ' retvinklet?', p[0] + '² + ' + p[1] + '² = ' + c + '²', rigtigt, 'Regn begge sider ud: ' + (p[0] * p[0] + p[1] * p[1]) + ' mod ' + (c * c) + '.', 'geometri');
+  });
+  sen(7, 'VURDÉR', 'procent', function (t, w) {
+    var p = choice([[10, 100, 10], [25, 80, 20], [50, 30, 15], [20, 150, 30]]), rigtigt = Math.random() < 0.5, vist = rigtigt ? p[2] : p[2] + choice([-5, 5, 10]);
+    return truefalse(w, 'Nogen har regnet procent. Passer det?', p[0] + ' % af ' + p[1] + ' = ' + vist, rigtigt, 'Find ' + p[0] + ' % af ' + p[1] + ' selv.', 'procent');
+  });
+  sen(8, 'VURDÉR', 'algebra', function (t, w) {
+    var a = r(2, 9), b = r(2, 9), rigtigt = Math.random() < 0.5;
+    return truefalse(w, 'Nogen har reduceret et udtryk. Er det rigtigt?', a + 'x + ' + b + 'x = ' + (rigtigt ? (a + b) + 'x' : (a * b) + 'x'), rigtigt, 'Når man lægger x-er sammen, lægger man tallene foran sammen.', 'algebra');
+  });
+
+  var SEN_ANTAL = { 7: 2, 8: 2, 9: 3, 10: 3 };
+  // Bytter nogle af hverdagsopgaverne i sættet ud med overbygningsemner, der passer til sættets Bloom-trin.
+  function blandSenior(qs, bloom, t) {
+    var bud = SEN.filter(function (s) { return s.min <= t.klasse && s.bloom.indexOf(bloom) >= 0; });
+    var alle = SEN.filter(function (s) { return s.min <= t.klasse; });
+    var pladser = qs.map(function (q, i) { return i; }).filter(function (i) { return qs[i].kind !== 'build'; });
+    shuffle(pladser);
+    var n = Math.min(SEN_ANTAL[t.klasse] || 2, Math.max(1, qs.length - 2), pladser.length);
+    bud = shuffle(bud.slice()); alle = shuffle(alle.slice());
+    for (var i = 0; i < n; i++) {
+      var kilde = bud.length ? bud.shift() : alle.shift();
+      if (!kilde) break;
+      var idx = pladser[i], hvem = qs[idx].who;
+      qs[idx] = kilde.f(t, hvem);
+    }
+    return qs;
+  }
+  // Hele klassetrin giver ét niveau; et halvt trin (6,5) blander to niveauer, så det glider.
+  function lavHel(noegle, k) {
+    var t = trin(k), qs = SAET[noegle].gen(t);
+    if (t.senior) qs = blandSenior(qs, SAET[noegle].bloom, t);
+    qs.forEach(function (q) { q.k = t.klasse; });
+    return qs;
+  }
+  function lav(noegle, klasse) {
+    klasse = +klasse || STANDARD_KLASSE;
+    var lo = Math.floor(klasse), hi = Math.ceil(klasse), a = lavHel(noegle, lo);
+    if (hi !== lo) { var b = lavHel(noegle, hi); a = a.map(function (q, i) { return i % 2 && b[i] ? b[i] : q; }); }
+    return a;
+  }
+
   var SAET = {
     husk: { bloom: 'HUSK', gen: husk }, forstaa: { bloom: 'FORSTÅ', gen: forstaa }, anvend: { bloom: 'ANVEND', gen: anvend },
     analyser: { bloom: 'ANALYSÉR', gen: analyser }, vurder: { bloom: 'VURDÉR', gen: vurder }, boss: { bloom: 'SKAB', gen: boss },
@@ -632,7 +841,7 @@
 
   RH.opgaver = {
     TRIN: TRIN, KLASSER: KLASSER, STANDARD_KLASSE: STANDARD_KLASSE, trin: trin, regneloft: regneloft,
-    SAET: SAET, CAN: CAN, lav: function (noegle, klasse) { return SAET[noegle].gen(trin(klasse)); },
+    SAET: SAET, CAN: CAN, lav: lav, SENIOR: SEN,
     checkNumeric: checkNumeric, checkCreative: checkCreative, fmt: fmt, kr: kr,
     // Kapitel 2 og 3 (js/opgaver-kapitler.js) bygger deres sæt med de samme hjælpere
     H: {

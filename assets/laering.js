@@ -33,6 +33,29 @@
       + '<b>' + LF.tid(e.aktiv_sek) + '</b></span>';
   }
 
+  function komma(x) { return String(x).replace('.', ','); }
+  /** Barnets gennemsnitlige klassetrin i Regnehelten ("4,3. klasse"), med et ord, hvis det er regnet ud fra kapitlet. */
+  function snitKlasse(e) {
+    if (e.snit_klasse === null || e.snit_klasse === undefined) return '<span class="lr-intet">–</span>';
+    var anslaaet = e.klasse_anslaaet && e.klasse_anslaaet >= e.klasse_opgaver / 2;
+    return '<span title="Gennemsnittet af klassetrinnene på de opgaver, ' + esc(e.navn) + ' har løst i Regnehelten' + (anslaaet ? ' (anslået ud fra startklassen)' : '') + '"><b>' + komma(e.snit_klasse) + '.</b> klasse'
+      + (e.tilpas ? ' <span class="lille" title="Opgaverne tilpasser sig barnet">★ nu ' + komma(e.niveau_nu) + '.</span>' : '') + (anslaaet ? ' <span class="lille">anslået</span>' : '') + '</span>';
+  }
+  /** Søjler: hvor mange opgaver der er løst på hvert klassetrin, og hvor mange af dem der var rigtige i første forsøg. */
+  function klasseSoejler(e) {
+    var ks = Object.keys(e.klasser || {}).map(Number).sort(function (a, b) { return a - b; });
+    if (!ks.length) return '';
+    var maks = Math.max.apply(null, ks.map(function (k) { return e.klasser[k].n; }));
+    return '<h5>Klassetrin i Regnehelten</h5><p class="lille">Gennemsnit <b>' + komma(e.snit_klasse) + '. klasse</b>'
+      + (e.snit_klasse_rigtige !== null ? ' · de opgaver, ' + esc(e.navn) + ' klarede i første forsøg, ligger i gennemsnit på <b>' + komma(e.snit_klasse_rigtige) + '. klasse</b>' : '')
+      + (e.klasse_anslaaet ? ' · ' + e.klasse_anslaaet + ' af ' + e.klasse_opgaver + ' opgaver er fra før klassetrinnet blev gemt (regnet ud fra startklassen og kapitlet)' : '')
+      + '</p><ul class="lr-emner lr-klasser">' + ks.map(function (k) {
+        var x = e.klasser[k], p = pct(x.n, x.foerste);
+        return '<li><span class="lr-emnenavn">' + k + '. klasse</span><span class="lr-spor"><i style="width:' + Math.max(4, Math.round(x.n / maks * 100)) + '%"></i></span>'
+          + '<span class="lille"> ' + x.n + ' opgaver · ' + x.foerste + ' rigtige i første forsøg (' + p + ' %)</span></li>';
+      }).join('') + '</ul>';
+  }
+
   function tegn(el, d, ctx) {
     var k = d.klasse, elever = d.elever.slice();
     var maks = Math.max.apply(null, elever.map(function (e) { return e.aktiv_sek; }).concat([60]));
@@ -61,7 +84,7 @@
       + '<option value="tid">Mest spilletid</option></select></div>';
 
     html += '<div class="tabel-rul"><table class="liste lr-tabel"><thead><tr><th>Elev</th><th>Spilletid</th><th class="t">Opgaver</th>'
-      + '<th>Rigtige i første forsøg</th><th>Kapitel</th><th></th></tr></thead><tbody data-lr-elever></tbody></table></div>';
+      + '<th>Rigtige i første forsøg</th><th>Klassetrin (Regnehelten)</th><th>Kapitel</th><th></th></tr></thead><tbody data-lr-elever></tbody></table></div>';
 
     html += '<details class="foldud lr-katalog"><summary>Hvilke opgaver bygger det på? (' + d.omraader.length + ' emner i spillene)</summary>'
       + '<p class="lille">Hvert emne er en gruppe opgaver i spillene. Tallene viser, hvor mange af klassens elever der har prøvet emnet, og hvordan det gik.'
@@ -103,9 +126,9 @@
           return '<span class="lille">' + esc(SPILNAVN[s]) + ': ' + c.kapitel + '/3</span>';
         }).filter(Boolean).join('<br>') || '<span class="lr-intet">–</span>';
         return '<tr class="lr-elev" data-elev="' + e.id + '"><td><strong>' + esc(e.navn) + '</strong></td><td>' + tidBjaelke(e, maks) + '</td>'
-          + '<td class="t">' + e.opgaver + '</td><td>' + pctBjaelke(e.pct, e.opgaver) + '</td><td>' + kap + '</td>'
+          + '<td class="t">' + e.opgaver + '</td><td>' + pctBjaelke(e.pct, e.opgaver) + '</td><td>' + snitKlasse(e) + '</td><td>' + kap + '</td>'
           + '<td class="handling"><button type="button" class="link-knap" data-lr-aabn aria-expanded="false">Vis detaljer</button></td></tr>'
-          + '<tr class="lr-detalje" data-detalje="' + e.id + '" hidden><td colspan="6"></td></tr>';
+          + '<tr class="lr-detalje" data-detalje="' + e.id + '" hidden><td colspan="7"></td></tr>';
       }).join('');
     }
     raekker('navn');
@@ -127,7 +150,12 @@
         opg.disabled = true; opg.textContent = 'Henter …';
         var celle = opg.closest('td'), id2 = +opg.dataset.lrOpgaver;
         LF.hent('klasse', 'laering_elev', ctx.params({ id: id2 })).then(function (r) {
-          celle.querySelector('[data-lr-liste]').innerHTML = opgaveliste(r.opgaver);
+          var liste = celle.querySelector('[data-lr-liste]');
+          liste.innerHTML = opgaveliste(r.opgaver);
+          var vaelg = liste.querySelector('[data-lr-klasse]');
+          if (vaelg) vaelg.addEventListener('change', function () {
+            [].forEach.call(liste.querySelectorAll('tbody tr'), function (tr) { var c = tr.querySelector('[data-klasse]'); tr.hidden = !!vaelg.value && (!c || c.dataset.klasse !== vaelg.value); });
+          });
           opg.remove();
         }).catch(function (err) { opg.disabled = false; opg.textContent = 'Vis opgaverne'; alert(err.message); });
       }
@@ -150,6 +178,7 @@
             + '<span class="lille"> ' + o.foerste + ' af ' + o.n + ' opgaver</span></li>';
         }).join('') + '</ul>';
     });
+    h += klasseSoejler(e);
     var trin = Object.keys(e.trin || {});
     if (trin.length) {
       var NAVN = { HUSK: 'Tal-fakta', 'FORSTÅ': 'Forstå opgaven', ANVEND: 'Handle ind', 'ANALYSÉR': 'Mønstre og flere trin', 'VURDÉR': 'Tjekke et svar', SKAB: 'Bygge sit eget regnestykke' };
@@ -177,16 +206,21 @@
       if (!grp[k]) { grp[k] = { spil: o.spil, navn: o.omraade, o: [] }; rk.push(k); }
       grp[k].o.push(o);
     });
+    var ks = {}; opg.forEach(function (o) { if (o.klasse) ks[o.klasse] = 1; });
+    var filter = Object.keys(ks).length > 1
+      ? '<p class="lille lr-filter">Vis kun klassetrin: <select data-lr-klasse><option value="">alle</option>' + Object.keys(ks).sort(function (a, b) { return a - b; }).map(function (k) { return '<option value="' + k + '">' + k + '. klasse</option>'; }).join('') + '</select></p>'
+      : '';
     var svag = function (g) { var m = g.o.filter(function (x) { return x.foerste !== null; }); return m.length ? m.filter(function (x) { return x.foerste; }).length / m.length : 0.5; };
     rk.sort(function (a, b) { return svag(grp[a]) - svag(grp[b]); });
-    return rk.map(function (k) {
+    return filter + rk.map(function (k) {
       var g = grp[k], m = g.o.filter(function (x) { return x.foerste !== null; }), r = m.filter(function (x) { return x.foerste; }).length;
       return '<details class="lr-opg"><summary><b>' + esc(g.navn.replace(/^[^·]*· /, '')) + '</b> <span class="lille">' + esc(SPILNAVN[g.spil]) + ' · ' + g.o.length + ' opgaver'
         + (m.length ? ' · ' + r + ' rigtige i første forsøg' : '') + '</span></summary>'
-        + '<div class="tabel-rul"><table class="liste lr-tabel"><thead><tr><th>Opgave</th><th>Rigtigt svar</th><th class="t">Forsøg</th><th>1. forsøg</th></tr></thead><tbody>'
+        + '<div class="tabel-rul"><table class="liste lr-tabel"><thead><tr><th>Opgave</th><th class="t">Klassetrin</th><th>Rigtigt svar</th><th class="t">Forsøg</th><th class="t">Sek.</th><th>1. forsøg</th></tr></thead><tbody>'
         + g.o.map(function (x) {
-          return '<tr><td>' + esc(x.spoergsmaal) + (x.trin ? '<br><span class="lille">' + esc(x.trin) + '</span>' : '') + '</td><td>' + esc(x.facit) + '</td>'
-            + '<td class="t">' + (x.forsoeg === null ? '–' : x.forsoeg) + '</td>'
+          return '<tr><td>' + esc(x.spoergsmaal) + (x.trin ? '<br><span class="lille">' + esc(x.trin) + '</span>' : '') + '</td>'
+            + '<td class="t" data-klasse="' + (x.klasse || '') + '">' + (x.klasse ? x.klasse + '.' + (x.klasse_anslaaet ? '<span class="lille" title="Anslået"> ~</span>' : '') : '–') + '</td><td>' + esc(x.facit) + '</td>'
+            + '<td class="t">' + (x.forsoeg === null ? '–' : x.forsoeg) + '</td><td class="t">' + (x.sek ? x.sek : '–') + '</td>'
             + '<td>' + (x.foerste === null ? '<span class="lr-intet" title="Spillet gemte ikke forsøgene for denne opgave">ikke gemt</span>' : x.foerste ? '✓ ja' : '✗ nej') + '</td></tr>';
         }).join('') + '</tbody></table></div></details>';
     }).join('');

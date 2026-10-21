@@ -2,6 +2,39 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "regnehelten-til-10-klasse",
+      "dato": "2026-10-21",
+      "maerke": "Spil",
+      "titel": "Regnehelten går nu helt op til 10. klasse",
+      "kort": "7.–10. klasse får potenser, ligninger, funktioner, Pythagoras, sandsynlighed og renters rente.",
+      "tekst": [
+        "Regnehelten var lavet til 1.–6. klasse. Nu kan eleverne vælge <strong>7., 8., 9. og 10. klasse</strong>, og opgaverne følger med: negative tal, potenser og kvadratrødder, ligninger, funktioner og hældning, Pythagoras, cirklens areal, rumfang, sandsynlighed og median, procent, moms og renters rente.",
+        "Det er stadig den samme almindelige skoledag med de samme personer — opgaverne er bare sværere. I <strong>Regnebogen</strong> er der kommet seks nye sider med forklaring, eksempel og tegning, som først dukker op, når man går i 7. klasse eller derover."
+      ]
+    },
+    {
+      "id": "tilpas-niveau",
+      "dato": "2026-10-21",
+      "maerke": "Til voksne",
+      "titel": "Opgaver, der tilpasser sig barnet — og et klassetrin, man kan følge",
+      "kort": "“Tilpas niveau” gør Regnehelten lettere eller sværere, og læringsoversigten viser barnets gennemsnitlige klassetrin.",
+      "tekst": [
+        "Under <a href=\"/konto\">Min konto</a> kan du slå <strong>Tilpas niveau</strong> til for hvert barn. Så kigger Regnehelten på, hvor mange opgaver der lykkes i første forsøg, og hvor hurtigt de bliver løst, og skruer op eller ned i halve klassetrin. Barnet selv kan også vælge “★ Tilpas til mig”, når et spil begynder.",
+        "I <strong>Børnenes læring</strong> (og <strong>Elevernes læring</strong> for en klasse) kan du nu se, hvilket klassetrin barnet i gennemsnit har regnet på, hvor mange opgaver der er løst på hvert klassetrin, og hver enkelt opgave med klassetrin og tid. Excel-arket har fået en ny fane, “Niveau”. Spillet gemmer nu klassetrin og tid pr. opgave — det står under <a href=\"/privatliv\">Privatliv</a>."
+      ]
+    },
+    {
+      "id": "hjaelp-og-support",
+      "dato": "2026-10-21",
+      "maerke": "Siden",
+      "titel": "Hjælp og support nederst til højre",
+      "kort": "Voksne, der er logget ind, kan finde svar på de mest stillede spørgsmål eller skrive til os.",
+      "tekst": [
+        "Når du er logget ind som voksen, ligger der nu en lille <strong>?</strong>-knap nederst til højre. Den åbner svar på de mest stillede spørgsmål (du kan søge i dem), og hvis du ikke finder svaret, kan du oprette en supportsag direkte derfra. Vi svarer på mail, og du kan følge sagen under “Mine sager”.",
+        "Børn ser aldrig knappen — den findes kun for voksne, der er logget ind. Hvad vi gemmer om en supportsag, står under <a href=\"/privatliv\">Privatliv</a>."
+      ]
+    },
+    {
       "id": "elevernes-laering",
       "dato": "2026-10-21",
       "maerke": "Til voksne",

@@ -33,6 +33,9 @@
       forsoeg: r.tries,
       foerste_forsoeg: !!r.first,
       klaret: !!r.klaret,
+      k: spec.k || S.klasse,                // klassetrinnet, opgaven er lavet på (lærervisningen viser gennemsnit og fordeling)
+      sek: r.sek || 0,                      // hvor lang tid barnet brugte på opgaven
+      tp: S.tilpas ? 1 : 0,                 // 1 = opgaverne tilpassede sig barnet
       t: Math.floor(Date.now() / 1000)   // når opgaven blev løst — lærervisningen bruger det til at se, hvor lang tid der går mellem opgaverne
     });
   }
@@ -52,7 +55,7 @@
       minutter: Math.round(S.res.sek / 6) / 10,
       opgaver: svar.length, foerste_forsoeg: rigtige, klaret: klaret,
       procent: svar.length ? Math.round(100 * rigtige / svar.length) : 0,
-      regnekraft: S.kraft, kapitel: kapitel, kap: S.kap || 1, klaret: (S.klaret || []).join(','), faerdig: !!S.res.faerdig,
+      regnekraft: S.kraft, kapitel: kapitel, kap: S.kap || 1, kapitler_klaret: (S.klaret || []).join(','), niveau: S.tilpas ? S.niveau : null, faerdig: !!S.res.faerdig,
       emner: emner, detaljer: svar
     };
   }

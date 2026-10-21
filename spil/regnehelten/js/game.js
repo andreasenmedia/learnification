@@ -37,8 +37,9 @@
   // ---------------------------------------------------------------- tilstand
   function fresh(name, klasse, look) {
     return {
-      // kap = kapitlet, man spiller nu; klaret = de kapitler, man har gennemført; klasse følger kapitlet (startKlasse + kap − 1, højst 6)
-      v: 3, kap: 1, klaret: [], startKlasse: klasse, name: name, klasse: klasse, look: look, map: 'klasse', x: 8, y: 9, dir: 'up', cut: true, tom: false,
+      // kap = kapitlet, man spiller nu; klaret = de kapitler, man har gennemført; klasse følger kapitlet (startKlasse + kap − 1, højst 10)
+      // tilpas = opgaverne følger barnet (niveau, i halve klassetrin); voksen = en voksen har slået det til (konto → barn)
+      v: 3, tilpas: false, niveau: klasse, voksen: false, kap: 1, klaret: [], startKlasse: klasse, name: name, klasse: klasse, look: look, map: 'klasse', x: 8, y: 9, dir: 'up', cut: true, tom: false,
       q: {}, flags: {}, sets: {}, loest: {}, runde: {}, mastery: {}, kraft: 10, total: { n: 0, first: 0 }, persist: 0,
       bag: { owned: [], counts: {}, plays: { fodbold: 0, dressup: 0 } }, seen: {}, talks: 0, res: RH.resultat.nyOmgang()
     };
@@ -84,7 +85,7 @@
       var s = typeof tekst === 'string' ? JSON.parse(tekst) : tekst;
       if (!s || s.slettet) return null;
       if (s.v === 2) { s.v = 3; s.kap = 1; s.klaret = s.q && s.q.q5 === 'done' ? [1] : []; s.startKlasse = s.klasse; }
-      if (s.v === 3) { s.klaret = s.klaret || []; s.kap = s.kap || 1; s.startKlasse = s.startKlasse || s.klasse; return s; }
+      if (s.v === 3) { s.klaret = s.klaret || []; s.kap = s.kap || 1; s.startKlasse = s.startKlasse || s.klasse; s.tilpas = !!s.tilpas; s.niveau = s.niveau || s.klasse; s.voksen = !!s.voksen; return s; }
       if (s.navn !== undefined && s.chapter !== undefined) return parse(fraFoersteUdgave(s));
     } catch (e) { /* ødelagt */ }
     return null;
@@ -213,6 +214,21 @@
     var keep = idx.slice(0, must >= 0 ? n - 1 : n); if (must >= 0) keep.push(must);
     return keep.sort(function (a, b) { return a - b; }).map(function (i) { return specs[i]; });
   }
+  // Tilpas niveau: efter hvert sæt kigger vi på, hvor mange der var rigtige i første forsøg, og hvor lang tid det tog
+  // i forhold til en rolig tid pr. opgavetype (GRUNDTID). Op i halve trin, ned i halve trin — barnet hører kun om op.
+  function tilpasNiveau(runde) {
+    var rel = (runde.rel || []).slice().sort(function (a, b) { return a - b; });
+    if (!rel.length || runde.n < 1) return;
+    var median = rel[(rel.length - 1) >> 1], ratio = runde.first / Math.max(1, runde.n), skridt = 0;
+    if (ratio >= 0.999 && median <= 0.6) skridt = 1;
+    else if (ratio >= 0.8 && median <= 1) skridt = 0.5;
+    else if (ratio < 0.5 || median > 2.5) skridt = -0.5;
+    if (!skridt) return;
+    var foer = S.niveau, ny = Math.max(1, Math.min(10, (S.niveau || S.klasse) + skridt));
+    if (ny === foer) return;
+    S.niveau = ny; S.klasse = Math.round(ny);
+    if (ny > foer) UI.toast('Opgaverne bliver lidt sværere — flot! ★');
+  }
   var g = {
     get S() { return S; },
     get world() { return world; },
@@ -222,11 +238,11 @@
     saet: async function (qid, saetNoegle, scene) {
       var specs = S.sets[qid];
       var bloom = O.SAET[saetNoegle].bloom;
-      if (!specs) { specs = S.sets[qid] = trimSaet(qid, O.lav(saetNoegle, S.klasse), bloom); save(); }
+      if (!specs) { specs = S.sets[qid] = trimSaet(qid, O.lav(saetNoegle, S.tilpas ? S.niveau : S.klasse), bloom); save(); }
       for (var i = 0; i < specs.length; i++) {
         var key = qid + ':' + i;
         if (S.loest[key]) continue;
-        var sp = specs[i], side = K.BOG.filter(function (p) { return p.id === sp.book; })[0];
+        var sp = specs[i], side = K.BOG.filter(function (p) { return p.id === sp.book; })[0], t0 = Date.now();
         var r = await UI.opgave(sp, {
           who: sp.who ? who(sp.who) : null, area: 'Matematik · ' + (side ? side.title : ''), count: 'Opgave ' + (i + 1) + ' af ' + specs.length, kraft: S.kraft,
           onBook: function (id) { UI.book('regnebogen', id, true); }
@@ -237,11 +253,15 @@
         S.total.n++; if (r.first) S.total.first++;
         if (r.klaret) S.kraft = Math.min(100, S.kraft + (r.first ? 6 : 3));
         if (r.klaret && !r.first) { S.persist++; if (S.persist === 1 || S.persist % 5 === 0) UI.toast('<b>Vedholdenhed!</b> Du gav ikke op — det er sådan, man bliver god.'); }
+        r.sek = Math.min(600, Math.round((Date.now() - t0) / 1000));
+        var rel = S.runde[qid].rel || (S.runde[qid].rel = []);
+        rel.push(Math.round(100 * r.sek / ((K.GRUNDTID || {})[sp.kind] || 25)) / 100);
         RH.resultat.noter(S, scene, bloom, sp, r);
         RH.resultat.send(S, true);
         save(); hud();
       }
       var runde = S.runde[qid] || { n: 1, first: 0 }, ratio = runde.first / Math.max(1, runde.n);
+      if (S.tilpas) tilpasNiveau(runde);
       if (!K.quest(qid).side) S.mastery[bloom] = ratio >= 0.8 ? 3 : ratio >= 0.45 ? 2 : 1;
       delete S.sets[qid];
       RH.audio.sfx('quest');
@@ -667,7 +687,7 @@
     if (n === 1 || (S.klaret || []).indexOf(n - 1) >= 0) return 'klar';
     return 'laast';
   }
-  function klasseFor(n) { return Math.min(6, (S.startKlasse || S.klasse) + n - 1); }
+  function klasseFor(n) { return S.tilpas ? Math.round(S.niveau) : Math.min(10, (S.startKlasse || S.klasse) + n - 1); }
   async function naesteKapitel() { await startKapitel((S.kap || 1) + 1); }
   async function startKapitel(n) {
     var kp = K.kapitler[n];
@@ -679,8 +699,15 @@
       player.px = S.x * T; player.py = S.y * T; player.moving = false;
       npcDir = {}; refresh(); snapCam(); musik(); hud(); save(true);
     }, 700);
-    await UI.kapitelkort(n, kp.navn, kp.kort, O.trin(S.klasse).navn + ': opgaverne er nu på ' + O.trin(S.klasse).navn + 's niveau.');
+    await UI.kapitelkort(n, kp.navn, kp.kort, S.tilpas ? 'Opgaverne tilpasser sig dig, mens du spiller.' : O.trin(S.klasse).navn + ': opgaverne er nu på ' + O.trin(S.klasse).navn + 's niveau.');
     await kp.intro(g);
+  }
+  // En voksen kan slå "Tilpas niveau" til/fra pr. barn (/konto). Spillet følger med, næste gang barnet fortsætter.
+  function tilpasFraVoksen() { return !!(window.LF_SPILLER && LF_SPILLER.elev && LF_SPILLER.elev.tilpas); }
+  function synkTilpas() {
+    var v = tilpasFraVoksen();
+    if (v && !S.tilpas) { S.tilpas = true; S.niveau = S.klasse; S.voksen = true; }
+    else if (!v && S.voksen) { S.tilpas = false; S.voksen = false; S.startKlasse = S.klasse; }
   }
   // Kapitel-menuen (Pause → Kapitler): ✓ klaret, ► i gang, "Start" når det er låst op
   async function kapitelMenu() {
@@ -1030,7 +1057,7 @@
     if (!profil && saved && saved.look) { profil = LFProfil.ny(saved.name, saved.look); LFProfil.gem(profil, true); }
     var choice = await UI.title(saved ? (profil && profil.navn) || saved.name : '', info);
     if ((choice === 'continue' || choice === 'naeste') && saved) {
-      S = saved;
+      S = saved; synkTilpas();
       // Lukkede man fanen midt i åbningsscenen, springer vi frem til morgenen
       if (S.cut) { S.cut = false; S.tom = false; S.map = 'hjem'; S.x = 4; S.y = 3; S.dir = 'up'; if (!S.q.q0) S.q.q0 = 'active'; }
       begin();
@@ -1049,6 +1076,7 @@
     }
     var ny = await UI.create(saved ? { klasse: saved.klasse } : null);
     S = fresh(profil.navn, ny.klasse, profil.look);
+    S.tilpas = !!ny.tilpas; S.voksen = tilpasFraVoksen();
     begin(); save();
     await run(async function () { await visGuide(); await K.script.intro(g); });
   }

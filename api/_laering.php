@@ -34,6 +34,13 @@ const REGNEBOG = [
     'areal' => ['Omkreds og areal', 'Rundt om og indeni'],
     'raekkefolge' => ['Hvad regner man først?', 'Regnearternes orden'],
     'tjek' => ['Tjek dit svar', 'Gode vaner'],
+    // overbygningen, 7.-10. klasse
+    'potens' => ['Potenser og rødder', 'Gange med sig selv'],
+    'algebra' => ['Algebra og ligninger', 'Find det skjulte tal'],
+    'funktion' => ['Funktioner og linjer', 'Når det ene afhænger af det andet'],
+    'geometri' => ['Geometri', 'Figurer, rumfang og Pythagoras'],
+    'sandsynlighed' => ['Sandsynlighed og statistik', 'Chancer og tal om tal'],
+    'procent' => ['Procent, moms og rente', 'Når tal vokser og falder'],
 ];
 
 const BLOOM_NAVN = [
@@ -78,13 +85,40 @@ function laer_elev_ud_fra_spil(array $gemt, bool $med_opgaver): array
     $omr = [];              // "spil:id" => ['spil','id','navn','n','foerste']
     $tider = [];            // unix-tidspunkter for løste opgaver
     $trin = [];
+    $klasser = [];          // klassetrin => ['n','foerste'] — Regnehelten, ud fra hver opgaves eget klassetrin
+    $anslaaet_k = 0;        // antal opgaver uden gemt klassetrin (ældre spil), hvor trinnet er regnet ud fra kapitlet
+    $summ_k = $summ_k_rigtige = $n_k_rigtige = $n_k = 0;
+    $niveau_nu = null;
+    $tilpas = false;
 
     // ---- Regnehelten
     if (isset($gemt['regnehelten'])) {
         $d = $gemt['regnehelten'];
+        $start_k = max(1, min(10, (int) ($d['startKlasse'] ?? $d['klasse'] ?? 3)));
+        $tilpas = !empty($d['tilpas']);
+        $niveau_nu = $tilpas ? round((float) ($d['niveau'] ?? $d['klasse'] ?? $start_k) * 2) / 2 : null;
         foreach ((array) ($d['res']['svar'] ?? []) as $s) {
             if (!is_array($s)) {
                 continue;
+            }
+            // Klassetrinnet opgaven blev lavet på. Ældre spil gemte det ikke: så er det startklassen + kapitlet − 1.
+            $k_est = false;
+            if (isset($s['k']) && (int) $s['k'] >= 1) {
+                $k = max(1, min(10, (int) $s['k']));
+            } else {
+                $kap_n = preg_match('/^k(\d)q/', (string) ($s['scene'] ?? ''), $mm) ? (int) $mm[1] : 1;
+                $k = max(1, min(10, $start_k + $kap_n - 1));
+                $k_est = true;
+                $anslaaet_k++;
+            }
+            $klasser[$k] = $klasser[$k] ?? ['n' => 0, 'foerste' => 0];
+            $klasser[$k]['n']++;
+            $klasser[$k]['foerste'] += !empty($s['foerste_forsoeg']) ? 1 : 0;
+            $summ_k += $k;
+            $n_k++;
+            if (!empty($s['foerste_forsoeg'])) {
+                $summ_k_rigtige += $k;
+                $n_k_rigtige++;
             }
             $emne = (string) ($s['emne'] ?? '') ?: 'andet';
             $id = 'regnehelten:' . $emne;
@@ -102,7 +136,8 @@ function laer_elev_ud_fra_spil(array $gemt, bool $med_opgaver): array
                     'trin' => (string) ($s['trin'] ?? ''), 'type' => (string) ($s['type'] ?? ''),
                     'sted' => (string) ($s['scene'] ?? ''), 'spoergsmaal' => kort_tekst($s['spoergsmaal'] ?? '', 140),
                     'facit' => kort_tekst($s['facit'] ?? '', 80), 'forsoeg' => (int) ($s['forsoeg'] ?? 0),
-                    'foerste' => !empty($s['foerste_forsoeg']) ? 1 : 0, 'klaret' => !empty($s['klaret']) ? 1 : 0, 't' => $t];
+                    'foerste' => !empty($s['foerste_forsoeg']) ? 1 : 0, 'klaret' => !empty($s['klaret']) ? 1 : 0, 't' => $t,
+                    'klasse' => $k, 'klasse_anslaaet' => $k_est ? 1 : 0, 'sek' => isset($s['sek']) ? (int) $s['sek'] : null];
             }
         }
         foreach ((array) ($d['mastery'] ?? []) as $bloom => $niveau) {
@@ -156,7 +191,10 @@ function laer_elev_ud_fra_spil(array $gemt, bool $med_opgaver): array
         }
     }
     return ['opgaver_n' => $n, 'foerste' => $foerste, 'omraader' => array_values($omr), 'trin' => $trin,
-            'opgaver' => $opgaver, 'har_tider' => count($tider) >= 2, 'tider_n' => count($tider), 'vandre_maalt' => $maalt];
+            'opgaver' => $opgaver, 'har_tider' => count($tider) >= 2, 'tider_n' => count($tider), 'vandre_maalt' => $maalt,
+            'klasser' => $klasser, 'snit_klasse' => $n_k ? round($summ_k / $n_k, 1) : null,
+            'snit_klasse_rigtige' => $n_k_rigtige ? round($summ_k_rigtige / $n_k_rigtige, 1) : null,
+            'klasse_anslaaet' => $anslaaet_k, 'klasse_opgaver' => $n_k, 'tilpas' => $tilpas, 'niveau_nu' => $niveau_nu];
 }
 
 /** De gemte spil for en elev som [spil => array]. */
@@ -227,6 +265,10 @@ function laering_klasse(array $gruppe, bool $med_opgaver = false): array
             'opgaver' => $u['opgaver_n'], 'foerste' => $u['foerste'],
             'pct' => $u['opgaver_n'] ? (int) round(100 * $u['foerste'] / $u['opgaver_n']) : null,
             'omraader' => $u['omraader'], 'trin' => $u['trin'], 'kapitler' => $kap,
+            'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin'] : ($gruppe['klassetrin'] !== null ? (int) $gruppe['klassetrin'] : null),
+            'tilpas_til' => !empty($e['tilpas']) ? 1 : 0, 'tilpas' => $u['tilpas'], 'niveau_nu' => $u['niveau_nu'],
+            'snit_klasse' => $u['snit_klasse'], 'snit_klasse_rigtige' => $u['snit_klasse_rigtige'],
+            'klasser' => $u['klasser'], 'klasse_anslaaet' => $u['klasse_anslaaet'], 'klasse_opgaver' => $u['klasse_opgaver'],
             'har_tider' => $u['har_tider'], 'vandre_maalt' => $u['vandre_maalt'],
             'skema' => $skema[$id] ?? null, 'opgaveliste' => $u['opgaver']];
     }
@@ -427,25 +469,34 @@ function laering_xlsx_faner(array $L): array
 {
     $spil = ['runeborg' => 'Runeborg', 'regnehelten' => 'Regnehelten'];
     $elever = [['Elev', 'Aktiv tid (min)', 'Heraf Runeborg (min)', 'Heraf Regnehelten (min)', 'Opgaver løst', 'Rigtige i 1. forsøg',
-                '% rigtige i 1. forsøg', 'Opgaver pr. 10 min', 'Tid uden opgaver (min)', 'Tid uden opgaver er', 'Runeborg kapitel', 'Regnehelten kapitel']];
+                '% rigtige i 1. forsøg', 'Opgaver pr. 10 min', 'Tid uden opgaver (min)', 'Tid uden opgaver er', 'Runeborg kapitel', 'Regnehelten kapitel',
+                'Regnehelten: gns. klassetrin', 'Gns. klassetrin, rigtige i 1. forsøg', 'Niveau nu (tilpas)']];
     $emner = [['Elev', 'Spil', 'Emne / område', 'Opgaver', 'Rigtige i 1. forsøg', '% rigtige i 1. forsøg']];
-    $opg = [['Elev', 'Spil', 'Emne / område', 'Læringstrin', 'Opgavetype', 'Sted / nøgle', 'Spørgsmål', 'Rigtigt svar',
-             'Forsøg', 'Rigtigt i 1. forsøg', 'Klaret', 'Tidspunkt']];
+    $opg = [['Elev', 'Spil', 'Emne / område', 'Klassetrin', 'Klassetrin er', 'Læringstrin', 'Opgavetype', 'Sted / nøgle', 'Spørgsmål', 'Rigtigt svar',
+             'Forsøg', 'Rigtigt i 1. forsøg', 'Klaret', 'Sekunder brugt', 'Tidspunkt']];
+    $niveau = [['Elev', 'Klassetrin', 'Opgaver', 'Rigtige i 1. forsøg', '% rigtige i 1. forsøg']];
     $skema = [['Elev', 'Hvor sjovt var det?', 'Hvordan var opgaverne?', 'Forstod du, hvad du skulle?', 'Lærte du noget nyt?',
                'Vil du spille igen?', 'Hvilket spil bedst?']];
     foreach ($L['elever'] as $e) {
         $elever[] = [$e['navn'], min1($e['aktiv_sek']), min1($e['sek_spil']['runeborg'] ?? 0), min1($e['sek_spil']['regnehelten'] ?? 0),
             $e['opgaver'], $e['foerste'], $e['pct'], $e['pr10'], min1($e['vandre_sek']),
             $e['vandre_type'] === 'maalt' ? 'målt' : 'anslået',
-            $e['kapitler']['runeborg']['kapitel'] ?? '', $e['kapitler']['regnehelten']['kapitel'] ?? ''];
+            $e['kapitler']['runeborg']['kapitel'] ?? '', $e['kapitler']['regnehelten']['kapitel'] ?? '',
+            $e['snit_klasse'], $e['snit_klasse_rigtige'], $e['niveau_nu']];
+        $kl = $e['klasser'];
+        ksort($kl);
+        foreach ($kl as $k => $x) {
+            $niveau[] = [$e['navn'], $k . '. klasse', $x['n'], $x['foerste'], $x['n'] ? (int) round(100 * $x['foerste'] / $x['n']) : null];
+        }
         foreach ($e['omraader'] as $o) {
             $emner[] = [$e['navn'], $spil[$o['spil']] ?? $o['spil'], $o['navn'], $o['n'], $o['foerste'],
                 $o['n'] ? (int) round(100 * $o['foerste'] / $o['n']) : null];
         }
         foreach ($e['opgaveliste'] ?? [] as $o) {
-            $opg[] = [$e['navn'], $spil[$o['spil']] ?? $o['spil'], $o['omraade'], $o['trin'], $o['type'], $o['sted'], $o['spoergsmaal'],
+            $opg[] = [$e['navn'], $spil[$o['spil']] ?? $o['spil'], $o['omraade'], isset($o['klasse']) ? $o['klasse'] . '. klasse' : '',
+                isset($o['klasse']) ? (!empty($o['klasse_anslaaet']) ? 'anslået' : 'målt') : '', $o['trin'], $o['type'], $o['sted'], $o['spoergsmaal'],
                 $o['facit'], $o['forsoeg'], $o['foerste'] === null ? '' : ($o['foerste'] ? 'ja' : 'nej'),
-                $o['klaret'] === null ? '' : ($o['klaret'] ? 'ja' : 'nej'), $o['t'] ? date('Y-m-d H:i:s', (int) $o['t']) : ''];
+                $o['klaret'] === null ? '' : ($o['klaret'] ? 'ja' : 'nej'), $o['sek'] ?? '', $o['t'] ? date('Y-m-d H:i:s', (int) $o['t']) : ''];
         }
         if ($e['skema']) {
             $s = $e['skema'];
@@ -461,10 +512,12 @@ function laering_xlsx_faner(array $L): array
         ['Aktiv tid', 'Tid, hvor spillet var åbent, i forgrunden og barnet rørte skærmen eller tastaturet (målt hvert 30. sekund).'],
         ['Rigtige i 1. forsøg', 'Opgaver, der blev løst rigtigt i første forsøg. Det er det bedste mål for, hvad barnet kan uden hjælp.'],
         ['Opgaver pr. 10 min', 'Hvor mange opgaver barnet løser i gennemsnit pr. 10 aktive minutter.'],
+        ['Klassetrin (Regnehelten)', 'Det klassetrin, opgaven blev lavet på. Når barnet har "Tilpas niveau", skifter det undervejs i halve trin. "Målt" = gemt af spillet; "anslået" = regnet ud fra barnets startklasse og kapitel (ældre spil).'],
+        ['Gns. klassetrin', 'Gennemsnittet af klassetrinnene på alle de opgaver, barnet har løst. "Rigtige i 1. forsøg" tager kun dem, barnet klarede uden hjælp: det viser, hvilket niveau barnet reelt mestrer.'],
         ['Tid uden opgaver', 'Dialog, læsning, bøger og at gå rundt i spillets verden.'],
         ['målt', 'Spillet har gemt et tidspunkt pr. løst opgave. Tid uden opgaver er summen af pauser over ' . OPGAVE_TYPISK_SEK . ' sekunder mellem to opgaver.'],
         ['anslået', 'Spillet gemte ikke tidspunkter, da klassen spillede. Tid uden opgaver er aktiv tid minus antal opgaver × ' . $L['klasse']['typisk_sek'] . ' sek. (den typiske tid pr. opgave for de mest fokuserede elever i klassen). Brug det som et fingerpeg, ikke et facit.'],
         ['Runeborg-opgaver', 'Før tidspunkter blev gemt, kan vi se hvilke opgaver der er løst og hvor mange der var rigtige i 1. forsøg pr. område, men ikke pr. opgave.'],
         ['Spørgeskema', 'Barnets egne svar på de seks smiley-spørgsmål (kun i testrunder).']];
-    return ['Elever' => $elever, 'Emner' => $emner, 'Opgaver' => $opg, 'Opgaverne i spillene' => $om, 'Spørgeskema' => $skema, 'Forklaring' => $forklaring];
+    return ['Elever' => $elever, 'Emner' => $emner, 'Niveau' => $niveau, 'Opgaver' => $opg, 'Opgaverne i spillene' => $om, 'Spørgeskema' => $skema, 'Forklaring' => $forklaring];
 }

@@ -187,8 +187,29 @@
       example: ['2 + 3 x 4  →  3 x 4 = 12  →  2 + 12 = 14.', 'Med parentes: (2 + 3) x 4 = 20.'] },
     { id: 'tjek', title: 'Tjek dit svar', tag: 'Gode vaner', diagram: null,
       body: ['Et svar kan tjekkes. Det tager ti sekunder og redder mange fejl.', 'Regn den anden vej: har du lagt sammen, så træk fra igen. Har du ganget, så divider tilbage.', 'Spørg også: kan svaret overhovedet passe? Hvis du deler 12 mellem 3, kan svaret ikke være større end 12.'],
-      example: ['Du fik 47 + 26 = 73.', 'Tjek: 73 - 26 = 47. Det passer.'] }
+      example: ['Du fik 47 + 26 = 73.', 'Tjek: 73 - 26 = 47. Det passer.'] },
+    // Overbygningen — kommer først frem i Regnebogen fra 7. klasse (fra: klassetrin)
+    { id: 'potens', fra: 7, title: 'Potenser og rødder', tag: 'Gange med sig selv', diagram: 'potens',
+      body: ['En potens er en hurtig måde at skrive, at man ganger et tal med sig selv. 5² betyder 5 · 5, og 2³ betyder 2 · 2 · 2.', 'Kvadratroden går den modsatte vej: √49 er det tal, som ganget med sig selv giver 49. Det er 7.'],
+      example: ['Et kvadrat med siden 6 m har arealet 6² = 36 m².', 'Et kvadrat på 81 m² har siden √81 = 9 m.'] },
+    { id: 'algebra', fra: 7, title: 'Algebra og ligninger', tag: 'Find det skjulte tal', diagram: 'algebra',
+      body: ['I en ligning er der et tal, du ikke kender endnu (x). En ligning er som en vægt i balance: det du gør ved den ene side, skal du gøre ved den anden.', 'Mangler du x, så gå baglæns: modsat af plus er minus, modsat af gange er division. Står x på begge sider, så saml dem først på den ene side.'],
+      example: ['3x + 4 = 19  →  3x = 15  →  x = 5.', 'Reducér: 2x + 5 + 4x - 1 = 6x + 4.'] },
+    { id: 'funktion', fra: 7, title: 'Funktioner og linjer', tag: 'Når det ene afhænger af det andet', diagram: 'funktion',
+      body: ['En funktion fortæller, hvad y bliver, når du vælger x. For y = 2x + 3 får du y = 7, når x = 2.', 'Grafen er en ret linje. Tallet foran x er hældningen (hvor meget y vokser, når x vokser med 1). Tallet bagved er der, hvor linjen skærer y-aksen.'],
+      example: ['Taxa: 30 kr + 12 kr pr. km  →  y = 12x + 30.', 'Efter 5 km: 12 · 5 + 30 = 90 kr.'] },
+    { id: 'geometri', fra: 7, title: 'Geometri', tag: 'Figurer, rumfang og Pythagoras', diagram: 'geometri',
+      body: ['I en retvinklet trekant gælder Pythagoras: a² + b² = c², hvor c er den længste side. En cirkel har omkredsen π · diameter og arealet π · radius · radius (π ≈ 3,14).', 'Rumfang er, hvor meget der er inden i: længde · bredde · højde. Vinklerne i en trekant er tilsammen 180°. På et kort med målestok 1 : 100.000 er 1 cm lig med 1 km.'],
+      example: ['Stige: 3 m fra væg, 4 m op. 3² + 4² = 25, så stigen er √25 = 5 m.', 'Rum på 5 · 4 · 3 = 60 m³.'] },
+    { id: 'sandsynlighed', fra: 7, title: 'Sandsynlighed og statistik', tag: 'Chancer og tal om tal', diagram: 'sandsynlighed',
+      body: ['Sandsynlighed = antal gunstige udfald : antal mulige udfald. Skriv den gerne i procent.', 'Median er det midterste tal, når du sorterer. Typetal er det tal, der kommer flest gange. Gennemsnit er summen delt med antallet.'],
+      example: ['3 røde og 7 blå kugler: chancen for rød er 3 : 10 = 30 %.', 'Median af 2, 9, 4, 7, 5: sortér til 2, 4, 5, 7, 9 → 5.'] },
+    { id: 'procent', fra: 7, title: 'Procent, moms og rente', tag: 'Når tal vokser og falder', diagram: 'procent',
+      body: ['Find 1 % ved at dele med 100, og gang så. Procentvis ændring = ændringen delt med det gamle tal.', 'Moms er 25 %: gang prisen med 1,25. Rente er procent af dit beløb. Med renters rente regner du renten af det nye beløb hvert år.'],
+      example: ['Pris 400 kr + 25 % moms = 400 · 1,25 = 500 kr.', '1.000 kr til 10 % i 2 år: 1.100, og så 1.210 kr.'] }
   ];
+  // Hvor lang tid en opgave tager for en barn, der magter den (sekunder) — bruges til at tilpasse niveauet
+  var GRUNDTID = { choice: 14, truefalse: 12, write: 22, findall: 30, balance: 32, sequence: 24, coins: 26, build: 55 };
 
   // ---------------------------------------------------------------- dialog og handling
   // g er spillets hjælpere: g.say, g.ask, g.saet, g.start, g.finish, g.flag, g.toast ...
@@ -316,7 +337,7 @@
   // kapitel2.js og kapitel3.js og lægger deres personer, missioner og opgavesæt oveni med
   // RH.content.tilfoej({...}). Alt i et kapitel har en kap-markering, så Dagbogen kun viser det,
   // man har nået. Sværhedsgraden stiger ét klassetrin pr. kapitel: S.klasse = startKlasse + kap − 1
-  // (højst 6. klasse) — det bestemmer game.js, når et kapitel begynder.
+  // (højst 10. klasse) — det bestemmer game.js, når et kapitel begynder.
   var KAPITLER = 3;
   var kapitler = {
     1: {
@@ -382,7 +403,7 @@
   RH.content = {
     npcs: npcs, things: things, places: places, placePos: placePos, lockedDoors: lockedDoors, script: script,
     talk: talk, available: available, ENC: ENC, REWARDS: REWARDS, REWARD_PCT: REWARD_PCT, ITEMS: ITEMS, PAUSESPIL: PAUSESPIL,
-    PLAYS_PER_ITEM: PLAYS_PER_ITEM, MAX_PLAYS: MAX_PLAYS, BOG: BOG,
+    PLAYS_PER_ITEM: PLAYS_PER_ITEM, MAX_PLAYS: MAX_PLAYS, BOG: BOG, GRUNDTID: GRUNDTID,
     SKIN: SKIN, HAIRC: HAIRC, CLOTH: CLOTH, PANTS: PANTS, STYLES: STYLES, EXTRAS: EXTRAS, STD_LOOK: STD_LOOK,
     KAPITLER: KAPITLER, kapitler: kapitler, tilfoej: tilfoej, kapNu: kapNu, main: main, side: side,
     quest: function (id) { return byId[id]; },

@@ -49,6 +49,13 @@ if (!$x || $x['elev']) {
     fejl('Log ind som voksen for at se XP-tavlen.', 401);
 }
 $k = $x['konto'];
+// Administratoren kan se en families tavle som forælderen ser den (/konto?som=…) — kun læsning
+if ($k['type'] === 'admin' && tal('konto') > 0 && $h === 'tavle') {
+    $k = en("SELECT * FROM konti WHERE id = ? AND type != 'admin'", [tal('konto')]);
+    if (!$k) {
+        fejl('Kontoen findes ikke.', 404);
+    }
+}
 
 if ($h === 'tavle') {
     if ($k['type'] !== 'foraelder') {

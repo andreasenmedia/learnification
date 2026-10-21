@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=8">
-<link rel="stylesheet" href="/assets/konto.css?v=19">
+<link rel="stylesheet" href="/assets/konto.css?v=20">
 </head>
 <body>
 
@@ -41,6 +41,7 @@
   <a href="/start/" class="btn btn-primary glimt" style="width:fit-content;margin-top:8px;">Start eventyret her</a>
 </div>
 
+<div id="som-banner" role="status" hidden></div>
 <main class="konto-side">
   <div class="wrap">
     <p class="midt lille" id="indlaeser">Henter din konto …</p>
@@ -186,7 +187,7 @@
           <label><input type="radio" name="kun_spil" value="runeborg">
             <span><strong>Kun Runeborg</strong><small>Et fantasyeventyr for 5.-9. klasse</small></span></label>
           <label><input type="radio" name="kun_spil" value="regnehelten">
-            <span><strong>Kun Regnehelten</strong><small>Regning i hverdagen for 1.-6. klasse</small></span></label>
+            <span><strong>Kun Regnehelten</strong><small>Regning i hverdagen for 1.-10. klasse</small></span></label>
         </div>
         <button class="btn btn-sm btn-primary" type="submit">Gem</button>
       </form>
@@ -230,12 +231,15 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=6"></script>
-<script src="/assets/laering.js?v=1"></script>
+<script src="/assets/konto.js?v=7"></script>
+<script src="/assets/laering.js?v=2"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var data = null;
+  // /konto?som=<id>: administratoren ser kontoen præcis som ejeren, men kun læsende (se LF.som i konto.js)
+  var SOM = +(new URLSearchParams(location.search).get('som')) || 0;
+  if (SOM) { LF.som = SOM; document.body.classList.add('som'); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -255,6 +259,13 @@
 
   function tegn(d) {
     data = d;
+    if (SOM && d.konto.id !== SOM) { SOM = 0; LF.som = 0; document.body.classList.remove('som'); }   // ikke administrator: det er din egen konto
+    if (SOM) {
+      var ejer = { skole: 'læreren', foraelder: 'forælderen', privat: 'brugeren' }[d.konto.type] || 'ejeren';
+      $('som-banner').hidden = false;
+      $('som-banner').innerHTML = '<b>Du ser ' + LF.esc(d.konto.navn) + 's konto, som ' + ejer + ' ser den.</b> Kun visning — der kan ikke ændres noget her. '
+        + '<a href="/admin#konto=' + SOM + '">Tilbage til admin</a>';
+    }
     var skole = d.konto.type === 'skole';
     var admin = d.konto.type === 'admin';
     $('indlaeser').hidden = true;
@@ -324,14 +335,14 @@
         + '<div class="gruppe-hoved"><h3>' + titel + '</h3></div>'
         + '<p class="knapper lille ingen-print" style="margin:-4px 0 16px;gap:6px 18px;">'
         + '<a href="/login-kort?g=' + g.id + '">Udskriv login-kort</a>'
-        + (g.elever.length && (skole || admin) ? '<button type="button" class="link-knap" data-laering-knap aria-expanded="false">Elevernes læring</button>' : '')
+        + (g.elever.length ? '<button type="button" class="link-knap" data-laering-knap aria-expanded="false">' + (skole || admin ? 'Elevernes læring' : 'Børnenes læring') + '</button>' : '')
         + (g.elever.length ? '<button type="button" class="link-knap" data-ret-navne>Ret alle navne</button>' : '')
         + (skole || admin ? '<button type="button" class="link-knap" data-ret-gruppe>Omdøb</button>'
           + '<button type="button" class="link-knap fare" data-slet-gruppe>Slet klassen</button>' : '')
         + '</p>'
         + '<div class="lr" data-laering hidden></div>';
       if (g.elever.length) {
-        html += '<p class="hj ingen-print">Har ' + (skole ? 'en elev' : 'dit barn') + ' svært ved at læse eller med tal? Slå "Læs op" til, så bliver spørgsmål og svarmuligheder læst højt i spillene.</p>';
+        html += '<p class="hj ingen-print">Har ' + (skole ? 'en elev' : 'dit barn') + ' svært ved at læse eller med tal? Slå "Læs op" til, så bliver spørgsmål og svarmuligheder læst højt i spillene. Med "Tilpas niveau" bliver Regnehelten-opgaverne lettere eller sværere, efter hvor godt og hurtigt ' + (skole ? 'eleven' : 'barnet') + ' løser dem.</p>';
         html += '<div class="tabel-rul"><table class="liste"><thead><tr><th>' + (skole ? 'Elev' : 'Barn') + '</th><th>Kode</th>';
         spil.forEach(function (s) { html += '<th class="t">' + LF.esc(d.spil[s]) + '</th>'; });
         html += '<th class="t">7 dage</th><th class="t">I alt</th><th class="t">Sidst spillet</th><th class="ingen-print"></th></tr></thead><tbody>';
@@ -343,6 +354,7 @@
             + '<td class="t">' + LF.dato(e.tid.sidst) + '</td>'
             + '<td class="handling ingen-print"><button type="button" class="link-knap" data-som-elev>Log ind som ' + LF.esc(e.kaldenavn) + '</button>'
             + '<button type="button" class="link-knap" data-oplaes="' + (e.oplaes ? 1 : 0) + '" aria-pressed="' + (e.oplaes ? 'true' : 'false') + '" title="Spørgsmål og svarmuligheder bliver læst højt">Læs op: ' + (e.oplaes ? 'til' : 'fra') + '</button>'
+            + '<button type="button" class="link-knap" data-tilpas="' + (e.tilpas ? 1 : 0) + '" aria-pressed="' + (e.tilpas ? 'true' : 'false') + '" title="Regnehelten gør opgaverne lettere eller sværere, alt efter hvordan det går (fra 1. til 10. klasse)">Tilpas niveau: ' + (e.tilpas ? 'til' : 'fra') + '</button>'
             + '<button type="button" class="link-knap" data-ret-elev>Omdøb</button>'
             + '<button type="button" class="link-knap" data-ny-elevkode>Ny kode</button>'
             + '<button type="button" class="link-knap fare" data-slet-elev>Slet</button></td></tr>';
@@ -455,7 +467,7 @@
       var boks = sek.querySelector('[data-laering]'), aaben = boks.hidden;
       boks.hidden = !aaben;
       e.target.setAttribute('aria-expanded', aaben ? 'true' : 'false');
-      if (aaben && !boks.dataset.hentet) { boks.dataset.hentet = 1; LFL.vis(boks, gid); }
+      if (aaben && !boks.dataset.hentet) { boks.dataset.hentet = 1; LFL.vis(boks, gid, SOM || undefined); }
       return;
     }
     if (e.target.matches('[data-som-elev]')) {
@@ -464,6 +476,8 @@
         LF.send('klasse', 'log_ind_som', { id: eid }).then(function () { location.replace('/spil/biblioteket/'); }, fejl);
     } else if (e.target.matches('[data-oplaes]')) {
       LF.send('klasse', 'oplaes', { id: eid, til: e.target.dataset.oplaes === '1' ? 0 : 1 }).then(hent, fejl);
+    } else if (e.target.matches('[data-tilpas]')) {
+      LF.send('klasse', 'tilpas', { id: eid, til: e.target.dataset.tilpas === '1' ? 0 : 1 }).then(hent, fejl);
     } else if (e.target.matches('[data-ny-elevkode]')) {
       if (confirm('Lav en ny kode til ' + elev.kaldenavn + '?\n\nDen gamle holder op med at virke, og ' + elev.kaldenavn + ' bliver logget ud. Husk at udskrive et nyt login-kort.'))
         LF.send('klasse', 'ny_elevkode', { id: eid }).then(hent, fejl);
@@ -615,7 +629,7 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=5" defer></script>
+<script src="/assets/script.js?v=6" defer></script>
 <script src="/assets/samtykke.js?v=2" defer></script>
 <script src="/assets/besoeg.js?v=2" defer></script>
 </body>

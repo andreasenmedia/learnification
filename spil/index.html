@@ -102,7 +102,7 @@
         <article data-spil="regnehelten">
           <a class="billede" href="/spil/regnehelten/" tabindex="-1" aria-hidden="true"><img src="/assets/billeder/regnehelten-by.png" alt=""></a>
           <div class="indhold">
-            <p class="alder"><span class="maerke">7–12 år</span> <span class="maerke godkendt" data-passer hidden>Passer til din klasse</span></p>
+            <p class="alder"><span class="maerke">7–16 år</span> <span class="maerke godkendt" data-passer hidden>Passer til din klasse</span></p>
             <h2>Regnehelten</h2>
             <p>En helt almindelig skoledag fuld af regneopgaver — med en matematikbog i tasken og ingen karakterer.</p>
             <p class="status" data-status></p>
@@ -137,8 +137,8 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var NAVN = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
-  // Klassetrin, spillet passer til (Regnehelten 7-12 år, Runeborg 11-15 år)
-  var KLASSER = { runeborg: [5, 9], regnehelten: [1, 6] };
+  // Klassetrin, spillet passer til (Regnehelten 7-16 år, Runeborg 11-15 år)
+  var KLASSER = { runeborg: [5, 9], regnehelten: [1, 10] };
 
   $('log-ud').addEventListener('click', function () {
     LF.send('konto', 'logud').then(function () { location.replace('/login'); });
@@ -295,7 +295,7 @@
 
 <script src="/assets/script.js?v=6" defer></script>
 <script src="/assets/elevskema.js?v=5" defer></script>
-<script src="/assets/klassetrin.js?v=2" defer></script>
+<script src="/assets/klassetrin.js?v=3" defer></script>
 <script src="/assets/besoeg.js?v=2" defer></script>
 </body>
 </html>

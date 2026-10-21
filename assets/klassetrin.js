@@ -2,7 +2,7 @@
 
    Bruges af /spil/ og begge spil. Børn, der ikke har et klassetrin endnu (hverken fra
    klassen eller fra et tidligere svar), får et vindue oven på siden med knapper fra
-   0. til 9. klasse. Svaret gemmes på barnet (api/konto.php, saet_klassetrin) og ligger
+   0. til 10. klasse. Svaret gemmes på barnet (api/konto.php, saet_klassetrin) og ligger
    bagefter i window.LF_KLASSETRIN, hvor Regnehelten henter sit startniveau, og
    /spil/ viser "Passer til din klasse". Passer klassetrinnet ikke til det spil, man er
    i, får barnet det at vide — og må stadig selv vælge. */
@@ -10,7 +10,7 @@
   if (!/(?:^|;\s*)lf_in=elev\./.test(document.cookie)) return;
 
   var spil = (location.pathname.match(/\/spil\/(runeborg|regnehelten)\//) || [])[1] || '';
-  var FRA_TIL = { runeborg: [5, 9], regnehelten: [1, 6] };
+  var FRA_TIL = { runeborg: [5, 9], regnehelten: [1, 10] };
   var NAVN = { runeborg: 'Runeborg', regnehelten: 'Regnehelten' };
   var ANDET = { runeborg: 'regnehelten', regnehelten: 'runeborg' };
   var bg = null;
@@ -104,7 +104,7 @@
     v.appendChild(el('p', null, 'Så passer spillet til dig. Du skal kun svare én gang.'));
     var trin = el('div', 'trin');
     var besked = el('p', null, ''); besked.style.color = '#ff9d8a'; besked.style.marginTop = '12px';
-    for (var n = 0; n <= 9; n++) {
+    for (var n = 0; n <= 10; n++) {
       (function (n) {
         var b = el('button', null, n + '.');
         b.type = 'button';

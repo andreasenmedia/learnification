@@ -61,6 +61,7 @@ if ($h === 'mig') {
         $ud['elev'] = ['id' => (int) $e['id'], 'kaldenavn' => $e['kaldenavn'], 'ikon' => $e['ikon'],
                        'gruppe' => $e['gruppe'],
                        'oplaes' => (int) ($e['oplaes'] ?? 0),
+                       'tilpas' => (int) ($e['tilpas'] ?? 0),
                        // Barnets eget svar, ellers klassens. null = ingen ved det endnu, så spillene spørger.
                        'klassetrin' => $e['klassetrin'] !== null ? (int) $e['klassetrin']
                            : ($e['gruppe_klassetrin'] !== null ? (int) $e['gruppe_klassetrin'] : null)];
@@ -119,7 +120,7 @@ case 'opret':
             }
             $navne[] = $n;
             $t = is_array($b) ? ($b['klassetrin'] ?? null) : null;
-            if ($t !== null && $t !== '' && (int) $t >= 0 && (int) $t <= 9) {
+            if ($t !== null && $t !== '' && (int) $t >= 0 && (int) $t <= 10) {
                 $trin[lille($n)] = (int) $t;
             }
         }
@@ -193,7 +194,7 @@ case 'saet_klassetrin':
         fejl('Det er kun for børn, der er logget ind.', 401);
     }
     $t = input()['klassetrin'] ?? null;
-    if (!is_numeric($t) || (int) $t < 0 || (int) $t > 9) {
+    if (!is_numeric($t) || (int) $t < 0 || (int) $t > 10) {
         fejl('Vælg et klassetrin.');
     }
     kør('UPDATE elever SET klassetrin = ? WHERE id = ?', [(int) $t, $x['elev']['id']]);

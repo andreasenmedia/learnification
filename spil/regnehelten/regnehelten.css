@@ -465,6 +465,7 @@ body.vkbd-open .modal-bg, body.vkbd-open .screen-full { padding-bottom: calc(var
 .name-in.need { border-color: var(--bad); animation: shake .3s steps(3); }
 .klasser { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .kl { width: 3em; height: 2.4em; background: var(--panel-2); border: 3px solid var(--edge-2); font-weight: 700; font-size: 1.2em; }
+.kl.stjerne { width: auto; padding: 0 .8em; }
 .kl.sel { background: var(--gold); color: var(--ink); border-color: #fff3c4; }
 .maal { min-height: 3em; }
 .looked { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; text-align: left; }

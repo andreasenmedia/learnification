@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=8">
-<link rel="stylesheet" href="/assets/konto.css?v=19">
+<link rel="stylesheet" href="/assets/konto.css?v=20">
 </head>
 <body>
 
@@ -77,6 +77,7 @@
           <a class="btn btn-sm" href="#fremskridt">Fremskridtsmail</a>
           <a class="btn btn-sm" href="#spoergeskema">Spørgeskema</a>
           <a class="btn btn-sm btn-primary" href="#test">Skoletest</a>
+          <a class="btn btn-sm" href="#support" id="nav-support">Support</a>
           <a class="btn btn-sm" href="/api/admin.php?handling=eksport">Hent som Excel (CSV)</a>
           <a class="btn btn-sm" href="/konto">Min egen konto</a>
           <button type="button" class="btn btn-sm" data-logud>Log ud</button>
@@ -279,6 +280,19 @@
       </div>
     </div>
 
+    <!-- Support: sager fra hjælpeboblen -->
+    <div id="support" hidden>
+      <a href="#" class="tilbage">&larr; Alle konti</a>
+      <div class="topbar">
+        <div><p class="eyebrow" style="margin-bottom:6px;">Hjælpeboblen</p><h1>Support</h1>
+          <p>Sager fra voksne, der er logget ind. Dit svar går på mail til dem og bliver gemt i sagen, så de kan se det under “Mine sager”.</p></div>
+        <div class="knapper"><select id="su-filter" aria-label="Vis sager"><option value="">Alle</option><option value="ny">Nye</option><option value="i_gang">Besvaret</option><option value="loest">Løst</option></select></div>
+      </div>
+      <div class="tal-raekke" id="su-tal"></div>
+      <div class="panel" id="su-liste"></div>
+      <div class="panel" id="su-sag" hidden></div>
+    </div>
+
     <!-- Spørgeskemaet -->
     <div id="skemaer" hidden>
       <a href="#" class="tilbage">&larr; Alle konti</a>
@@ -475,8 +489,8 @@
   </div>
 </main>
 
-<script src="/assets/konto.js?v=6"></script>
-<script src="/assets/laering.js?v=1"></script>
+<script src="/assets/konto.js?v=7"></script>
+<script src="/assets/laering.js?v=2"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -486,7 +500,7 @@
   var alle = [], spilnavne = {};
 
   function maerke(s) { return '<span class="maerke ' + s + '">' + STATUS[s] + '</span>'; }
-  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'fremskridt', 'skemaer', 'opret', 'test'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function vis(id) { ['indlaeser', 'opsaet', 'ikke-admin', 'overblik', 'detalje', 'nyhed', 'velkomst', 'fremskridt', 'skemaer', 'support', 'opret', 'test'].forEach(function (x) { $(x).hidden = x !== id; }); }
 
   document.querySelectorAll('[data-logud]').forEach(function (b) {
     b.addEventListener('click', function () { LF.send('konto', 'logud').then(function () { location.replace('/login'); }); });
@@ -500,6 +514,7 @@
         if (!m.logget_ind || m.hvem !== 'voksen') { location.replace('/login?til=/admin#voksen'); return; }
         if (m.konto.type !== 'admin') { vis('ikke-admin'); return; }
         rute();
+        LF.hent('support', 'liste', { status: 'ny' }).then(function (d) { if (d.sager.length) $('nav-support').textContent = 'Support (' + d.sager.length + ' ny' + (d.sager.length === 1 ? '' : 'e') + ')'; }).catch(function () {});
       });
     }).catch(function (err) { $('indlaeser').textContent = err.message; });
   }
@@ -513,6 +528,54 @@
       .catch(function (err) { LF.besked($('opsaet-besked'), err.message, 'fejl'); LF.travl(knap, false); });
   });
 
+  // --- support ---------------------------------------------------------------
+  var SU_NAVN = { ny: 'Ny', i_gang: 'Besvaret', loest: 'Løst' };
+  function visSupport(sagId) {
+    vis('support');
+    function liste() {
+      LF.hent('support', 'liste', { status: $('su-filter').value }).then(function (d) {
+        $('su-tal').innerHTML = [[d.tal.ny || 0, 'Nye'], [d.tal.i_gang || 0, 'Besvaret'], [d.tal.loest || 0, 'Løst']].map(kort).join('');
+        $('su-liste').innerHTML = d.sager.length ? '<div class="tabel-rul"><table class="liste"><thead><tr><th>Status</th><th>Sag</th><th>Fra</th><th>Kategori</th><th>Sidst</th></tr></thead><tbody>'
+          + d.sager.map(function (s) {
+            return '<tr><td><span class="maerke ' + (s.status === 'ny' ? 'ny' : s.status === 'loest' ? 'godkendt' : 'afventer') + '">' + SU_NAVN[s.status] + '</span></td>'
+              + '<td><a href="#support=' + s.id + '">' + LF.esc(s.emne) + '</a></td><td>' + LF.esc(s.konto.navn) + '<br><span class="lille">' + LF.esc(s.konto.email) + '</span></td>'
+              + '<td>' + LF.esc(s.kategori_navn) + '</td><td>' + LF.dato(s.opdateret) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' : '<p class="tom">Ingen sager.</p>';
+      }).catch(function (err) { $('su-liste').textContent = err.message; });
+    }
+    $('su-filter').onchange = function () { if (!/^#support=/.test(location.hash)) liste(); };
+    if (!sagId) { $('su-sag').hidden = true; $('su-liste').hidden = false; liste(); return; }
+    $('su-liste').hidden = true; $('su-sag').hidden = false; $('su-tal').innerHTML = '';
+    LF.hent('support', 'sag', { id: sagId }).then(function (d) {
+      var s = d.sag;
+      $('su-sag').innerHTML = '<p><a href="#support">&larr; Alle sager</a></p><h2>' + LF.esc(s.emne) + '</h2>'
+        + '<p class="lille"><span class="maerke ' + (s.status === 'ny' ? 'ny' : s.status === 'loest' ? 'godkendt' : 'afventer') + '">' + SU_NAVN[s.status] + '</span> · ' + LF.esc(s.kategori_navn)
+        + ' · fra <a href="#konto=' + s.konto.id + '">' + LF.esc(s.konto.navn) + '</a> (<a href="mailto:' + LF.esc(s.konto.email) + '">' + LF.esc(s.konto.email) + '</a>)'
+        + (s.side ? ' · skrevet på ' + LF.esc(s.side) : '') + ' · oprettet ' + LF.dato(s.oprettet) + '</p>'
+        + d.beskeder.map(function (m) {
+          return '<div class="panel" style="margin:10px 0;' + (m.fra === 'admin' ? 'background:#e3ecff;' : '') + '"><span class="lille">' + (m.fra === 'admin' ? 'Dig' : LF.esc(s.konto.navn)) + ' · ' + LF.dato(m.tid)
+            + '</span><p style="white-space:pre-wrap;margin:6px 0 0;">' + LF.esc(m.tekst) + '</p></div>';
+        }).join('')
+        + '<div class="felt"><label for="su-svar">Dit svar (sendes på mail til ' + LF.esc(s.konto.email) + ')</label><textarea id="su-svar" rows="5" maxlength="3000"></textarea></div>'
+        + '<p class="knapper"><button type="button" class="btn btn-sm btn-primary" id="su-send">Send svar</button>'
+        + '<button type="button" class="btn btn-sm" id="su-send-loest">Send og markér som løst</button>'
+        + '<button type="button" class="btn btn-sm" id="su-loest">' + (s.status === 'loest' ? 'Åbn igen' : 'Markér som løst') + '</button>'
+        + '<button type="button" class="btn btn-sm fare" id="su-slet">Slet sagen</button></p><p class="besked" id="su-besked"></p>';
+      function send(loest) {
+        var t = $('su-svar').value.trim();
+        if (!t) { LF.besked($('su-besked'), 'Skriv et svar først.', 'fejl'); return; }
+        LF.send('support', 'svar', { id: s.id, tekst: t, loest: loest ? 1 : 0 }).then(function (r) {
+          if (!r.mail_sendt) alert('Svaret er gemt i sagen, men mailen kunne ikke sendes. Skriv til ' + s.konto.email + ' selv.');
+          visSupport(String(s.id));
+        }, function (err) { LF.besked($('su-besked'), err.message, 'fejl'); });
+      }
+      $('su-send').onclick = function () { send(false); };
+      $('su-send-loest').onclick = function () { send(true); };
+      $('su-loest').onclick = function () { LF.send('support', 'status', { id: s.id, status: s.status === 'loest' ? 'i_gang' : 'loest' }).then(function () { visSupport(String(s.id)); }, function (err) { alert(err.message); }); };
+      $('su-slet').onclick = function () { if (confirm('Slet sagen for altid?')) LF.send('support', 'slet', { id: s.id }).then(function () { location.hash = '#support'; }, function (err) { alert(err.message); }); };
+    }).catch(function (err) { $('su-sag').textContent = err.message; });
+  }
+
   function rute() {
     var m = location.hash.match(/konto=(\d+)/);
     if (m) visKonto(+m[1]);
@@ -520,6 +583,7 @@
     else if (location.hash === '#velkomst') visVelkomst();
     else if (location.hash === '#fremskridt') visFremskridt();
     else if (location.hash === '#spoergeskema') visSkemaer();
+    else if (/^#support/.test(location.hash)) visSupport((location.hash.match(/^#support=(\d+)/) || [])[1]);
     else if (/^#test/.test(location.hash)) visTest((location.hash.match(/^#test=(\d+)/) || [])[1]);
     else if (location.hash === '#ny-konto') visOpret();
     else visOverblik();
@@ -1376,7 +1440,9 @@
             }).join(', ') : 'ikke sendt') : '') + '</span>';
       var knapper = '';
       if (k.type !== 'admin') {
-        knapper += '<button type="button" class="btn btn-sm" data-tid="ekstra" data-min="30">+30 min</button>'
+        knapper += '<a class="btn btn-sm btn-primary" href="/konto?som=' + k.id + '" target="_blank" rel="noopener" title="Åbner kontosiden præcis som ejeren ser den — kun visning">Se kontoen som '
+          + ({ skole: 'læreren', foraelder: 'forælderen', privat: 'brugeren' }[k.type] || 'ejeren') + '</a>'
+          + '<button type="button" class="btn btn-sm" data-tid="ekstra" data-min="30">+30 min</button>'
           + '<button type="button" class="btn btn-sm" data-tid="ekstra" data-min="60">+60 min</button>'
           + '<button type="button" class="btn btn-sm" data-tid="fri" data-til="' + (k.fri_adgang ? 0 : 1) + '">' + (k.fri_adgang ? 'Fjern fri adgang' : 'Fri adgang') + '</button>'
           + (k.ekstra_min || k.fri_adgang ? '<button type="button" class="btn btn-sm" data-tid="nulstil">Tilbage til ' + k.graense_min + ' min</button>' : '');
@@ -1644,6 +1710,6 @@
   </div>
 </footer>
 
-<script src="/assets/script.js?v=5" defer></script>
+<script src="/assets/script.js?v=6" defer></script>
 </body>
 </html>

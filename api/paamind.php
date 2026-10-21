@@ -30,6 +30,11 @@ if ($noegle === '' || !hash_equals(paamind_noegle(), $noegle)) {
 // Noteres altid, så /admin kan se, at cronjobbet lever
 paamind_gem_status(['cron' => time()]);
 
+// Supportsager gemmes, til de har været løst i 2 år (se /privatliv)
+$gammel = time() - 2 * 365 * 86400;
+kør("DELETE FROM support_beskeder WHERE sag_id IN (SELECT id FROM support_sager WHERE status = 'loest' AND opdateret < ?)", [$gammel]);
+kør("DELETE FROM support_sager WHERE status = 'loest' AND opdateret < ?", [$gammel]);
+
 $time = (int) date('G');
 if ($time < PAAMIND_TIMER[0] || $time >= PAAMIND_TIMER[1]) {
     exit('OK — uden for tidsrummet kl. ' . PAAMIND_TIMER[0] . '-' . PAAMIND_TIMER[1] . ", intet sendt.\n");

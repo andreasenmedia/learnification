@@ -23,7 +23,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   skrivOp();
   loginIMenuen();
+  hjaelpeboble();
 });
+
+/* Hjælpeboblen nederst til højre: kun for voksne, der er logget ind (cookien lf_in=voksen.…), og aldrig på
+   børnenes sider, i spillene eller i admin. Serveren afgør til sidst (api/support.php?handling=start). */
+function hjaelpeboble() {
+  if (!/(?:^|;\s*)lf_in=voksen\./.test(document.cookie)) return;
+  if (/^\/(spil\/|login|admin|statistik|start|opret)/.test(location.pathname)) return;
+  var s = document.createElement('script');
+  s.src = '/assets/hjaelp.js?v=1'; s.defer = true;
+  document.head.appendChild(s);
+}
 
 
 /* Er nogen logget ind, bliver "Log ind" i menuen til deres egen side.
