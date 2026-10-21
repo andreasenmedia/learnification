@@ -1,0 +1,650 @@
+{
+ "omraader": {
+  "find": {
+   "navn": "Læsning · Find informationen",
+   "kan": "finde præcis det, en tekst fortæller"
+  },
+  "fakta": {
+   "navn": "Læsning · Fakta eller holdning",
+   "kan": "skelne fakta fra holdninger"
+  },
+  "kilde": {
+   "navn": "Læsning · Kildekritik",
+   "kan": "vurdere, om en kilde er til at stole på"
+  },
+  "forsog": {
+   "navn": "Naturfag · Fair undersøgelse",
+   "kan": "planlægge en fair undersøgelse"
+  },
+  "data": {
+   "navn": "Naturfag · Data og beviser",
+   "kan": "aflæse grafer og se, hvad data faktisk viser"
+  },
+  "argument": {
+   "navn": "Tænk kritisk · Beviser",
+   "kan": "bruge beviser, når jeg skal overbevise nogen"
+  },
+  "forhold": {
+   "navn": "Matematik · Forhold",
+   "kan": "regne med forhold og skalere en opskrift"
+  },
+  "procent": {
+   "navn": "Matematik · Pris og procent",
+   "kan": "sammenligne priser og regne med procent"
+  },
+  "maalestok": {
+   "navn": "Matematik · Målestok",
+   "kan": "bruge et korts målestok"
+  },
+  "iagttag": {
+   "navn": "Naturfag · Se og tro",
+   "kan": "skelne det, jeg ser, fra det, jeg tror"
+  },
+  "hypotese": {
+   "navn": "Naturfag · Hypoteser",
+   "kan": "finde ud af, hvilke forklaringer man kan prøve af"
+  },
+  "tabel": {
+   "navn": "Naturfag · Tabeller og grafer",
+   "kan": "aflæse tabeller og grafer og se en tendens"
+  },
+  "aarsag": {
+   "navn": "Tænk kritisk · Sammenhæng eller årsag",
+   "kan": "skelne sammenhæng fra årsag"
+  },
+  "gentag": {
+   "navn": "Naturfag · Fair test og gentagelser",
+   "kan": "planlægge en fair test med gentagelser"
+  },
+  "tempo": {
+   "navn": "Matematik · Tid og tempo",
+   "kan": "regne med tid og tempo"
+  },
+  "tabel3": {
+   "navn": "Læsning · Find i tabeller",
+   "kan": "finde oplysninger i en tabel"
+  },
+  "kilde3": {
+   "navn": "Læsning · Kilder og vidner",
+   "kan": "vurdere vidner og kilder"
+  },
+  "procent3": {
+   "navn": "Matematik · Rabat og procent",
+   "kan": "regne med rabat, procent og forhold"
+  },
+  "kort3": {
+   "navn": "Matematik · Søkort og målestok",
+   "kan": "bruge et søkorts målestok"
+  },
+  "tempo3": {
+   "navn": "Matematik · Fart, tid og afstand",
+   "kan": "regne med fart, tid og afstand"
+  },
+  "tidevand": {
+   "navn": "Naturfag · Tidevand og mønstre",
+   "kan": "aflæse tidevandet og se mønstre"
+  }
+ },
+ "opgaver": {
+  "q0a": {
+   "omraade": "find",
+   "type": "pick",
+   "q": "Hvad skal en lærling gøre, før hun eller han påstår noget? Klik på den regel, der svarer på det."
+  },
+  "q0b": {
+   "omraade": "find",
+   "type": "choice",
+   "q": "Hvornår må man IKKE fodre laugets drage?"
+  },
+  "q1a": {
+   "omraade": "find",
+   "type": "pick",
+   "q": "Hvornår blev brønden lukket? Klik på sætningen, der fortæller det."
+  },
+  "q1b": {
+   "omraade": "find",
+   "type": "choice",
+   "q": "Hvor mange borgere er blevet syge af vandet?"
+  },
+  "q1c": {
+   "omraade": "find",
+   "type": "multi",
+   "q": "Hvilke af disse ting står der faktisk på opslagene? Vælg alle, der passer."
+  },
+  "q2a": {
+   "omraade": "fakta",
+   "type": "sort",
+   "q": "Sortér det, folk sagde på kroen."
+  },
+  "q2b": {
+   "omraade": "fakta",
+   "type": "choice",
+   "q": "Borgmesteren siger: «Det er helt sikkert heksens skyld.» Hvad er det?"
+  },
+  "q2c": {
+   "omraade": "fakta",
+   "type": "choice",
+   "q": "Hvilket udsagn fra kroen er det vigtigste at undersøge nærmere?"
+  },
+  "q3a": {
+   "omraade": "kilde",
+   "type": "choice",
+   "q": "Hvem har skrevet pjecen — og hvorfor er det vigtigt at vide?"
+  },
+  "q3b": {
+   "omraade": "kilde",
+   "type": "multi",
+   "q": "Hvad gør Oles logbog mere troværdig end pjecen? Vælg alle, der passer."
+  },
+  "q3c": {
+   "omraade": "kilde",
+   "type": "pick",
+   "q": "Klik på linjen i logbogen, hvor Ole første gang ser grønt vand."
+  },
+  "q3d": {
+   "omraade": "kilde",
+   "type": "choice",
+   "q": "Kilderne siger modsatte ting. Hvad er det klogeste at gøre nu?"
+  },
+  "q4a": {
+   "omraade": "forsog",
+   "type": "choice",
+   "q": "Hvad er vores hypotese — det, vi tror, og som vi vil teste?"
+  },
+  "q4b": {
+   "omraade": "forsog",
+   "type": "multi",
+   "q": "Vælg de to glas, der giver en fair test af, om farvesalt gør vandet grønt."
+  },
+  "q4c": {
+   "omraade": "forsog",
+   "type": "multi",
+   "q": "Hvad skal være ens i de to glas, for at testen er fair? Vælg alle, der passer."
+  },
+  "q4d": {
+   "omraade": "forsog",
+   "type": "order",
+   "q": "Sæt trinene i forsøget i den rigtige rækkefølge."
+  },
+  "q5a": {
+   "omraade": "data",
+   "type": "choice",
+   "q": "Hvor var vandet mest grønt?"
+  },
+  "q5b": {
+   "omraade": "data",
+   "type": "number",
+   "q": "Hvor mange gange grønnere er vandet ved røret end i Nordbækken?"
+  },
+  "q5c": {
+   "omraade": "data",
+   "type": "choice",
+   "q": "Farveriet tændte sine kedler på dag 3. Hvad viser grafen?"
+  },
+  "q5d": {
+   "omraade": "data",
+   "type": "multi",
+   "q": "Hvilke konklusioner kan vi trække ud fra vores data? Vælg alle, der passer."
+  },
+  "q5e": {
+   "omraade": "data",
+   "type": "choice",
+   "q": "Hvad ville gøre vores beviser endnu stærkere?"
+  },
+  "q6a": {
+   "omraade": "argument",
+   "type": "multi",
+   "q": "Vælg de tre stærkeste spor fra din dagbog, som du vil vise borgmesteren."
+  },
+  "q6b": {
+   "omraade": "argument",
+   "type": "choice",
+   "q": "Borgmesteren: «Men farveriet giver byen arbejde og penge! Så kan det da ikke være farligt!» Hvad svarer du?"
+  },
+  "q6c": {
+   "omraade": "argument",
+   "type": "choice",
+   "q": "Borgmesteren: «Men kan du bevise, at det IKKE var Hilde?» Hvad svarer du?"
+  },
+  "q7a": {
+   "omraade": "forhold",
+   "type": "number",
+   "q": "Hvor mange skefulde månesalt skal der bruges til 8 spande vand?"
+  },
+  "q7b": {
+   "omraade": "forhold",
+   "type": "number",
+   "q": "Hvor mange kviste sølvmynte skal der bruges til 12 spande?"
+  },
+  "q7c": {
+   "omraade": "forhold",
+   "type": "choice",
+   "q": "Gamle Troels siger: «Til 6 spande skal der bruges 5 skefulde månesalt. For 4 + 2 = 6, så må det være 3 + 2 = 5.» Har han ret?"
+  },
+  "q7d": {
+   "omraade": "forhold",
+   "type": "number",
+   "q": "Månebrønden rummer 200 spande vand. Hvor mange skefulde månesalt skal der bruges?"
+  },
+  "q8a": {
+   "omraade": "procent",
+   "type": "number",
+   "q": "Hvad koster én skefuld hos Durin?"
+  },
+  "q8b": {
+   "omraade": "procent",
+   "type": "number",
+   "q": "Knud giver 25 % rabat på 36 guld. Hvad koster hans pose så?"
+  },
+  "q8c": {
+   "omraade": "procent",
+   "type": "choice",
+   "q": "Hvem sælger billigst pr. skefuld, når Knuds rabat er regnet med?"
+  },
+  "q8d": {
+   "omraade": "procent",
+   "type": "number",
+   "q": "Du skal bruge 150 skefulde (to af Knuds poser). Hvad koster det i alt, med rabat?"
+  },
+  "q9a": {
+   "omraade": "maalestok",
+   "type": "number",
+   "q": "Hvor langt er der i virkeligheden fra Runeborg til broen?"
+  },
+  "q9b": {
+   "omraade": "maalestok",
+   "type": "number",
+   "q": "Hvor lang er hele turen til farveriet, i meter?"
+  },
+  "q9c": {
+   "omraade": "maalestok",
+   "type": "number",
+   "q": "Du går 3 km i timen — altså 3000 meter på 60 minutter. Hvor mange minutter tager turen?"
+  },
+  "q9d": {
+   "omraade": "maalestok",
+   "type": "choice",
+   "q": "På et andet kort er målestokken 1 cm = 400 m. Hvor lang er den samme tur (1500 m) på det kort?"
+  },
+  "q10a": {
+   "omraade": "kilde",
+   "type": "choice",
+   "q": "Hvorfor er certifikatet ikke et godt bevis?"
+  },
+  "q10b": {
+   "omraade": "fakta",
+   "type": "sort",
+   "q": "Ulf siger fire ting. Hvilke kan tjekkes?"
+  },
+  "q10c": {
+   "omraade": "data",
+   "type": "choice",
+   "q": "Hvornår løber der mest farvesalt ud i åen?"
+  },
+  "q10d": {
+   "omraade": "data",
+   "type": "choice",
+   "q": "Hvilket rør skal lukkes for at stoppe udslippet til åen?"
+  },
+  "q10e": {
+   "omraade": "forhold",
+   "type": "number",
+   "q": "Der er 40 spande farvevand i tanken. Opskriften bruger 3 skefulde månesalt til 4 spande. Hvor mange skefulde skal der bruges?"
+  },
+  "s2a": {
+   "omraade": "fakta",
+   "type": "sort",
+   "q": "Hvilke rygter kan komme med i Lærkes vise om sandheden?"
+  },
+  "s3a": {
+   "omraade": "forhold",
+   "type": "number",
+   "q": "Klingestål: 2 dele jern til 3 dele kul. Hvor mange dele kul skal der til 10 dele jern?"
+  },
+  "s3b": {
+   "omraade": "forhold",
+   "type": "number",
+   "q": "Der er plads til 20 spande i ovnen i alt. Hvor mange spande af dem skal være jern?"
+  },
+  "k2q0a": {
+   "omraade": "find",
+   "type": "pick",
+   "q": "Hvor længe er det siden, de første træer fik grå blade? Klik på sætningen, der fortæller det."
+  },
+  "k2q0b": {
+   "omraade": "find",
+   "type": "multi",
+   "q": "Hvad siger Fenja selv, at hun har set? Vælg alle, der passer."
+  },
+  "k2q1d": {
+   "omraade": "tabel",
+   "type": "choice",
+   "q": "Hvor var der flest træer med grå blade?"
+  },
+  "k2q1e": {
+   "omraade": "tabel",
+   "type": "number",
+   "q": "Hvor mange procent af træerne ved mosen havde grå blade?"
+  },
+  "k2q1f": {
+   "omraade": "iagttag",
+   "type": "choice",
+   "q": "Hvilket udsagn bygger på tabellen — og ikke på en gætteri?"
+  },
+  "k2q2a": {
+   "omraade": "hypotese",
+   "type": "choice",
+   "q": "Tuk mener, at røgen fra kulmilen gør træerne grå. Hvilken iagttagelse passer IKKE til det?"
+  },
+  "k2q2b": {
+   "omraade": "hypotese",
+   "type": "choice",
+   "q": "Hvorfor kan man ikke prøve, om Mosetrolden Grum har gjort træerne grå?"
+  },
+  "k2q2c": {
+   "omraade": "hypotese",
+   "type": "multi",
+   "q": "Hvilke af disse forklaringer kan man prøve af med målinger eller tællinger? Vælg alle, der passer."
+  },
+  "k2q2d": {
+   "omraade": "hypotese",
+   "type": "choice",
+   "q": "Mads' dæmning har hævet vandet i mosen. Hvad ville være den bedste måde at prøve, om det har skadet træerne?"
+  },
+  "k2q3a": {
+   "omraade": "tabel",
+   "type": "choice",
+   "q": "Hvad viser søjlerne?"
+  },
+  "k2q3b": {
+   "omraade": "tabel",
+   "type": "number",
+   "q": "Hvor mange procentpoint flere grå blade har et træ 5 m fra mosen end et træ 20 m fra mosen?"
+  },
+  "k2q3c": {
+   "omraade": "tabel",
+   "type": "number",
+   "q": "Hvad er gennemsnittet for de tre træer tættest på mosen (2 m, 5 m og 10 m)?"
+  },
+  "k2q3d": {
+   "omraade": "tabel",
+   "type": "choice",
+   "q": "Dæmningen blev bygget i uge 3. Hvad viser grafen?"
+  },
+  "k2q3e": {
+   "omraade": "tabel",
+   "type": "number",
+   "q": "Hvor mange cm steg vandet i gennemsnit pr. uge fra uge 3 til uge 8?"
+  },
+  "k2q3f": {
+   "omraade": "aarsag",
+   "type": "multi",
+   "q": "Hvilke konklusioner kan vi trække ud fra målingerne? Vælg alle, der passer."
+  },
+  "k2q3g": {
+   "omraade": "aarsag",
+   "type": "choice",
+   "q": "Mads siger: «Der er altid nogle træer, der bliver syge. Det er bare et tilfælde.» Hvad svarer du?"
+  },
+  "k2q4a": {
+   "omraade": "gentag",
+   "type": "multi",
+   "q": "Vælg de to grupper, der giver en fair test af, om stående vand gør bladene grå."
+  },
+  "k2q4b": {
+   "omraade": "gentag",
+   "type": "multi",
+   "q": "Hvad skal være ens i alle grupper, for at testen er fair? Vælg alle, der passer."
+  },
+  "k2q4c": {
+   "omraade": "gentag",
+   "type": "choice",
+   "q": "Hvorfor har Fenja tre planter i hver gruppe i stedet for kun én?"
+  },
+  "k2q4d": {
+   "omraade": "gentag",
+   "type": "order",
+   "q": "Sæt trinene i forsøget i den rigtige rækkefølge."
+  },
+  "k2q4e": {
+   "omraade": "gentag",
+   "type": "choice",
+   "q": "Hvad viser resultaterne?"
+  },
+  "k2q4f": {
+   "omraade": "tabel",
+   "type": "number",
+   "q": "Hvor mange af de i alt 12 planter fik grå blade?"
+  },
+  "k2q4g": {
+   "omraade": "aarsag",
+   "type": "choice",
+   "q": "Hvad er den vigtigste forsigtighed, når vi bruger resultatet?"
+  },
+  "k2q5a": {
+   "omraade": "argument",
+   "type": "multi",
+   "q": "Vælg de tre stærkeste spor fra din dagbog, som du vil vise Mads."
+  },
+  "k2q5b": {
+   "omraade": "argument",
+   "type": "choice",
+   "q": "Mads: «Men uden dæmningen kan jeg ikke male korn! Så sulter hele landsbyen.» Hvad svarer du?"
+  },
+  "k2q5c": {
+   "omraade": "tempo",
+   "type": "choice",
+   "q": "Hvilken vandstand kan både møllen og træerne leve med?"
+  },
+  "k2q5d": {
+   "omraade": "tempo",
+   "type": "number",
+   "q": "Hvor mange timer skal slusen stå åben, for at vandet går fra 35 cm til 5 cm over normal?"
+  },
+  "k2q5e": {
+   "omraade": "tempo",
+   "type": "number",
+   "q": "Efter 4 timer — hvor mange cm over normal står vandet så?"
+  },
+  "k2q5f": {
+   "omraade": "tempo",
+   "type": "choice",
+   "q": "Slusen åbnes klokken 20. Hvornår står vandet 5 cm over normal?"
+  },
+  "k2s1a": {
+   "omraade": "iagttag",
+   "type": "sort",
+   "q": "Sortér, hvad der er sagn, og hvad der kan måles."
+  },
+  "k2s1b": {
+   "omraade": "tabel",
+   "type": "number",
+   "q": "Hvor mange procent færre svampe var der i uge 5 end i uge 1?"
+  },
+  "k2s2a": {
+   "omraade": "tempo",
+   "type": "number",
+   "q": "Femten kilo træ giver tre kilo kul. Hvor mange kilo træ skal der bruges til 12 kilo kul?"
+  },
+  "k2s2b": {
+   "omraade": "procent",
+   "type": "number",
+   "q": "Hvor mange procent af træets vægt bliver til kul?"
+  },
+  "k3q0a": {
+   "omraade": "tabel3",
+   "type": "choice",
+   "q": "Hvilket skib er forsinket?"
+  },
+  "k3q0b": {
+   "omraade": "tabel3",
+   "type": "multi",
+   "q": "Hvad fragter Stormfuglen? Vælg alle, der passer."
+  },
+  "k3q0c": {
+   "omraade": "tabel3",
+   "type": "pick",
+   "q": "Hvor mange liter olie har fyrpasser Maja brug for? Klik på sætningen, der fortæller det."
+  },
+  "k3q1a": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "Hvad koster én liter olie hos Rane?"
+  },
+  "k3q1b": {
+   "omraade": "procent3",
+   "type": "choice",
+   "q": "Hvem har den billigste olie pr. liter?"
+  },
+  "k3q1c": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "Rane giver 20 % rabat på sin sildekasse til 54 guld. Hvad koster kassen efter rabat?"
+  },
+  "k3q1d": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "Fiskehallen: «Køb 2, betal for 1,5.» To kasser koster normalt 2 · 90 = 180 guld. Hvad koster de to kasser med tilbuddet?"
+  },
+  "k3q1e": {
+   "omraade": "procent3",
+   "type": "choice",
+   "q": "Hvem sælger sild billigst pr. kilo? Regn efter: Tilde 32 : 4, Rane 43,2 : 6 og Fiskehallen 135 : 20 (to kasser med tilbuddet)."
+  },
+  "k3q2a": {
+   "omraade": "kilde3",
+   "type": "sort",
+   "q": "Sortér udsagnene i Ranes folder."
+  },
+  "k3q2b": {
+   "omraade": "kilde3",
+   "type": "choice",
+   "q": "Hvorfor skal man være forsigtig med at tro på Ranes folder?"
+  },
+  "k3q2c": {
+   "omraade": "procent3",
+   "type": "choice",
+   "q": "Hvad viser kontrolvejningen?"
+  },
+  "k3q2d": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "Hvor mange procent for lidt viser vægten? Brug 10 kg-loddet: det vejes til 9,5 kg."
+  },
+  "k3q2e": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "En kunde køber en kasse sild, som vægten viser til 19 kg. Hvor meget vejer kassen i virkeligheden? (Vægten viser 5 % for lidt.)"
+  },
+  "k3q2f": {
+   "omraade": "kilde3",
+   "type": "multi",
+   "q": "Hvad viser journalen om, hvordan Orla har håndteret vægten? Vælg alle, der passer."
+  },
+  "k3q2g": {
+   "omraade": "kilde3",
+   "type": "choice",
+   "q": "Hvad er den rimeligste konklusion?"
+  },
+  "k3q3a": {
+   "omraade": "kort3",
+   "type": "number",
+   "q": "Hvor langt er der i virkeligheden fra Saltvig til Fyrbøjen? På kortet er det 4 cm, og 1 cm er 2 km."
+  },
+  "k3q3b": {
+   "omraade": "kort3",
+   "type": "number",
+   "q": "Fra Fyrbøjen til det sted, hvor Stormfuglen sidst blev set, er der 6,5 cm på kortet. Hvor mange km er det?"
+  },
+  "k3q3c": {
+   "omraade": "kort3",
+   "type": "number",
+   "q": "Hvor langt er hele turen fra Saltvig via Fyrbøjen til Stormfuglen?"
+  },
+  "k3q3d": {
+   "omraade": "kilde3",
+   "type": "choice",
+   "q": "Søren er sikker på, at Stormfuglen gik ned ved Tandskær. Hvad er det bedste at sige?"
+  },
+  "k3q4a": {
+   "omraade": "tidevand",
+   "type": "choice",
+   "q": "Hvornår er der mest vand i renden?"
+  },
+  "k3q4b": {
+   "omraade": "tidevand",
+   "type": "choice",
+   "q": "Mellem hvilke klokkeslæt er der mindst 2,4 meter vand i renden? (Aflæs grafen.)"
+  },
+  "k3q4c": {
+   "omraade": "tidevand",
+   "type": "number",
+   "q": "Hvor mange meter vand er der i renden klokken 22 ud over de 2,4 meter, Stormfuglen skal bruge?"
+  },
+  "k3q4d": {
+   "omraade": "tidevand",
+   "type": "choice",
+   "q": "Hvad bliver problemet, hvis Stormfuglen først når renden klokken 02?"
+  },
+  "k3q5a": {
+   "omraade": "tempo3",
+   "type": "number",
+   "q": "Maja skal bruge 40 liter. Orla har 16 liter. Hvor mange liter skal du købe?"
+  },
+  "k3q5a2": {
+   "omraade": "tempo3",
+   "type": "number",
+   "q": "Fiskehallen sælger 12 liter for 66 guld. Hvad koster 24 liter?"
+  },
+  "k3q5b": {
+   "omraade": "tempo3",
+   "type": "number",
+   "q": "Lampen brænder 2,5 liter i timen. Hvor mange timer kan 40 liter lyse?"
+  },
+  "k3q5c": {
+   "omraade": "tempo3",
+   "type": "choice",
+   "q": "Fyret skal lyse fra klokken 18 til klokken 24 — altså 6 timer. Er 40 liter nok?"
+  },
+  "k3q5d": {
+   "omraade": "tempo3",
+   "type": "number",
+   "q": "Stormfuglen er ved Fyrbøjen og sejler 8 km til Saltvig. Hun sejler 4 km i timen. Hvor mange timer tager det?"
+  },
+  "k3q5e": {
+   "omraade": "tempo3",
+   "type": "number",
+   "q": "Renden er åben mellem klokken 20 og 24. Hvis Stormfuglen sejler fra Fyrbøjen klokken 19.30 og sejler i 2 timer, hvornår kommer hun til renden? Skriv klokkeslættet som tal (fx 21,5 = halv ti)."
+  },
+  "k3q5f": {
+   "omraade": "tidevand",
+   "type": "choice",
+   "q": "Er der vand nok i renden klokken 21,5 (halv ti)? Mellem klokken 20 (2,6 m) og 22 (3,2 m)."
+  },
+  "k3q5g": {
+   "omraade": "tabel3",
+   "type": "choice",
+   "q": "Stormfuglen skal vide, at renden er åben. Hvilket signal skal lampen sende?"
+  },
+  "k3s1a": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "Tilde har 36 sild. De skal deles i forholdet 1 : 2 : 3. Hvor mange er der i den mindste kasse?"
+  },
+  "k3s1b": {
+   "omraade": "procent3",
+   "type": "number",
+   "q": "Hvor mange sild er der i den største kasse?"
+  },
+  "k3s2a": {
+   "omraade": "kilde3",
+   "type": "sort",
+   "q": "Sortér Sørens udsagn."
+  },
+  "k3s2b": {
+   "omraade": "kilde3",
+   "type": "choice",
+   "q": "Hvordan kan Søren gøre sin historie både sand og spændende?"
+  }
+ }
+}

@@ -186,6 +186,9 @@
         S.solved[key] = true;
         var area = areaKey(T0.area);
         if (area) { var st = S.stats[area] || (S.stats[area] = { n: 0, first: 0 }); st.n++; if (r.first) st.first++; }
+        // Tidspunkt og resultat pr. opgave, så læreren kan se fremdrift og tid mellem opgaver (de seneste 200)
+        (S.log = S.log || []).push({ t: Math.floor(Date.now() / 1000), k: key, a: area || '', f: r.first ? 1 : 0, n: r.tries || 1 });
+        if (S.log.length > 200) S.log.splice(0, S.log.length - 200);
         if (!r.first) { S.persist++; if (S.persist === 1 || S.persist % 5 === 0) UI.toast('<b>Vedholdenhed!</b> Du gav ikke op — det er sådan, man bliver god.'); }
         save(); return true;
       });

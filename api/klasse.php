@@ -100,6 +100,31 @@ if ($h === 'oversigt') {
           'spil' => SPIL]);
 }
 
+// Elevernes læring: tal pr. klasse og elev, opgaverne bag tallene og rådata som Excel
+if ($h === 'laering') {
+    require __DIR__ . '/_laering.php';
+    svar(['ok' => true] + laering_klasse(min_gruppe($kid, tal('gruppe'))));
+}
+
+if ($h === 'laering_elev') {
+    require __DIR__ . '/_laering.php';
+    $e = min_elev($kid, tal('id'));
+    svar(['ok' => true, 'id' => (int) $e['id'], 'opgaver' => laering_elev_opgaver((int) $e['id'])]);
+}
+
+if ($h === 'laering_xlsx') {
+    require __DIR__ . '/_laering.php';
+    $g = min_gruppe($kid, tal('gruppe'));
+    $fil = xlsx_bygg(laering_xlsx_faner(laering_klasse($g, true)));
+    $navn = preg_replace('/[^A-Za-z0-9._-]+/', '-', iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', (string) $g['navn']) ?: 'klasse');
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="laering-' . trim($navn, '-') . '-' . date('Y-m-d') . '.xlsx"');
+    header('Content-Length: ' . strlen($fil));
+    header('Cache-Control: no-store');
+    echo $fil;
+    exit;
+}
+
 kraev_egen_side();
 
 switch ($h) {

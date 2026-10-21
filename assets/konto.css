@@ -504,3 +504,39 @@ details.foldud[open] summary { margin-bottom: 12px; }
 @media (max-width: 640px) { .xp-tiles { grid-template-columns: 1fr; } .xp-tile .stor { font-size: 1.9rem; } }
 .panel.xp { scroll-margin-top: 90px; }
 .xp-privat { margin: 0 0 10px; padding: 8px 12px; font-size: .92rem; color: var(--txt); background: var(--panel-2); border-left: 4px solid var(--gold); }
+
+/* ---------- Elevernes læring (assets/laering.js) --------------------------- */
+
+.lr { margin: 6px 0 22px; padding: 18px 18px 8px; background: var(--paper-2); border: 2px solid var(--paper-edge); }
+.lr h4 { font-size: 1.15rem; margin: 0 0 2px; }
+.lr h5 { font-size: 1rem; margin: 16px 0 6px; }
+.lr-top { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; margin-bottom: 14px; }
+.lr-top p { margin: 0; max-width: 62ch; }
+.lr-sorter { display: flex; gap: 10px; align-items: center; margin: 4px 0 10px; font-size: .92rem; }
+.lr-sorter select { font: inherit; padding: 6px 8px; border: 2px solid var(--ink); background: var(--paper-card); }
+.lr-tabel td, .lr-tabel th { vertical-align: top; }
+.lr-intet { color: var(--ink-soft); }
+.lr-spor { display: inline-flex; width: 90px; height: 12px; background: #fff; border: 2px solid var(--ink); vertical-align: middle; margin-right: 8px; overflow: hidden; }
+.lr-spor > i { display: block; height: 100%; background: var(--ink-soft); }
+.lr-pct.hoej .lr-spor > i { background: var(--green); }
+.lr-pct.mid .lr-spor > i { background: #d99a1d; }
+.lr-pct.lav .lr-spor > i { background: var(--red); }
+.lr-ord { font-size: .82rem; color: var(--ink-soft); }
+.lr-tid { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+.lr-spor.tid { display: flex; width: auto; max-width: 160px; margin: 0; }
+.lr-spor.tid i, .lr-forklaring i { display: inline-block; }
+.lr-spor.tid i.opg, .lr-forklaring i.opg { background: var(--gold-dark); }
+.lr-spor.tid i.vandre, .lr-forklaring i.vandre { background: repeating-linear-gradient(45deg, #fff 0 4px, var(--gold-edge) 4px 8px); }
+.lr-forklaring { display: flex; flex-wrap: wrap; gap: 6px 22px; font-size: .88rem; margin: 0 0 12px; }
+.lr-forklaring i { width: 18px; height: 12px; border: 2px solid var(--ink); margin-right: 6px; vertical-align: -1px; }
+.lr-detalje td { background: var(--paper-card); padding: 0 !important; }
+.lr-detalje-boks { padding: 14px 16px 18px; }
+.lr-emner { list-style: none; margin: 0 0 8px; padding: 0; }
+.lr-emner li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; padding: 3px 0; }
+.lr-emnenavn { min-width: 14ch; font-weight: 650; }
+.lr-opg { margin: 8px 0; }
+.lr-opg summary { cursor: pointer; }
+.lr-note { margin-top: 10px; }
+.lr-katalog { margin-top: 18px; }
+@media (max-width: 640px) { .lr { padding: 14px 10px 6px; } .lr-spor { width: 60px; } }
+@media print { .lr-detalje[hidden] { display: none; } }

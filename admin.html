@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/skrifter/site.css?v=2">
 <link rel="stylesheet" href="/assets/style.css?v=8">
-<link rel="stylesheet" href="/assets/konto.css?v=17">
+<link rel="stylesheet" href="/assets/konto.css?v=18">
 </head>
 <body>
 
@@ -368,6 +368,13 @@
 
         <div class="tal-raekke" id="t-tal"></div>
 
+        <div class="panel" id="t-laering-boks">
+          <h2>Elevernes læring</h2>
+          <p class="lille" style="margin-top:-6px;">Det samme overblik, en lærer ser på sin konto: hvad eleverne har løst, hvor godt det gik og hvor meget tid der gik uden opgaver. Kan hentes som Excel.</p>
+          <button type="button" class="btn" id="t-laering-knap">Vis elevernes læring</button>
+          <div class="lr" id="t-laering" hidden></div>
+        </div>
+
         <div class="panel">
           <h2>Hvor er spillerne?</h2>
           <p class="lille" style="margin-top:-6px;">Opdateres hvert 10. sekund. <span class="prik groen"></span> spiller nu · <span class="prik gul"></span> for lidt siden · <span class="prik ude"></span> ikke inde. Sted og mission opdateres, når spillet gemmer (et par sekunder efter, man går ind et nyt sted).</p>
@@ -469,6 +476,7 @@
 </main>
 
 <script src="/assets/konto.js?v=6"></script>
+<script src="/assets/laering.js?v=1"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -1167,6 +1175,8 @@
     $('t-csv').href = '/api/test.php?handling=csv&id=' + r.id;
     if (document.activeElement !== $('t-start')) $('t-start').value = r.start || 'biblioteket';
     testSpillere = d.spillere;
+    $('t-laering-knap').dataset.gruppe = r.gruppe;
+    $('t-laering-knap').dataset.konto = r.id;
 
     var svaret = d.spillere.filter(function (p) { return p.svaret; }).length;
     var aaben = !!r.skema_aaben;
@@ -1230,6 +1240,13 @@
       }).join('');
     }).catch(function () { /* næste opdatering prøver igen */ });
   }
+
+  $('t-laering-knap').addEventListener('click', function () {
+    var boks = $('t-laering');
+    boks.hidden = false;
+    this.textContent = 'Opdatér elevernes læring';
+    LFL.vis(boks, +this.dataset.gruppe, +this.dataset.konto);
+  });
 
   $('t-start').addEventListener('change', function () {
     var v = this.value;

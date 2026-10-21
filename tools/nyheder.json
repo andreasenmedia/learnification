@@ -2,6 +2,18 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "elevernes-laering",
+      "dato": "2026-10-21",
+      "maerke": "Til voksne",
+      "titel": "Lærere kan nu se, hvordan hver elev klarer opgaverne",
+      "kort": "På skolekontoen findes “Elevernes læring”: emner, første forsøg, tid – og et Excel-ark med rådata.",
+      "tekst": [
+        "Under hver klasse på <a href=\"/konto\">Min konto</a> er der nu <strong>Elevernes læring</strong>. Her kan læreren se, hvilke emner hver elev har løst opgaver i, hvor mange der lykkedes i første forsøg, og hvor stor en del af spilletiden der gik med at tale, læse og gå rundt i stedet for at løse opgaver.",
+        "Hvert tal kan foldes ud, så man kan se de opgaver, det bygger på – og vil man dykke ned i det hele, kan man hente rådata som <strong>Excel-ark</strong>. Arket indeholder kun elevens kaldenavn.",
+        "Spillene gemmer nu også, hvornår en opgave blev løst, så tiden uden opgaver kan måles helt præcist. Det er noteret under <a href=\"/privatliv\">Privatliv</a>."
+      ]
+    },
+    {
       "id": "fortryd-start-forfra",
       "dato": "2026-10-20",
       "maerke": "Spil",

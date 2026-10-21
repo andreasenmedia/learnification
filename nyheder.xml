@@ -6,7 +6,15 @@
     <atom:link href="https://learnification.dk/nyheder.xml" rel="self" type="application/rss+xml"/>
     <description>Nye spil, nye kapitler og forbedringer på learnification.dk</description>
     <language>da</language>
-    <lastBuildDate>Tue, 20 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 21 Oct 2026 10:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Lærere kan nu se, hvordan hver elev klarer opgaverne</title>
+      <link>https://learnification.dk/nyheder#elevernes-laering</link>
+      <guid isPermaLink="false">learnification-nyhed-elevernes-laering</guid>
+      <pubDate>Wed, 21 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Til voksne</category>
+      <description><![CDATA[<p>Under hver klasse på <a href="https://learnification.dk/konto">Min konto</a> er der nu <strong>Elevernes læring</strong>. Her kan læreren se, hvilke emner hver elev har løst opgaver i, hvor mange der lykkedes i første forsøg, og hvor stor en del af spilletiden der gik med at tale, læse og gå rundt i stedet for at løse opgaver.</p><p>Hvert tal kan foldes ud, så man kan se de opgaver, det bygger på – og vil man dykke ned i det hele, kan man hente rådata som <strong>Excel-ark</strong>. Arket indeholder kun elevens kaldenavn.</p><p>Spillene gemmer nu også, hvornår en opgave blev løst, så tiden uden opgaver kan måles helt præcist. Det er noteret under <a href="https://learnification.dk/privatliv">Privatliv</a>.</p>]]></description>
+    </item>
     <item>
       <title>Kom til at trykke &quot;Start forfra&quot;? Nu kan du fortryde</title>
       <link>https://learnification.dk/nyheder#fortryd-start-forfra</link>

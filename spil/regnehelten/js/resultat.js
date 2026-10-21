@@ -32,7 +32,8 @@
       facit: RH.answerText(spec),
       forsoeg: r.tries,
       foerste_forsoeg: !!r.first,
-      klaret: !!r.klaret
+      klaret: !!r.klaret,
+      t: Math.floor(Date.now() / 1000)   // når opgaven blev løst — lærervisningen bruger det til at se, hvor lang tid der går mellem opgaverne
     });
   }
 
