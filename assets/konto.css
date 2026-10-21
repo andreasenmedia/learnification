@@ -515,6 +515,7 @@ details.foldud[open] summary { margin-bottom: 12px; }
 .lr-sorter { display: flex; gap: 10px; align-items: center; margin: 4px 0 10px; font-size: .92rem; }
 .lr-sorter select { font: inherit; padding: 6px 8px; border: 2px solid var(--ink); background: var(--paper-card); }
 .lr-tabel td, .lr-tabel th { vertical-align: top; }
+.lr-opg .lr-tabel td:last-child, .lr-opg .lr-tabel th:last-child { padding-left: 18px; white-space: nowrap; }
 .lr-intet { color: var(--ink-soft); }
 .lr-spor { display: inline-flex; width: 90px; height: 12px; background: #fff; border: 2px solid var(--ink); vertical-align: middle; margin-right: 8px; overflow: hidden; }
 .lr-spor > i { display: block; height: 100%; background: var(--ink-soft); }
