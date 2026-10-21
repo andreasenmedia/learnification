@@ -25,6 +25,7 @@
  *   POST paamind_koer           send påmindelserne, der er klar, nu
  *
  *   XP-tavlen og fremskridtsmailen (_xp.php), fra /admin#fremskridt:
+ *   GET  ?handling=php_version PHP-version og kørselsmåde (til sikkerhedstjek)
  *   GET  ?handling=xp_oversigt  familiekonti, XP, hvem der får mailen, og den automatiske udsendelse
  *   POST xp_indstil {auto, ugedag}   slå den ugentlige udsendelse til/fra
  *   POST xp_vis / xp_test {id?}      mailen som HTML / sendt til administratoren (id = en families tal, ellers et eksempel)
@@ -98,6 +99,10 @@ if ($h === 'opsaet') {
 }
 
 kraev_admin();
+
+if ($h === 'php_version') {
+    svar(['ok' => true, 'version' => PHP_VERSION, 'sapi' => php_sapi_name()]);
+}
 
 /** Én linje pr. konto med tal på. Administratorer er ikke testbrugere. */
 function konti_med_tal(): array
