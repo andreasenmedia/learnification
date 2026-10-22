@@ -2,6 +2,17 @@
   "_om": "Kilden til /nyheder, boksen 'Seneste nyt' på forsiden og RSS-feedet nyheder.xml. Nyeste øverst. Ret her og kør: python tools/nyheder.py. 'tekst' er afsnit med lidt HTML (<a>, <strong>, <em>). 'maerke' er et af: Nyt spil, Nyt kapitel, Spil, Til voksne, Privatliv, Siden.",
   "nyheder": [
     {
+      "id": "regnehelten-videre-af-sig-selv",
+      "dato": "2026-10-22",
+      "maerke": "Spil",
+      "titel": "Regnehelten går selv videre, når du har regnet rigtigt",
+      "kort": "Ét tryk mindre pr. regnestykke: rigtigt svar giver et kort øjeblik med ros, og så kommer næste opgave af sig selv.",
+      "tekst": [
+        "Før skulle man trykke på <strong>Videre</strong> efter hvert rigtigt svar. Nu går Regnehelten selv videre til næste regnestykke, efter at barnet har set rosen. Det giver mere fart og mindre klik.",
+        "Er svaret forkert, bliver opgaven stående, så barnet i ro og mag kan læse det rigtige svar og tippet, før det trykker <strong>Videre</strong>."
+      ]
+    },
+    {
       "id": "regnehelten-til-10-klasse",
       "dato": "2026-10-21",
       "maerke": "Spil",

@@ -164,7 +164,7 @@
 
         var G = GAMES[S0.kind](S0, area, ok);
         var maxTries = { build: 4, findall: 3, coins: 3 }[S0.kind] || 2;
-        var tries = 0, solved = false, finished = false;
+        var tries = 0, solved = false, finished = false, closed = false, auto = null;
         push(bg);
         setTimeout(function () { if (G.focus) G.focus(); else ok.focus(); }, 60);
 
@@ -204,11 +204,11 @@
           setTimeout(laesAlt, 350);
         }
 
-        later.addEventListener('click', function () { RH.voice.stop(); pop(bg); resolve(null); });
+        later.addEventListener('click', function () { closed = true; clearTimeout(auto); RH.voice.stop(); pop(bg); resolve(null); });
         bookB.addEventListener('click', function () { if (meta.onBook) meta.onBook(S0.book); });
         ok.addEventListener('click', function () { if (finished) finish(); else check(); });
         bg.addEventListener('keydown', function (e) {
-          if (e.key === 'Escape') { e.stopPropagation(); RH.voice.stop(); pop(bg); resolve(null); return; }
+          if (e.key === 'Escape') { e.stopPropagation(); if (closed) return; closed = true; clearTimeout(auto); RH.voice.stop(); pop(bg); resolve(null); return; }
           if (finished) return;
           if (G.key && G.key(e)) { e.preventDefault(); e.stopPropagation(); }
         });
@@ -223,6 +223,7 @@
             var praise = tries === 1 ? PRAISE[(Math.random() * PRAISE.length) | 0] : 'Rigtigt — du blev ved, og det virkede!';
             show('good', '<b>' + praise + '</b>');
             done();
+            auto = setTimeout(finish, 1400);
           } else if (tries >= maxTries) {
             finished = true; RH.audio.sfx('soft');
             show('bad', '<b>Svaret er ' + esc(answerText(S0)) + '.</b> ' + esc(S0.hint) + '<br><span class="soft">Det er helt i orden. Næste gang ved du, hvordan man gør.</span>');
@@ -245,7 +246,7 @@
             fb.insertBefore(l, fb.firstChild);
           }
         }
-        function finish() { RH.voice.stop(); pop(bg); resolve({ first: solved && tries === 1, tries: tries, klaret: solved }); }
+        function finish() { if (closed) return; closed = true; clearTimeout(auto); RH.voice.stop(); pop(bg); resolve({ first: solved && tries === 1, tries: tries, klaret: solved }); }
       });
     },
 
