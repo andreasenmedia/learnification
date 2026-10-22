@@ -222,8 +222,7 @@
             solved = true; finished = true; RH.audio.sfx('good');
             var praise = tries === 1 ? PRAISE[(Math.random() * PRAISE.length) | 0] : 'Rigtigt — du blev ved, og det virkede!';
             show('good', '<b>' + praise + '</b>');
-            done();
-            auto = setTimeout(finish, 1400);
+            finish();
           } else if (tries >= maxTries) {
             finished = true; RH.audio.sfx('soft');
             show('bad', '<b>Svaret er ' + esc(answerText(S0)) + '.</b> ' + esc(S0.hint) + '<br><span class="soft">Det er helt i orden. Næste gang ved du, hvordan man gør.</span>');

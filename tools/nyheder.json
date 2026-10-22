@@ -6,9 +6,9 @@
       "dato": "2026-10-22",
       "maerke": "Spil",
       "titel": "Regnehelten går selv videre, når du har regnet rigtigt",
-      "kort": "Ét tryk mindre pr. regnestykke: rigtigt svar giver et kort øjeblik med ros, og så kommer næste opgave af sig selv.",
+      "kort": "Ét tryk mindre pr. regnestykke: rigtigt svar, og næste opgave kommer med det samme.",
       "tekst": [
-        "Før skulle man trykke på <strong>Videre</strong> efter hvert rigtigt svar. Nu går Regnehelten selv videre til næste regnestykke, efter at barnet har set rosen. Det giver mere fart og mindre klik.",
+        "Før skulle man trykke på <strong>Videre</strong> efter hvert rigtigt svar. Nu går Regnehelten selv videre til næste regnestykke, så snart svaret er rigtigt. Det giver mere fart og mindre klik.",
         "Er svaret forkert, bliver opgaven stående, så barnet i ro og mag kan læse det rigtige svar og tippet, før det trykker <strong>Videre</strong>."
       ]
     },
